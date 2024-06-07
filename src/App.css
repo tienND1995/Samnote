@@ -1,0 +1,29 @@
+li {
+  list-style-type: none;
+}
+.saying .container .row .col-sm-4::after {
+  height: 100%;
+  content: "";
+  width: 3px;
+  background-color: #000;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+@media (max-width: 767px) {
+  header {
+    justify-content: space-around !important;
+  }
+  .menu-mobile {
+    display: block !important;
+  }
+}
+.active#myElement {
+  position: fixed;
+  background-color: #fff;
+  padding: 0 20%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
