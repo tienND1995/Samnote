@@ -48,7 +48,7 @@ const navbarItems = [
 
 const UserPanel = () => {
   const appContext = useContext(AppContext);
-  const { user, setUser, setSnackbar } = appContext;
+  const { user, setUser } = appContext;
   const navigate = useNavigate();
 
   return (
@@ -71,7 +71,7 @@ const UserPanel = () => {
                 <img
                   src={user.AvtProfile}
                   alt=""
-                  className="rounded-full w-12"
+                  className="rounded-full w-12 h-12"
                 />
                 <Typography className="text-2xl">{user.name}</Typography>
               </Box>

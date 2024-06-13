@@ -13,7 +13,6 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import RemoveIcon from "@mui/icons-material/Remove";
 import { SketchPicker } from "react-color";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -21,7 +20,7 @@ import api from "../api";
 import { AppContext } from "../context";
 import { format } from "date-fns";
 
-const types = ["Text", "CheckList"];
+const types = ["text", "checkList"];
 const notePublicOptions = ["Private", "public"];
 const CreateNote = () => {
   const [type, setType] = useState("Text");
@@ -39,7 +38,7 @@ const CreateNote = () => {
     setData(data);
   };
 
-  const linkNoteShare = null;
+  // const linkNoteShare = null;
   const [notePublic, setNotePublic] = useState(0);
   const [color, setColor] = useState({ r: "255", g: "255", b: "255", a: "1" });
   const [displayColorPicker, setDisplayColorPicker] = useState(false);

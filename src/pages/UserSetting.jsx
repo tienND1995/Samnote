@@ -10,16 +10,22 @@ import {
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { AppContext } from "../context";
+import api from "../api"; // Make sure to import the API instance
 
 const UserSetting = () => {
   const appContext = useContext(AppContext);
-  const { user } = appContext;
+  const { user, setSnackbar } = appContext;
   const [image, setImage] = useState(user.AvtProfile);
   const [imageCover, setImageCover] = useState(user.Avarta);
   const [showBox2, setShowBox2] = useState(true);
   const [showPassword2Edit, setShowPassword2Edit] = useState(false);
   const [selected, setSelected] = useState("");
-
+  const [name, setName] = useState(user.name);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [password2, setPassword2] = useState("");
+  const [newPassword2, setNewPassword2] = useState("");
+  console.log("user", user);
   const handleEditClick = () => {
     setShowBox2((prevShowBox2) => !prevShowBox2);
   };
@@ -45,6 +51,95 @@ const UserSetting = () => {
   const handleChange = (event) => {
     setSelected(event.target.value);
   };
+
+  const handleProfileUpdate = async () => {
+    const payload = {
+      name,
+      AvtProfile: image,
+      Avarta: imageCover,
+    };
+    console.log(payload);
+    try {
+      await api.patch(
+        `https://samnote.mangasocial.online/profile/change_Profile/${user.id}`,
+        payload
+      );
+      setSnackbar({
+        isOpen: true,
+        message: "Profile updated successfully",
+        severity: "success",
+      });
+    } catch (error) {
+      console.error(error);
+      setSnackbar({
+        isOpen: true,
+        message: "Failed to update profile",
+        severity: "error",
+      });
+    }
+  };
+
+  const handlePasswordUpdate = async () => {
+    const payload = {
+      currentPassword,
+      newPassword,
+    };
+    if (currentPassword === null || currentPassword === "") {
+      setSnackbar({
+        isOpen: true,
+        message: "Current password not null",
+        severity: "error",
+      });
+    } else if (newPassword === null || newPassword === "") {
+      setSnackbar({
+        isOpen: true,
+        message: "New password not null",
+        severity: "error",
+      });
+    } else {
+      try {
+        await api.patch(
+          `https://samnote.mangasocial.online/login/change_password/${user.id}`,
+          payload
+        );
+        setSnackbar({
+          isOpen: true,
+          message: "Password updated successfully",
+          severity: "success",
+        });
+      } catch (error) {
+        console.error(error);
+        setSnackbar({
+          isOpen: true,
+          message: "Failed to update password",
+          severity: "error",
+        });
+      }
+    }
+  };
+
+  // const handlePassword2Update = async () => {
+  //   const payload = {
+  //     password2,
+  //     newPassword2,
+  //   };
+
+  //   try {
+  //     await api.patch(`/users/${user.id}/password2`, payload);
+  //     setSnackbar({
+  //       isOpen: true,
+  //       message: "Password 2 updated successfully",
+  //       severity: "success",
+  //     });
+  //   } catch (error) {
+  //     console.error(error);
+  //     setSnackbar({
+  //       isOpen: true,
+  //       message: "Failed to update password 2",
+  //       severity: "error",
+  //     });
+  //   }
+  // };
 
   return (
     <Container>
@@ -77,6 +172,7 @@ const UserSetting = () => {
               style={{
                 width: "50px",
                 height: "50px",
+                objectFit: "cover",
                 borderRadius: "50%",
               }}
             />
@@ -90,7 +186,12 @@ const UserSetting = () => {
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", marginTop: "10px" }}>
         <Typography sx={{ width: "200px" }}>Name:</Typography>
-        <TextField required id="outlined-required" defaultValue={user.name} />
+        <TextField
+          required
+          id="outlined-required"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", marginTop: "10px" }}>
         <Typography sx={{ width: "200px" }}>Cover image:</Typography>
@@ -109,6 +210,7 @@ const UserSetting = () => {
               style={{
                 width: "50px",
                 height: "50px",
+                objectFit: "cover",
                 borderRadius: "50%",
               }}
             />
@@ -145,20 +247,28 @@ const UserSetting = () => {
               id="outlined-required"
               placeholder="Enter current password"
               sx={{ width: "300px" }}
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
             />
             <TextField
               required
               id="outlined-required"
               placeholder="Enter new password"
               sx={{ width: "300px", marginTop: "5px" }}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
             />
-            <Button variant="contained" sx={{ marginTop: "10px" }}>
+            <Button
+              variant="contained"
+              sx={{ marginTop: "10px" }}
+              onClick={handlePasswordUpdate}
+            >
               UPDATE
             </Button>
           </Box>
         )}
       </Box>
-      <Box
+      {/* <Box
         sx={{
           display: "flex",
           justifyContent: "flex-start",
@@ -172,13 +282,16 @@ const UserSetting = () => {
             <TextField
               required
               id="outlined-required"
-              placeholder="Enter new password2"
+              placeholder="Enter new password 2"
               sx={{ width: "300px", marginTop: "5px" }}
+              value={password2}
+              onChange={(e) => setPassword2(e.target.value)}
             />
             <Button
               variant="outlined"
               component="span"
               sx={{ marginLeft: "20px" }}
+              onClick={handlePassword2Update}
             >
               Create
             </Button>
@@ -190,14 +303,22 @@ const UserSetting = () => {
               id="outlined-required"
               placeholder="Enter current password 2"
               sx={{ width: "300px" }}
+              value={password2}
+              onChange={(e) => setPassword2(e.target.value)}
             />
             <TextField
               required
               id="outlined-required"
               placeholder="Enter new password 2"
               sx={{ width: "300px", marginTop: "5px" }}
+              value={newPassword2}
+              onChange={(e) => setNewPassword2(e.target.value)}
             />
-            <Button variant="contained" sx={{ marginTop: "10px" }}>
+            <Button
+              variant="contained"
+              sx={{ marginTop: "10px" }}
+              onClick={handlePassword2Update}
+            >
               UPDATE
             </Button>
           </Box>
@@ -214,8 +335,12 @@ const UserSetting = () => {
             </Button>
           </Box>
         )}
-      </Box>
-      <Button sx={{ marginTop: "20px" }} variant="contained">
+      </Box> */}
+      <Button
+        sx={{ marginTop: "20px" }}
+        variant="contained"
+        onClick={handleProfileUpdate}
+      >
         UPDATE PROFILE
       </Button>
       <Typography

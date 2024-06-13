@@ -18,7 +18,7 @@ import api from "../api";
 import { AppContext } from "../context";
 import { format } from "date-fns";
 
-const notePublicOptions = ["Private", "public"];
+const notePublicOptions = ["Private", "Public"];
 
 export default function UserNotes() {
   const [type, setType] = useState("");
@@ -35,11 +35,10 @@ export default function UserNotes() {
   const [folder, setUserFolder] = useState([]);
   const [note, setUserNote] = useState([]);
   const [noteEdit, setNoteEdit] = useState(null);
+  const [updateTrigger, setUpdateTrigger] = useState(0); // State to trigger updates
 
   const appContext = useContext(AppContext);
   const { user, setSnackbar } = appContext;
-
-  const outputDate = format(new Date(remindAt), "d/M/yyyy HH:mm a '+07:00'");
 
   useEffect(() => {
     let ignore = false;
@@ -85,7 +84,7 @@ export default function UserNotes() {
     return () => {
       ignore = true;
     };
-  }, [user.id]);
+  }, [user.id, updateTrigger]); // Add updateTrigger as a dependency
 
   const handleClick = () => {
     setDisplayColorPicker(!displayColorPicker);
@@ -107,12 +106,12 @@ export default function UserNotes() {
     setData(content);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (value) => {
     const parsedColor = {
       r: parseInt(color.r),
       g: parseInt(color.g),
       b: parseInt(color.b),
-      a: parseInt(color.a),
+      a: parseFloat(color.a),
     };
 
     const payload = {
@@ -121,21 +120,25 @@ export default function UserNotes() {
       title,
       color: parsedColor,
       idFolder,
-      dueAt: dueAt ? dueAt.toISOString() : null,
+      dueAt: format(new Date(dueAt), "dd/MM/yyyy HH:mm a '+07:00'"),
       pinned,
       lock,
-      remindAt: outputDate ? outputDate : null,
+      remindAt: remindAt
+        ? format(new Date(remindAt), "dd/MM/yyyy HH:mm a '+07:00'")
+        : null,
       linkNoteShare: "",
       notePublic,
     };
 
+    console.log(payload);
     try {
-      await api.post(`/notes/${user.id}`, payload);
+      await api.patch(`/notes/${value}`, payload);
       setSnackbar({
         isOpen: true,
-        message: "Update note successfully",
+        message: "Update note successfully ",
         severity: "success",
       });
+      setUpdateTrigger((prev) => prev + 1); // Trigger the useEffect to fetch notes again
     } catch (err) {
       console.error(err);
       setSnackbar({
@@ -159,15 +162,17 @@ export default function UserNotes() {
     setNotePublic(info.notePublic);
     setColor(info.color);
   };
+
   console.log("noteEdit", noteEdit);
   return (
     <Box className="grid grid-cols-[350px_1fr]">
-      <div className="mx-3 overflow-y-auto h-[100vh]">
+      <div className="mx-3 overflow-y-auto h-[100vh] border-r border-black border-solid">
         <Box className="flex justify-between items-center mt-3">
           <div className="flex">
             <EditNoteIcon />
             <p className="m-0 p-0">Edit Note</p>
           </div>
+          <p className="m-0 py-0 pr-2">{note.length} note</p>
         </Box>
         {note &&
           note.map((info, index) => (
@@ -186,11 +191,19 @@ export default function UserNotes() {
           ))}
       </div>
       {noteEdit === null ? (
-        <h3>Click any note to edit</h3>
+        note.length === 0 ? (
+          <h3>You dont have note to edit</h3>
+        ) : (
+          <h3>Click any note to edit</h3>
+        )
       ) : (
         <Box className="max-w mx-auto mt-3">
           <div className="flex justify-end items-center mr-3">
-            <Button className="h-8" variant="contained" onClick={handleSubmit}>
+            <Button
+              className="h-8"
+              variant="contained"
+              onClick={() => handleSubmit(noteEdit.idNote)}
+            >
               Save
             </Button>
           </div>
@@ -202,6 +215,7 @@ export default function UserNotes() {
                 label="Type"
                 size="small"
                 value={type}
+                onChange={(e) => setType(e.target.value)}
               />
             </FormControl>
             <TextField
