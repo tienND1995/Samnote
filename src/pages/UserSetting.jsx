@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import {
   Button,
   Container,
@@ -11,31 +11,43 @@ import {
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { AppContext } from "../context";
 import api from "../api"; // Make sure to import the API instance
+import { Message } from "@mui/icons-material";
 
 const UserSetting = () => {
   const appContext = useContext(AppContext);
   const { user, setSnackbar } = appContext;
-  const [image, setImage] = useState(user.AvtProfile);
-  const [imageCover, setImageCover] = useState(user.Avarta);
-  const [showBox2, setShowBox2] = useState(true);
-  const [showPassword2Edit, setShowPassword2Edit] = useState(false);
+
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImageCover, setSelectedImageCover] = useState(null);
+  const [userInformations, setUserInformations] = useState(null);
+  const [image, setImage] = useState(userInformations?.AvtProfile);
+  const [imageCover, setImageCover] = useState(userInformations?.Avarta);
   const [selected, setSelected] = useState("");
   const [name, setName] = useState(user.name);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [password2, setPassword2] = useState("");
-  const [newPassword2, setNewPassword2] = useState("");
-  console.log("user", user);
-  const handleEditClick = () => {
-    setShowBox2((prevShowBox2) => !prevShowBox2);
-  };
+  const [reload, setReload] = useState(0);
 
-  const handlePassword2EditClick = () => {
-    setShowPassword2Edit((prevShowPassword2Edit) => !prevShowPassword2Edit);
-  };
+  useEffect(() => {
+    const getUserInformation = async () => {
+      try {
+        const res = await api.get(
+          `https://samnote.mangasocial.online/profile/${user.id}`
+        );
+        setUserInformations(res.data.user);
+        setImage(res.data.user?.AvtProfile);
+        setImageCover(res.data.user?.Avarta);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    getUserInformation();
+  }, [user.id, reload]);
 
   const handleImageChange = (e) => {
     const selectedImage = e.target.files[0];
+    setSelectedImage(selectedImage);
     if (selectedImage) {
       setImage(URL.createObjectURL(selectedImage));
     }
@@ -43,6 +55,7 @@ const UserSetting = () => {
 
   const handleImageCoverChange = (e) => {
     const selectedImageCover = e.target.files[0];
+    setSelectedImageCover(selectedImageCover);
     if (selectedImageCover) {
       setImageCover(URL.createObjectURL(selectedImageCover));
     }
@@ -51,24 +64,46 @@ const UserSetting = () => {
   const handleChange = (event) => {
     setSelected(event.target.value);
   };
-
+  const Email = user.gmail;
   const handleProfileUpdate = async () => {
-    const payload = {
-      name,
-      AvtProfile: image,
-      Avarta: imageCover,
-    };
-    console.log(payload);
+    setSnackbar({
+      isOpen: true,
+      message: "Loading .....",
+      severity: "warning",
+    });
     try {
+      let updatedImage = image;
+      let updatedImageCover = imageCover;
+      if (selectedImage) {
+        const imageUrl = await uploadToImgBB(selectedImage);
+        updatedImage = imageUrl;
+      }
+
+      if (selectedImageCover) {
+        const imageCoverUrl = await uploadToImgBB(selectedImageCover);
+        updatedImageCover = imageCoverUrl;
+      }
+
+      const payload = {
+        name,
+        AvtProfile: updatedImage,
+        Avarta: updatedImageCover,
+      };
+
       await api.patch(
         `https://samnote.mangasocial.online/profile/change_Profile/${user.id}`,
         payload
       );
+
+      setImage(updatedImage);
+      setImageCover(updatedImageCover);
+
       setSnackbar({
         isOpen: true,
         message: "Profile updated successfully",
         severity: "success",
       });
+      setReload((prev) => prev + 1);
     } catch (error) {
       console.error(error);
       setSnackbar({
@@ -81,71 +116,77 @@ const UserSetting = () => {
 
   const handlePasswordUpdate = async () => {
     const payload = {
-      currentPassword,
-      newPassword,
+      email: Email,
+      password: currentPassword,
+      new_password: newPassword,
     };
-    if (currentPassword === null || currentPassword === "") {
+    console.log("message", Message);
+
+    console.log("payload", payload);
+    if (!currentPassword) {
       setSnackbar({
         isOpen: true,
-        message: "Current password not null",
+        message: "Current password cannot be empty",
         severity: "error",
       });
-    } else if (newPassword === null || newPassword === "") {
+      return;
+    }
+
+    if (!newPassword) {
       setSnackbar({
         isOpen: true,
-        message: "New password not null",
+        message: "New password cannot be empty",
         severity: "error",
       });
-    } else {
-      try {
-        await api.patch(
-          `https://samnote.mangasocial.online/login/change_password/${user.id}`,
-          payload
-        );
-        setSnackbar({
-          isOpen: true,
-          message: "Password updated successfully",
-          severity: "success",
-        });
-      } catch (error) {
-        console.error(error);
-        setSnackbar({
-          isOpen: true,
-          message: "Failed to update password",
-          severity: "error",
-        });
-      }
+      return;
+    }
+
+    try {
+      await api.post(
+        `https://samnote.mangasocial.online/login/change_password/${user.id}`,
+        payload
+      );
+      setSnackbar({
+        isOpen: true,
+        message: "Please check your email or spam",
+        severity: "warning",
+      });
+    } catch (error) {
+      console.error(error);
+      setSnackbar({
+        isOpen: true,
+        message: "Failed to update password",
+        severity: "error",
+      });
     }
   };
 
-  // const handlePassword2Update = async () => {
-  //   const payload = {
-  //     password2,
-  //     newPassword2,
-  //   };
+  const uploadToImgBB = async (imageData) => {
+    const apiKey = "0165c1b60ac134636927900246669e17";
+    const formData = new FormData();
+    formData.append("image", imageData);
 
-  //   try {
-  //     await api.patch(`/users/${user.id}/password2`, payload);
-  //     setSnackbar({
-  //       isOpen: true,
-  //       message: "Password 2 updated successfully",
-  //       severity: "success",
-  //     });
-  //   } catch (error) {
-  //     console.error(error);
-  //     setSnackbar({
-  //       isOpen: true,
-  //       message: "Failed to update password 2",
-  //       severity: "error",
-  //     });
-  //   }
-  // };
+    const response = await fetch(
+      `https://api.imgbb.com/1/upload?key=${apiKey}`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.data?.url) {
+      return data.data.url;
+    } else {
+      throw new Error("Failed to upload image to ImgBB");
+    }
+  };
 
   return (
     <Container>
       <Typography
         variant="h5"
-        component="h2"
         sx={{
           marginTop: "20px",
           color: "#6a53cc",
@@ -153,7 +194,7 @@ const UserSetting = () => {
           fontWeight: 700,
         }}
       >
-        Update Account
+        Update Profile
       </Typography>
       <Box sx={{ display: "flex", marginTop: 2 }}>
         <Typography sx={{ width: "200px" }}>Avatar:</Typography>
@@ -163,12 +204,12 @@ const UserSetting = () => {
             id="avatar-button-file"
             type="file"
             style={{ display: "none" }}
-            onChange={handleImageChange}
+            onChange={handleImageCoverChange}
           />
           <Box sx={{ marginLeft: 2 }}>
             <img
-              src={image}
-              alt="Uploaded"
+              src={imageCover}
+              alt="Avatar"
               style={{
                 width: "50px",
                 height: "50px",
@@ -188,9 +229,9 @@ const UserSetting = () => {
         <Typography sx={{ width: "200px" }}>Name:</Typography>
         <TextField
           required
-          id="outlined-required"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          sx={{ width: "300px" }}
         />
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", marginTop: "10px" }}>
@@ -201,17 +242,17 @@ const UserSetting = () => {
             id="cover-button-file"
             type="file"
             style={{ display: "none" }}
-            onChange={handleImageCoverChange}
+            onChange={handleImageChange}
           />
           <Box sx={{ marginLeft: 2 }}>
             <img
-              src={imageCover}
-              alt="Uploaded"
+              src={image}
+              alt="Cover"
               style={{
                 width: "50px",
                 height: "50px",
                 objectFit: "cover",
-                borderRadius: "50%",
+                borderRadius: "10px",
               }}
             />
           </Box>
@@ -226,25 +267,32 @@ const UserSetting = () => {
         <Typography sx={{ width: "200px" }}>Gmail:</Typography>
         <Typography>{user.gmail}</Typography>
       </Box>
-      <Box sx={{ display: "flex", alignItems: "center", marginTop: "20px" }}>
-        <Typography sx={{ width: "200px" }}>Password:</Typography>
-        {showBox2 ? (
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Typography>*******</Typography>
-            <Button
-              variant="outlined"
-              component="span"
-              sx={{ marginLeft: "20px" }}
-              onClick={handleEditClick}
-            >
-              Edit
-            </Button>
-          </Box>
-        ) : (
+
+      <Button
+        sx={{ marginTop: "20px" }}
+        variant="contained"
+        onClick={handleProfileUpdate}
+      >
+        UPDATE
+      </Button>
+      <Box sx={{ marginTop: "20px" }}>
+        <Typography
+          variant="h5"
+          sx={{
+            marginTop: "20px",
+            color: "#6a53cc",
+            fontSize: "22px",
+            fontWeight: 700,
+          }}
+        >
+          Update Password
+        </Typography>
+        <Box sx={{ marginTop: "20px", display: "flex" }}>
+          {" "}
+          <Typography sx={{ width: "200px" }}>Password:</Typography>
           <Box sx={{ display: "flex", flexDirection: "column" }}>
             <TextField
               required
-              id="outlined-required"
               placeholder="Enter current password"
               sx={{ width: "300px" }}
               value={currentPassword}
@@ -252,7 +300,6 @@ const UserSetting = () => {
             />
             <TextField
               required
-              id="outlined-required"
               placeholder="Enter new password"
               sx={{ width: "300px", marginTop: "5px" }}
               value={newPassword}
@@ -266,85 +313,9 @@ const UserSetting = () => {
               UPDATE
             </Button>
           </Box>
-        )}
+        </Box>
       </Box>
-      {/* <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-start",
-          alignItems: "center",
-          marginTop: "20px",
-        }}
-      >
-        <Typography sx={{ width: "200px" }}>Password 2:</Typography>
-        {user.password_2 === null ? (
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <TextField
-              required
-              id="outlined-required"
-              placeholder="Enter new password 2"
-              sx={{ width: "300px", marginTop: "5px" }}
-              value={password2}
-              onChange={(e) => setPassword2(e.target.value)}
-            />
-            <Button
-              variant="outlined"
-              component="span"
-              sx={{ marginLeft: "20px" }}
-              onClick={handlePassword2Update}
-            >
-              Create
-            </Button>
-          </Box>
-        ) : showPassword2Edit ? (
-          <Box sx={{ display: "flex", flexDirection: "column" }}>
-            <TextField
-              required
-              id="outlined-required"
-              placeholder="Enter current password 2"
-              sx={{ width: "300px" }}
-              value={password2}
-              onChange={(e) => setPassword2(e.target.value)}
-            />
-            <TextField
-              required
-              id="outlined-required"
-              placeholder="Enter new password 2"
-              sx={{ width: "300px", marginTop: "5px" }}
-              value={newPassword2}
-              onChange={(e) => setNewPassword2(e.target.value)}
-            />
-            <Button
-              variant="contained"
-              sx={{ marginTop: "10px" }}
-              onClick={handlePassword2Update}
-            >
-              UPDATE
-            </Button>
-          </Box>
-        ) : (
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Typography>*******</Typography>
-            <Button
-              variant="outlined"
-              component="span"
-              sx={{ marginLeft: "20px" }}
-              onClick={handlePassword2EditClick}
-            >
-              Edit
-            </Button>
-          </Box>
-        )}
-      </Box> */}
-      <Button
-        sx={{ marginTop: "20px" }}
-        variant="contained"
-        onClick={handleProfileUpdate}
-      >
-        UPDATE PROFILE
-      </Button>
       <Typography
-        component="h2"
         variant="h5"
         sx={{
           margin: "25px 0 20px",
@@ -359,10 +330,9 @@ const UserSetting = () => {
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Typography sx={{ width: "200px" }}>Default screen:</Typography>
           <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
             value={selected}
             onChange={handleChange}
+            sx={{ minWidth: "150px" }}
           >
             <MenuItem value="calendar">Calendar</MenuItem>
             <MenuItem value="archived">Archived</MenuItem>
@@ -373,7 +343,6 @@ const UserSetting = () => {
         <Typography>Default color:</Typography>
       </Box>
       <Typography
-        component="h2"
         variant="h5"
         sx={{
           margin: "20px 0",

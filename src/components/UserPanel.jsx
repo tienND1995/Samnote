@@ -50,7 +50,6 @@ const UserPanel = () => {
   const appContext = useContext(AppContext);
   const { user, setUser } = appContext;
   const navigate = useNavigate();
-
   return (
     <>
       {user && (
@@ -61,15 +60,15 @@ const UserPanel = () => {
         >
           <Box
             // className={`w-[320px] min-h-screen bg-[#1D1D1D] text-white p-8 fixed top-0 left-0`}
-            className={`w-[250px] min-h-screen bg-[#1D1D1D] text-white p-8 `}
+            className={`w-[250px] min-h-screen bg-[#1D1D1D] text-white p-8 pt-3 `}
           >
-            <Box className="flex items-center justify-between mb-10">
+            <Box className="flex items-center justify-between">
               <Box
                 className="flex gap-3 items-center cursor-pointer"
                 onClick={() => navigate(`/user/profile`)}
               >
                 <img
-                  src={user.AvtProfile}
+                  src={user.Avarta}
                   alt=""
                   className="rounded-full w-12 h-12"
                 />
@@ -82,7 +81,7 @@ const UserPanel = () => {
               />
             </Box>
 
-            <Box className="flex items-end text-white mb-10">
+            <Box className="flex items-end text-white mb-6">
               <SearchIcon className="mr-1 my-1" />
               <TextField
                 id="input-with-sx"
@@ -96,7 +95,7 @@ const UserPanel = () => {
             <Box>
               <Button
                 variant="contained"
-                className="bg-[#5BE260] rounded-full w-full mb-12"
+                className="bg-[#5BE260] rounded-full w-full mb-4"
                 onClick={() => navigate(`/user/create-note`)}
               >
                 <NoteAddIcon className="text-blue-500" />

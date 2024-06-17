@@ -10,6 +10,7 @@ import TabPanel from "@mui/lab/TabPanel";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import SvgIcon from "@mui/material/SvgIcon";
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import Avatar from "@mui/material/Avatar";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -20,8 +21,9 @@ const UserProfile = () => {
 
   const [userInfomations, setUserInformations] = useState(null);
   const [userNotes, setUserNotes] = useState(null);
+  const archivedNotes = (userNotes || []).filter((note) => note.inArchived);
   const [value, setValue] = useState("1");
-  const [updateTrigger, setUpdateTrigger] = useState(0); // State to trigger updates
+  const [reload, setReload] = useState(0); // State to trigger updates
 
   const deleteNote = async (index) => {
     try {
@@ -31,7 +33,7 @@ const UserProfile = () => {
         message: `Remove note successfully ${index}`,
         severity: "success",
       });
-      setUpdateTrigger((prev) => prev + 1); // Update the state to trigger useEffect
+      setReload((prev) => prev + 1); // Update the state to trigger useEffect
     } catch (err) {
       console.error(err);
       setSnackbar({
@@ -88,7 +90,7 @@ const UserProfile = () => {
         if (!ignore) {
           setUserInformations(res.data.user);
           setUserNotes(res.data.note);
-          console.log(res.data.note);
+          console.log("note", res.data.note);
         }
       } catch (err) {
         console.log(err);
@@ -100,7 +102,7 @@ const UserProfile = () => {
     return () => {
       ignore = true;
     };
-  }, [user.id, updateTrigger]); // Add updateTrigger as a dependency
+  }, [user.id, reload]);
 
   return (
     <Box className="bg-zinc-100 w-full">
@@ -108,7 +110,7 @@ const UserProfile = () => {
         <>
           <Box className=" relative">
             <img
-              src={userInfomations.Avarta}
+              src={userInfomations.AvtProfile}
               alt=""
               className="w-full h-[500px]"
             />
@@ -123,7 +125,7 @@ const UserProfile = () => {
           </Box>
           <Box className="flex items-center gap-8 w-10/12 mx-auto my-3 ">
             <img
-              src={userInfomations.AvtProfile}
+              src={userInfomations.Avarta}
               alt=""
               className="w-28 h-28 rounded-full"
             />
@@ -138,7 +140,7 @@ const UserProfile = () => {
           </Box>
           <Box className="flex">
             <Box className="flex-[4]">
-              {userNotes.length > 0 ? (
+              {archivedNotes.length > 0 ? (
                 <>
                   <div
                     style={{
@@ -180,8 +182,8 @@ const UserProfile = () => {
                         onSlideChange={() => console.log("slide change")}
                         onSwiper={(swiper) => console.log(swiper)}
                       >
-                        {userNotes &&
-                          userNotes.map((info, index) => (
+                        {archivedNotes &&
+                          archivedNotes.map((info, index) => (
                             <SwiperSlide
                               key={index}
                               className="p-2 border-[1px] rounded-xl border-black border-solid"
@@ -212,7 +214,7 @@ const UserProfile = () => {
                                       marginRight: "10px",
                                       objectFit: "cover",
                                     }}
-                                    src={userInfomations.AvtProfile}
+                                    src={userInfomations.Avarta}
                                     alt=""
                                   />
                                   <Box sx={{ color: "text.main" }}>
@@ -227,7 +229,37 @@ const UserProfile = () => {
                                     </p>
                                   </Box>
                                 </div>
-                                <div>
+                                <div className=" flex items-center">
+                                  <div className=" flex items-center">
+                                    <SvgIcon
+                                      style={{
+                                        marginRight: "3px",
+                                        color: "#fff",
+                                        width: "28px",
+                                        height: "30px",
+                                      }}
+                                      viewBox="0 0 32 25"
+                                      fill="none"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M30.4044 10.5738C30.7877 11.1021 31 11.7884 31 12.5C31 13.2117 30.7877 13.898 30.4044 14.4263C27.9767 17.675 22.4507 24 16 24C9.54928 24 4.02338 17.675 1.59568 14.4263C1.21225 13.898 1 13.2117 1 12.5C1 11.7884 1.21225 11.1021 1.59568 10.5738C4.02338 7.32501 9.54928 1 16 1C22.4507 1 27.9767 7.32501 30.4044 10.5738Z"
+                                        stroke="black"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                      />
+                                      <path
+                                        d="M15.9999 17.6108C18.5538 17.6108 20.6241 15.3225 20.6241 12.4997C20.6241 9.67697 18.5538 7.38867 15.9999 7.38867C13.446 7.38867 11.3757 9.67697 11.3757 12.4997C11.3757 15.3225 13.446 17.6108 15.9999 17.6108Z"
+                                        stroke="black"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                      />
+                                    </SvgIcon>
+
+                                    {info.view}
+                                  </div>
                                   <SvgIcon
                                     onClick={() => deleteNote(info.idNote)}
                                     sx={{

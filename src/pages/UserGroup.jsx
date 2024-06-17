@@ -71,7 +71,7 @@ const UserGroup = () => {
         sx={{
           backgroundColor: "bgitem.main",
           paddingTop: "10px",
-          height: "635px",
+          height: "100vh",
         }}
       >
         <Box
@@ -125,11 +125,11 @@ const UserGroup = () => {
           </div>
         </Box>
 
-        <div style={{ overflow: "hidden", paddingBottom: "100px" }}>
+        <div style={{ overflow: "hidden" }}>
           <div
             style={{
               overflow: "auto",
-              height: "541px",
+              height: "78vh",
               scrollbarWidth: "none",
             }}
           >
@@ -173,7 +173,7 @@ const UserGroup = () => {
           </div>
         </div>
       </Box>
-      <div style={{ borderLeft: "1px solid black" }}>
+      <div style={{ borderLeft: "1px solid black", height: "100vh" }}>
         <Box
           sx={{
             display: "flex",
@@ -246,7 +246,7 @@ const UserGroup = () => {
         <Box
           sx={{
             backgroundColor: "bgitem.main",
-            height: "515px",
+            height: "49%",
             overflow: "scroll",
             scrollbarWidth: "none",
           }}
