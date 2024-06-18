@@ -11,7 +11,6 @@ import {
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { AppContext } from "../context";
 import api from "../api"; // Make sure to import the API instance
-import { Message } from "@mui/icons-material";
 
 const UserSetting = () => {
   const appContext = useContext(AppContext);
@@ -20,14 +19,7 @@ const UserSetting = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImageCover, setSelectedImageCover] = useState(null);
   const [userInformations, setUserInformations] = useState(null);
-  const [image, setImage] = useState(userInformations?.AvtProfile);
-  const [imageCover, setImageCover] = useState(userInformations?.Avarta);
-  const [selected, setSelected] = useState("");
-  const [name, setName] = useState(user.name);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
   const [reload, setReload] = useState(0);
-
   useEffect(() => {
     const getUserInformation = async () => {
       try {
@@ -44,6 +36,13 @@ const UserSetting = () => {
 
     getUserInformation();
   }, [user.id, reload]);
+
+  const [image, setImage] = useState(userInformations?.AvtProfile);
+  const [imageCover, setImageCover] = useState(userInformations?.Avarta);
+  const [selected, setSelected] = useState("");
+  const [name, setName] = useState(user.name);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   const handleImageChange = (e) => {
     const selectedImage = e.target.files[0];
@@ -116,13 +115,11 @@ const UserSetting = () => {
 
   const handlePasswordUpdate = async () => {
     const payload = {
-      email: Email,
+      gmail: Email,
       password: currentPassword,
       new_password: newPassword,
     };
-    console.log("message", Message);
 
-    console.log("payload", payload);
     if (!currentPassword) {
       setSnackbar({
         isOpen: true,
@@ -142,13 +139,15 @@ const UserSetting = () => {
     }
 
     try {
-      await api.post(
+      const response = await api.post(
         `https://samnote.mangasocial.online/login/change_password/${user.id}`,
         payload
       );
+      console.log("payload", payload);
+      console.log(response.data);
       setSnackbar({
         isOpen: true,
-        message: "Please check your email or spam",
+        message: response.data,
         severity: "warning",
       });
     } catch (error) {

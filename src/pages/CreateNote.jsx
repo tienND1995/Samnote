@@ -123,6 +123,7 @@ const CreateNote = () => {
       });
     } catch (err) {
       console.error(err);
+      const errorMessage = err.response?.data?.message;
       setSnackbar({
         isOpen: true,
         message: "Failed to create note",

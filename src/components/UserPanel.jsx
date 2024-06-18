@@ -1,4 +1,3 @@
-import { useContext } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
@@ -11,7 +10,9 @@ import GroupIcon from "@mui/icons-material/Group";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutline";
 import { handleLogOut } from "../helper";
+import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context";
+import api from "../api";
 
 const navbarItems = [
   {
@@ -49,10 +50,34 @@ const navbarItems = [
 const UserPanel = () => {
   const appContext = useContext(AppContext);
   const { user, setUser } = appContext;
+  const [userInfomations, setUserInformations] = useState(null);
+
   const navigate = useNavigate();
+  useEffect(() => {
+    let ignore = false;
+    const getUserInformation = async () => {
+      try {
+        const res = await api.get(
+          `https://samnote.mangasocial.online/profile/${user.id}`
+        );
+        if (!ignore) {
+          setUserInformations(res.data.user);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    getUserInformation();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
   return (
     <>
-      {user && (
+      {userInfomations && (
         <Box
           // className="flex pl-[320px]"
           className="grid"
@@ -68,11 +93,13 @@ const UserPanel = () => {
                 onClick={() => navigate(`/user/profile`)}
               >
                 <img
-                  src={user.Avarta}
+                  src={userInfomations.Avarta}
                   alt=""
                   className="rounded-full w-12 h-12"
                 />
-                <Typography className="text-2xl">{user.name}</Typography>
+                <Typography className="text-2xl">
+                  {userInfomations.name}
+                </Typography>
               </Box>
               <SettingsIcon
                 fontSize="large"

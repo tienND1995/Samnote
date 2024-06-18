@@ -141,9 +141,10 @@ export default function UserNotes() {
       setUpdateTrigger((prev) => prev + 1); // Trigger the useEffect to fetch notes again
     } catch (err) {
       console.error(err);
+      const errorMessage = err.response?.data?.message;
       setSnackbar({
         isOpen: true,
-        message: "Failed to update note",
+        message: errorMessage,
         severity: "error",
       });
     }
