@@ -483,7 +483,7 @@ const UserSketch = () => {
               }}
             >
               <Button variant="contained" onClick={downloadImage}>
-                dowload
+                dowload img
               </Button>
             </div>
           </Box>

@@ -85,7 +85,7 @@ const UserPanel = () => {
         >
           <Box
             // className={`w-[320px] min-h-screen bg-[#1D1D1D] text-white p-8 fixed top-0 left-0`}
-            className={`w-[250px] min-h-screen bg-[#1D1D1D] text-white p-8 pt-3 `}
+            className={`w-[250px] h-[100%] bg-[#1D1D1D] text-white p-8 pt-3 bg-[#4A4B51]`}
           >
             <Box className="flex items-center justify-between">
               <Box
