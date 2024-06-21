@@ -34,8 +34,9 @@ export default function UserNotes() {
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [folder, setUserFolder] = useState([]);
   const [note, setUserNote] = useState([]);
+
   const [noteEdit, setNoteEdit] = useState(null);
-  const [updateTrigger, setUpdateTrigger] = useState(0); // State to trigger updates
+  const [updateTrigger, setUpdateTrigger] = useState(0);
 
   const appContext = useContext(AppContext);
   const { user, setSnackbar } = appContext;
@@ -71,8 +72,10 @@ export default function UserNotes() {
           `https://samnote.mangasocial.online/notes/${user.id}`
         );
         if (!ignore) {
-          setUserNote(res.data.notes);
-          console.log(res.data.notes);
+          const filteredNotes = res.data.notes.filter(
+            (note) => note.type === "text" || note.type === "checklist"
+          );
+          setUserNote(filteredNotes);
         }
       } catch (err) {
         console.log(err);
@@ -84,7 +87,7 @@ export default function UserNotes() {
     return () => {
       ignore = true;
     };
-  }, [user.id, updateTrigger]); // Add updateTrigger as a dependency
+  }, [user.id, updateTrigger]);
 
   const handleClick = () => {
     setDisplayColorPicker(!displayColorPicker);
@@ -274,9 +277,10 @@ export default function UserNotes() {
               </div>
             )}
 
-            <FormControl className="w-full sm:w-1/3 mx-2 my-2">
+            <FormControl className="w-full sm:w-1/3 mx-2 my-2 flex items-center">
+              <p className="m-0">folder:</p>
               <Select
-                label="Folder"
+                style={{ width: "300px", border: "none" }}
                 size="small"
                 value={idFolder}
                 onChange={(e) => setIdFolder(e.target.value)}
@@ -332,23 +336,27 @@ export default function UserNotes() {
                 />
               }
             />
-            <Box className="w-full">
-              <h5 className="ml-2">Content</h5>
-              <div>
-                <Editor
-                  apiKey="c9fpvuqin9s9m9702haau5pyi6k0t0zj29nelhczdvjdbt3y"
-                  value={data}
-                  init={{
-                    height: "100vh",
-                    menubar: true,
-                    statusbar: false,
-                    toolbar:
-                      "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat",
-                  }}
-                  onEditorChange={handleEditorChange}
-                />
-              </div>
-            </Box>
+            {noteEdit.type !== "image" ? (
+              <Box className="w-full">
+                <h5 className="ml-2">Content</h5>
+                <div>
+                  <Editor
+                    apiKey="c9fpvuqin9s9m9702haau5pyi6k0t0zj29nelhczdvjdbt3y"
+                    value={data}
+                    init={{
+                      height: "100vh",
+                      menubar: true,
+                      statusbar: false,
+                      toolbar:
+                        "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat",
+                    }}
+                    onEditorChange={handleEditorChange}
+                  />
+                </div>
+              </Box>
+            ) : (
+              "đây là note ảnh"
+            )}
           </Box>
         </Box>
       )}
