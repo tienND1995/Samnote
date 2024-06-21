@@ -327,6 +327,7 @@ const Home = () => {
           </div>
         </div>
       </header>
+
       <main>
         {" "}
         <Mybox component="h2">
