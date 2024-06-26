@@ -26,15 +26,28 @@ const UserProfile = () => {
   const [value, setValue] = useState("1");
   const [valueNotePrivate, setValueNotePrivate] = useState("1");
   const [reload, setReload] = useState(0); // State to trigger updates
+  const [allNotePublic, setAllNotePublic] = useState([]);
 
   useEffect(() => {
     fetchLastUsers();
     fetchAllNotesProfile();
+    fetchAllNotePublic();
   }, []);
   const fetchLastUsers = async () => {
     const response = await api.get("/lastUser");
     if (response && response.data.status === 200) {
       setLastUsers(response.data.data);
+    }
+  };
+
+  const fetchAllNotePublic = async () => {
+    try {
+      const response = await api.get("/notes_public");
+      if (response && response.data.message === "success") {
+        setAllNotePublic(response.data.public_note);
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -114,6 +127,25 @@ const UserProfile = () => {
       ignore = true;
     };
   }, [user.id, reload]);
+
+  const getTimeDifference = (time1, time2) => {
+    const realTime = time1 + "+0700";
+    const diffInMs = new Date(time2).getTime() - new Date(realTime).getTime();
+    const diffInSeconds = Math.floor(diffInMs / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInHours < 1) {
+      return `${diffInMinutes} min`;
+    } else if (diffInDays < 1) {
+      return `${diffInHours} hours`;
+    } else if (diffInDays < 30) {
+      return `${diffInDays} day`;
+    } else {
+      return `more 30 day`;
+    }
+  };
 
   return (
     <Box className="w-full bg-[#4A4B51] h-[2300px]">
@@ -466,7 +498,28 @@ const UserProfile = () => {
                 </div>
               </div>
               <div className="mt-3 w-full h-[285px] bg-[#fff] rounded-xl">
-                User off
+                {allNotePublic.length > 0 ? (
+                  <div className="mt-2 w-[95%] h-[95%] ml-2">
+                    {allNotePublic.slice(0, 6).map((item, index) => (
+                      <div
+                        key={`notePublic ${index}`}
+                        className="w-full h-[15%] flex justify-between my-1 ml-2"
+                      >
+                        <span className="text-sm w-[30%] h-[full] truncate-text border-l-4 border-black-200">
+                          {item.author}
+                        </span>
+                        <span className="w-[45%] break-words text-xs">
+                          Has added a new public note
+                        </span>
+                        <span className="text-xs">
+                          {getTimeDifference(item.update_at, new Date())}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
           </Box>
