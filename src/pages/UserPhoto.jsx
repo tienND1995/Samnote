@@ -20,7 +20,10 @@ const UserPhoto = () => {
 
   const [userInfomations, setUserInformations] = useState(null);
   const [userNotes, setUserNotes] = useState(null);
-  const archivedNotes = (userNotes || []).filter((note) => note.inArchived);
+  const archivedNotes = (userNotes || [])
+    .filter((note) => note.inArchived)
+    .reverse();
+
   const [value, setValue] = useState("1");
   const [reload, setReload] = useState(0); // State to trigger updates
 
@@ -104,6 +107,39 @@ const UserPhoto = () => {
 
     return <div className="font-normal text-xl">{currentDateTime}</div>;
   };
+
+  // const LinkNoteComponent = () => {
+  //   const [linkNote, setLinkNote] = useState("");
+  //   const [snackbar, setSnackbar] = useState({ isOpen: false, message: "", severity: "" });
+
+  //   const fetchLinkNote = async (index) => {
+  //     try {
+  //       const response = await api.get(
+  //         `https://samnote.mangasocial.online/notes/${index}`
+  //       );
+  //       setLinkNote(response.data); // Giả sử phản hồi từ API chứa dữ liệu cần thiết
+  //     } catch (err) {
+  //       console.error(err);
+  //       setSnackbar({
+  //         isOpen: true,
+  //         message: `Failed to get link note ${index}`,
+  //         severity: "error",
+  //       });
+  //     }
+  //   };
+
+  //   return (
+  //     <div>
+  //       <button onClick={() => fetchLinkNote(123)}>Get Note Link</button>
+  //       {linkNote && <div className="font-normal text-xl">{linkNote}</div>}
+  //       {snackbar.isOpen && (
+  //         <div className={`snackbar ${snackbar.severity}`}>
+  //           {snackbar.message}
+  //         </div>
+  //       )}
+  //     </div>
+  //   );
+  // };
 
   useEffect(() => {
     let ignore = false;

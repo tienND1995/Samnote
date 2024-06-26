@@ -142,6 +142,7 @@ const UserDustbin = () => {
             (note) =>
               note.type === "Text" ||
               note.type === "checklist" ||
+              note.type === "checkList" ||
               note.type === "text"
           );
           setTrashNotes(filteredNotes);

@@ -18,7 +18,7 @@ import api from "../api";
 import { AppContext } from "../context";
 import { format } from "date-fns";
 
-const notePublicOptions = ["Private", "Public"];
+const notePublicOptions = ["private", "public"];
 
 export default function UserNotes() {
   const [type, setType] = useState("");
@@ -73,7 +73,10 @@ export default function UserNotes() {
         );
         if (!ignore) {
           const filteredNotes = res.data.notes.filter(
-            (note) => note.type === "text" || note.type === "checklist"
+            (note) =>
+              note.type === "text" ||
+              note.type === "checkList" ||
+              note.type === "checklist"
           );
           setUserNote(filteredNotes);
         }
