@@ -581,15 +581,29 @@ const UserDustbin = () => {
                                 }}
                               />
                             </Box>
-                            <img
-                              style={{
-                                height: "200px",
-                                width: "100%",
-                                marginTop: "10px",
-                              }}
-                              src={convertToHttps(info.image)}
-                              alt=""
-                            />
+                            <Swiper
+                              style={{ marginTop: "10px" }}
+                              spaceBetween={0}
+                              slidesPerView={info.image.length === 1 ? 1 : 1.1}
+                              navigation
+                              onSlideChange={() => console.log("slide change")}
+                              onSwiper={(swiper) => console.log(swiper)}
+                            >
+                              {info.image &&
+                                info.image.map((linkImg, index) => (
+                                  <SwiperSlide key={index}>
+                                    {" "}
+                                    <img
+                                      style={{
+                                        height: "200px",
+                                        width: "100%",
+                                      }}
+                                      src={convertToHttps(linkImg.link)}
+                                      alt=""
+                                    />
+                                  </SwiperSlide>
+                                ))}
+                            </Swiper>
                             <Box
                               component="div"
                               sx={{

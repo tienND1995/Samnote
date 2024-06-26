@@ -280,7 +280,7 @@ export default function UserNotes() {
               </div>
             )}
 
-            <FormControl className="w-full sm:w-1/3 mx-2 my-2 flex items-center">
+            <FormControl className="w-full sm:w-1/3 mx-2 my-2 flex items-center flex-row">
               <p className="m-0">folder:</p>
               <Select
                 style={{ width: "300px", border: "none" }}

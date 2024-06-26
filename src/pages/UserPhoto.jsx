@@ -23,7 +23,7 @@ const UserPhoto = () => {
   const archivedNotes = (userNotes || [])
     .filter((note) => note.inArchived)
     .reverse();
-
+  console.log("archivedNotes", archivedNotes);
   const [value, setValue] = useState("1");
   const [reload, setReload] = useState(0); // State to trigger updates
 
@@ -82,8 +82,8 @@ const UserPhoto = () => {
   };
 
   const convertToHttps = (url) => {
-    if (url && url.startsWith("http://")) {
-      return url.replace("http://", "https://", 1);
+    if (typeof url === "string" && url.startsWith("http://")) {
+      return url.replace("http://", "https://");
     }
     return url;
   };
@@ -396,11 +396,32 @@ const UserPhoto = () => {
                                   }}
                                 />
                               </Box>
-                              <img
-                                style={{ height: "200px", width: "100%" }}
-                                src={convertToHttps(info.image)}
-                                alt=""
-                              />
+                              <Swiper
+                                spaceBetween={0}
+                                slidesPerView={
+                                  info.image.length === 1 ? 1 : 1.1
+                                }
+                                navigation
+                                onSlideChange={() =>
+                                  console.log("slide change")
+                                }
+                                onSwiper={(swiper) => console.log(swiper)}
+                              >
+                                {info.image &&
+                                  info.image.map((linkImg, index) => (
+                                    <SwiperSlide key={index}>
+                                      {" "}
+                                      <img
+                                        style={{
+                                          height: "200px",
+                                          width: "100%",
+                                        }}
+                                        src={convertToHttps(linkImg.link)}
+                                        alt=""
+                                      />
+                                    </SwiperSlide>
+                                  ))}
+                              </Swiper>
                               <Box
                                 component="div"
                                 sx={{
