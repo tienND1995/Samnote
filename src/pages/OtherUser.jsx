@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../api";
 import { Avatar, Box, SvgIcon, Typography } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
@@ -10,6 +10,7 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import "./UserProfile.css";
 import ModalComments from "../components/ModalComments";
+import { AppContext } from "../context";
 
 const OtherUser = () => {
   const [userInfomations, setUserInformations] = useState(null);
@@ -19,7 +20,10 @@ const OtherUser = () => {
   const [value, setValue] = React.useState("1");
   const [isModalNote, setIsModalNote] = useState(false);
   const [infoNote, setInfoNote] = useState({});
-  const [commentNote, setCommentNote] = useState([]);
+  const appContext = useContext(AppContext);
+  const { chat, addChat } = appContext;
+
+  const navi = useNavigate();
 
   useEffect(() => {
     let ignore = false;
@@ -79,6 +83,20 @@ const OtherUser = () => {
   const toggleModal = () => {
     setIsModalNote(false);
     setInfoNote({});
+  };
+
+  console.log(userInfomations);
+
+  const handleChat = () => {
+    const data = {
+      id: userInfomations.id,
+      Avarta: userInfomations.Avarta,
+      name: userInfomations.name,
+    };
+    if (chat.id !== userInfomations.id) {
+      addChat(data);
+    }
+    navi(`/user/group`);
   };
   return (
     <Box className="bg-zinc-100 w-full">
@@ -186,6 +204,7 @@ const OtherUser = () => {
                     borderRadius: "5px",
                     color: "#fff",
                   }}
+                  onClick={handleChat}
                 >
                   <svg
                     style={{ marginRight: "5px" }}

@@ -41,8 +41,8 @@ const UserGroup = () => {
   const [messageContent, setMessageContent] = useState("");
 
   const appContext = useContext(AppContext);
-  const { setSnackbar, user } = appContext;
-
+  const { setSnackbar, user, chat } = appContext;
+  console.log(chat);
   const [socket, setSocket] = useState(null);
 
   const handleOpen = () => setOpen(true);
@@ -69,6 +69,7 @@ const UserGroup = () => {
   }, [user.id]);
 
   const handleGroupClick = (group) => {
+    console.log(group);
     setSelectedGroup(group);
   };
 
@@ -230,10 +231,10 @@ const UserGroup = () => {
                 scrollbarWidth: "none",
               }}
             >
-              {group?.map((item, index) => {
+              {chat.slice(1).map((item, index) => {
                 return (
                   <Box
-                    key={index}
+                    key={`chat ${index}`}
                     sx={{
                       margin: "2px 0",
                       display: "flex",
@@ -250,7 +251,7 @@ const UserGroup = () => {
                     onClick={() => handleGroupClick(item)}
                   >
                     <Avatar
-                      src="../public/groupImg.png"
+                      src={item.Avarta}
                       sx={{ width: "30px", height: "30px", margin: "10px" }}
                     />
                     <div style={{ width: "100%" }}>
@@ -274,7 +275,8 @@ const UserGroup = () => {
                           textOverflow: "ellipsis",
                         }}
                       >
-                        {item.describe}
+                        {/* {item.describe} */}
+                        {item.id}
                       </p>
                     </div>
                   </Box>
@@ -479,13 +481,14 @@ const UserGroup = () => {
                 if (selectedGroup) {
                   const messageData = {
                     idSend: user.id,
-                    idReceive: selectedGroup.idOwner,
+                    idReceive: selectedGroup.id,
                     type: "text", // Giả sử loại tin nhắn là text
+                    state: "",
                     content: messageContent,
                   };
 
                   sendMessage(
-                    `send_message/${user.id}-${selectedGroup.idOwner}`,
+                    `send_message/${user.id}${selectedGroup.id}`,
                     messageData
                   );
                 }
