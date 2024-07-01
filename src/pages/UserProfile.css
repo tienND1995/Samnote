@@ -20,3 +20,7 @@
 .hide-quick {
   display: none;
 }
+
+.borderNone:hover {
+  border: none;
+}
