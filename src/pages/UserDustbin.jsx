@@ -13,12 +13,15 @@ import SvgIcon from "@mui/material/SvgIcon";
 import Avatar from "@mui/material/Avatar";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
+import "swiper/css/pagination";
 import RestoreIcon from "@mui/icons-material/Restore";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { Pagination } from "swiper/modules";
 
 const UserDustbin = () => {
   const appContext = useContext(AppContext);
   const { setSnackbar, user } = appContext;
-
+  const lgScreen = useMediaQuery("(max-width:991px)");
   const [userInfomations, setUserInformations] = useState(null);
   const [userNotes, setTrashNotes] = useState(null);
   const [userNoteImage, setTrashNoteImage] = useState(null);
@@ -142,6 +145,7 @@ const UserDustbin = () => {
             (note) =>
               note.type === "Text" ||
               note.type === "checklist" ||
+              note.type === "checkList" ||
               note.type === "text"
           );
           setTrashNotes(filteredNotes);
@@ -199,7 +203,7 @@ const UserDustbin = () => {
             </Box>
           </Box>
 
-          <Box className="w-100">
+          <Box className={lgScreen ? "w-[96vw]" : "w-[73vw]"}>
             <div
               style={{
                 display: "flex",
@@ -234,14 +238,27 @@ const UserDustbin = () => {
                   </Box>
                   <TabPanel
                     value="1"
-                    sx={{ width: "1000px", margin: "0 auto", padding: 0 }}
+                    sx={{ maxWidth: "1000px", margin: "0 auto", padding: 0 }}
                   >
                     <Swiper
-                      spaceBetween={20}
-                      slidesPerView={2.5}
+                      spaceBetween={10}
+                      slidesPerView={1}
                       navigation
-                      onSlideChange={() => console.log("slide change")}
-                      onSwiper={(swiper) => console.log(swiper)}
+                      pagination={{
+                        clickable: true,
+                      }}
+                      breakpoints={{
+                        551: {
+                          slidesPerView: 2,
+                        },
+                        768: {
+                          slidesPerView: 3,
+                        },
+                        991: {
+                          slidesPerView: 3,
+                        },
+                      }}
+                      modules={[Pagination]}
                     >
                       {userNotes &&
                         userNotes.map((info, index) => (
@@ -409,7 +426,7 @@ const UserDustbin = () => {
               </Box>
             )}
           </Box>
-          <Box className="w-100">
+          <Box className={lgScreen ? "w-[96vw]" : "w-[73vw]"}>
             <div
               style={{
                 display: "flex",
@@ -444,14 +461,28 @@ const UserDustbin = () => {
                   </Box>
                   <TabPanel
                     value="1"
-                    sx={{ width: "1000px", margin: "0 auto", padding: 0 }}
+                    sx={{ width: lgScreen ? "96vw" : "73vw", padding: 0 }}
                   >
                     <Swiper
-                      spaceBetween={20}
-                      slidesPerView={2.5}
+                      // style={{ width: "100%", height: "100%" }}
+                      spaceBetween={10}
+                      slidesPerView={1}
                       navigation
-                      onSlideChange={() => console.log("slide change")}
-                      onSwiper={(swiper) => console.log(swiper)}
+                      pagination={{
+                        clickable: true,
+                      }}
+                      breakpoints={{
+                        551: {
+                          slidesPerView: 2,
+                        },
+                        768: {
+                          slidesPerView: 3,
+                        },
+                        991: {
+                          slidesPerView: 3,
+                        },
+                      }}
+                      modules={[Pagination]}
                     >
                       {userNoteImage &&
                         userNoteImage.map((info, index) => (
@@ -580,15 +611,30 @@ const UserDustbin = () => {
                                 }}
                               />
                             </Box>
-                            <img
-                              style={{
-                                height: "200px",
-                                width: "100%",
-                                marginTop: "10px",
-                              }}
-                              src={convertToHttps(info.image)}
-                              alt=""
-                            />
+                            <Swiper
+                              style={{ marginTop: "10px" }}
+                              spaceBetween={0}
+                              slidesPerView={info.image.length === 1 ? 1 : 1.1}
+                              navigation
+                              onSlideChange={() => console.log("slide change")}
+                              onSwiper={(swiper) => console.log(swiper)}
+                            >
+                              {info.image &&
+                                info.image.map((linkImg, index) => (
+                                  <SwiperSlide key={index}>
+                                    {" "}
+                                    <img
+                                      style={{
+                                        height: "200px",
+                                        objectFit: "cover",
+                                        width: "100%",
+                                      }}
+                                      src={convertToHttps(linkImg.link)}
+                                      alt=""
+                                    />
+                                  </SwiperSlide>
+                                ))}
+                            </Swiper>
                             <Box
                               component="div"
                               sx={{

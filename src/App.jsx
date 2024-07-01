@@ -12,7 +12,7 @@ import UserSetting from "./pages/UserSetting";
 import UserSketch from "./pages/UserSketch";
 import UserDustbin from "./pages/UserDustbin";
 import UserGroup from "./pages/UserGroup";
-import { Alert, Snackbar } from "@mui/material";
+import { Alert, Snackbar, Button } from "@mui/material";
 import OtherUser from "./pages/OtherUser";
 import UserPhoto from "./pages/UserPhoto";
 import CreateNote from "./pages/CreateNote";
@@ -50,7 +50,7 @@ const AppSnackbar = () => {
   return (
     <Snackbar
       open={isOpen}
-      autoHideDuration={6000}
+      autoHideDuration={1000}
       onClose={handleCloseSnackbar}
     >
       <Alert
@@ -72,6 +72,7 @@ function App() {
   return (
     <BrowserRouter>
       <AppSnackbar />
+
       <Routes>
         {publicRoutes.map((r) => (
           <Route path={r.path} element={r.element} key={r.path} />

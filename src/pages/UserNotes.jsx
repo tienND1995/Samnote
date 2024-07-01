@@ -17,9 +17,100 @@ import "react-datepicker/dist/react-datepicker.css";
 import api from "../api";
 import { AppContext } from "../context";
 import { format } from "date-fns";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-const notePublicOptions = ["Private", "Public"];
+const Checklist = ({ data }) => {
+  const [items, setItems] = useState([]);
 
+  useEffect(() => {
+    setItems(data);
+  }, [data]);
+
+  return (
+    <div>
+      {items.map((item, index) => (
+        <div key={index}>
+          <input
+            style={{ marginRight: "5px" }}
+            type="checkbox"
+            checked={item.status}
+            // onChange={() => handleChange(index)} hàm này để thany đổi trang thái của ô check
+          />
+          {item.content}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const notePublicOptions = ["private", "public"];
+const ChecklistComponent = ({ checklistItems, setChecklistItems, data }) => {
+  const [newItem, setNewItem] = useState("");
+
+  useEffect(() => {
+    if (data) {
+      setChecklistItems(data);
+    }
+  }, [data, setChecklistItems]);
+
+  const handleAddItem = () => {
+    if (newItem.trim()) {
+      setChecklistItems([
+        ...checklistItems,
+        { content: newItem, status: false },
+      ]);
+      setNewItem("");
+    }
+  };
+
+  const handleToggleItem = (index) => {
+    const updatedItems = checklistItems.map((item, idx) =>
+      idx === index ? { ...item, status: !item.status } : item
+    );
+    setChecklistItems(updatedItems);
+  };
+
+  const handleDeleteItem = (index) => {
+    const updatedItems = checklistItems.filter((_, idx) => idx !== index);
+    setChecklistItems(updatedItems);
+  };
+
+  return (
+    <div className="w-full p-2">
+      <ul>
+        {checklistItems.map((item, index) => (
+          <li key={index}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={item.status}
+                  onChange={() => handleToggleItem(index)}
+                />
+              }
+              label={item.content}
+            />
+            <span onClick={() => handleDeleteItem(index)}>
+              <DeleteIcon />
+            </span>
+          </li>
+        ))}
+      </ul>
+      <div className="flex items-center pl-4">
+        <input
+          type="text"
+          style={{ height: "40px" }}
+          value={newItem}
+          onChange={(e) => setNewItem(e.target.value)}
+          placeholder="Add a new list item"
+        />
+        <span onClick={handleAddItem}>
+          <AddIcon />
+        </span>
+      </div>
+    </div>
+  );
+};
 export default function UserNotes() {
   const [type, setType] = useState("");
   const [title, setTitle] = useState("");
@@ -34,7 +125,8 @@ export default function UserNotes() {
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [folder, setUserFolder] = useState([]);
   const [note, setUserNote] = useState([]);
-
+  const [checklistItems, setChecklistItems] = useState([]);
+  console.log("checklistItems", checklistItems);
   const [noteEdit, setNoteEdit] = useState(null);
   const [updateTrigger, setUpdateTrigger] = useState(0);
 
@@ -50,7 +142,6 @@ export default function UserNotes() {
         );
         if (!ignore) {
           setUserFolder(res.data.folder);
-          console.log("User folder", res.data.folder);
         }
       } catch (err) {
         console.log(err);
@@ -73,9 +164,13 @@ export default function UserNotes() {
         );
         if (!ignore) {
           const filteredNotes = res.data.notes.filter(
-            (note) => note.type === "text" || note.type === "checklist"
+            (note) =>
+              note.type === "text" ||
+              note.type === "checkList" ||
+              note.type === "checklist"
           );
           setUserNote(filteredNotes);
+          console.log(filteredNotes);
         }
       } catch (err) {
         console.log(err);
@@ -105,11 +200,13 @@ export default function UserNotes() {
     setNotePublic(e.target.value);
   };
 
-  const handleEditorChange = (content, editor) => {
+  const handleEditorChange = (content) => {
     setData(content);
   };
 
   const handleSubmit = async (value) => {
+    const payloadData = type === "text" ? data : checklistItems;
+
     const parsedColor = {
       r: parseInt(color.r),
       g: parseInt(color.g),
@@ -119,7 +216,7 @@ export default function UserNotes() {
 
     const payload = {
       type,
-      data,
+      data: payloadData,
       title,
       color: parsedColor,
       idFolder,
@@ -132,8 +229,7 @@ export default function UserNotes() {
       linkNoteShare: "",
       notePublic,
     };
-
-    console.log(payload);
+    console.log("payload", payload);
     try {
       await api.patch(`/notes/${value}`, payload);
       setSnackbar({
@@ -182,7 +278,7 @@ export default function UserNotes() {
           note.map((info, index) => (
             <div
               key={index}
-              className="my-3 p-3 rounded-xl"
+              className="my-1 p-3 rounded-xl"
               style={{
                 border: "1px solid #000",
                 backgroundColor: `rgba(${info.color.r}, ${info.color.g}, ${info.color.b}, ${info.color.a})`,
@@ -190,7 +286,11 @@ export default function UserNotes() {
               onClick={() => handleGetValue(info)}
             >
               <h4>{info.title}</h4>
-              <div dangerouslySetInnerHTML={{ __html: info.data }} />
+              {info.type === "checkList" || info.type === "checklist" ? (
+                <Checklist data={info.data} />
+              ) : (
+                <div dangerouslySetInnerHTML={{ __html: info.data }} />
+              )}
             </div>
           ))}
       </div>
@@ -219,7 +319,7 @@ export default function UserNotes() {
                 label="Type"
                 size="small"
                 value={type}
-                onChange={(e) => setType(e.target.value)}
+                // onChange={(e) => setType(e.target.value)}
               />
             </FormControl>
             <TextField
@@ -276,8 +376,7 @@ export default function UserNotes() {
                 <SketchPicker color={color} onChange={handleChangeColor} />
               </div>
             )}
-
-            <FormControl className="w-full sm:w-1/3 mx-2 my-2 flex items-center">
+            <FormControl className="w-full sm:w-1/3 mx-2 my-2 flex items-center flex-row">
               <p className="m-0">folder:</p>
               <Select
                 style={{ width: "300px", border: "none" }}
@@ -293,7 +392,6 @@ export default function UserNotes() {
                   ))}
               </Select>
             </FormControl>
-
             <TextField
               className="w-full sm:w-1/3 mx-2 my-2"
               label="Lock"
@@ -302,7 +400,6 @@ export default function UserNotes() {
               value={lock === null ? "" : lock}
               onChange={(e) => setLock(e.target.value)}
             />
-
             <FormControl className="w-full sm:w-1/3 mx-2 my-2">
               <Select
                 label="NotePublic"
@@ -335,10 +432,10 @@ export default function UserNotes() {
                   onChange={(e) => setPinned(e.target.checked)}
                 />
               }
-            />
-            {noteEdit.type !== "image" ? (
-              <Box className="w-full">
-                <h5 className="ml-2">Content</h5>
+            />{" "}
+            <Box className="w-full">
+              <h5 className="ml-2">Content</h5>
+              {noteEdit.type === "text" ? (
                 <div>
                   <Editor
                     apiKey="c9fpvuqin9s9m9702haau5pyi6k0t0zj29nelhczdvjdbt3y"
@@ -353,10 +450,14 @@ export default function UserNotes() {
                     onEditorChange={handleEditorChange}
                   />
                 </div>
-              </Box>
-            ) : (
-              "đây là note ảnh"
-            )}
+              ) : (
+                <ChecklistComponent
+                  checklistItems={checklistItems}
+                  setChecklistItems={setChecklistItems}
+                  data={noteEdit.data}
+                />
+              )}
+            </Box>
           </Box>
         </Box>
       )}

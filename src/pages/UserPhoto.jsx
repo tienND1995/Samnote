@@ -20,7 +20,10 @@ const UserPhoto = () => {
 
   const [userInfomations, setUserInformations] = useState(null);
   const [userNotes, setUserNotes] = useState(null);
-  const archivedNotes = (userNotes || []).filter((note) => note.inArchived);
+  const archivedNotes = (userNotes || [])
+    .filter((note) => note.inArchived)
+    .reverse();
+  console.log("archivedNotes", archivedNotes);
   const [value, setValue] = useState("1");
   const [reload, setReload] = useState(0); // State to trigger updates
 
@@ -79,8 +82,8 @@ const UserPhoto = () => {
   };
 
   const convertToHttps = (url) => {
-    if (url && url.startsWith("http://")) {
-      return url.replace("http://", "https://", 1);
+    if (typeof url === "string" && url.startsWith("http://")) {
+      return url.replace("http://", "https://");
     }
     return url;
   };
@@ -104,6 +107,39 @@ const UserPhoto = () => {
 
     return <div className="font-normal text-xl">{currentDateTime}</div>;
   };
+
+  // const LinkNoteComponent = () => {
+  //   const [linkNote, setLinkNote] = useState("");
+  //   const [snackbar, setSnackbar] = useState({ isOpen: false, message: "", severity: "" });
+
+  //   const fetchLinkNote = async (index) => {
+  //     try {
+  //       const response = await api.get(
+  //         `https://samnote.mangasocial.online/notes/${index}`
+  //       );
+  //       setLinkNote(response.data); // Giả sử phản hồi từ API chứa dữ liệu cần thiết
+  //     } catch (err) {
+  //       console.error(err);
+  //       setSnackbar({
+  //         isOpen: true,
+  //         message: `Failed to get link note ${index}`,
+  //         severity: "error",
+  //       });
+  //     }
+  //   };
+
+  //   return (
+  //     <div>
+  //       <button onClick={() => fetchLinkNote(123)}>Get Note Link</button>
+  //       {linkNote && <div className="font-normal text-xl">{linkNote}</div>}
+  //       {snackbar.isOpen && (
+  //         <div className={`snackbar ${snackbar.severity}`}>
+  //           {snackbar.message}
+  //         </div>
+  //       )}
+  //     </div>
+  //   );
+  // };
 
   useEffect(() => {
     let ignore = false;
@@ -216,7 +252,7 @@ const UserPhoto = () => {
                         <Tab label="Recommended" value="2" />
                       </TabList>
                     </Box>
-                    <TabPanel value="1" sx={{ width: "1000px", padding: 0 }}>
+                    <TabPanel value="1" sx={{ maxWidth: "1000px", padding: 0 }}>
                       <Swiper
                         spaceBetween={20}
                         slidesPerView={2.5}
@@ -360,11 +396,33 @@ const UserPhoto = () => {
                                   }}
                                 />
                               </Box>
-                              <img
-                                style={{ height: "200px", width: "100%" }}
-                                src={convertToHttps(info.image)}
-                                alt=""
-                              />
+                              <Swiper
+                                spaceBetween={0}
+                                slidesPerView={
+                                  info.image.length === 1 ? 1 : 1.1
+                                }
+                                navigation
+                                onSlideChange={() =>
+                                  console.log("slide change")
+                                }
+                                onSwiper={(swiper) => console.log(swiper)}
+                              >
+                                {info.image &&
+                                  info.image.map((linkImg, index) => (
+                                    <SwiperSlide key={index}>
+                                      {" "}
+                                      <img
+                                        style={{
+                                          height: "200px",
+                                          objectFit: "cover",
+                                          width: "100%",
+                                        }}
+                                        src={convertToHttps(linkImg.link)}
+                                        alt=""
+                                      />
+                                    </SwiperSlide>
+                                  ))}
+                              </Swiper>
                               <Box
                                 component="div"
                                 sx={{
