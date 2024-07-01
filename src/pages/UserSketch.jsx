@@ -9,6 +9,7 @@ import html2canvas from "html2canvas";
 import api from "../api";
 import axios from "axios";
 import DatePicker from "react-datepicker";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { AppContext } from "../context";
 
 const UserSketch = () => {
@@ -22,6 +23,7 @@ const UserSketch = () => {
   const [isEraserActive, setIsEraserActive] = useState(false);
   const [title, setTitle] = useState("");
   const [remindAt, setRemindAt] = useState(null);
+  const lgScreen = useMediaQuery("(max-width:991px)");
   const [colorNote, setColorNote] = useState({
     r: "255",
     g: "255",
@@ -147,27 +149,27 @@ const UserSketch = () => {
     }
   };
 
-  const downloadImage = async () => {
-    try {
-      // Capture screenshot of the current view
-      const canvas = await html2canvas(document.getElementById("screenshot"));
-      const imageData = canvas.toDataURL("image/png");
+  // const downloadImage = async () => {
+  //   try {
+  //     // Capture screenshot of the current view
+  //     const canvas = await html2canvas(document.getElementById("screenshot"));
+  //     const imageData = canvas.toDataURL("image/png");
 
-      // Download the image locally
-      const downloadLink = document.createElement("a");
-      downloadLink.href = imageData;
-      downloadLink.download = "screenshot.png";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-    } catch (error) {
-      setSnackbar({
-        isOpen: true,
-        message: "Failed to dowload image ",
-        severity: "error",
-      });
-    }
-  };
+  //     // Download the image locally
+  //     const downloadLink = document.createElement("a");
+  //     downloadLink.href = imageData;
+  //     downloadLink.download = "screenshot.png";
+  //     document.body.appendChild(downloadLink);
+  //     downloadLink.click();
+  //     document.body.removeChild(downloadLink);
+  //   } catch (error) {
+  //     setSnackbar({
+  //       isOpen: true,
+  //       message: "Failed to dowload image ",
+  //       severity: "error",
+  //     });
+  //   }
+  // };
 
   const handleMouseUp = () => {
     setIsDrawing(false);
@@ -194,13 +196,15 @@ const UserSketch = () => {
     setColorNote(color.rgb);
   };
 
-  const boardWidth = window.innerWidth - 267;
+  const boardWidth = lgScreen
+    ? window.innerWidth - 20
+    : window.innerWidth - 267;
   const boardHeight = 500;
 
   return (
-    <Box sx={{}}>
+    <div className="w-full">
       <div className="flex flex-wrap items-center justify-between px-2 py-3">
-        <h3 className="uppercase">create note image</h3>{" "}
+        <h3 className="uppercase">sketch note</h3>{" "}
         <Button
           className="mx-4"
           variant="contained"
@@ -226,6 +230,7 @@ const UserSketch = () => {
             borderRadius: "3px",
             boxShadow: "0 0 0 1px rgba(0,0,0,.1)",
             cursor: "pointer",
+            whiteSpace: "nowrap",
             display: "flex",
             height: "39px",
           }}
@@ -249,7 +254,7 @@ const UserSketch = () => {
               position: "absolute",
               right: "45%",
               top: "50px",
-              zIndex: "50",
+              zIndex: "90",
             }}
           >
             <div
@@ -316,14 +321,14 @@ const UserSketch = () => {
             sx={{
               width: "fit-content",
               height: "fit-content",
-              padding: "0 40px",
+              padding: "0 20px",
               borderRadius: "40px",
               zIndex: "20",
               backgroundColor: "#999",
               display: "flex",
               color: "text.main",
               flexDirection: "row",
-              justifyContent: "space-evenly",
+              justifyContent: "center",
             }}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
@@ -473,7 +478,7 @@ const UserSketch = () => {
                 undo
               </Button>
             </div>
-            <div
+            {/* <div
               style={{
                 marginLeft: "10px",
                 whiteSpace: "nowrap",
@@ -485,11 +490,11 @@ const UserSketch = () => {
               <Button variant="contained" onClick={downloadImage}>
                 dowload img
               </Button>
-            </div>
+            </div> */}
           </Box>
         </div>
       </div>
-    </Box>
+    </div>
   );
 };
 

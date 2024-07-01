@@ -30,7 +30,7 @@ const ChecklistComponent = ({ checklistItems, setChecklistItems }) => {
     if (newItem.trim()) {
       setChecklistItems([
         ...checklistItems,
-        { text: newItem, completed: false },
+        { content: newItem, status: false },
       ]);
       setNewItem("");
     }
@@ -38,7 +38,7 @@ const ChecklistComponent = ({ checklistItems, setChecklistItems }) => {
 
   const handleToggleItem = (index) => {
     const updatedItems = checklistItems.map((item, idx) =>
-      idx === index ? { ...item, completed: !item.completed } : item
+      idx === index ? { ...item, status: !item.status } : item
     );
     setChecklistItems(updatedItems);
   };
@@ -57,11 +57,11 @@ const ChecklistComponent = ({ checklistItems, setChecklistItems }) => {
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={item.completed}
+                  checked={item.status}
                   onChange={() => handleToggleItem(index)}
                 />
               }
-              label={item.text}
+              label={item.content}
             />
             <span onClick={() => handleDeleteItem(index)}>
               <DeleteIcon />
@@ -147,12 +147,9 @@ const CreateNote = () => {
   };
 
   const handleSubmit = async () => {
-    const payloadData =
-      type === "text"
-        ? dataText
-        : checklistItems
-            .map((item) => `${item.text},${item.completed}`)
-            .join(";");
+    const payloadData = type === "text" ? dataText : checklistItems;
+    // .map((item) => `${item.text},${item.completed}`)
+    // .join(";");
 
     const parsedColor = {
       r: parseInt(color.r),

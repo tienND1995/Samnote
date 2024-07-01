@@ -160,7 +160,7 @@ const Home = () => {
   };
   const mdScreen = useMediaQuery("(max-width:767px)");
   return (
-    <Box sx={{ padding: "0 20%" }}>
+    <Box sx={{ maxWidth: "760px", margin: "0 auto" }}>
       <ScrollClassAdder
         targetId="myElement"
         className="active"

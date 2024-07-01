@@ -252,7 +252,7 @@ const UserPhoto = () => {
                         <Tab label="Recommended" value="2" />
                       </TabList>
                     </Box>
-                    <TabPanel value="1" sx={{ width: "1000px", padding: 0 }}>
+                    <TabPanel value="1" sx={{ maxWidth: "1000px", padding: 0 }}>
                       <Swiper
                         spaceBetween={20}
                         slidesPerView={2.5}
@@ -414,6 +414,7 @@ const UserPhoto = () => {
                                       <img
                                         style={{
                                           height: "200px",
+                                          objectFit: "cover",
                                           width: "100%",
                                         }}
                                         src={convertToHttps(linkImg.link)}
