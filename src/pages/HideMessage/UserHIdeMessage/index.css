@@ -1,0 +1,66 @@
+.onlineUserHideMessage {
+   margin-top: 5%;
+   cursor: pointer;
+
+}
+
+.nameAndAvatarOfClientHideMessage {
+    width      : 100%;
+    display    : flex;
+    margin-left: 2%;
+    align-items: end;
+}
+
+.nameAndAvatarOfClientHideMessage img{
+    width        : 50px;
+    border-radius: 71.18px;
+    height       : 50px;
+  
+}
+
+.nameAndAvatarOfClientHideMessage p{
+    color      : white;
+    margin-left: 5%;
+    font-size: 18px;
+    display: flex;
+    height: 40%;
+    
+}
+
+.iconDeleteAndMessUser {
+    display              : flex;
+    width                : 30%;
+    align-items          : center;
+    grid-template-columns: auto auto;
+    text-align: center;
+}
+
+
+
+.avatarOnlineClientMessage svg{
+    margin-left: -20%;
+    margin-top: 55%;
+  
+}
+.avatarOnlineClientMessage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* Relative positioning for the container */
+}
+
+.avatarContainer {
+    position: relative; /* Relative positioning to contain the absolute positioned SVG */
+    display: inline-block;
+}
+
+.avatarContainer img {
+    display: block; /* Ensure no extra space below the image */
+}
+
+.statusIcon {
+    position: absolute; /* Absolute positioning to place the SVG */
+    bottom: 0; /* Position at the bottom */
+    right: 0; /* Position at the right */
+    transform: translate(50%, 50%); /* Fine-tuning the position to be at the corner */
+}
