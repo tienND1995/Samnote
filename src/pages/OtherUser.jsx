@@ -86,6 +86,7 @@ const OtherUser = () => {
   };
 
   console.log(userInfomations);
+  console.log(userNotes);
 
   const handleChat = () => {
     const data = {

@@ -1,8 +1,17 @@
 import { useEffect, useState } from "react";
 import api from "../api";
 import "./modalComments.css";
-import { data } from "autoprefixer";
 import { headers } from "next/headers";
+
+const NoteComponent = ({ noteText }) => {
+  return (
+    <div
+      dangerouslySetInnerHTML={{
+        __html: noteText,
+      }}
+    />
+  );
+};
 
 function ModalComments(props) {
   const [info, setInfo] = useState(props.data);
@@ -13,6 +22,7 @@ function ModalComments(props) {
     Avarta: "",
   });
   const [valueInput, setValueInput] = useState("");
+  const [reloadComment, setReloadComment] = useState(false);
   // const convertDay = () => {
   //   const createAt = info.createAt.split(" ").slice(0, 1);
   //   console.log(createAt);
@@ -65,7 +75,7 @@ function ModalComments(props) {
     };
 
     fetchComments();
-  }, []);
+  }, [reloadComment]);
 
   console.log(comments);
 
@@ -90,22 +100,32 @@ function ModalComments(props) {
   };
 
   const handleSendComment = async () => {
-    const time = new Date().toISOString();
+    const time = new Date();
+    const timeIOS = time.toISOString();
+    console.log(typeof time);
     const rawData = {
       parent_id: false,
-      sendAt: time,
+      sendAt: timeIOS,
       content: valueInput,
       idNote: +info.idNote,
       idUser: +userComment.id,
     };
     const response = await api.post(
-      `https://samnote.mangasocial.online/notes/notes-comment/${info.idNote}`,
-      { data: rawData }
+      `/notes/notes-comment/${info.idNote}`,
+      rawData
     );
     if (response && response.data.status === 200) {
+      console.log(response.data);
+      if (reloadComment === false) {
+        setReloadComment(true);
+      } else {
+        setReloadComment(false);
+      }
       setValueInput("");
     }
   };
+  console.log(valueInput);
+  console.log(reloadComment);
   return (
     <div className="fixed z-10 inset-0 w-full overflow-y-auto">
       <div className="flex items-center justify-center w-full h-full min-h-screen">
@@ -165,7 +185,9 @@ function ModalComments(props) {
                 </div>
                 <br />
                 <div className="w-[95%] h-auto mx-auto max-w-[1000px]">
-                  <p className="break-words">{info.data}</p>
+                  <p className="break-words">
+                    <NoteComponent noteText={info.data} />
+                  </p>
                 </div>
               </div>
             </div>
@@ -222,6 +244,7 @@ function ModalComments(props) {
                 className="w-full bg-[#F0F2F5] h-[50px]"
                 onChange={(e) => setValueInput(e.target.value)}
                 type="text"
+                value={valueInput}
               />
             </div>
             <div className="ml-6 mt-2 cursor-pointer">

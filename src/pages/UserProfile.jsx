@@ -154,7 +154,7 @@ const UserProfile = () => {
   };
 
   return (
-    <Box className="lg:w-full w-inherit bg-[#4A4B51] h-auto">
+    <Box className="w-full bg-[#4A4B51] h-auto">
       {userInfomations && (
         <>
           <Box className="lg:relative">
@@ -227,7 +227,7 @@ const UserProfile = () => {
               placeholder="Search..."
             />
           </Box>
-          <div className={`w-full flex justify-between mb-4`}>
+          <div className={`w-[98%] flex justify-between mb-4`}>
             <div className="w-[30%] h-[285px] bg-[#FFF4BA] rounded-xl mt-3">
               <div className="flex justify-between w-full mt-2">
                 <span className="ml-3">Quick notes</span>
@@ -296,7 +296,7 @@ const UserProfile = () => {
                 </div>
               </div>
             </div>
-            <div className="mt-3 w-[30%] h-[285px] bg-[#fff] rounded-xl">
+            <div className="mt-3 w-[35%] h-[285px] bg-[#fff] rounded-xl">
               {allNotePublic.length > 0 ? (
                 <div className="mt-2 w-[95%] h-[95%] ml-2">
                   {allNotePublic.slice(0, 6).map((item, index) => (
@@ -322,7 +322,7 @@ const UserProfile = () => {
             </div>
           </div>
           <Box className="flex">
-            <Box className="flex-[4]">
+            <Box className="flex-[4] w-full">
               {archivedNotes.length > 0 ? (
                 <>
                   <div
@@ -359,7 +359,11 @@ const UserProfile = () => {
                         <Tab label="Recommended" value="2" />
                       </TabList>
                     </Box>
-                    <TabPanel value="1" sx={{ width: "1000px", padding: 0 }}>
+                    <TabPanel
+                      value="1"
+                      className="lg:w-[1000px] w-auto"
+                      sx={{ maxWidth: "1000px", padding: 0 }}
+                    >
                       <Swiper
                         spaceBetween={20}
                         slidesPerView={2.5}
@@ -595,7 +599,11 @@ const UserProfile = () => {
                       <Tab label="Recommended" value="2" />
                     </TabList>
                   </Box>
-                  <TabPanel value="1" sx={{ width: "1000px", padding: 0 }}>
+                  <TabPanel
+                    value="1"
+                    className="lg:w-[1000px] w-auto"
+                    sx={{ maxWidth: "1000px", padding: 0 }}
+                  >
                     <Swiper
                       spaceBetween={20}
                       slidesPerView={2.5}
