@@ -21,7 +21,7 @@ import { Pagination } from "swiper/modules";
 const UserDustbin = () => {
   const appContext = useContext(AppContext);
   const { setSnackbar, user } = appContext;
-  const lgScreen = useMediaQuery("(max-width:991px)");
+  const lgScreen = useMediaQuery("(max-width:1024px)");
   const [userInfomations, setUserInformations] = useState(null);
   const [userNotes, setTrashNotes] = useState(null);
   const [userNoteImage, setTrashNoteImage] = useState(null);
@@ -252,10 +252,7 @@ const UserDustbin = () => {
                           slidesPerView: 2,
                         },
                         768: {
-                          slidesPerView: 3,
-                        },
-                        991: {
-                          slidesPerView: 3,
+                          slidesPerView: 2,
                         },
                       }}
                       modules={[Pagination]}
@@ -478,8 +475,8 @@ const UserDustbin = () => {
                         768: {
                           slidesPerView: 3,
                         },
-                        991: {
-                          slidesPerView: 3,
+                        1024: {
+                          slidesPerView: 2,
                         },
                       }}
                       modules={[Pagination]}

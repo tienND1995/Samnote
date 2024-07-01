@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api";
 import "./modalComments.css";
-import { headers } from "next/headers";
 
 const NoteComponent = ({ noteText }) => {
   return (
