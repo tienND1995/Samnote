@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { SketchPicker } from "react-color";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import api from "../api";
@@ -96,9 +95,9 @@ const CreateNote = () => {
   const [dataText, setDataText] = useState("");
   const [checklistItems, setChecklistItems] = useState([]);
   const [notePublic, setNotePublic] = useState(0);
-  const [color, setColor] = useState({ r: "255", g: "255", b: "255", a: "1" });
-  const [displayColorPicker, setDisplayColorPicker] = useState(false);
+  const [color, setColor] = useState("");
   const [folder, setUserFolder] = useState(null);
+  const [allColor, setAllColor] = useState([]);
   const appContext = useContext(AppContext);
   const { user, setSnackbar } = appContext;
   const outputDate = format(new Date(remindAt), "d/M/yyyy HH:mm a '+07:00'");
@@ -124,19 +123,21 @@ const CreateNote = () => {
     return () => {
       ignore = true;
     };
+  }, [user.id]);
+
+  useEffect(() => {
+    const getAllColor = async () => {
+      try {
+        const res = await api.get(`get_all_color`);
+        setAllColor(res.data.data);
+        console.log("User color", res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch colors:", err);
+      }
+    };
+
+    getAllColor();
   }, []);
-
-  const handleClick = () => {
-    setDisplayColorPicker(!displayColorPicker);
-  };
-
-  const handleClose = () => {
-    setDisplayColorPicker(false);
-  };
-
-  const handleChange = (color) => {
-    setColor(color.rgb);
-  };
 
   const handleChangeType = (e) => {
     setType(e.target.value);
@@ -146,16 +147,20 @@ const CreateNote = () => {
     setNotePublic(e.target.value);
   };
 
+  const handleChangeColor = (e) => {
+    setColor(e.target.value);
+  };
+
   const handleSubmit = async () => {
     const payloadData = type === "text" ? dataText : checklistItems;
-    // .map((item) => `${item.text},${item.completed}`)
-    // .join(";");
+
+    const selectedColor = allColor.find((col) => col.id === color);
 
     const parsedColor = {
-      r: parseInt(color.r),
-      g: parseInt(color.g),
-      b: parseInt(color.b),
-      a: parseInt(color.a),
+      r: parseInt(selectedColor.r),
+      g: parseInt(selectedColor.g),
+      b: parseInt(selectedColor.b),
+      a: 1,
     };
 
     const payload = {
@@ -183,7 +188,6 @@ const CreateNote = () => {
       });
     } catch (err) {
       console.error(err);
-      const errorMessage = err.response?.data?.message;
       setSnackbar({
         isOpen: true,
         message: "Failed to create note",
@@ -232,57 +236,39 @@ const CreateNote = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          <div
-            className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2"
-            style={{
-              padding: "5px",
-              background: "#fff",
-              borderRadius: "3px",
-              boxShadow: "0 0 0 1px rgba(0,0,0,.1)",
-              cursor: "pointer",
-              display: "flex",
-              height: "39px",
-            }}
-            onClick={handleClick}
-          >
-            Background-color:
-            <div
-              style={{
-                width: "36px",
-                height: "100%",
-                border: "0.1px solid black",
-                marginLeft: "5px",
-                borderRadius: "2px",
-                background: ` rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`,
-              }}
-            />
-          </div>
-          {displayColorPicker ? (
-            <div
-              style={{
-                position: "absolute",
-                right: "0px",
-                zIndex: "50",
-              }}
+          <FormControl className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2">
+            <InputLabel id="demo-simple-select-color-label">
+              Background-color
+            </InputLabel>
+            <Select
+              labelId="demo-simple-select-color-label"
+              id="demo-simple-select-color"
+              label="Background-color"
+              size="small"
+              value={color}
+              onChange={handleChangeColor}
             >
-              <div
-                style={{
-                  position: "fixed",
-                  top: "0px",
-                  right: "0px",
-                  bottom: "0px",
-                  left: "0px",
-                }}
-                onClick={handleClose}
-              />
-              <SketchPicker color={color} onChange={handleChange} />
-            </div>
-          ) : null}
+              {allColor.map((colorOption) => (
+                <MenuItem key={colorOption.id} value={colorOption.id}>
+                  {colorOption.name}
+                  <span
+                    style={{
+                      height: "20px",
+                      width: "20px",
+                      border: "1px solid black",
+                      marginLeft: "3px",
+                      background: `rgba(${colorOption.r}, ${colorOption.g}, ${colorOption.b})`,
+                    }}
+                  ></span>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
           <FormControl className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2">
             <InputLabel id="demo-simple-select-folder">Folder</InputLabel>
             <Select
-              label="folder"
+              label="Folder"
               size="small"
               labelId="demo-simple-select-folder"
               id="demo-simple-select"
@@ -308,21 +294,25 @@ const CreateNote = () => {
           />
 
           <FormControl className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2">
-            <InputLabel id="demo-simple-select-label">Note Public</InputLabel>
+            <InputLabel id="demo-simple-select-notePublic">
+              Note Public
+            </InputLabel>
             <Select
-              labelId="demo-simple-select-label"
-              label="NotePublic"
+              label="Note Public"
               size="small"
+              labelId="demo-simple-select-notePublic"
+              id="demo-simple-select"
               value={notePublic}
               onChange={handleChangeNotePublic}
             >
-              {notePublicOptions.map((note, idx) => (
-                <MenuItem key={idx} value={idx}>
-                  {note}
+              {notePublicOptions.map((data, index) => (
+                <MenuItem key={index} value={index}>
+                  {data}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
+
           <Box className="flex items-center w-full md:w-1/3 lg:w-1/4 xl:w-1/4 z-50 mx-4 my-2">
             <h6>RemindAt:</h6>
             <DatePicker
@@ -342,31 +332,36 @@ const CreateNote = () => {
               />
             }
           />
-          {type === "text" ? (
-            <Box className="w-full">
-              <h5 className="ml-2">Content</h5>
-              <div>
-                <Editor
-                  apiKey="c9fpvuqin9s9m9702haau5pyi6k0t0zj29nelhczdvjdbt3y"
-                  initialValue="<p>Write content here</p>"
-                  init={{
-                    height: "100vh",
-                    menubar: true,
-                    statusbar: false,
-                    toolbar:
-                      "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat",
-                  }}
-                  onEditorChange={(data) => setDataText(data)}
-                />
-              </div>
-            </Box>
-          ) : (
-            <ChecklistComponent
-              checklistItems={checklistItems}
-              setChecklistItems={setChecklistItems}
-            />
-          )}
         </Box>
+        {type === "text" ? (
+          <>
+            <h5 className="ml-2">Content</h5>
+            <Editor
+              apiKey="c9fpvuqin9s9m9702haau5pyi6k0t0zj29nelhczdvjdbt3y"
+              value={dataText}
+              init={{
+                height: "100vh",
+                menubar: true,
+                statusbar: false,
+                plugins: [
+                  "advlist autolink lists link image charmap print preview anchor",
+                  "searchreplace visualblocks code fullscreen",
+                  "insertdatetime media table paste code help wordcount",
+                ],
+                toolbar:
+                  "undo redo | formatselect | bold italic backcolor | \
+              alignleft aligncenter alignright alignjustify | \
+              bullist numlist outdent indent | removeformat | help",
+              }}
+              onEditorChange={(content) => setDataText(content)}
+            />
+          </>
+        ) : (
+          <ChecklistComponent
+            checklistItems={checklistItems}
+            setChecklistItems={setChecklistItems}
+          />
+        )}
       </Box>
     </>
   );

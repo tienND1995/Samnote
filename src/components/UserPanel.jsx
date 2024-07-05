@@ -122,7 +122,8 @@ const UserPanel = () => {
             <Button
               variant="contained"
               className="bg-[#5BE260] rounded-full w-full mb-4 hidden lg:flex"
-              onClick={() => navigate(`/user/create-note`)}
+              onClick={() => navigate(`/user/incognito`)}
+              // onClick={() => navigate(`/user/create-note`)}
             >
               <NoteAddIcon className="text-blue-500" />
               <Typography>new</Typography>
@@ -159,7 +160,7 @@ const UserPanel = () => {
           <Outlet />
         </Box>
       )}
-      <footer className="bg-[black] w-full h-[50px] text-center hidden lg:block">
+      {/* <footer className="bg-[black] w-full h-[50px] text-center hidden lg:block">
         <svg
           width="80"
           height="30"
@@ -218,7 +219,7 @@ const UserPanel = () => {
             fill="white"
           />
         </svg>
-      </footer>
+      </footer> */}
     </>
   );
 };

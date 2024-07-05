@@ -302,15 +302,15 @@ const UserProfile = () => {
                   {allNotePublic.slice(0, 6).map((item, index) => (
                     <div
                       key={`notePublic ${index}`}
-                      className="w-full h-[15%] flex justify-center my-1 ml-2"
+                      className="w-full h-[15%] flex justify-evenly my-1 ml-2 items-center"
                     >
                       <span className=" w-[20%] h-[full] truncate-text border-l-4 border-black-200">
                         {item.author}
                       </span>
-                      <span className="w-[45%] break-words mx-4">
-                        Has added a new public note
+                      <span className="w-[55%] break-words">
+                        Create a new public note
                       </span>
-                      <span className="text-xs break-words w-[12%]">
+                      <span className="text-xs break-words w-[12%] whitespace-nowrap">
                         {getTimeDifference(item.update_at, new Date())}
                       </span>
                     </div>
