@@ -88,7 +88,6 @@ const CreateNote = () => {
   const [type, setType] = useState("text");
   const [title, setTitle] = useState("");
   const [idFolder, setIdFolder] = useState("");
-  const [dueAt, setDueAt] = useState(null);
   const [pinned, setPinned] = useState(false);
   const [lock, setLock] = useState("");
   const [remindAt, setRemindAt] = useState(null);
@@ -100,7 +99,42 @@ const CreateNote = () => {
   const [allColor, setAllColor] = useState([]);
   const appContext = useContext(AppContext);
   const { user, setSnackbar } = appContext;
-  const outputDate = format(new Date(remindAt), "d/M/yyyy HH:mm a '+07:00'");
+  console.log("remindAt", remindAt);
+  const outputDate = format(new Date(remindAt), "dd/MM/yyyy HH:mm a '+07:00'");
+
+  function getCurrentFormattedDateTime() {
+    const date = new Date();
+
+    // Lấy các thành phần của ngày và giờ
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Tháng tính từ 0-11, cần +1
+    const year = date.getFullYear();
+
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    // Xác định AM/PM
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Giờ 0 thành 12
+    const formattedHours = String(hours).padStart(2, "0");
+
+    // Lấy múi giờ
+    const timeZoneOffset = -date.getTimezoneOffset();
+    const offsetSign = timeZoneOffset >= 0 ? "+" : "-";
+    const offsetHours = String(
+      Math.floor(Math.abs(timeZoneOffset) / 60)
+    ).padStart(2, "0");
+    const offsetMinutes = String(Math.abs(timeZoneOffset) % 60).padStart(
+      2,
+      "0"
+    );
+
+    // Tạo chuỗi thời gian định dạng
+    const formattedDateTime = `${day}/${month}/${year} ${formattedHours}:${minutes} ${ampm} ${offsetSign}${offsetHours}:${offsetMinutes}`;
+
+    return formattedDateTime;
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -156,28 +190,30 @@ const CreateNote = () => {
 
     const selectedColor = allColor.find((col) => col.id === color);
 
-    const parsedColor = {
-      r: parseInt(selectedColor.r),
-      g: parseInt(selectedColor.g),
-      b: parseInt(selectedColor.b),
-      a: 1,
-    };
+    const parsedColor = selectedColor
+      ? {
+          r: parseInt(selectedColor.r),
+          g: parseInt(selectedColor.g),
+          b: parseInt(selectedColor.b),
+          a: 1,
+        }
+      : { r: 255, g: 255, b: 255, a: 1 };
 
     const payload = {
       type,
       data: payloadData,
-      title,
+      title: title ? title : "TITLE",
       color: parsedColor,
-      idFolder,
-      dueAt: dueAt ? dueAt.toISOString() : null,
+      idFolder: idFolder ? idFolder : null,
+      dueAt: getCurrentFormattedDateTime(),
       pinned,
       lock,
-      remindAt: outputDate ? outputDate : null,
+      remindAt: remindAt ? outputDate : null,
       linkNoteShare: "",
       notePublic,
     };
 
-    console.log(payload); // Check payload structure before sending
+    console.log("payload", payload); // Check payload structure before sending
 
     try {
       await api.post(`/notes/${user.id}`, payload);
@@ -196,7 +232,6 @@ const CreateNote = () => {
     }
   };
 
-  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   return (
     <>
       <Box className="max-w mx-auto mt-3">
@@ -236,6 +271,7 @@ const CreateNote = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
+
           <FormControl className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2">
             <InputLabel id="demo-simple-select-color-label">
               Background-color
@@ -315,11 +351,19 @@ const CreateNote = () => {
 
           <Box className="flex items-center w-full md:w-1/3 lg:w-1/4 xl:w-1/4 z-50 mx-4 my-2">
             <h6>RemindAt:</h6>
-            <DatePicker
+            {/* <DatePicker
               selected={remindAt}
               onChange={(date) => setRemindAt(date)}
               showTimeSelect
               dateFormat="Pp"
+            /> */}
+            <DatePicker
+              selected={remindAt ? remindAt : null}
+              onChange={(date) => setRemindAt(date)}
+              showTimeSelect
+              dateFormat="Pp"
+              placeholderText="Select a date and time"
+              isClearable
             />
           </Box>
           <FormControlLabel
@@ -340,7 +384,7 @@ const CreateNote = () => {
               apiKey="c9fpvuqin9s9m9702haau5pyi6k0t0zj29nelhczdvjdbt3y"
               value={dataText}
               init={{
-                height: "100vh",
+                height: "50vh",
                 menubar: true,
                 statusbar: false,
                 plugins: [

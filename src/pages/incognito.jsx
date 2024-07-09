@@ -7,6 +7,7 @@ import {
   Typography,
   InputBase,
 } from "@mui/material";
+import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -15,21 +16,15 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SubdirectoryArrowRightSharpIcon from "@mui/icons-material/SubdirectoryArrowRightSharp";
-import { useRef } from "react";
-
-// ...other code
 
 const Incognito = () => {
   const appContext = useContext(AppContext);
   const { user } = appContext;
   const [userChat, setUserChat] = useState([]);
-  const [messenger, setMess] = useState([]);
+  const [messenger, setMess] = useState(null);
   const [sendMess, setSendMess] = useState([]);
   const [idRecei, setIdReceive] = useState(null);
   const [reload, setReload] = useState(0);
-  const messagesEndRef = useRef(null);
-
-  console.log("idReceive", idRecei);
 
   const handleInputChange = (event) => {
     setSendMess(event.target.value);
@@ -75,7 +70,6 @@ const Incognito = () => {
       const res = await api.get(
         `https://samnote.mangasocial.online/message/chat-unknown-id/${data.idReceive}/${user.id}`
       );
-      console.log("userChat", res.data.data);
       setMess(res.data.data.reverse());
       scrollToBottom();
     } catch (err) {
@@ -114,7 +108,7 @@ const Incognito = () => {
     };
     try {
       await api.post(`/message/chat-unknown/${idRecei}`, senmess);
-      setMess((prev) => [...prev, senmess]); // Thêm tin nhắn mới vào danh sách tin nhắn
+      setMess((prev) => [...prev, senmess]);
       setSendMess("");
       setReload((prev) => prev + 1);
       scrollToBottom();
@@ -122,7 +116,6 @@ const Incognito = () => {
       console.error(err);
     }
     console.log("Message to send:", senmess);
-    // Gọi hàm gửi tin nhắn với giá trị message
   };
 
   const getSendMess = async (data) => {
@@ -130,7 +123,6 @@ const Incognito = () => {
       const res = await api.get(
         `https://samnote.mangasocial.online/message/chat-unknown-id/${data.idReceive}/${user.id}`
       );
-      console.log("userChat", res.data.data);
       scrollToBottom();
 
       setSendMess(res.data.data);
@@ -157,18 +149,15 @@ const Incognito = () => {
   }, [reload]);
 
   return (
-    <Box
-      className="text-white mb-6 hidden lg:block bg-[#999] "
-      style={{
-        display: "grid",
-        gridTemplateColumns: "300px 1fr",
-      }}
-    >
+    <Box className="text-white lg:flex bg-[#999] sm:grid sm:grid-cols-[300px_1fr]">
       <Box
+        className="sm:w-[300px]"
         sx={{
           display: "flex",
           flexDirection: "column",
           margin: "0 10px",
+          // justifyContent: "center",
+          alignItems: "center",
         }}
       >
         <Box
@@ -179,6 +168,8 @@ const Incognito = () => {
             borderRadius: "30px",
             height: "40px",
             margin: "10px 0",
+            width: "90%",
+            justifyContent: "center",
           }}
         >
           <TextField
@@ -186,12 +177,13 @@ const Incognito = () => {
             label="Search messenger"
             variant="standard"
             sx={{
+              width: "90%",
               margin: "0 20px 10px",
               input: { color: "white" },
             }}
             InputLabelProps={{ style: { color: "#000" } }}
           />
-          <IconButton sx={{ p: "10px" }}>
+          <IconButton sx={{}}>
             <SearchIcon className="mr-1 my-1" />
           </IconButton>
         </Box>
@@ -200,10 +192,10 @@ const Incognito = () => {
             backgroundColor: "#56565DCC",
             textAlign: "center",
             borderRadius: "10px",
-            margin: "0 20px 10px",
+            margin: "0 10px 10px",
           }}
         >
-          <div style={{ marginTop: "10px" }}>
+          <div style={{ margin: "10px 0 0", padding: "0 10px 0" }}>
             <img
               style={{
                 height: "20px",
@@ -215,7 +207,7 @@ const Incognito = () => {
             />
             Incognito
           </div>
-          <p>
+          <p style={{ padding: "0 10px 0" }}>
             You are now in incognito mode. You can send anonymous text with
             other people.
           </p>
@@ -283,54 +275,55 @@ const Incognito = () => {
           </Typography>
         )}
       </Box>
-      <Box sx={{}}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            width: "100%",
-            // margin: "5px 20px",
-            padding: "5px 10px",
-            backgroundColor: "#56565DCC",
-            justifyContent: "space-between",
-            height: "50px",
-          }}
-        >
-          {" "}
+      {messenger !== null ? (
+        <Box className="fixed inset-0 z-[3] sm:static w-full">
           <Box
-            sx={{ marginLeft: "10px", display: "flex", alignItems: "center" }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              padding: "5px 10px",
+              backgroundColor: "#999",
+              justifyContent: "space-between",
+              height: "50px",
+            }}
           >
-            <svg
-              width="48"
-              height="48"
-              viewBox="0 0 48 48"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M32.2804 4.30225H15.7736C8.60355 4.30225 4.3291 8.57669 4.3291 15.7467V32.2536C4.3291 37.7887 6.87013 41.5904 11.3416 43.0283C12.6416 43.4814 14.1387 43.698 15.7736 43.698H32.2804C33.9154 43.698 35.4124 43.4814 36.7125 43.0283C41.1839 41.5904 43.7249 37.7887 43.7249 32.2536V15.7467C43.7249 8.57669 39.4505 4.30225 32.2804 4.30225ZM40.7702 32.2536C40.7702 36.4689 39.1156 39.1281 35.7867 40.2312C33.876 36.4689 29.3455 33.79 24.027 33.79C18.7086 33.79 14.1978 36.4492 12.2674 40.2312H12.2477C8.95811 39.1675 7.28379 36.4886 7.28379 32.2733V15.7467C7.28379 10.1919 10.2188 7.25693 15.7736 7.25693H32.2804C37.8353 7.25693 40.7702 10.1919 40.7702 15.7467V32.2536Z"
-                fill="black"
+            {" "}
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <KeyboardBackspaceIcon
+                className="sm:hidden block"
+                sx={{ marginRight: "10px" }}
+                onClick={() => setMess(null)}
               />
-              <path
-                d="M24.0304 16.1208C20.1302 16.1208 16.9785 19.2725 16.9785 23.1727C16.9785 27.0729 20.1302 30.2442 24.0304 30.2442C27.9306 30.2442 31.0822 27.0729 31.0822 23.1727C31.0822 19.2725 27.9306 16.1208 24.0304 16.1208Z"
-                fill="black"
-              />
-            </svg>
-            <Typography variant="body1">User name</Typography>
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 48 48"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M32.2804 4.30225H15.7736C8.60355 4.30225 4.3291 8.57669 4.3291 15.7467V32.2536C4.3291 37.7887 6.87013 41.5904 11.3416 43.0283C12.6416 43.4814 14.1387 43.698 15.7736 43.698H32.2804C33.9154 43.698 35.4124 43.4814 36.7125 43.0283C41.1839 41.5904 43.7249 37.7887 43.7249 32.2536V15.7467C43.7249 8.57669 39.4505 4.30225 32.2804 4.30225ZM40.7702 32.2536C40.7702 36.4689 39.1156 39.1281 35.7867 40.2312C33.876 36.4689 29.3455 33.79 24.027 33.79C18.7086 33.79 14.1978 36.4492 12.2674 40.2312H12.2477C8.95811 39.1675 7.28379 36.4886 7.28379 32.2733V15.7467C7.28379 10.1919 10.2188 7.25693 15.7736 7.25693H32.2804C37.8353 7.25693 40.7702 10.1919 40.7702 15.7467V32.2536Z"
+                  fill="black"
+                />
+                <path
+                  d="M24.0304 16.1208C20.1302 16.1208 16.9785 19.2725 16.9785 23.1727C16.9785 27.0729 20.1302 30.2442 24.0304 30.2442C27.9306 30.2442 31.0822 27.0729 31.0822 23.1727C31.0822 19.2725 27.9306 16.1208 24.0304 16.1208Z"
+                  fill="black"
+                />
+              </svg>
+              <Typography variant="body1">User name</Typography>
+            </Box>
+            <MoreHorizIcon />
           </Box>
-          <MoreHorizIcon />
-        </Box>
-        <Box
-          sx={{
-            height: "80vh",
-            width: "100%",
-            backgroundColor: "#888",
-            overflow: "auto",
-            scrollbarWidth: "none",
-          }}
-        >
-          {messenger &&
-            messenger.map((info, index) => (
+          <Box
+            className="h-[74vh] lg:h-[79vh]"
+            sx={{
+              width: "100%",
+              backgroundColor: "#888",
+              overflow: "auto",
+              scrollbarWidth: "none",
+            }}
+          >
+            {messenger.map((info, index) => (
               <Box
                 key={index}
                 sx={{
@@ -388,44 +381,47 @@ const Incognito = () => {
                 )}
               </Box>
             ))}
-          <div id="lastmessage" />
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            width: "100%",
-            padding: "10px 10px 0 10px",
-            backgroundColor: "#F4F4F4",
-            borderBottomLeftRadius: "15px",
-            borderBottomrightRadius: "15px",
-          }}
-        >
-          <IconButton sx={{ p: "10px" }}>
-            <EmojiEmotionsIcon />
-          </IconButton>
-          <InputBase
-            sx={{ ml: 1, flex: 1 }}
-            placeholder="Type your message..."
-            value={sendMess}
-            onChange={handleInputChange}
-            // onKeyDown={sendMess ? () => handleKeyDown() : undefined}
-            onKeyDown={sendMess ? handleKeyDown : undefined}
-            // onKeyDown={handleKeyDown}
-          />
-          <IconButton sx={{ p: "10px" }}>
-            <AttachFileIcon />
-          </IconButton>
-          <IconButton
-            color={sendMess ? "primary" : "rgba(0,0,0,0.3)"}
-            sx={{ p: "10px" }}
-            aria-label="Send message"
-            onClick={sendMess ? () => SendMessage() : undefined}
+            <div id="lastmessage" />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+              padding: "10px 10px 0 10px",
+              backgroundColor: "#F4F4F4",
+              borderBottomLeftRadius: "15px",
+              borderBottomrightRadius: "15px",
+            }}
           >
-            <SubdirectoryArrowRightSharpIcon sx={{ cursor: "pointer" }} />
-          </IconButton>
+            <IconButton sx={{ p: "10px" }}>
+              <EmojiEmotionsIcon />
+            </IconButton>
+            <InputBase
+              sx={{ ml: 1, flex: 1 }}
+              placeholder="Type your message..."
+              value={sendMess}
+              onChange={handleInputChange}
+              // onKeyDown={sendMess ? () => handleKeyDown() : undefined}
+              onKeyDown={sendMess ? handleKeyDown : undefined}
+              // onKeyDown={handleKeyDown}
+            />
+            <IconButton sx={{ p: "10px" }}>
+              <AttachFileIcon />
+            </IconButton>
+            <IconButton
+              color={sendMess ? "primary" : "rgba(0,0,0,0.3)"}
+              sx={{ p: "10px" }}
+              aria-label="Send message"
+              onClick={sendMess ? () => SendMessage() : undefined}
+            >
+              <SubdirectoryArrowRightSharpIcon sx={{ cursor: "pointer" }} />
+            </IconButton>
+          </Box>
         </Box>
-      </Box>
+      ) : (
+        ""
+      )}
     </Box>
   );
 };
