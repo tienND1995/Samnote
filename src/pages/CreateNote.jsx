@@ -16,6 +16,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import api from "../api";
+import { CreateFolder, DeleteFolder } from "../components/Folder";
 import { AppContext } from "../context";
 import { format } from "date-fns";
 
@@ -97,6 +98,7 @@ const CreateNote = () => {
   const [color, setColor] = useState("");
   const [folder, setUserFolder] = useState(null);
   const [allColor, setAllColor] = useState([]);
+
   const appContext = useContext(AppContext);
   const { user, setSnackbar } = appContext;
   console.log("remindAt", remindAt);
@@ -315,8 +317,10 @@ const CreateNote = () => {
                 folder.map((data, index) => (
                   <MenuItem key={index} value={data.id}>
                     {data.nameFolder}
+                    <DeleteFolder />
                   </MenuItem>
                 ))}
+              <CreateFolder number={user.id} />
             </Select>
           </FormControl>
 

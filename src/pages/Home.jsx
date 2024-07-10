@@ -37,7 +37,7 @@ const customTime = (lastDate) => {
   const days = Math.floor(hours / 24);
 
   if (days > 0) {
-    return days === 1 ? "1 days ago" : `${days} days ago`;
+    return days === 1 ? "1 days" : `${days} days`;
   } else if (days <= 0) {
     return "to day";
   }
@@ -163,7 +163,7 @@ const Home = () => {
     <Box sx={{ maxWidth: "760px", margin: "0 auto" }}>
       <ScrollClassAdder
         targetId="myElement"
-        className="active"
+        className="active "
         threshold={150}
       />
       <header
@@ -205,6 +205,7 @@ const Home = () => {
                     display: isOpen ? "block" : "none",
                     flexDirection: "column",
                     position: "absolute",
+                    zIndex: "50",
                     top: "70px",
                     borderRadius: "10px",
                     right: "10px",
@@ -431,8 +432,8 @@ const Home = () => {
                     navigate(`/other-user/${info.idUser}`);
                   }}
                 >
-                  <p style={{ margin: 0, width: "5%" }}>{index + 1}</p>
-                  <div style={{ width: "10%" }}>
+                  <p style={{ margin: 0, width: "7%" }}>{index + 1}</p>
+                  <div style={{ width: "50px", marginRight: "5px" }}>
                     <Avatar
                       src={info.Avatar}
                       alt="Avatar"
@@ -442,14 +443,20 @@ const Home = () => {
                   <p
                     style={{
                       margin: 0,
-                      width: "70%",
+                      width: "60%",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                     }}
                   >
                     {info.name}
                   </p>
-                  <p style={{ margin: 0, width: "15%", textAlign: "end" }}>
+                  <p
+                    style={{
+                      margin: 0,
+                      width: "fit-content",
+                      textAlign: "end",
+                    }}
+                  >
                     {info.nbnote} notes
                   </p>
                 </div>
@@ -489,7 +496,7 @@ const Home = () => {
             >
               <div
                 style={{
-                  width: "5%",
+                  width: "8%",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                 }}
@@ -505,33 +512,13 @@ const Home = () => {
               >
                 {item.type}
               </div>
-              <div
-                style={{
-                  width: "30%",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
+              <div className="w-[30%] hidden sm:block overflow-hidden whitespace-nowrap text-ellipsis">
                 {item.title}
               </div>
-              <div
-                style={{
-                  width: "20%",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
+              <div className="sm:w-[20%] w-[25%] overflow-hidden whitespace-nowrap text-ellipsis">
                 {customTime(item.update_at)}
               </div>
-              <div
-                style={{
-                  width: "30%",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
+              <div className="sm:w-[20%] w-[50%] overflow-hidden whitespace-nowrap text-ellipsis">
                 {item.author}
               </div>
             </div>
@@ -569,14 +556,14 @@ const Home = () => {
             >
               <div
                 style={{
-                  width: "5%",
+                  width: "8%",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                 }}
               >
                 {index + 1}
               </div>
-              <div style={{ width: "10%" }}>
+              <div style={{ width: "50px", marginRight: "5px" }}>
                 <Avatar
                   src={item.linkAvatar}
                   alt="Avatar"
@@ -584,33 +571,13 @@ const Home = () => {
                 />
               </div>
 
-              <div
-                style={{
-                  width: "35%",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
+              <div className="w-[60%] sm:w-[35%] overflow-hidden whitespace-nowrap text-ellipsis">
                 {item.name}
               </div>
-              <div
-                style={{
-                  width: "20%",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
+              <div className="w-[30%] sm:w-[20%] overflow-hidden whitespace-nowrap text-ellipsis">
                 {customTime(item.createAt)}
               </div>
-              <div
-                style={{
-                  width: "30%",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
+              <div className="sm:w-[30%] hidden sm:block overflow-hidden whitespace-nowrap text-ellipsis">
                 {item.gmail}
               </div>
             </div>
@@ -647,7 +614,7 @@ const Home = () => {
                   alignItems: "center",
                 }}
               >
-                <div style={{ width: "15%" }}>
+                <div style={{ width: "50px", marginRight: "5px" }}>
                   <Avatar
                     src={item.url_avatar}
                     alt="Avatar"

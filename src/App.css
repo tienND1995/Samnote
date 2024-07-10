@@ -22,7 +22,6 @@ li {
 .active#myElement {
   position: fixed;
   background-color: #fff;
-  padding: 0 20%;
   left: 0;
   right: 0;
   z-index: 100;
