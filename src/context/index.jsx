@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useReducer } from "react";
+import { createContext, useState, useEffect } from "react";
 import { USER } from "../constant";
 import axios from "axios";
 
@@ -11,24 +11,6 @@ const AppProvider = ({ children }) => {
     message: "",
     severity: "",
   });
-  const [chat, dispatch] = useReducer(chatReducer, [
-    {
-      id: 0,
-      Avarta: "",
-      name: "",
-    },
-  ]);
-  console.log(chat);
-
-  const addChat = (newChat) => {
-    // @ts-ignore
-    dispatch({ type: "ADD_CHAT", payload: newChat });
-  };
-
-  const removeChat = (index) => {
-    // @ts-ignore
-    dispatch({ type: "REMOVE_CHAT", payload: index });
-  };
 
   useEffect(() => {
     // Lấy dữ liệu từ localStorage khi component mount
@@ -80,14 +62,6 @@ const AppProvider = ({ children }) => {
     // Clean up function để xóa interval khi component unmount
     return () => clearInterval(interval);
   }, []);
-
-  const addChat = (newChat) => {
-    dispatch({ type: "ADD_CHAT", payload: newChat });
-  };
-
-  const removeChat = (index) => {
-    dispatch({ type: "REMOVE_CHAT", payload: index });
-  };
 
   const updateUserInLocalStorage = (newUserData) => {
     try {

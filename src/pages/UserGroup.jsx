@@ -294,13 +294,22 @@ const UserGroup = () => {
 
   const handleButtonSend = () => {
     if (selectedGroup) {
-      const messageData = {
+      console.log(imageContent);
+      const textData = {
         idSend: +user.id,
         idReceive:
           selectedGroup.id !== 0 ? +selectedGroup.id : +dataInfomations.id,
         type: "text", // Giả sử loại tin nhắn là text
         state: "",
-        // data: imageContent,
+        content: messageContent,
+      };
+      const imageData = {
+        idSend: +user.id,
+        idReceive:
+          selectedGroup.id !== 0 ? +selectedGroup.id : +dataInfomations.id,
+        type: "image",
+        state: "",
+        data: imageContent,
         content: messageContent,
       };
 
@@ -309,7 +318,7 @@ const UserGroup = () => {
           +user.id,
           selectedGroup.id !== 0 ? +selectedGroup.id : +dataInfomations.id
         ),
-        messageData
+        imageContent ? imageData : textData
       );
     }
   };
@@ -599,7 +608,9 @@ const UserGroup = () => {
               )
             )}
           {socketMess
-            .filter((item) => item.ReceivedID === selectedGroup.id)
+            .filter(
+              (item) => item.ReceivedID === user.id || item.SenderID === user.id
+            )
             .map((item, index) =>
               item.SenderID === user.id ? (
                 <div
