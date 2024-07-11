@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import UserProfile from "./pages/UserProfile";
 import UserNotes from "./pages/UserNotes";
+import Incognito from "./pages/incognito";
 import UserSetting from "./pages/UserSetting";
 import UserSketch from "./pages/UserSketch";
 import UserDustbin from "./pages/UserDustbin";
@@ -32,6 +33,7 @@ const userRoutes = [
   { path: "/user/photo", element: <UserPhoto /> },
   { path: "/user/create-note", element: <CreateNote /> },
   { path: "/user/profile", element: <UserProfile /> },
+  { path: "/user/incognito", element: <Incognito /> },
 ];
 
 const AppSnackbar = () => {

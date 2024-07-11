@@ -1,5 +1,6 @@
 import { Outlet, useNavigate } from "react-router-dom";
-import { Box, Button, TextField, Typography } from "@mui/material";
+
+import { Box, Button, TextField, IconButton, Typography } from "@mui/material";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import SearchIcon from "@mui/icons-material/Search";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -85,7 +86,7 @@ const UserPanel = () => {
         >
           <Box
             // className={`w-[320px] min-h-screen bg-[#1D1D1D] text-white p-8 fixed top-0 left-0`}
-            className={`lg:w-[250px] w-full lg:h-[100%] h-[3%] bg-[#1D1D1D] fixed bottom-0 z-10 lg:static text-white p-8 pt-3 bg-[#4A4B51]`}
+            className={`lg:w-[250px] w-full lg:h-[100%] h-[3%] bg-[#1D1D1D] fixed bottom-0 z-10 lg:static text-white px-8 py-4 pt-3 bg-[#4A4B51]`}
           >
             <Box className="flex items-center justify-between">
               <Box
@@ -108,20 +109,23 @@ const UserPanel = () => {
               />
             </Box>
 
-            <Box className="flex items-end text-white mb-6 hidden lg:block">
-              <SearchIcon className="mr-1 my-1" />
+            <Box className="flex items-end text-white mb-4 hidden lg:block whitespace-nowrap ">
               <TextField
                 id="input-with-sx"
                 label="Search messenger"
                 variant="standard"
-                sx={{ input: { color: "white" } }}
+                sx={{ input: { color: "white" }, width: "80%" }}
                 InputLabelProps={{ style: { color: "white" } }}
               />
+              <IconButton sx={{ p: "10px" }}>
+                <SearchIcon className="mr-1 mt-2 text-white" />
+              </IconButton>
             </Box>
 
             <Button
               variant="contained"
               className="bg-[#5BE260] rounded-full w-full mb-4 hidden lg:flex"
+              // onClick={() => navigate(`/user/incognito`)}
               onClick={() => navigate(`/user/create-note`)}
             >
               <NoteAddIcon className="text-blue-500" />
@@ -159,7 +163,7 @@ const UserPanel = () => {
           <Outlet />
         </Box>
       )}
-      <footer className="bg-[black] w-full h-[50px] text-center hidden lg:block">
+      {/* <footer className="bg-[black] w-full h-[50px] text-center hidden lg:block">
         <svg
           width="80"
           height="30"
@@ -218,7 +222,7 @@ const UserPanel = () => {
             fill="white"
           />
         </svg>
-      </footer>
+      </footer> */}
     </>
   );
 };

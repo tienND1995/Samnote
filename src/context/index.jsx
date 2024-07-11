@@ -1,5 +1,6 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useReducer } from "react";
 import { USER } from "../constant";
+import axios from "axios";
 
 export const AppContext = createContext(null);
 
@@ -7,13 +8,32 @@ const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [snackbar, setSnackbar] = useState({
     isOpen: false,
-    message: ``,
+    message: "",
     severity: "",
   });
+  const [chat, dispatch] = useReducer(chatReducer, [
+    {
+      id: 0,
+      Avarta: "",
+      name: "",
+    },
+  ]);
+  console.log(chat);
+
+  const addChat = (newChat) => {
+    // @ts-ignore
+    dispatch({ type: "ADD_CHAT", payload: newChat });
+  };
+
+  const removeChat = (index) => {
+    // @ts-ignore
+    dispatch({ type: "REMOVE_CHAT", payload: index });
+  };
+
   useEffect(() => {
     // Lấy dữ liệu từ localStorage khi component mount
+    const localUser = localStorage.getItem(USER);
     try {
-      const localUser = localStorage.getItem(USER);
       const parseUser = JSON.parse(localUser);
       if (parseUser) {
         setUser(parseUser);
@@ -42,7 +62,32 @@ const AppProvider = ({ children }) => {
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };
-  }, []); // Chỉ chạy một lần đầu khi component mount
+  }, []);
+
+  useEffect(() => {
+    // Gọi API mỗi 6 giây
+    const interval = setInterval(() => {
+      axios
+        .get(`https://samnote.mangasocial.online/check-status/77`)
+        .then((response) => {
+          console.log("API called successfully");
+        })
+        .catch((error) => {
+          console.error("Error calling API:", error);
+        });
+    }, 60000);
+
+    // Clean up function để xóa interval khi component unmount
+    return () => clearInterval(interval);
+  }, []);
+
+  const addChat = (newChat) => {
+    dispatch({ type: "ADD_CHAT", payload: newChat });
+  };
+
+  const removeChat = (index) => {
+    dispatch({ type: "REMOVE_CHAT", payload: index });
+  };
 
   const updateUserInLocalStorage = (newUserData) => {
     try {

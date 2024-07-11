@@ -7,11 +7,11 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
+  InputLabel,
   MenuItem,
   Select,
   TextField,
 } from "@mui/material";
-import { SketchPicker } from "react-color";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import api from "../api";
@@ -27,6 +27,12 @@ const Checklist = ({ data }) => {
     setItems(data);
   }, [data]);
 
+  const handleChange = (index) => {
+    const updatedItems = [...items];
+    updatedItems[index].status = !updatedItems[index].status;
+    setItems(updatedItems);
+  };
+
   return (
     <div>
       {items.map((item, index) => (
@@ -35,7 +41,7 @@ const Checklist = ({ data }) => {
             style={{ marginRight: "5px" }}
             type="checkbox"
             checked={item.status}
-            // onChange={() => handleChange(index)} hàm này để thany đổi trang thái của ô check
+            onChange={() => handleChange(index)}
           />
           {item.content}
         </div>
@@ -111,8 +117,9 @@ const ChecklistComponent = ({ checklistItems, setChecklistItems, data }) => {
     </div>
   );
 };
+
 export default function UserNotes() {
-  const [type, setType] = useState("");
+  const [type, setType] = useState(""); // Add state for type
   const [title, setTitle] = useState("");
   const [idFolder, setIdFolder] = useState(null);
   const [dueAt, setDueAt] = useState(null);
@@ -122,14 +129,12 @@ export default function UserNotes() {
   const [data, setData] = useState("");
   const [notePublic, setNotePublic] = useState(0);
   const [color, setColor] = useState({ r: "255", g: "255", b: "255", a: "1" });
-  const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [folder, setUserFolder] = useState([]);
   const [note, setUserNote] = useState([]);
   const [checklistItems, setChecklistItems] = useState([]);
-  console.log("checklistItems", checklistItems);
   const [noteEdit, setNoteEdit] = useState(null);
   const [updateTrigger, setUpdateTrigger] = useState(0);
-
+  const [allColor, setAllColor] = useState([]);
   const appContext = useContext(AppContext);
   const { user, setSnackbar } = appContext;
 
@@ -184,17 +189,19 @@ export default function UserNotes() {
     };
   }, [user.id, updateTrigger]);
 
-  const handleClick = () => {
-    setDisplayColorPicker(!displayColorPicker);
-  };
+  useEffect(() => {
+    const getAllColor = async () => {
+      try {
+        const res = await api.get(`get_all_color`);
+        setAllColor(res.data.data);
+        console.log("User color", res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch colors:", err);
+      }
+    };
 
-  const handleClose = () => {
-    setDisplayColorPicker(false);
-  };
-
-  const handleChangeColor = (color) => {
-    setColor(color.rgb);
-  };
+    getAllColor();
+  }, []);
 
   const handleChangeNotePublic = (e) => {
     setNotePublic(e.target.value);
@@ -204,14 +211,19 @@ export default function UserNotes() {
     setData(content);
   };
 
+  const handleColorChange = (e) => {
+    setColor(e.target.value);
+  };
+
   const handleSubmit = async (value) => {
     const payloadData = type === "text" ? data : checklistItems;
+    const selectedColor = allColor.find((col) => col.id === color);
 
     const parsedColor = {
-      r: parseInt(color.r),
-      g: parseInt(color.g),
-      b: parseInt(color.b),
-      a: parseFloat(color.a),
+      r: parseInt(selectedColor.r),
+      g: parseInt(selectedColor.g),
+      b: parseInt(selectedColor.b),
+      a: 1,
     };
 
     const payload = {
@@ -229,7 +241,7 @@ export default function UserNotes() {
       linkNoteShare: "",
       notePublic,
     };
-    console.log("payload", payload);
+
     try {
       await api.patch(`/notes/${value}`, payload);
       setSnackbar({
@@ -249,6 +261,26 @@ export default function UserNotes() {
     }
   };
 
+  const deleteNote = async (index) => {
+    try {
+      await api.delete(`https://samnote.mangasocial.online/notes/${index}`);
+      setSnackbar({
+        isOpen: true,
+        message: `Remove note successfully ${index}`,
+        severity: "success",
+      });
+      console.log("index", index);
+      setUpdateTrigger((prev) => prev + 1); // Update the state to trigger useEffect
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        isOpen: true,
+        message: `Failed to remove note ${index}`,
+        severity: "error",
+      });
+    }
+  };
+
   const handleGetValue = (info) => {
     setNoteEdit(info);
     setType(info.type);
@@ -261,9 +293,8 @@ export default function UserNotes() {
     setData(info.data);
     setNotePublic(info.notePublic);
     setColor(info.color);
+    console.log("now color", info.color);
   };
-
-  console.log("noteEdit", noteEdit);
   return (
     <Box className="grid grid-cols-[350px_1fr]">
       <div className="mx-3 overflow-y-auto h-[100vh] border-r border-black border-solid">
@@ -278,25 +309,39 @@ export default function UserNotes() {
           note.map((info, index) => (
             <div
               key={index}
-              className="my-1 p-3 rounded-xl"
+              className="my-1 p-3 rounded-xl "
               style={{
                 border: "1px solid #000",
                 backgroundColor: `rgba(${info.color.r}, ${info.color.g}, ${info.color.b}, ${info.color.a})`,
               }}
               onClick={() => handleGetValue(info)}
             >
-              <h4>{info.title}</h4>
+              <Box className="flex items-center justify-between">
+                <h4>{info.title}</h4>
+                <DeleteIcon onClick={() => deleteNote(info.idNote)} />
+              </Box>
+
               {info.type === "checkList" || info.type === "checklist" ? (
-                <Checklist data={info.data} />
+                <>
+                  <Checklist data={info.data.slice(0, 3)} />
+                  {info.data.length - 3 > 0 && (
+                    <div className="font-bold">
+                      +{info.data.length - 3} item hidden
+                    </div>
+                  )}
+                </>
               ) : (
-                <div dangerouslySetInnerHTML={{ __html: info.data }} />
+                <div
+                  className="max-h-[100px] text-start overflow-hidden"
+                  dangerouslySetInnerHTML={{ __html: info.data }}
+                />
               )}
             </div>
           ))}
       </div>
       {noteEdit === null ? (
         note.length === 0 ? (
-          <h3>You dont have note to edit</h3>
+          <h3>You don't have notes to edit</h3>
         ) : (
           <h3>Click any note to edit</h3>
         )
@@ -317,9 +362,8 @@ export default function UserNotes() {
               <TextField
                 id="demo-simple-select"
                 label="Type"
-                size="small"
                 value={type}
-                // onChange={(e) => setType(e.target.value)}
+                size="small"
               />
             </FormControl>
             <TextField
@@ -329,57 +373,42 @@ export default function UserNotes() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
-            <div
-              className="w-full sm:w-1/3 mx-2 my-2"
-              style={{
-                padding: "5px",
-                background: "#fff",
-                borderRadius: "3px",
-                boxShadow: "0 0 0 1px rgba(0,0,0,.1)",
-                cursor: "pointer",
-                display: "flex",
-                height: "39px",
-                whiteSpace: "nowrap",
-              }}
-              onClick={handleClick}
-            >
-              Background-color:
-              <div
-                style={{
-                  width: "36px",
-                  height: "100%",
-                  border: "0.1px solid black",
-                  marginLeft: "5px",
-                  borderRadius: "2px",
-                  background: `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`,
-                }}
-              />
-            </div>
-            {displayColorPicker && (
-              <div
-                style={{
-                  position: "absolute",
-                  right: "0px",
-                  zIndex: "50",
-                }}
-              >
-                <div
-                  style={{
-                    position: "fixed",
-                    top: "0px",
-                    right: "0px",
-                    bottom: "0px",
-                    left: "0px",
-                  }}
-                  onClick={handleClose}
-                />
-                <SketchPicker color={color} onChange={handleChangeColor} />
-              </div>
-            )}
-            <FormControl className="w-full sm:w-1/3 mx-2 my-2 flex items-center flex-row">
-              <p className="m-0">folder:</p>
+            <FormControl className="w-full sm:w-1/3 mx-2 my-2">
+              <InputLabel id="demo-simple-select-color-label">
+                Background-color
+              </InputLabel>
               <Select
-                style={{ width: "300px", border: "none" }}
+                labelId="demo-simple-select-color-label"
+                id="demo-simple-select-color"
+                label="Background-color"
+                size="small"
+                value={color}
+                onChange={handleColorChange}
+              >
+                {allColor.map((colorOption) => (
+                  <MenuItem key={colorOption.id} value={colorOption.id}>
+                    <Box display="flex" alignItems="center">
+                      <span
+                        style={{
+                          height: "20px",
+                          width: "20px",
+                          border: "1px solid black",
+                          marginRight: "8px",
+                          backgroundColor: `rgba(${colorOption.r}, ${colorOption.g}, ${colorOption.b})`,
+                        }}
+                      ></span>
+                      {colorOption.name}
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl className="w-full sm:w-1/3 mx-2 my-2 flex items-center flex-row">
+              <InputLabel id="demo-simple-select-color-label">
+                Folder
+              </InputLabel>
+              <Select
+                style={{ width: "300px" }}
                 size="small"
                 value={idFolder}
                 onChange={(e) => setIdFolder(e.target.value)}
@@ -401,6 +430,9 @@ export default function UserNotes() {
               onChange={(e) => setLock(e.target.value)}
             />
             <FormControl className="w-full sm:w-1/3 mx-2 my-2">
+              <InputLabel id="demo-simple-select-color-label">
+                NotePublic
+              </InputLabel>
               <Select
                 label="NotePublic"
                 size="small"
