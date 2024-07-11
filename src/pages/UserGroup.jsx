@@ -97,6 +97,7 @@ const UserGroup = () => {
     },
   ]);
   const [isEmoji, setIsEmoji] = useState(false);
+  const [emojiContent, setEmojiContent] = useState("");
   const [messageContent, setMessageContent] = useState("");
   const [imageContent, setImageContent] = useState(null);
   const [socketMess, setSocketMess] = useState([]);
@@ -355,6 +356,8 @@ const UserGroup = () => {
       }
     }
   };
+
+  const handleEmoji = () => {};
 
   const handleToggleEmoji = () => {
     setIsEmoji(!isEmoji);
@@ -705,6 +708,7 @@ const UserGroup = () => {
             justifyContent: "space-between",
             backgroundColor: "#FFFFFF",
             height: "auto",
+            position: "relative",
           }}
         >
           <Box
@@ -719,11 +723,10 @@ const UserGroup = () => {
               position: "relative",
             }}
           >
-            <IconButton className="relative">
+            <IconButton>
               <button className="border-none" onClick={handleToggleEmoji}>
                 <EmojiEmotionsIcon />
               </button>
-              {isEmoji && <EmojiPicker className="absolute w-[5px] h-[5px]" />}
             </IconButton>
             <div
               className={
@@ -783,6 +786,12 @@ const UserGroup = () => {
               <SubdirectoryArrowRightSharpIcon sx={{ cursor: "pointer" }} />
             </IconButton>
           </Box>
+          {isEmoji && (
+            <EmojiPicker
+              className="absolute bottom-[80%] left-[6%]"
+              onEmojiClick={handleEmoji}
+            />
+          )}
         </Box>
       </div>
       <Modal
