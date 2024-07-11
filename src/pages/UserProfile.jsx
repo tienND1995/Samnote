@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context";
 import api from "../api";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
@@ -36,7 +36,7 @@ const UserProfile = () => {
   const [allNotePublic, setAllNotePublic] = useState([]);
   const [isModalMess, setIsModalMessage] = useState(false);
   const [dataMess, setDataMess] = useState([]);
-
+  const [payloadData, setPayloadData] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,7 +79,7 @@ const UserProfile = () => {
   const fetchLastUsers = async () => {
     const response = await api.get("/lastUser");
     if (response && response.data.status === 200) {
-      setLastUsers(response.data.data);
+      setLastUsers(response.data.data.slice(0, 4));
     }
   };
 
@@ -94,6 +94,10 @@ const UserProfile = () => {
     }
   };
 
+  useEffect(() => {
+    fetchAllNotePublic();
+  }, [reload]);
+
   const fetchAllNotesProfile = async () => {
     const response = await api.get(`/profile/${user.id}`).then((res) => {
       const dataFilter = res.data.note.filter(
@@ -104,9 +108,32 @@ const UserProfile = () => {
     setNotePrivate(response);
   };
 
+  const Checklist = ({ data }) => {
+    const [items, setItems] = useState([]);
+
+    useEffect(() => {
+      setItems(data);
+    }, [data]);
+
+    return (
+      <div>
+        {items.map((item, index) => (
+          <div key={index}>
+            <input
+              style={{ marginRight: "5px" }}
+              type="checkbox"
+              checked={item.status}
+            />
+            {item.content}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const deleteNote = async (index) => {
     try {
-      await api.delete(`https://samnote.mangasocial.online/notes/${index}`);
+      await api.delete(`/notes/${index}`);
       setSnackbar({
         isOpen: true,
         message: `Remove note successfully ${index}`,
@@ -145,6 +172,76 @@ const UserProfile = () => {
 
   const handleChangeNotePrivate = (event, newValue) => {
     setValueNotePrivate(newValue);
+  };
+
+  function getCurrentFormattedDateTime() {
+    const date = new Date();
+
+    // Lấy các thành phần của ngày và giờ
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Tháng tính từ 0-11, cần +1
+    const year = date.getFullYear();
+
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    // Xác định AM/PM
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Giờ 0 thành 12
+    const formattedHours = String(hours).padStart(2, "0");
+
+    // Lấy múi giờ
+    const timeZoneOffset = -date.getTimezoneOffset();
+    const offsetSign = timeZoneOffset >= 0 ? "+" : "-";
+    const offsetHours = String(
+      Math.floor(Math.abs(timeZoneOffset) / 60)
+    ).padStart(2, "0");
+    const offsetMinutes = String(Math.abs(timeZoneOffset) % 60).padStart(
+      2,
+      "0"
+    );
+
+    // Tạo chuỗi thời gian định dạng
+    const formattedDateTime = `${day}/${month}/${year} ${formattedHours}:${minutes} ${ampm} ${offsetSign}${offsetHours}:${offsetMinutes}`;
+
+    return formattedDateTime;
+  }
+
+  const handleSubmit = async () => {
+    const payload = {
+      type: "text",
+      data: payloadData,
+      title: "Quick notes",
+      color: { r: 255, g: 255, b: 255, a: 1 },
+      idFolder: null,
+      dueAt: getCurrentFormattedDateTime(),
+      pinned: false,
+      lock: "",
+      remindAt: null,
+      linkNoteShare: "",
+      notePublic: 1,
+    };
+
+    console.log("payload", payload); // Check payload structure before sending
+
+    try {
+      await api.post(`/notes/${user.id}`, payload);
+      setReload((prev) => prev + 1);
+      setPayloadData("");
+      setSnackbar({
+        isOpen: true,
+        message: "Created new note successfully",
+        severity: "success",
+      });
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        isOpen: true,
+        message: "Failed to create note",
+        severity: "error",
+      });
+    }
   };
 
   useEffect(() => {
@@ -268,6 +365,7 @@ const UserProfile = () => {
               </div>
             </div>
           </Box>
+
           <Box className="flex w-full items-end bg-[#99999] justify-center text-white mb-6 block lg:hidden">
             <SearchIcon className="mr-1 my-1" />
             <input
@@ -278,44 +376,27 @@ const UserProfile = () => {
           </Box>
           <div className={`w-[98%] flex justify-between mb-4`}>
             <div className="w-[30%] h-[285px] bg-[#FFF4BA] rounded-xl mt-3">
-              <div className="flex justify-between w-full mt-2">
+              <div className="flex justify-between w-full mt-2 px-2">
                 <span className="font-[700] text-[#888888] text-xl">
                   Quick notes
                 </span>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="mr-3"
-                >
-                  <path
-                    d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z"
-                    stroke="black"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M19 13C19.5523 13 20 12.5523 20 12C20 11.4477 19.5523 11 19 11C18.4477 11 18 11.4477 18 12C18 12.5523 18.4477 13 19 13Z"
-                    stroke="black"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M5 13C5.55228 13 6 12.5523 6 12C6 11.4477 5.55228 11 5 11C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13Z"
-                    stroke="black"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
+                <Button className="" variant="contained" onClick={handleSubmit}>
+                  Create
+                </Button>
               </div>
+              <TextField
+                className="p-2 w-full"
+                id="standard-multiline-static"
+                placeholder="Content"
+                multiline
+                rows={9}
+                variant="standard"
+                value={payloadData}
+                onChange={(event) => setPayloadData(event.target.value)}
+              />
             </div>
             <div className="mt-3 w-[30%] h-[285px] bg-[#fff] rounded-xl">
-              <div className="mx-2 my-2 w-[95%] h-[90%]">
+              <div className="mx-2 my-2 w-[95%] h-[100%]">
                 <span className="font-[700] text-[#888888] text-xl">
                   New User
                 </span>
@@ -325,14 +406,14 @@ const UserProfile = () => {
                       {lastUsers.map((item, index) => (
                         <div
                           key={`user ${index}`}
-                          className="w-full h-[15%] flex justify-between my-1 ml-2"
+                          className="w-full h-[15%] flex justify-between items-center my-1 ml-2"
                         >
                           <img
-                            className="w-[20px] h-[20px] rounded-xl object-cover mt-2"
+                            className="w-[40px] h-[40px] rounded-xl object-cover mt-2"
                             src={item.linkAvatar}
                             alt="anh"
                           />
-                          <span className="truncate-text w-[80px] mr-2">
+                          <span className="truncate-text w-[50%] mr-2">
                             {item.user_name}
                           </span>
                           <span className="mr-3">
@@ -363,7 +444,7 @@ const UserProfile = () => {
                         {item.author}
                       </span>
                       <span className="w-[55%] break-words">
-                        Create a new note
+                        Create a new public note
                       </span>
                       <span className="text-xs break-words w-[12%] whitespace-nowrap">
                         {getTimeDifference(item.update_at, new Date())}
@@ -501,7 +582,6 @@ const UserProfile = () => {
                                         stroke-linejoin="round"
                                       />
                                     </SvgIcon>
-
                                     {info.view}
                                   </div>
                                   <SvgIcon
@@ -566,12 +646,24 @@ const UserProfile = () => {
                                 <strong style={{ fontSize: "20px" }}>
                                   {info.title}
                                 </strong>
-                                <div
-                                  style={{ marginTop: "10px" }}
-                                  dangerouslySetInnerHTML={{
-                                    __html: info.data,
-                                  }}
-                                />
+                                {info.type === "checkList" ||
+                                info.type === "checklist" ? (
+                                  <>
+                                    <Checklist data={info.data.slice(0, 3)} />
+                                    {info.data.length - 3 > 0 && (
+                                      <div className="font-bold">
+                                        +{info.data.length - 3} item hidden
+                                      </div>
+                                    )}
+                                  </>
+                                ) : (
+                                  <div
+                                    className="max-h-[100px] text-start overflow-hidden"
+                                    dangerouslySetInnerHTML={{
+                                      __html: info.data,
+                                    }}
+                                  />
+                                )}
                               </Box>
                               <Box
                                 component="div"

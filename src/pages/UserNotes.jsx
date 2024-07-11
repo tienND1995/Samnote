@@ -137,7 +137,6 @@ export default function UserNotes() {
   const [allColor, setAllColor] = useState([]);
   const appContext = useContext(AppContext);
   const { user, setSnackbar } = appContext;
-  const [resultMessage, setResultMessage] = useState(null);
 
   useEffect(() => {
     let ignore = false;
@@ -324,45 +323,9 @@ export default function UserNotes() {
                   // onClick={() => deleteNote(info.idNote)}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setResultMessage(
-                      "Do you want to add this note to the trash?"
-                    );
+                    deleteNote(info.idNote);
                   }}
                 />
-                {resultMessage !== null ? (
-                  <Box className="fixed inset-0 z-[100] bg-[rgba(0,0,0,0.4)] flex items-center justify-center flex-col">
-                    <Box className="flex relative items-center justify-center bg-white h-[120px] w-[500px] py-[50px] flex-col rounded-lg">
-                      {" "}
-                      {resultMessage}
-                      <div>
-                        {" "}
-                        <Button
-                          className=""
-                          variant="outlined"
-                          sx={{ margin: "10px" }}
-                          onClick={() => {
-                            setResultMessage(null);
-                          }}
-                        >
-                          cancel
-                        </Button>
-                        <Button
-                          className=" "
-                          variant="contained"
-                          sx={{ margin: "10px" }}
-                          onClick={() => {
-                            deleteNote(info.idNote);
-                            setResultMessage(null);
-                          }}
-                        >
-                          ok
-                        </Button>
-                      </div>
-                    </Box>
-                  </Box>
-                ) : (
-                  ""
-                )}
               </Box>
 
               {info.type === "checkList" || info.type === "checklist" ? (

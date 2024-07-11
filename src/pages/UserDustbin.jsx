@@ -28,6 +28,29 @@ const UserDustbin = () => {
   const [value, setValue] = useState("1");
   const [reload, setReload] = useState(0); // State to trigger updates
 
+  const Checklist = ({ data }) => {
+    const [items, setItems] = useState([]);
+
+    useEffect(() => {
+      setItems(data);
+    }, [data]);
+
+    return (
+      <div>
+        {items.map((item, index) => (
+          <div key={index}>
+            <input
+              style={{ marginRight: "5px" }}
+              type="checkbox"
+              checked={item.status}
+            />
+            {item.content}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const deleteNote = async (index) => {
     try {
       await api.delete(
@@ -377,12 +400,24 @@ const UserDustbin = () => {
                               <strong style={{ fontSize: "20px" }}>
                                 {info.title}
                               </strong>
-                              <div
-                                style={{ marginTop: "10px" }}
-                                dangerouslySetInnerHTML={{
-                                  __html: info.data,
-                                }}
-                              />
+                              {info.type === "checkList" ||
+                              info.type === "checklist" ? (
+                                <>
+                                  <Checklist data={info.data.slice(0, 3)} />
+                                  {info.data.length - 3 > 0 && (
+                                    <div className="font-bold">
+                                      +{info.data.length - 3} item hidden
+                                    </div>
+                                  )}
+                                </>
+                              ) : (
+                                <div
+                                  className="max-h-[100px] text-start overflow-hidden"
+                                  dangerouslySetInnerHTML={{
+                                    __html: info.data,
+                                  }}
+                                />
+                              )}
                             </Box>
                             <Box
                               component="div"
