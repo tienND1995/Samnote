@@ -1,18 +1,7 @@
-import { createContext, useState, useEffect, useReducer } from "react";
+import { createContext, useState, useEffect } from "react";
 import { USER } from "../constant";
 
 export const AppContext = createContext(null);
-
-const chatReducer = (state, action) => {
-  switch (action.type) {
-    case "ADD_CHAT":
-      return [...state, action.payload];
-    case "REMOVE_CHAT":
-      return state.filter((_, index) => index !== action.payload);
-    default:
-      return state;
-  }
-};
 
 const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -21,25 +10,6 @@ const AppProvider = ({ children }) => {
     message: ``,
     severity: "",
   });
-  const [chat, dispatch] = useReducer(chatReducer, [
-    {
-      id: 0,
-      Avarta: "",
-      name: "",
-    },
-  ]);
-  console.log(chat);
-
-  const addChat = (newChat) => {
-    // @ts-ignore
-    dispatch({ type: "ADD_CHAT", payload: newChat });
-  };
-
-  const removeChat = (index) => {
-    // @ts-ignore
-    dispatch({ type: "REMOVE_CHAT", payload: index });
-  };
-
   useEffect(() => {
     // Lấy dữ liệu từ localStorage khi component mount
     try {
@@ -94,9 +64,6 @@ const AppProvider = ({ children }) => {
         snackbar,
         setSnackbar,
         updateUserInLocalStorage,
-        chat,
-        addChat,
-        removeChat,
       }}
     >
       {children}
