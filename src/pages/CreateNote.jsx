@@ -207,7 +207,7 @@ const CreateNote = () => {
 
     const payload = {
       type,
-      data: payloadData,
+      data: payloadData === "" ? "content is empty" : payloadData,
       title: title ? title : "TITLE",
       color: parsedColor,
       idFolder: idFolder ? idFolder : null,

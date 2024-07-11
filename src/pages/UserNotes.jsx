@@ -11,6 +11,7 @@ import {
   MenuItem,
   Select,
   TextField,
+  CircularProgress,
 } from "@mui/material";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -305,7 +306,7 @@ export default function UserNotes() {
           </div>
           <p className="m-0 py-0 pr-2">{note.length} note</p>
         </Box>
-        {note &&
+        {note && note.length !== 0 ? (
           note.map((info, index) => (
             <div
               key={index}
@@ -344,11 +345,23 @@ export default function UserNotes() {
                 />
               )}
             </div>
-          ))}
+          ))
+        ) : (
+          <>
+            <div className="w-full h-full flex items-center justify-center">
+              {" "}
+              <CircularProgress size={30} />
+            </div>
+          </>
+        )}
       </div>
       {noteEdit === null ? (
         note.length === 0 ? (
-          <h3>You don't have notes to edit</h3>
+          // <h3>You don't have notes to edit</h3>
+          <div className="w-full h-full flex items-center justify-center">
+            {" "}
+            <CircularProgress size={30} />
+          </div>
         ) : (
           <h3>Click any note to edit</h3>
         )

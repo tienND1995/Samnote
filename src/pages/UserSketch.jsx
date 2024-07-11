@@ -533,8 +533,17 @@ const UserSketch = () => {
   const [remindAt, setRemindAt] = useState(null);
   const [loading, setLoading] = useState(false);
   const [allColor, setAllColor] = useState([]);
+  const [widthScreen, setWidthScreen] = useState(() => {
+    const initialWidth = window.innerWidth >= 1260 ? 1260 : window.innerWidth;
+    return initialWidth;
+  });
 
+  const [boardWidth, setBoardWidth] = useState(() => {
+    const initialWidth = window.innerWidth >= 1260 ? 1260 : window.innerWidth;
+    return initialWidth > 1024 ? initialWidth - 267 : initialWidth - 20;
+  });
   const lgScreen = useMediaQuery("(max-width:991px)");
+  const [payloadData, setPayloadData] = useState("");
   const [colorNote, setColorNote] = useState({
     r: "255",
     g: "255",
@@ -555,6 +564,29 @@ const UserSketch = () => {
     };
 
     getAllColor();
+  }, []);
+
+  const updateDimensions = () => {
+    let newWidthScreen = window.innerWidth;
+    if (newWidthScreen >= 1260) {
+      newWidthScreen = 1260;
+    }
+
+    setWidthScreen(newWidthScreen);
+
+    const newBoardWidth =
+      newWidthScreen > 1024 ? newWidthScreen - 267 : newWidthScreen - 20;
+    setBoardWidth(newBoardWidth);
+  };
+
+  useEffect(() => {
+    updateDimensions(); // Cập nhật chiều rộng ban đầu
+    window.addEventListener("resize", updateDimensions); // Cập nhật khi thay đổi kích thước
+
+    // Cleanup event listener khi component bị unmount
+    return () => {
+      window.removeEventListener("resize", updateDimensions);
+    };
   }, []);
 
   const handleMouseDown = (event) => {
@@ -616,11 +648,8 @@ const UserSketch = () => {
     try {
       setLoading(true);
 
-      // Capture screenshot of the current view
       const canvas = await html2canvas(document.getElementById("screenshot"));
       const imageData = canvas.toDataURL("image/png");
-
-      // Convert data URL to Blob
       const byteCharacters = atob(imageData.split(",")[1]);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
@@ -628,25 +657,21 @@ const UserSketch = () => {
       }
       const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray], { type: "image/png" });
-
-      // Create a File object from the Blob
       const file = new File([blob], "screenshot.png", { type: "image/png" });
-
       const selectedColor = allColor.find((col) => col.id === color);
 
       const payload = {
         type: "image",
         image_note: file,
-        title: title, // Replace with your actual title variable
+        title: title,
         r: selectedColor ? parseInt(selectedColor.r) : 255,
         g: selectedColor ? parseInt(selectedColor.g) : 255,
         b: selectedColor ? parseInt(selectedColor.b) : 255,
         a: selectedColor ? 1 : 1,
-        content: "dfsdf",
+        content: payloadData,
         remind: outputDate ? outputDate : null,
       };
 
-      // Prepare FormData for fetch
       const formPayload = new FormData();
       formPayload.append("image_note", file);
       formPayload.append("type", "image");
@@ -692,9 +717,6 @@ const UserSketch = () => {
     }
   };
 
-  const boardWidth = lgScreen
-    ? window.innerWidth - 20
-    : window.innerWidth - 267;
   const boardHeight = 500;
 
   return (
@@ -711,15 +733,15 @@ const UserSketch = () => {
           {loading ? <CircularProgress size={24} /> : "create"}
         </Button>
       </div>
-      <div className="flex flex-wrap items-center">
+      <div className="flex flex-wrap mb-2 items-center">
         <TextField
-          className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-2 my-2"
+          className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-3 my-2"
           label="Title"
           size="small"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-        <FormControl className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2">
+        <FormControl className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-3 my-2">
           <InputLabel id="demo-simple-select-color-label">
             Background-color
           </InputLabel>
@@ -728,26 +750,34 @@ const UserSketch = () => {
             id="demo-simple-select-color"
             label="Background-color"
             size="small"
+            className="flex flex-row"
             value={color}
             onChange={handleChangeColor}
           >
             {allColor.map((colorOption) => (
-              <MenuItem key={colorOption.id} value={colorOption.id}>
-                {colorOption.name}
+              <MenuItem
+                key={colorOption.id}
+                value={colorOption.id}
+                className="flex flex-row"
+              >
                 <span
                   style={{
+                    display: "block",
                     height: "20px",
                     width: "20px",
+                    marginRight: "20px",
                     border: "1px solid black",
                     marginLeft: "3px",
                     background: `rgba(${colorOption.r}, ${colorOption.g}, ${colorOption.b})`,
                   }}
-                ></span>
+                >
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{colorOption.name}
+                </span>{" "}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
-        <Box className="flex items-center w-full md:w-1/3 lg:w-1/4 xl:w-1/4 z-50 mx-4 my-2">
+        <Box className="flex items-center w-full md:w-1/3 lg:w-1/4 xl:w-1/4 z-50 mx-3 my-2">
           <h6>RemindAt:</h6>
           <DatePicker
             selected={remindAt}
@@ -756,12 +786,21 @@ const UserSketch = () => {
             dateFormat="Pp"
           />
         </Box>
+        <TextField
+          className="mx-3 mt-2 w-full"
+          id="standard-multiline-static"
+          label="Content"
+          multiline
+          rows={3}
+          value={payloadData}
+          onChange={(event) => setPayloadData(event.target.value)}
+        />
       </div>
       <div>
         <div
           id="screenshot"
           ref={stageRef}
-          className="lg:w-[100%-267px] w-[100%-20px]"
+          className="lg:w-[100%-267px] w-[100%]"
           style={{
             borderBottom: "1px solid black",
             borderTop: "1px solid black",
