@@ -1,4 +1,11 @@
-import { useState, useEffect, useContext } from "react";
+import {
+  useState,
+  useEffect,
+  useContext,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import io from "socket.io-client";
 import { AppContext } from "../context";
 import api from "../api";
@@ -27,8 +34,15 @@ import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SubdirectoryArrowRightSharpIcon from "@mui/icons-material/SubdirectoryArrowRightSharp";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useLocation } from "react-router-dom";
+import { data } from "autoprefixer";
+
+const newSocket = io("https://samnote.mangasocial.online");
 
 const UserGroup = () => {
+  const location = useLocation();
+  const [dataInfomations, setDataInfomations] = useState(location.state);
+  console.log(dataInfomations);
   const [group, setGroup] = useState([]);
   const [open, setOpen] = useState(false);
   const [groupName, setGroupName] = useState("");
@@ -36,14 +50,60 @@ const UserGroup = () => {
   const [members, setMembers] = useState([]);
   const [memberEmail, setMemberEmail] = useState("");
   const [memberId, setMemberId] = useState("");
-  const [selectedGroup, setSelectedGroup] = useState(null);
-  const [message, setMessage] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState({
+    id: 0,
+    Avarta: "",
+    name: "",
+    describe: "",
+  });
+  const [message, setMessage] = useState([
+    {
+      id: 0,
+      idReceive: 0,
+      idSend: 0,
+      image: null,
+      sendAt: "",
+      state: "",
+      text: "",
+      type: "",
+    },
+  ]);
+  const [userChat, setUserChat] = useState([
+    {
+      idMessage: 0,
+      idReceive: 0,
+      idRoom: "",
+      idSend: 0,
+      is_seen: 0,
+      last_text: "",
+      sendAt: "",
+      user: {
+        Avarta: "",
+        AvtProfile: "",
+        createAccount: "",
+        df_color: {
+          a: 0,
+          b: 0,
+          g: 0,
+          r: 0,
+        },
+        gmail: "",
+        id: 0,
+        name: "",
+        password_2: null,
+        status_Login: true,
+        user_Name: "",
+      },
+    },
+  ]);
   const [messageContent, setMessageContent] = useState("");
+  const [imageContent, setImageContent] = useState(null);
+  const [socketMess, setSocketMess] = useState([]);
 
   const appContext = useContext(AppContext);
-  const { setSnackbar, user, chat } = appContext;
-  console.log(chat);
+  const { setSnackbar, user } = appContext;
   const [socket, setSocket] = useState(null);
+  const scrollContainerRef = useRef(null);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -55,23 +115,74 @@ const UserGroup = () => {
   const handleMessageContentChange = (e) => setMessageContent(e.target.value);
 
   // Kết nối tới server Socket.IO khi component được tạo ra
-  useEffect(() => {
-    const newSocket = io("https://samnote.mangasocial.online");
+  useMemo(() => {
     console.log(newSocket);
     setSocket(newSocket);
     newSocket.on("connect", () => {
-      console.log("Connected to socket.IO server", newSocket.id);
+      console.log("Connected to server");
     });
+    newSocket.on("send_message", (result) => {
+      console.log(result.data, result.data.ReceivedID, selectedGroup.id);
+      setSocketMess((prevMessages) => [...prevMessages, result.data]);
+      fetchUserChat();
+    });
+    const fetchUserChat = async () => {
+      const response = await api.get(
+        `https://samnote.mangasocial.online/message/list_user_chat1vs1/${user.id}`
+      );
+      if (response && response.data.status === 200) {
+        response.data.data.map((item) => {
+          newSocket.emit("join_room", { room: item.idRoom });
+        });
+        setUserChat(response.data.data);
+      }
+    };
+    fetchUserChat();
 
     return () => {
       newSocket.disconnect(); // Ngắt kết nối khi component bị xoá
     };
-  }, [user.id]);
+  }, []);
 
-  const handleGroupClick = (group) => {
+  useEffect(() => {
+    const fetchMessWhenNavi = async () => {
+      const response = await api.get(
+        `https://samnote.mangasocial.online/message/list_message_chat1vs1/${user.id}/${dataInfomations.id}`
+      );
+      if (response && response.data.status === 200) {
+        setMessage(response.data.data[0].messages);
+      }
+    };
+    fetchMessWhenNavi();
+  }, []);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    scrollContainer.scrollTop = scrollContainer.scrollHeight;
+  }, [selectedGroup]);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    scrollContainer.scrollTop =
+      scrollContainer.scrollHeight - scrollContainer.clientHeight;
+  }, [socketMess]);
+
+  console.log(userChat);
+  const handleGroupClick = async (group) => {
     console.log(group);
+    console.log(user.id);
+    const response = await api.get(
+      `https://samnote.mangasocial.online/message/list_message_chat1vs1/${user.id}/${group.id}`
+    );
+    console.log(response.data.data[0].messages);
+    if (response && response.data.status === 200) {
+      setMessage(response.data.data[0].messages);
+      setSocketMess([]);
+    }
     setSelectedGroup(group);
+    setDataInfomations(group);
   };
+  console.log(message);
 
   const handleAddMember = () => {
     setMembers([
@@ -129,11 +240,20 @@ const UserGroup = () => {
     }
   };
 
-  const sendMessage = (roomId, messageData) => {
-    if (socket) {
-      socket.emit("send_message", roomId, messageData); // Gửi sự kiện "send_message" tới server
+  const roomSplit = (idUser, idOther) => {
+    if (idUser > idOther) {
+      return `${idOther}#${idUser}`;
+    } else {
+      return `${idUser}#${idOther}`;
+    }
+  };
 
-      console.log("Message sent:", messageData);
+  const sendMessage = (room, data) => {
+    if (socket) {
+      // socket.emit("join_room", room);
+      newSocket.emit("send_message", { room, data }); // Gửi sự kiện "send_message" tới server
+      setMessageContent("");
+      console.log("Message sent:", typeof room, data);
 
       // Xử lý logic khi tin nhắn được gửi đi
       // Ví dụ: cập nhật giao diện ngay lập tức
@@ -156,6 +276,52 @@ const UserGroup = () => {
 
     getGroup();
   }, [user.id]);
+
+  const handleImageChange = (event) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageContent(reader.result);
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  };
+
+  console.log(imageContent);
+  console.log(
+    socketMess.filter(
+      (item) => item.ReceivedID === user.id || item.SenderID === user.id
+    )
+  );
+
+  const handleButtonSend = () => {
+    if (selectedGroup) {
+      console.log(imageContent);
+      const textData = {
+        idSend: +user.id,
+        idReceive:
+          selectedGroup.id !== 0 ? +selectedGroup.id : +dataInfomations.id,
+        type: "text", // Giả sử loại tin nhắn là text
+        state: "",
+        content: messageContent,
+      };
+      const imageData = {
+        idSend: +user.id,
+        idReceive:
+          selectedGroup.id !== 0 ? +selectedGroup.id : +dataInfomations.id,
+        type: "image",
+        state: "",
+        data: imageContent,
+        content: messageContent,
+      };
+
+      sendMessage(
+        roomSplit(
+          +user.id,
+          selectedGroup.id !== 0 ? +selectedGroup.id : +dataInfomations.id
+        ),
+        imageContent ? imageData : textData
+      );
+    }
+  };
 
   return (
     <div
@@ -231,7 +397,7 @@ const UserGroup = () => {
                 scrollbarWidth: "none",
               }}
             >
-              {chat.slice(1).map((item, index) => {
+              {userChat.map((item, index) => {
                 return (
                   <Box
                     key={`chat ${index}`}
@@ -248,10 +414,10 @@ const UserGroup = () => {
                         cursor: "pointer",
                       },
                     }}
-                    onClick={() => handleGroupClick(item)}
+                    onClick={() => handleGroupClick(item.user)}
                   >
                     <Avatar
-                      src={item.Avarta}
+                      src={item.user.Avarta}
                       sx={{ width: "30px", height: "30px", margin: "10px" }}
                     />
                     <div style={{ width: "100%" }}>
@@ -264,7 +430,7 @@ const UserGroup = () => {
                           textOverflow: "ellipsis",
                         }}
                       >
-                        {item.name}
+                        {item.user.name}
                       </strong>
                       <p
                         style={{
@@ -275,8 +441,9 @@ const UserGroup = () => {
                           textOverflow: "ellipsis",
                         }}
                       >
-                        {/* {item.describe} */}
-                        {item.id}
+                        {item.idSend === user.id
+                          ? `Bạn: ${item.last_text}`
+                          : item.last_text}
                       </p>
                     </div>
                   </Box>
@@ -351,7 +518,10 @@ const UserGroup = () => {
         </Accordion>
       </Box>
 
-      <div style={{ borderLeft: "1px solid black" }}>
+      <div
+        className="mb-2"
+        style={{ borderLeft: "1px solid black", height: "auto" }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -360,6 +530,7 @@ const UserGroup = () => {
             padding: "20px",
             color: "text.main",
             backgroundColor: "bg.main",
+            borderBottom: "1px solid #999",
           }}
         >
           <div style={{ display: "flex" }}>
@@ -369,7 +540,9 @@ const UserGroup = () => {
                 width: "40px",
                 marginRight: "15px",
               }}
-              src="../public/groupImg.png"
+              src={
+                dataInfomations ? dataInfomations.Avarta : selectedGroup.Avarta
+              }
               alt=""
             />
           </div>
@@ -377,7 +550,11 @@ const UserGroup = () => {
             <div>
               {selectedGroup && (
                 <>
-                  <h3 style={{ margin: 0 }}>{selectedGroup.name}</h3>
+                  <h3 style={{ margin: 0 }}>
+                    {dataInfomations
+                      ? dataInfomations.name
+                      : selectedGroup.name}
+                  </h3>
                   <p style={{ margin: 0 }}>{selectedGroup.describe}</p>
                 </>
               )}
@@ -386,6 +563,7 @@ const UserGroup = () => {
           <MoreHorizIcon />
         </Box>
         <Box
+          ref={scrollContainerRef}
           sx={{
             backgroundColor: "bgitem.main",
             height: "515px",
@@ -395,51 +573,65 @@ const UserGroup = () => {
         >
           {/* Đây là ví dụ về cách hiển thị tin nhắn, bạn cần thay đổi để hiển thị tin nhắn thực tế */}
           {/* Đã cập nhật để hiển thị tin nhắn từ server */}
-          {selectedGroup && (
-            <Box>
-              {selectedGroup.messages?.map((message, index) => (
+          {message
+            .slice()
+            .reverse()
+            .map((item, index) =>
+              item.idSend === user.id ? (
                 <div
-                  key={index}
-                  style={{
-                    padding: "10px",
-                    display: "flex",
-                    alignItems: "center",
-                    flexDirection:
-                      message.sender.id === user.id ? "row-reverse" : "row",
-                  }}
+                  key={`message ${index}`}
+                  className="w-[98%] h-auto my-2 ml-2 flex flex-col items-end"
                 >
-                  <Avatar
-                    sx={{
-                      height: "30px",
-                      width: "30px",
-                      margin: "5px",
-                    }}
-                    src={message.sender.avatar}
-                    alt=""
-                  />
-                  <Box
-                    className="content-messenger-left"
-                    sx={{
-                      height: "fit-content",
-                      width: "fit-content",
-                      backgroundColor:
-                        message.sender.id === user.id
-                          ? "mymes.main"
-                          : "bgmessenger.main",
-                      color: message.sender.id === user.id ? "#fff" : "#000",
-                      textAlign:
-                        message.sender.id === user.id ? "right" : "left",
-                      padding: "0px 15px 0",
-                      borderRadius: "10px",
-                      margin: 0,
-                    }}
-                  >
-                    <p>{message.content}</p>
-                  </Box>
+                  {item.image ? (
+                    <img
+                      className="w-[100px] h-auto "
+                      src={item.image.replace(
+                        "dataimage/jpegbase64",
+                        "data:image/jpeg;base64,"
+                      )}
+                    />
+                  ) : (
+                    <p className="max-w-[50%] break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto">
+                      {item.text}
+                    </p>
+                  )}
                 </div>
-              ))}
-            </Box>
-          )}
+              ) : (
+                <div
+                  key={`message ${index}`}
+                  className="w-full h-auto my-2 ml-2 flex flex-col items-start"
+                >
+                  <p className="max-w-[50%] break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto">
+                    {item.text}
+                  </p>
+                </div>
+              )
+            )}
+          {socketMess
+            .filter(
+              (item) => item.ReceivedID === user.id || item.SenderID === user.id
+            )
+            .map((item, index) =>
+              item.SenderID === user.id ? (
+                <div
+                  key={`message ${index}`}
+                  className="w-[98%] h-auto my-2 ml-2 flex flex-col items-end"
+                >
+                  <p className="max-w-[50%] break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto">
+                    {item.Content}
+                  </p>
+                </div>
+              ) : (
+                <div
+                  key={`message ${index}`}
+                  className="w-full h-auto my-2 ml-2 flex flex-col items-start"
+                >
+                  <p className="max-w-[50%] break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto">
+                    {item.Content}
+                  </p>
+                </div>
+              )
+            )}
         </Box>
         <Box
           sx={{
@@ -447,7 +639,7 @@ const UserGroup = () => {
             alignItems: "center",
             justifyContent: "space-between",
             backgroundColor: "#FFFFFF",
-            height: "60px",
+            height: "auto",
           }}
         >
           <Box
@@ -459,40 +651,60 @@ const UserGroup = () => {
               backgroundColor: "#F4F4F4",
               borderRadius: "15px",
               margin: "0 10px",
+              position: "relative",
             }}
           >
-            <IconButton sx={{ p: "10px" }}>
+            <IconButton>
               <EmojiEmotionsIcon />
             </IconButton>
+            <div
+              className={
+                imageContent !== null ? "w-[100%] h-auto relative" : "hidden"
+              }
+            >
+              <img
+                className="w-[100px] h-auto object-fit"
+                src={imageContent}
+                alt="convert image"
+              />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                className="w-[18px] h-auto cursor-pointer bg-black rounded-full text-white absolute left-0"
+                onClick={() => {
+                  setImageContent(null);
+                }}
+              >
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </div>
             <InputBase
               sx={{ ml: 1, flex: 1 }}
               placeholder="Type your message..."
               value={messageContent}
               onChange={handleMessageContentChange}
             />
-            <IconButton sx={{ p: "10px" }}>
-              <AttachFileIcon />
+            <IconButton>
+              <input
+                id="file"
+                type="file"
+                className="hidden m-0"
+                onChange={(e) => handleImageChange(e)}
+              />
+              <label htmlFor="file">
+                <AttachFileIcon />
+              </label>
             </IconButton>
             <IconButton
               color="primary"
               sx={{ p: "10px" }}
               aria-label="Send message"
-              onClick={() => {
-                if (selectedGroup) {
-                  const messageData = {
-                    idSend: user.id,
-                    idReceive: selectedGroup.id,
-                    type: "text", // Giả sử loại tin nhắn là text
-                    state: "",
-                    content: messageContent,
-                  };
-
-                  sendMessage(
-                    `send_message/${user.id}${selectedGroup.id}`,
-                    messageData
-                  );
-                }
-              }}
+              onClick={() => handleButtonSend()}
             >
               <SubdirectoryArrowRightSharpIcon sx={{ cursor: "pointer" }} />
             </IconButton>

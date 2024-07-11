@@ -18,10 +18,13 @@ import Avatar from "@mui/material/Avatar";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "./UserProfile.css";
+import { io } from "socket.io-client";
+import ModalChat from "../components/ModalChat";
 
 const UserProfile = () => {
   const appContext = useContext(AppContext);
   const { setSnackbar, user } = appContext;
+  const [socket, setSocket] = useState(null);
   const [userInfomations, setUserInformations] = useState(null);
   const [notePrivate, setNotePrivate] = useState([]);
   const [lastUsers, setLastUsers] = useState([]);
@@ -31,6 +34,8 @@ const UserProfile = () => {
   const [valueNotePrivate, setValueNotePrivate] = useState("1");
   const [reload, setReload] = useState(0); // State to trigger updates
   const [allNotePublic, setAllNotePublic] = useState([]);
+  const [isModalMess, setIsModalMessage] = useState(false);
+  const [dataMess, setDataMess] = useState([]);
 
   const navigate = useNavigate();
 
@@ -39,6 +44,38 @@ const UserProfile = () => {
     fetchAllNotesProfile();
     fetchAllNotePublic();
   }, []);
+
+  useEffect(() => {
+    fetchAllDataMess();
+    const newSocket = io("https://samnote.mangasocial.online");
+    console.log(newSocket);
+    setSocket(newSocket);
+    newSocket.on("connect", () => {
+      console.log("Connected to socket.IO server", newSocket.id);
+    });
+
+    newSocket.on("join_room", (newRoom) => {
+      if (newRoom.includes(user.id)) {
+        console.log(newRoom);
+        fetchAllDataMess();
+      }
+    });
+
+    return () => {
+      newSocket.disconnect(); // Ngắt kết nối khi component bị xoá
+    };
+  }, []);
+
+  const fetchAllDataMess = async () => {
+    const response = await api.get(
+      `https://samnote.mangasocial.online/message/list_user_chat1vs1/${user.id}`
+    );
+    if (response && response.data.status === 200) {
+      setDataMess(response.data.data);
+    }
+  };
+  console.log(dataMess);
+
   const fetchLastUsers = async () => {
     const response = await api.get("/lastUser");
     if (response && response.data.status === 200) {
@@ -153,6 +190,9 @@ const UserProfile = () => {
     }
   };
 
+  const handleMess = () => {
+    setIsModalMessage(!isModalMess);
+  };
   return (
     <Box className="w-full bg-[#4A4B51] h-auto">
       {userInfomations && (
@@ -197,26 +237,35 @@ const UserProfile = () => {
                 className="cursor-pointer block text-5xl lg:hidden text-white"
                 onClick={() => navigate(`/user/setting`)}
               />
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 48 48"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="hidden lg:block"
-              >
-                <g clip-path="url(#clip0_295_3410)">
-                  <path
-                    d="M0.00198132 23.278C0.00198132 9.898 10.482 0 24.002 0C37.522 0 48 9.9 48 23.278C48 36.656 37.52 46.554 24 46.554C21.58 46.554 19.24 46.234 17.06 45.634C16.6345 45.5195 16.1825 45.5548 15.78 45.734L11 47.834C10.7118 47.9623 10.3965 48.0176 10.0819 47.995C9.76732 47.9724 9.46312 47.8727 9.19622 47.7047C8.92931 47.5366 8.70791 47.3054 8.5516 47.0315C8.39528 46.7575 8.30887 46.4493 8.29998 46.134L8.15998 41.854C8.14913 41.5961 8.08694 41.343 7.97704 41.1095C7.86715 40.876 7.71176 40.6667 7.51998 40.494C5.11521 38.324 3.20093 35.6661 1.90487 32.6977C0.608801 29.7293 -0.0392407 26.5187 0.00398132 23.28L0.00198132 23.278ZM16.642 18.898L9.60198 30.098C8.90198 31.158 10.242 32.376 11.242 31.598L18.822 25.858C19.342 25.458 20.022 25.458 20.562 25.858L26.162 30.058C27.842 31.318 30.242 30.858 31.362 29.098L38.402 17.898C39.102 16.838 37.762 15.638 36.762 16.398L29.182 22.138C28.682 22.538 27.982 22.538 27.462 22.138L21.862 17.938C21.4637 17.6372 21.0073 17.4224 20.5216 17.3074C20.036 17.1924 19.5317 17.1796 19.0408 17.2698C18.55 17.3601 18.0832 17.5515 17.6703 17.8318C17.2573 18.1121 16.9071 18.4752 16.642 18.898Z"
-                    fill="#F4F4F4"
-                  />
-                </g>
-                <defs>
-                  <clipPath id="clip0_295_3410">
-                    <rect width="48" height="48" fill="white" />
-                  </clipPath>
-                </defs>
-              </svg>
+              <div className="relative inline-block">
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 48 48"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="hidden lg:block after:content cursor-pointer"
+                  onClick={handleMess}
+                >
+                  <g clip-path="url(#clip0_295_3410)">
+                    <path
+                      d="M0.00198132 23.278C0.00198132 9.898 10.482 0 24.002 0C37.522 0 48 9.9 48 23.278C48 36.656 37.52 46.554 24 46.554C21.58 46.554 19.24 46.234 17.06 45.634C16.6345 45.5195 16.1825 45.5548 15.78 45.734L11 47.834C10.7118 47.9623 10.3965 48.0176 10.0819 47.995C9.76732 47.9724 9.46312 47.8727 9.19622 47.7047C8.92931 47.5366 8.70791 47.3054 8.5516 47.0315C8.39528 46.7575 8.30887 46.4493 8.29998 46.134L8.15998 41.854C8.14913 41.5961 8.08694 41.343 7.97704 41.1095C7.86715 40.876 7.71176 40.6667 7.51998 40.494C5.11521 38.324 3.20093 35.6661 1.90487 32.6977C0.608801 29.7293 -0.0392407 26.5187 0.00398132 23.28L0.00198132 23.278ZM16.642 18.898L9.60198 30.098C8.90198 31.158 10.242 32.376 11.242 31.598L18.822 25.858C19.342 25.458 20.022 25.458 20.562 25.858L26.162 30.058C27.842 31.318 30.242 30.858 31.362 29.098L38.402 17.898C39.102 16.838 37.762 15.638 36.762 16.398L29.182 22.138C28.682 22.538 27.982 22.538 27.462 22.138L21.862 17.938C21.4637 17.6372 21.0073 17.4224 20.5216 17.3074C20.036 17.1924 19.5317 17.1796 19.0408 17.2698C18.55 17.3601 18.0832 17.5515 17.6703 17.8318C17.2573 18.1121 16.9071 18.4752 16.642 18.898Z"
+                      fill="#F4F4F4"
+                    />
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_295_3410">
+                      <rect width="48" height="48" fill="white" />
+                    </clipPath>
+                  </defs>
+                </svg>
+                <div className="absolute top-0 right-0 pointer-events-none transform translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                  {dataMess.filter((mess) => mess.is_seen === 0).length !== 0
+                    ? dataMess.filter((mess) => mess.is_seen === 0).length
+                    : 0}
+                </div>
+                {isModalMess && <ModalChat dataMess={dataMess} />}
+              </div>
             </div>
           </Box>
           <Box className="flex w-full items-end bg-[#99999] justify-center text-white mb-6 block lg:hidden">
