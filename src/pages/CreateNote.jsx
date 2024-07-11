@@ -16,7 +16,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import api from "../api";
-import { CreateFolder, DeleteFolder } from "../components/Folder";
+import Folder from "../components/Folder";
 import { AppContext } from "../context";
 import { format } from "date-fns";
 
@@ -98,7 +98,7 @@ const CreateNote = () => {
   const [color, setColor] = useState("");
   const [folder, setUserFolder] = useState(null);
   const [allColor, setAllColor] = useState([]);
-
+  const [reload, setReload] = useState(0);
   const appContext = useContext(AppContext);
   const { user, setSnackbar } = appContext;
   console.log("remindAt", remindAt);
@@ -138,6 +138,10 @@ const CreateNote = () => {
     return formattedDateTime;
   }
 
+  const handleReload = () => {
+    setReload((prev) => prev + 1);
+  };
+
   useEffect(() => {
     let ignore = false;
     const getUserFolder = async () => {
@@ -146,7 +150,7 @@ const CreateNote = () => {
           `https://samnote.mangasocial.online/allfolder/${user.id}`
         );
         if (!ignore) {
-          setUserFolder(res.data.folder);
+          setUserFolder(res.data.folder.reverse());
           console.log("User folder", res.data.folder);
         }
       } catch (err) {
@@ -159,7 +163,7 @@ const CreateNote = () => {
     return () => {
       ignore = true;
     };
-  }, [user.id]);
+  }, [reload]);
 
   useEffect(() => {
     const getAllColor = async () => {
@@ -317,10 +321,11 @@ const CreateNote = () => {
                 folder.map((data, index) => (
                   <MenuItem key={index} value={data.id}>
                     {data.nameFolder}
-                    <DeleteFolder />
                   </MenuItem>
+                  // <DeleteFolder folderId={data.id} setReload={setReload} />
                 ))}
-              <CreateFolder number={user.id} />
+              {/* <CreateFolder number={user.id} setReload={setReload} /> */}
+              <Folder setReloadfunction={handleReload} />
             </Select>
           </FormControl>
 

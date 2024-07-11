@@ -230,7 +230,9 @@ const UserProfile = () => {
           <div className={`w-[98%] flex justify-between mb-4`}>
             <div className="w-[30%] h-[285px] bg-[#FFF4BA] rounded-xl mt-3">
               <div className="flex justify-between w-full mt-2">
-                <span className="ml-3">Quick notes</span>
+                <span className="font-[700] text-[#888888] text-xl">
+                  Quick notes
+                </span>
                 <svg
                   width="24"
                   height="24"
@@ -299,7 +301,11 @@ const UserProfile = () => {
             <div className="mt-3 w-[35%] h-[285px] bg-[#fff] rounded-xl">
               {allNotePublic.length > 0 ? (
                 <div className="mt-2 w-[95%] h-[95%] ml-2">
-                  {allNotePublic.slice(0, 6).map((item, index) => (
+                  {" "}
+                  <span className="font-[700] text-[#888888] text-xl">
+                    New Notes
+                  </span>
+                  {allNotePublic.slice(0, 5).map((item, index) => (
                     <div
                       key={`notePublic ${index}`}
                       className="w-full h-[15%] flex justify-evenly my-1 ml-2 items-center"
@@ -308,7 +314,7 @@ const UserProfile = () => {
                         {item.author}
                       </span>
                       <span className="w-[55%] break-words">
-                        Create a new public note
+                        Create a new note
                       </span>
                       <span className="text-xs break-words w-[12%] whitespace-nowrap">
                         {getTimeDifference(item.update_at, new Date())}
