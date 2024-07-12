@@ -216,7 +216,7 @@ export default function UserNotes() {
     setColor(e.target.value);
   };
 
-  const handleSubmit = async (value, color) => {
+  const handleSubmit = async (value) => {
     const payloadData = type === "text" ? data : checklistItems;
     const selectedColor = allColor.find((col) => col.id === color);
     console.log("selectedColor", selectedColor);
@@ -372,7 +372,7 @@ export default function UserNotes() {
             <Button
               className="h-8"
               variant="contained"
-              onClick={() => handleSubmit(noteEdit.idNote, noteEdit.color)}
+              onClick={() => handleSubmit(noteEdit.idNote)}
             >
               Save
             </Button>
