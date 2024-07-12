@@ -68,9 +68,9 @@ const Incognito = () => {
 
     try {
       const res = await api.get(
-        `https://samnote.mangasocial.online/message/chat-unknown-id/${data.idReceive}/${user.id}`
+        `https://samnote.mangasocial.online/message/chat-unknown-id/${data.idReceive}/${user.id}/20`
       );
-      setMess(res.data.data.reverse());
+      setMess(res.data.data);
       scrollToBottom();
     } catch (err) {
       console.log(err);
@@ -121,7 +121,7 @@ const Incognito = () => {
   const getSendMess = async (data) => {
     try {
       const res = await api.get(
-        `https://samnote.mangasocial.online/message/chat-unknown-id/${data.idReceive}/${user.id}`
+        `/message/chat-unknown-id/${data.idReceive}/${user.id}`
       );
       scrollToBottom();
 
