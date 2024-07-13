@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context";
 import api from "../api";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
@@ -36,7 +36,7 @@ const UserProfile = () => {
   const [allNotePublic, setAllNotePublic] = useState([]);
   const [isModalMess, setIsModalMessage] = useState(false);
   const [dataMess, setDataMess] = useState([]);
-
+  const [payloadData, setPayloadData] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,7 +79,7 @@ const UserProfile = () => {
   const fetchLastUsers = async () => {
     const response = await api.get("/lastUser");
     if (response && response.data.status === 200) {
-      setLastUsers(response.data.data);
+      setLastUsers(response.data.data.slice(0, 4));
     }
   };
 
@@ -94,6 +94,10 @@ const UserProfile = () => {
     }
   };
 
+  useEffect(() => {
+    fetchAllNotePublic();
+  }, [reload]);
+
   const fetchAllNotesProfile = async () => {
     const response = await api.get(`/profile/${user.id}`).then((res) => {
       const dataFilter = res.data.note.filter(
@@ -104,9 +108,32 @@ const UserProfile = () => {
     setNotePrivate(response);
   };
 
+  const Checklist = ({ data }) => {
+    const [items, setItems] = useState([]);
+
+    useEffect(() => {
+      setItems(data);
+    }, [data]);
+
+    return (
+      <div>
+        {items.map((item, index) => (
+          <div key={index}>
+            <input
+              style={{ marginRight: "5px" }}
+              type="checkbox"
+              checked={item.status}
+            />
+            {item.content}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const deleteNote = async (index) => {
     try {
-      await api.delete(`https://samnote.mangasocial.online/notes/${index}`);
+      await api.delete(`/notes/${index}`);
       setSnackbar({
         isOpen: true,
         message: `Remove note successfully ${index}`,
@@ -145,6 +172,76 @@ const UserProfile = () => {
 
   const handleChangeNotePrivate = (event, newValue) => {
     setValueNotePrivate(newValue);
+  };
+
+  function getCurrentFormattedDateTime() {
+    const date = new Date();
+
+    // Lấy các thành phần của ngày và giờ
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Tháng tính từ 0-11, cần +1
+    const year = date.getFullYear();
+
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    // Xác định AM/PM
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Giờ 0 thành 12
+    const formattedHours = String(hours).padStart(2, "0");
+
+    // Lấy múi giờ
+    const timeZoneOffset = -date.getTimezoneOffset();
+    const offsetSign = timeZoneOffset >= 0 ? "+" : "-";
+    const offsetHours = String(
+      Math.floor(Math.abs(timeZoneOffset) / 60)
+    ).padStart(2, "0");
+    const offsetMinutes = String(Math.abs(timeZoneOffset) % 60).padStart(
+      2,
+      "0"
+    );
+
+    // Tạo chuỗi thời gian định dạng
+    const formattedDateTime = `${day}/${month}/${year} ${formattedHours}:${minutes} ${ampm} ${offsetSign}${offsetHours}:${offsetMinutes}`;
+
+    return formattedDateTime;
+  }
+
+  const handleSubmit = async () => {
+    const payload = {
+      type: "text",
+      data: payloadData,
+      title: "Quick notes",
+      color: { r: 255, g: 255, b: 255, a: 1 },
+      idFolder: null,
+      dueAt: getCurrentFormattedDateTime(),
+      pinned: false,
+      lock: "",
+      remindAt: null,
+      linkNoteShare: "",
+      notePublic: 1,
+    };
+
+    console.log("payload", payload); // Check payload structure before sending
+
+    try {
+      await api.post(`/notes/${user.id}`, payload);
+      setReload((prev) => prev + 1);
+      setPayloadData("");
+      setSnackbar({
+        isOpen: true,
+        message: "Created new note successfully",
+        severity: "success",
+      });
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        isOpen: true,
+        message: "Failed to create note",
+        severity: "error",
+      });
+    }
   };
 
   useEffect(() => {
@@ -231,12 +328,20 @@ const UserProfile = () => {
               src={user.Avarta}
               alt="Avarta"
             />
-            <div className="mx-10">
-              <SettingsIcon
+            <div className="w-[40%] mx-10 flex justify-between">
+              {/* <SettingsIcon
                 fontSize="large"
                 className="cursor-pointer block text-5xl lg:hidden text-white"
                 onClick={() => navigate(`/user/setting`)}
-              />
+              /> */}
+              <button className="h-[45px] bg-[black] w-[200px] text-white text-center rounded-[21px] flex justify-evenly items-center">
+                <img
+                  className="w-[25px] h-[25px] bg-[#f9f9f9]"
+                  src="https://s3-alpha-sig.figma.com/img/9765/1fb1/545af073cb81365ffa194ba6a7206ff1?Expires=1720396800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=kIbW1u5rmHVPa1hPZrZ83xZD3w7OsqPGnozeYeoRcd~~tjA-S80lOURbIIJ2uQM7-EzsDKibGrDMQEvWlQbH1QX5gmE5b6B0r7R3iMc5DrSuPwcEllcaR5nj1T2hoB~k85t4y~fBl1Gi2RPQKjHMuEKhhqDUwDZpyMvW2q~Ku8sej6A-yyZUXfkAaWEvnJ1Kr1V-SOHTQ-bNAAIbApS9oTJU82JxJs44y3MOM-CFVgYSVvHgU4p46WA~HS6CEbCnFGCXdvjojef6EpNKxp8ntp-TBXJD14KNXT9mmvt7VHVXydHLuQg8JuXhYdbXg45yhDwj6ZtR7U-9wlt~6XnOtQ__"
+                  alt="chat_an_danh"
+                />
+                <span>Chat anonymously</span>
+              </button>
               <div className="relative inline-block">
                 <svg
                   width="48"
@@ -247,7 +352,7 @@ const UserProfile = () => {
                   className="hidden lg:block after:content cursor-pointer"
                   onClick={handleMess}
                 >
-                  <g clip-path="url(#clip0_295_3410)">
+                  <g clipPath="url(#clip0_295_3410)">
                     <path
                       d="M0.00198132 23.278C0.00198132 9.898 10.482 0 24.002 0C37.522 0 48 9.9 48 23.278C48 36.656 37.52 46.554 24 46.554C21.58 46.554 19.24 46.234 17.06 45.634C16.6345 45.5195 16.1825 45.5548 15.78 45.734L11 47.834C10.7118 47.9623 10.3965 48.0176 10.0819 47.995C9.76732 47.9724 9.46312 47.8727 9.19622 47.7047C8.92931 47.5366 8.70791 47.3054 8.5516 47.0315C8.39528 46.7575 8.30887 46.4493 8.29998 46.134L8.15998 41.854C8.14913 41.5961 8.08694 41.343 7.97704 41.1095C7.86715 40.876 7.71176 40.6667 7.51998 40.494C5.11521 38.324 3.20093 35.6661 1.90487 32.6977C0.608801 29.7293 -0.0392407 26.5187 0.00398132 23.28L0.00198132 23.278ZM16.642 18.898L9.60198 30.098C8.90198 31.158 10.242 32.376 11.242 31.598L18.822 25.858C19.342 25.458 20.022 25.458 20.562 25.858L26.162 30.058C27.842 31.318 30.242 30.858 31.362 29.098L38.402 17.898C39.102 16.838 37.762 15.638 36.762 16.398L29.182 22.138C28.682 22.538 27.982 22.538 27.462 22.138L21.862 17.938C21.4637 17.6372 21.0073 17.4224 20.5216 17.3074C20.036 17.1924 19.5317 17.1796 19.0408 17.2698C18.55 17.3601 18.0832 17.5515 17.6703 17.8318C17.2573 18.1121 16.9071 18.4752 16.642 18.898Z"
                       fill="#F4F4F4"
@@ -268,6 +373,7 @@ const UserProfile = () => {
               </div>
             </div>
           </Box>
+
           <Box className="flex w-full items-end bg-[#99999] justify-center text-white mb-6 block lg:hidden">
             <SearchIcon className="mr-1 my-1" />
             <input
@@ -278,44 +384,27 @@ const UserProfile = () => {
           </Box>
           <div className={`w-[98%] flex justify-between mb-4`}>
             <div className="w-[30%] h-[285px] bg-[#FFF4BA] rounded-xl mt-3">
-              <div className="flex justify-between w-full mt-2">
+              <div className="flex justify-between w-full mt-2 px-2">
                 <span className="font-[700] text-[#888888] text-xl">
                   Quick notes
                 </span>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="mr-3"
-                >
-                  <path
-                    d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z"
-                    stroke="black"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M19 13C19.5523 13 20 12.5523 20 12C20 11.4477 19.5523 11 19 11C18.4477 11 18 11.4477 18 12C18 12.5523 18.4477 13 19 13Z"
-                    stroke="black"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M5 13C5.55228 13 6 12.5523 6 12C6 11.4477 5.55228 11 5 11C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13Z"
-                    stroke="black"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
+                <Button className="" variant="contained" onClick={handleSubmit}>
+                  Create
+                </Button>
               </div>
+              <TextField
+                className="p-2 w-full"
+                id="standard-multiline-static"
+                placeholder="Content"
+                multiline
+                rows={9}
+                variant="standard"
+                value={payloadData}
+                onChange={(event) => setPayloadData(event.target.value)}
+              />
             </div>
             <div className="mt-3 w-[30%] h-[285px] bg-[#fff] rounded-xl">
-              <div className="mx-2 my-2 w-[95%] h-[90%]">
+              <div className="mx-2 my-2 w-[95%] h-[100%]">
                 <span className="font-[700] text-[#888888] text-xl">
                   New User
                 </span>
@@ -325,14 +414,14 @@ const UserProfile = () => {
                       {lastUsers.map((item, index) => (
                         <div
                           key={`user ${index}`}
-                          className="w-full h-[15%] flex justify-between my-1 ml-2"
+                          className="w-full h-[15%] flex justify-between items-center my-1 ml-2"
                         >
                           <img
-                            className="w-[20px] h-[20px] rounded-xl object-cover mt-2"
+                            className="w-[40px] h-[40px] rounded-xl object-cover mt-2"
                             src={item.linkAvatar}
                             alt="anh"
                           />
-                          <span className="truncate-text w-[80px] mr-2">
+                          <span className="truncate-text w-[50%] mr-2">
                             {item.user_name}
                           </span>
                           <span className="mr-3">
@@ -363,7 +452,7 @@ const UserProfile = () => {
                         {item.author}
                       </span>
                       <span className="w-[55%] break-words">
-                        Create a new note
+                        Create a new public note
                       </span>
                       <span className="text-xs break-words w-[12%] whitespace-nowrap">
                         {getTimeDifference(item.update_at, new Date())}
@@ -489,19 +578,18 @@ const UserProfile = () => {
                                       <path
                                         d="M30.4044 10.5738C30.7877 11.1021 31 11.7884 31 12.5C31 13.2117 30.7877 13.898 30.4044 14.4263C27.9767 17.675 22.4507 24 16 24C9.54928 24 4.02338 17.675 1.59568 14.4263C1.21225 13.898 1 13.2117 1 12.5C1 11.7884 1.21225 11.1021 1.59568 10.5738C4.02338 7.32501 9.54928 1 16 1C22.4507 1 27.9767 7.32501 30.4044 10.5738Z"
                                         stroke="black"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
                                       />
                                       <path
                                         d="M15.9999 17.6108C18.5538 17.6108 20.6241 15.3225 20.6241 12.4997C20.6241 9.67697 18.5538 7.38867 15.9999 7.38867C13.446 7.38867 11.3757 9.67697 11.3757 12.4997C11.3757 15.3225 13.446 17.6108 15.9999 17.6108Z"
                                         stroke="black"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
                                       />
                                     </SvgIcon>
-
                                     {info.view}
                                   </div>
                                   <SvgIcon
@@ -566,12 +654,24 @@ const UserProfile = () => {
                                 <strong style={{ fontSize: "20px" }}>
                                   {info.title}
                                 </strong>
-                                <div
-                                  style={{ marginTop: "10px" }}
-                                  dangerouslySetInnerHTML={{
-                                    __html: info.data,
-                                  }}
-                                />
+                                {info.type === "checkList" ||
+                                info.type === "checklist" ? (
+                                  <>
+                                    <Checklist data={info.data.slice(0, 3)} />
+                                    {info.data.length - 3 > 0 && (
+                                      <div className="font-bold">
+                                        +{info.data.length - 3} item hidden
+                                      </div>
+                                    )}
+                                  </>
+                                ) : (
+                                  <div
+                                    className="max-h-[100px] text-start overflow-hidden"
+                                    dangerouslySetInnerHTML={{
+                                      __html: info.data,
+                                    }}
+                                  />
+                                )}
                               </Box>
                               <Box
                                 component="div"

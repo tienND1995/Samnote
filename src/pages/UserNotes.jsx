@@ -11,6 +11,7 @@ import {
   MenuItem,
   Select,
   TextField,
+  CircularProgress,
 } from "@mui/material";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -218,7 +219,7 @@ export default function UserNotes() {
   const handleSubmit = async (value) => {
     const payloadData = type === "text" ? data : checklistItems;
     const selectedColor = allColor.find((col) => col.id === color);
-
+    console.log("selectedColor", selectedColor);
     const parsedColor = {
       r: parseInt(selectedColor.r),
       g: parseInt(selectedColor.g),
@@ -226,6 +227,7 @@ export default function UserNotes() {
       a: 1,
     };
 
+    console.log("parsedColor", parsedColor);
     const payload = {
       type,
       data: payloadData,
@@ -296,7 +298,7 @@ export default function UserNotes() {
     console.log("now color", info.color);
   };
   return (
-    <Box className="grid grid-cols-[350px_1fr]">
+    <Box className="grid grid-cols-[350px_1fr] mb-[3.5rem] lg:mb-0">
       <div className="mx-3 overflow-y-auto h-[100vh] border-r border-black border-solid">
         <Box className="flex justify-between items-center mt-3">
           <div className="flex">
@@ -305,7 +307,7 @@ export default function UserNotes() {
           </div>
           <p className="m-0 py-0 pr-2">{note.length} note</p>
         </Box>
-        {note &&
+        {note && note.length !== 0 ? (
           note.map((info, index) => (
             <div
               key={index}
@@ -318,7 +320,14 @@ export default function UserNotes() {
             >
               <Box className="flex items-center justify-between">
                 <h4>{info.title}</h4>
-                <DeleteIcon onClick={() => deleteNote(info.idNote)} />
+                <DeleteIcon
+                  className="relative z-50 cursor-pointer"
+                  // onClick={() => deleteNote(info.idNote)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteNote(info.idNote);
+                  }}
+                />
               </Box>
 
               {info.type === "checkList" || info.type === "checklist" ? (
@@ -337,11 +346,23 @@ export default function UserNotes() {
                 />
               )}
             </div>
-          ))}
+          ))
+        ) : (
+          <>
+            <div className="w-full h-full flex items-center justify-center">
+              {" "}
+              <CircularProgress size={30} />
+            </div>
+          </>
+        )}
       </div>
       {noteEdit === null ? (
         note.length === 0 ? (
-          <h3>You don't have notes to edit</h3>
+          // <h3>You don't have notes to edit</h3>
+          <div className="w-full h-full flex items-center justify-center">
+            {" "}
+            <CircularProgress size={30} />
+          </div>
         ) : (
           <h3>Click any note to edit</h3>
         )

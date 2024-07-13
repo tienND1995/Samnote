@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context";
 import api from "../api";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
@@ -27,6 +27,30 @@ const UserDustbin = () => {
   const [userNoteImage, setTrashNoteImage] = useState(null);
   const [value, setValue] = useState("1");
   const [reload, setReload] = useState(0); // State to trigger updates
+  const [width, setWidth] = useState(window.innerWidth);
+
+  const Checklist = ({ data }) => {
+    const [items, setItems] = useState([]);
+
+    useEffect(() => {
+      setItems(data);
+    }, [data]);
+
+    return (
+      <div>
+        {items.map((item, index) => (
+          <div key={index}>
+            <input
+              style={{ marginRight: "5px" }}
+              type="checkbox"
+              checked={item.status}
+            />
+            {item.content}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   const deleteNote = async (index) => {
     try {
@@ -111,6 +135,29 @@ const UserDustbin = () => {
     return <div className="font-normal text-xl">{currentDateTime}</div>;
   };
 
+  const handleResize = () => {
+    let newWidth;
+    if (window.innerWidth > 1024 && window.innerWidth < 1248) {
+      newWidth = window.innerWidth - 275;
+    } else if (window.innerWidth > 1024) {
+      newWidth = 980;
+    } else {
+      newWidth = window.innerWidth - 25;
+    }
+    setWidth(newWidth);
+  };
+
+  useEffect(() => {
+    handleResize(); // Gọi handleResize lần đầu khi component được mount
+
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   useEffect(() => {
     let ignore = false;
     const getUserInformation = async () => {
@@ -170,7 +217,7 @@ const UserDustbin = () => {
 
   return (
     <Box className="bg-zinc-100 w-full">
-      {userInfomations && (
+      {userInfomations && userInfomations !== null ? (
         <>
           <Box className=" relative">
             <img
@@ -203,7 +250,9 @@ const UserDustbin = () => {
             </Box>
           </Box>
 
-          <Box className={lgScreen ? "w-[96vw]" : "w-[73vw]"}>
+          <Box
+          // className={lgScreen ? "w-[96vw]" : "w-[73vw]"}
+          >
             <div
               style={{
                 display: "flex",
@@ -223,6 +272,7 @@ const UserDustbin = () => {
                 <TabContext value={value}>
                   <Box
                     sx={{
+                      width: "100%",
                       borderBottom: 1,
                       borderColor: "divider",
                       marginBottom: "24px",
@@ -238,7 +288,11 @@ const UserDustbin = () => {
                   </Box>
                   <TabPanel
                     value="1"
-                    sx={{ maxWidth: "1000px", margin: "0 auto", padding: 0 }}
+                    sx={{
+                      maxWidth: `${width}px`,
+                      margin: "0 auto",
+                      padding: 0,
+                    }}
                   >
                     <Swiper
                       spaceBetween={10}
@@ -377,12 +431,24 @@ const UserDustbin = () => {
                               <strong style={{ fontSize: "20px" }}>
                                 {info.title}
                               </strong>
-                              <div
-                                style={{ marginTop: "10px" }}
-                                dangerouslySetInnerHTML={{
-                                  __html: info.data,
-                                }}
-                              />
+                              {info.type === "checkList" ||
+                              info.type === "checklist" ? (
+                                <>
+                                  <Checklist data={info.data.slice(0, 3)} />
+                                  {info.data.length - 3 > 0 && (
+                                    <div className="font-bold">
+                                      +{info.data.length - 3} item hidden
+                                    </div>
+                                  )}
+                                </>
+                              ) : (
+                                <div
+                                  className="max-h-[100px] text-start overflow-hidden"
+                                  dangerouslySetInnerHTML={{
+                                    __html: info.data,
+                                  }}
+                                />
+                              )}
                             </Box>
                             <Box
                               component="div"
@@ -423,7 +489,7 @@ const UserDustbin = () => {
               </Box>
             )}
           </Box>
-          <Box className={lgScreen ? "w-[96vw]" : "w-[73vw]"}>
+          <Box>
             <div
               style={{
                 display: "flex",
@@ -458,10 +524,9 @@ const UserDustbin = () => {
                   </Box>
                   <TabPanel
                     value="1"
-                    sx={{ width: lgScreen ? "96vw" : "73vw", padding: 0 }}
+                    sx={{ maxWidth: `${width}px`, padding: 0 }}
                   >
                     <Swiper
-                      // style={{ width: "100%", height: "100%" }}
                       spaceBetween={10}
                       slidesPerView={1}
                       navigation
@@ -672,6 +737,11 @@ const UserDustbin = () => {
             )}
           </Box>
         </>
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          {" "}
+          <CircularProgress size={30} />
+        </div>
       )}
     </Box>
   );

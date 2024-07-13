@@ -48,8 +48,6 @@ const UserSetting = () => {
   const [newPassword, setNewPassword] = useState("");
   const [currentPassword2, setCurrentPassword2] = useState("");
   const [newPassword2, setNewPassword2] = useState("");
-  const [FogotPw2Message, setFogotPw2Message] = useState(null);
-
   const [loading, setLoading] = useState(false);
   const [loadingPw2, setLoadingPw2] = useState(false);
   const [loadingFogotPw2, setLoadingFogotPw2] = useState(false);
