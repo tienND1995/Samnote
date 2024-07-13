@@ -328,12 +328,20 @@ const UserProfile = () => {
               src={user.Avarta}
               alt="Avarta"
             />
-            <div className="mx-10">
-              <SettingsIcon
+            <div className="w-[40%] mx-10 flex justify-between">
+              {/* <SettingsIcon
                 fontSize="large"
                 className="cursor-pointer block text-5xl lg:hidden text-white"
                 onClick={() => navigate(`/user/setting`)}
-              />
+              /> */}
+              <button className="h-[45px] bg-[black] w-[200px] text-white text-center rounded-[21px] flex justify-evenly items-center">
+                <img
+                  className="w-[25px] h-[25px] bg-[#f9f9f9]"
+                  src="https://s3-alpha-sig.figma.com/img/9765/1fb1/545af073cb81365ffa194ba6a7206ff1?Expires=1720396800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=kIbW1u5rmHVPa1hPZrZ83xZD3w7OsqPGnozeYeoRcd~~tjA-S80lOURbIIJ2uQM7-EzsDKibGrDMQEvWlQbH1QX5gmE5b6B0r7R3iMc5DrSuPwcEllcaR5nj1T2hoB~k85t4y~fBl1Gi2RPQKjHMuEKhhqDUwDZpyMvW2q~Ku8sej6A-yyZUXfkAaWEvnJ1Kr1V-SOHTQ-bNAAIbApS9oTJU82JxJs44y3MOM-CFVgYSVvHgU4p46WA~HS6CEbCnFGCXdvjojef6EpNKxp8ntp-TBXJD14KNXT9mmvt7VHVXydHLuQg8JuXhYdbXg45yhDwj6ZtR7U-9wlt~6XnOtQ__"
+                  alt="chat_an_danh"
+                />
+                <span>Chat anonymously</span>
+              </button>
               <div className="relative inline-block">
                 <svg
                   width="48"

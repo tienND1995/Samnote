@@ -1,11 +1,4 @@
-import {
-  useState,
-  useEffect,
-  useContext,
-  useMemo,
-  useRef,
-  useCallback,
-} from "react";
+import { useState, useEffect, useContext, useMemo, useRef } from "react";
 import io from "socket.io-client";
 import { AppContext } from "../context";
 import api from "../api";
@@ -35,7 +28,7 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SubdirectoryArrowRightSharpIcon from "@mui/icons-material/SubdirectoryArrowRightSharp";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useLocation } from "react-router-dom";
-import EmojiPicker from "emoji-picker-react";
+import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 
 const newSocket = io("https://samnote.mangasocial.online");
 
@@ -97,6 +90,8 @@ const UserGroup = () => {
     },
   ]);
   const [isEmoji, setIsEmoji] = useState(false);
+  const [inputEmoji, setInputEmoji] = useState(null);
+  const [emojiContent, setEmojiContent] = useState(null);
   const [messageContent, setMessageContent] = useState("");
   const [imageContent, setImageContent] = useState(null);
   const [socketMess, setSocketMess] = useState([]);
@@ -104,6 +99,7 @@ const UserGroup = () => {
   const appContext = useContext(AppContext);
   const { setSnackbar, user } = appContext;
   const [socket, setSocket] = useState(null);
+  const pickerEmojiRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
   const handleOpen = () => setOpen(true);
@@ -113,7 +109,9 @@ const UserGroup = () => {
     setGroupDescription(e.target.value);
   const handleMemberIdChange = (e) => setMemberId(e.target.value);
   const handleMemberEmailChange = (e) => setMemberEmail(e.target.value);
-  const handleMessageContentChange = (e) => setMessageContent(e.target.value);
+  const handleMessageContentChange = (e) => {
+    setMessageContent(e.target.value);
+  };
 
   // Kết nối tới server Socket.IO khi component được tạo ra
   useMemo(() => {
@@ -338,6 +336,11 @@ const UserGroup = () => {
     if (event.key === "Enter") {
       handleButtonSend();
     }
+    if (event.key === "Backspace") {
+      if (inputEmoji !== null) {
+        setInputEmoji(null);
+      }
+    }
   };
 
   const handleLastText = (lastText, idSend) => {
@@ -360,8 +363,46 @@ const UserGroup = () => {
     setIsEmoji(!isEmoji);
   };
 
+  const handleClickEmoji = (emoji) => {
+    console.log(emoji);
+
+    setInputEmoji(emoji.emoji);
+    const image = emoji.imageUrl;
+    console.log(image);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const base64 = canvas.toDataURL();
+      console.log(base64);
+    };
+
+    img.src = `https://cdn.jsdelivr.net/npm/emoji-datasource-facebook/img/facebook/64/1f609.png`;
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        pickerEmojiRef.current &&
+        !pickerEmojiRef.current.contains(event.target)
+      ) {
+        setIsEmoji(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div
+      className="mb-[3rem] lg:mb-0"
       style={{
         display: "grid",
         gridTemplateColumns: "40% 60%",
@@ -662,7 +703,7 @@ const UserGroup = () => {
                   key={`message ${index}`}
                   className="w-[98%] h-auto my-2 ml-2 flex flex-col items-end"
                 >
-                  {item.Image ? (
+                  {item.Content === "" ? (
                     <img
                       className="w-[100px] h-auto "
                       src={item.Image.replace(
@@ -681,7 +722,7 @@ const UserGroup = () => {
                   key={`message ${index}`}
                   className="w-full h-auto my-2 ml-2 flex flex-col items-start"
                 >
-                  {item.Image ? (
+                  {item.Content === "" ? (
                     <img
                       className="w-[100px] h-auto "
                       src={item.Image.replace(
@@ -691,7 +732,7 @@ const UserGroup = () => {
                     />
                   ) : (
                     <p className="max-w-[50%] break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto">
-                      {item.data}
+                      {item.Content}
                     </p>
                   )}
                 </div>
@@ -723,7 +764,6 @@ const UserGroup = () => {
               <button className="border-none" onClick={handleToggleEmoji}>
                 <EmojiEmotionsIcon />
               </button>
-              {isEmoji && <EmojiPicker className="absolute w-[5px] h-[5px]" />}
             </IconButton>
             <div
               className={
@@ -754,7 +794,7 @@ const UserGroup = () => {
             <InputBase
               sx={{ ml: 1, flex: 1 }}
               placeholder="Type your message..."
-              value={messageContent}
+              value={inputEmoji ? inputEmoji : messageContent}
               onChange={handleMessageContentChange}
               onKeyUp={handleKeyUp}
             />
@@ -782,6 +822,18 @@ const UserGroup = () => {
             >
               <SubdirectoryArrowRightSharpIcon sx={{ cursor: "pointer" }} />
             </IconButton>
+            <div
+              ref={pickerEmojiRef}
+              className="absolute top-[-705%] left-[6%] w-[5px] h-[5px]"
+            >
+              {isEmoji && (
+                <EmojiPicker
+                  emojiStyle={EmojiStyle.FACEBOOK}
+                  lazyLoadEmojis={true}
+                  onEmojiClick={handleClickEmoji}
+                />
+              )}
+            </div>
           </Box>
         </Box>
       </div>

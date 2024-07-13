@@ -202,7 +202,7 @@ const UserSketch = () => {
   const boardHeight = 500;
 
   return (
-    <div className="w-full">
+    <div className="w-full h-auto">
       <div className="flex flex-wrap items-center justify-between px-2 py-3">
         <h3 className="uppercase">sketch note</h3>{" "}
         <Button
@@ -281,7 +281,7 @@ const UserSketch = () => {
         </Box>
       </div>
 
-      <div>
+      <div className="mb-[5rem] lg:mb-0">
         <div
           id="screenshot"
           ref={stageRef}
@@ -323,7 +323,7 @@ const UserSketch = () => {
               height: "fit-content",
               padding: "0 20px",
               borderRadius: "40px",
-              zIndex: "20",
+              zIndex: "9",
               backgroundColor: "#999",
               display: "flex",
               color: "text.main",
@@ -478,6 +478,7 @@ const UserSketch = () => {
                 undo
               </Button>
             </div>
+            {/* <div></div> */}
             {/* <div
               style={{
                 marginLeft: "10px",

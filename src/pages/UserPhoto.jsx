@@ -183,7 +183,7 @@ const UserPhoto = () => {
   }, [user.id, reload]);
 
   return (
-    <Box className="bg-zinc-100 w-full">
+    <Box className="bg-zinc-100 w-full mb-[3rem] lg:mb-0">
       {userInfomations && (
         <>
           <Box className=" relative">

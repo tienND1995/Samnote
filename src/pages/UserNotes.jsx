@@ -296,7 +296,7 @@ export default function UserNotes() {
     console.log("now color", info.color);
   };
   return (
-    <Box className="grid grid-cols-[350px_1fr]">
+    <Box className="grid grid-cols-[350px_1fr] mb-[3.5rem] lg:mb-0">
       <div className="mx-3 overflow-y-auto h-[100vh] border-r border-black border-solid">
         <Box className="flex justify-between items-center mt-3">
           <div className="flex">
