@@ -7,7 +7,10 @@ import AppProvider from "./context/index.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AppProvider>
-      <App />
+      <div className="max-w-[1260px] mx-auto">
+        {" "}
+        <App />
+      </div>
     </AppProvider>
   </React.StrictMode>
 );

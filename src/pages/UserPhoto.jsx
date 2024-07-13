@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context";
 import api from "../api";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
@@ -12,6 +12,7 @@ import "slick-carousel/slick/slick-theme.css";
 import SvgIcon from "@mui/material/SvgIcon";
 import Avatar from "@mui/material/Avatar";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
 import "swiper/css";
 
 const UserPhoto = () => {
@@ -26,6 +27,7 @@ const UserPhoto = () => {
   console.log("archivedNotes", archivedNotes);
   const [value, setValue] = useState("1");
   const [reload, setReload] = useState(0); // State to trigger updates
+  const [width, setWidth] = useState(window.innerWidth);
 
   const deleteNote = async (index) => {
     try {
@@ -108,38 +110,28 @@ const UserPhoto = () => {
     return <div className="font-normal text-xl">{currentDateTime}</div>;
   };
 
-  // const LinkNoteComponent = () => {
-  //   const [linkNote, setLinkNote] = useState("");
-  //   const [snackbar, setSnackbar] = useState({ isOpen: false, message: "", severity: "" });
+  const handleResize = () => {
+    let newWidth;
+    if (window.innerWidth > 1024 && window.innerWidth < 1248) {
+      newWidth = window.innerWidth - 275;
+    } else if (window.innerWidth > 1024) {
+      newWidth = 980;
+    } else {
+      newWidth = window.innerWidth - 25;
+    }
+    setWidth(newWidth);
+  };
 
-  //   const fetchLinkNote = async (index) => {
-  //     try {
-  //       const response = await api.get(
-  //         `https://samnote.mangasocial.online/notes/${index}`
-  //       );
-  //       setLinkNote(response.data); // Giả sử phản hồi từ API chứa dữ liệu cần thiết
-  //     } catch (err) {
-  //       console.error(err);
-  //       setSnackbar({
-  //         isOpen: true,
-  //         message: `Failed to get link note ${index}`,
-  //         severity: "error",
-  //       });
-  //     }
-  //   };
+  useEffect(() => {
+    handleResize(); // Gọi handleResize lần đầu khi component được mount
 
-  //   return (
-  //     <div>
-  //       <button onClick={() => fetchLinkNote(123)}>Get Note Link</button>
-  //       {linkNote && <div className="font-normal text-xl">{linkNote}</div>}
-  //       {snackbar.isOpen && (
-  //         <div className={`snackbar ${snackbar.severity}`}>
-  //           {snackbar.message}
-  //         </div>
-  //       )}
-  //     </div>
-  //   );
-  // };
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     let ignore = false;
@@ -183,8 +175,8 @@ const UserPhoto = () => {
   }, [user.id, reload]);
 
   return (
-    <Box className="bg-zinc-100 w-full mb-[3rem] lg:mb-0">
-      {userInfomations && (
+    <Box className="bg-zinc-100 w-full">
+      {userInfomations ? (
         <>
           <Box className=" relative">
             <img
@@ -252,13 +244,26 @@ const UserPhoto = () => {
                         <Tab label="Recommended" value="2" />
                       </TabList>
                     </Box>
-                    <TabPanel value="1" sx={{ maxWidth: "1000px", padding: 0 }}>
+                    <TabPanel
+                      value="1"
+                      sx={{ maxWidth: `${width}px`, padding: 0 }}
+                    >
                       <Swiper
-                        spaceBetween={20}
-                        slidesPerView={2.5}
+                        spaceBetween={10}
+                        slidesPerView={1}
                         navigation
-                        onSlideChange={() => console.log("slide change")}
-                        onSwiper={(swiper) => console.log(swiper)}
+                        pagination={{
+                          clickable: true,
+                        }}
+                        breakpoints={{
+                          551: {
+                            slidesPerView: 2,
+                          },
+                          768: {
+                            slidesPerView: 2,
+                          },
+                        }}
+                        modules={[Pagination]}
                       >
                         {archivedNotes &&
                           archivedNotes.map((info, index) => (
@@ -467,6 +472,11 @@ const UserPhoto = () => {
             </Box>
           </Box>
         </>
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          {" "}
+          <CircularProgress size={30} />
+        </div>
       )}
     </Box>
   );
