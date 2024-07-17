@@ -23,6 +23,7 @@ const OtherUser = () => {
   const [infoNote, setInfoNote] = useState({});
   const appContext = useContext(AppContext);
   const navi = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     let stored = localStorage.getItem("USER");
@@ -243,46 +244,33 @@ const OtherUser = () => {
                     />
                   </svg>
                 </button>
-                <button
+                <div
                   style={{
-                    height: "40px",
-                    width: "fit-content",
-                    whiteSpace: "nowrap",
-                    border: "none",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    margin: "0px 10px 0 0",
+                    padding: "0 10px 0",
                     display: "flex",
-
-                    background: "#3644C7",
-                    padding: "8px 10px",
-                    borderRadius: "5px",
-                    color: "#fff",
+                    backgroundColor: "#999",
+                    alignItems: "center",
+                    borderRadius: "20px",
+                    cursor: "pointer",
+                    height: "39px",
                   }}
+                  onClick={() =>
+                    navigate(`/user/incognito`, { state: { userInfomations } })
+                  }
                 >
-                  <svg
-                    style={{ marginRight: "5px" }}
-                    width="25"
-                    height="25"
-                    viewBox="0 0 43 43"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M0.390625 42.6951C0.390625 38.4516 2.07633 34.3819 5.07692 31.3814C8.0775 28.3808 12.1472 26.6951 16.3906 26.6951C20.6341 26.6951 24.7038 28.3808 27.7043 31.3814C30.7049 34.3819 32.3906 38.4516 32.3906 42.6951H0.390625ZM16.3906 24.6951C9.76062 24.6951 4.39062 19.3251 4.39062 12.6951C4.39062 6.06507 9.76062 0.695068 16.3906 0.695068C23.0206 0.695068 28.3906 6.06507 28.3906 12.6951C28.3906 19.3251 23.0206 24.6951 16.3906 24.6951ZM31.1166 29.1611C34.1759 29.9474 36.9092 31.6788 38.9273 34.1087C40.9454 36.5387 42.1454 39.5434 42.3566 42.6951H36.3906C36.3906 37.4751 34.3906 32.7231 31.1166 29.1611ZM27.0706 24.6091C28.7466 23.11 30.0869 21.2737 31.0037 19.2206C31.9206 17.1674 32.3932 14.9436 32.3906 12.6951C32.3949 9.962 31.6958 7.27381 30.3606 4.88907C32.6259 5.34425 34.6636 6.56981 36.1275 8.35746C37.5914 10.1451 38.3911 12.3845 38.3906 14.6951C38.3912 16.12 38.0871 17.5286 37.4988 18.8264C36.9106 20.1243 36.0517 21.2813 34.9797 22.2202C33.9078 23.159 32.6476 23.8578 31.2835 24.2698C29.9194 24.6818 28.483 24.7975 27.0706 24.6091Z"
-                      fill="white"
-                    />
-                  </svg>
-                  Create group
-                </button>
+                  <img
+                    style={{
+                      height: "20px",
+                      width: "20px",
+                      marginRight: "5px",
+                    }}
+                    src="https://s3-alpha-sig.figma.com/img/9765/1fb1/545af073cb81365ffa194ba6a7206ff1?Expires=1721001600&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YP-6PnN36sD7~7-JrZkVVV7aDWVv4Ne6ZNik-vcASGppOo9~APa9puyjcWdbmvJp9z8RNmp6wMYmqquBvku5PUk6VjpGIpVbzDUS6M4BRabGwIKIiBIDCiM0zSiFEs8Aswgqp0aJ8YGDDhMoC5xfNoJyWHllBw0kuZCkhhJ9jGkRi-yp-niJCH38JZCi2nf9BsySXNaffArMVHFnECnOLKnk1nbVXHljJ-qbZ-rpdE2Kem9GOw4KYA~EnkIxbFhGIPzn2glqv5lOVZoUphbQ79wkVtjIfEAqN5egw8jT7kMIn-s7AMmpzKjGD1KfSD91P5wSA7TUAbJkt89e70gyEA__"
+                    alt="Incognito"
+                  />
+                  Incognito
+                </div>
               </div>
-              <button className="h-[45px] bg-[black] mt-4 w-[42%] text-white text-center rounded-[21px] flex justify-evenly items-center">
-                <img
-                  className="w-[25px] h-[25px] bg-[#f9f9f9]"
-                  src="https://s3-alpha-sig.figma.com/img/9765/1fb1/545af073cb81365ffa194ba6a7206ff1?Expires=1720396800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=kIbW1u5rmHVPa1hPZrZ83xZD3w7OsqPGnozeYeoRcd~~tjA-S80lOURbIIJ2uQM7-EzsDKibGrDMQEvWlQbH1QX5gmE5b6B0r7R3iMc5DrSuPwcEllcaR5nj1T2hoB~k85t4y~fBl1Gi2RPQKjHMuEKhhqDUwDZpyMvW2q~Ku8sej6A-yyZUXfkAaWEvnJ1Kr1V-SOHTQ-bNAAIbApS9oTJU82JxJs44y3MOM-CFVgYSVvHgU4p46WA~HS6CEbCnFGCXdvjojef6EpNKxp8ntp-TBXJD14KNXT9mmvt7VHVXydHLuQg8JuXhYdbXg45yhDwj6ZtR7U-9wlt~6XnOtQ__"
-                  alt="chat_an_danh"
-                />
-                <span>Chat anonymously</span>
-              </button>
             </div>
           </Box>
           <br />
