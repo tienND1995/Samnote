@@ -346,7 +346,11 @@ const UserProfile = () => {
                   cursor: "pointer",
                   height: "39px",
                 }}
-                onClick={() => navigate(`/user/incognito`)}
+                onClick={() =>
+                  navigate("/user/incognito", {
+                    state: { userInfomations: null },
+                  })
+                }
               >
                 <img
                   style={{

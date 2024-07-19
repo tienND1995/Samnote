@@ -28,8 +28,10 @@ const Incognito = () => {
   const [nowRoom, setNowRoom] = useState();
   const [reload, setReload] = useState(0);
   const navigate = useNavigate();
-  const { state: { userInfomations = [] } = {} } = useLocation();
-  console.log("userInfomations", userInfomations);
+  let { state: { userInfomations = [] } = {} } = useLocation();
+  const [userInfo, setUserInfo] = useState(userInfomations);
+  const [nowChat, setNowChat] = useState([]);
+  console.log("nowChat", nowChat);
 
   const handleInputChange = (event) => {
     setSendMess(event.target.value);
@@ -84,6 +86,15 @@ const Incognito = () => {
     }
   };
 
+  useEffect(() => {
+    if (userInfomations?.id) {
+      getMess({
+        idReceive: userInfomations.id,
+        idRoom: `${user.id}#${userInfomations.id}`,
+      });
+    }
+  }, [userInfomations?.id]);
+
   const scrollToBottom = () => {
     setTimeout(() => {
       const element = document.getElementById("lastmessage");
@@ -105,12 +116,22 @@ const Incognito = () => {
     }
   };
 
+  const searchMessage = async () => {
+    try {
+      const res = await api.post(`/message/chat-unknown-id`);
+      setSearchMessage(res.data.data.reverse());
+      console.log("res.data.data", res.data.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const SendMessage = async () => {
     const sendAt = getCurrentFormattedDateTime();
     const [part1, part2] = nowRoom ? nowRoom.split("#") : [];
     const idReceiveValue =
       part1 && part2 ? (part1 !== user.id ? part1 : part2) : null;
-    const idReceive = userInfomations.id || idReceiveValue;
+    const idReceive = userInfomations?.id || idReceiveValue;
 
     if (!idReceive) {
       console.error("idReceive is not defined");
@@ -220,8 +241,8 @@ const Incognito = () => {
             variant="standard"
             sx={{
               width: "90%",
-              margin: "0 20px 10px",
-              input: { color: "white" },
+              margin: "0 0 20px  10px",
+              input: { color: "#000" },
             }}
             InputLabelProps={{ style: { color: "#000" } }}
           />
@@ -229,6 +250,7 @@ const Incognito = () => {
             <SearchIcon className="mr-1 my-1" />
           </IconButton>
         </Box>
+
         <Box
           sx={{
             backgroundColor: "#56565DCC",
@@ -261,85 +283,90 @@ const Incognito = () => {
             Quit
           </Button>
         </Box>
-        {userChat.length > 0 ? (
-          userChat.map((item, idx) => (
-            <Box
-              key={idx}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                borderRadius: "10px",
-                margin: "5px 20px",
-                padding: "5px",
-                backgroundColor: "#56565DCC",
-                justifyContent: "space-between",
-              }}
-              onClick={() => {
-                getMess(item);
-                setNowRoom(item.idRoom);
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                {item.user === "Unknow" ? (
-                  <svg
-                    width="48"
-                    height="48"
-                    viewBox="0 0 48 48"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M32.2804 4.30225H15.7736C8.60355 4.30225 4.3291 8.57669 4.3291 15.7467V32.2536C4.3291 37.7887 6.87013 41.5904 11.3416 43.0283C12.6416 43.4814 14.1387 43.698 15.7736 43.698H32.2804C33.9154 43.698 35.4124 43.4814 36.7125 43.0283C41.1839 41.5904 43.7249 37.7887 43.7249 32.2536V15.7467C43.7249 8.57669 39.4505 4.30225 32.2804 4.30225ZM40.7702 32.2536C40.7702 36.4689 39.1156 39.1281 35.7867 40.2312C33.876 36.4689 29.3455 33.79 24.027 33.79C18.7086 33.79 14.1978 36.4492 12.2674 40.2312H12.2477C8.95811 39.1675 7.28379 36.4886 7.28379 32.2733V15.7467C7.28379 10.1919 10.2188 7.25693 15.7736 7.25693H32.2804C37.8353 7.25693 40.7702 10.1919 40.7702 15.7467V32.2536Z"
-                      fill="black"
-                    />
-                    <path
-                      d="M24.0304 16.1208C20.1302 16.1208 16.9785 19.2725 16.9785 23.1727C16.9785 27.0729 20.1302 30.2442 24.0304 30.2442C27.9306 30.2442 31.0822 27.0729 31.0822 23.1727C31.0822 19.2725 27.9306 16.1208 24.0304 16.1208Z"
-                      fill="black"
-                    />
-                  </svg>
-                ) : (
-                  <Avatar
-                    sx={{ width: "40px", height: "40px", margin: "4px" }}
-                    src={item.user.avatar}
-                  />
-                )}
-                <Box sx={{ marginLeft: "10px" }}>
-                  {item.user === "Unknow" ? (
-                    <Typography variant="body1">User name</Typography>
-                  ) : (
-                    <Typography variant="body1">
-                      {item.user.username}
-                    </Typography>
-                  )}
-                  <Typography
-                    sx={{
-                      overflow: "hidden",
-                      width: "140px",
-                      whiteSpace: "nowrap",
-                      textOverflow: "ellipsis",
-                    }}
-                    variant="body2"
-                  >
-                    {item.last_text}
-                  </Typography>
-                </Box>
-              </Box>
-              <DeleteIcon
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  deleteBoxChat(item);
+        <Box className="max-h-[47vh] w-[90%] lg:max-h-[53vh] sm:w-[95%] overflow-auto">
+          {" "}
+          {userChat.length > 0 ? (
+            userChat.map((item, idx) => (
+              <Box
+                key={idx}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  borderRadius: "10px",
+                  margin: "5px 10px",
+                  padding: "5px",
+                  backgroundColor: "#56565DCC",
+                  justifyContent: "space-between",
                 }}
-              />
-            </Box>
-          ))
-        ) : (
-          <Typography variant="body2" sx={{ marginTop: "20px" }}>
-            No chat messages available.
-          </Typography>
-        )}
+                onClick={() => {
+                  getMess(item);
+                  setNowRoom(item.idRoom);
+                  setUserInfo(null);
+                  setNowChat(item);
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  {item.user === "Unknow" ? (
+                    <svg
+                      width="48"
+                      height="48"
+                      viewBox="0 0 48 48"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M32.2804 4.30225H15.7736C8.60355 4.30225 4.3291 8.57669 4.3291 15.7467V32.2536C4.3291 37.7887 6.87013 41.5904 11.3416 43.0283C12.6416 43.4814 14.1387 43.698 15.7736 43.698H32.2804C33.9154 43.698 35.4124 43.4814 36.7125 43.0283C41.1839 41.5904 43.7249 37.7887 43.7249 32.2536V15.7467C43.7249 8.57669 39.4505 4.30225 32.2804 4.30225ZM40.7702 32.2536C40.7702 36.4689 39.1156 39.1281 35.7867 40.2312C33.876 36.4689 29.3455 33.79 24.027 33.79C18.7086 33.79 14.1978 36.4492 12.2674 40.2312H12.2477C8.95811 39.1675 7.28379 36.4886 7.28379 32.2733V15.7467C7.28379 10.1919 10.2188 7.25693 15.7736 7.25693H32.2804C37.8353 7.25693 40.7702 10.1919 40.7702 15.7467V32.2536Z"
+                        fill="black"
+                      />
+                      <path
+                        d="M24.0304 16.1208C20.1302 16.1208 16.9785 19.2725 16.9785 23.1727C16.9785 27.0729 20.1302 30.2442 24.0304 30.2442C27.9306 30.2442 31.0822 27.0729 31.0822 23.1727C31.0822 19.2725 27.9306 16.1208 24.0304 16.1208Z"
+                        fill="black"
+                      />
+                    </svg>
+                  ) : (
+                    <Avatar
+                      sx={{ width: "40px", height: "40px", margin: "4px" }}
+                      src={item.user.avatar}
+                    />
+                  )}
+                  <Box sx={{ marginLeft: "10px" }}>
+                    {item.user === "Unknow" ? (
+                      <Typography variant="body1">User name</Typography>
+                    ) : (
+                      <Typography variant="body1">
+                        {item.user.username}
+                      </Typography>
+                    )}
+                    <Typography
+                      sx={{
+                        overflow: "hidden",
+                        width: "140px",
+                        whiteSpace: "nowrap",
+                        textOverflow: "ellipsis",
+                      }}
+                      variant="body2"
+                    >
+                      {item.last_text}
+                    </Typography>
+                  </Box>
+                </Box>
+                <DeleteIcon
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    deleteBoxChat(item);
+                  }}
+                />
+              </Box>
+            ))
+          ) : (
+            <Typography variant="body2" sx={{ marginTop: "20px" }}>
+              No chat messages available.
+            </Typography>
+          )}
+        </Box>
       </Box>
-      {messenger !== null || userInfomations ? (
+      {messenger !== null || userInfomations === null ? (
         <Box className="fixed inset-0 z-[3] sm:static w-full">
           <Box
             sx={{
@@ -362,9 +389,12 @@ const Incognito = () => {
               <KeyboardBackspaceIcon
                 className="sm:hidden block"
                 sx={{ marginRight: "10px" }}
-                onClick={() => setMess(null)}
+                onClick={() => {
+                  setMess(null);
+                  userInfomations === null;
+                }}
               />
-              {userInfomations ? (
+              {userInfo !== null ? (
                 <>
                   {" "}
                   <Avatar
@@ -381,7 +411,6 @@ const Incognito = () => {
                 </>
               ) : (
                 <>
-                  {" "}
                   <svg
                     width="48"
                     height="48"
@@ -512,7 +541,7 @@ const Incognito = () => {
           </Box>
         </Box>
       ) : (
-        ""
+        <></>
       )}
     </Box>
   );
