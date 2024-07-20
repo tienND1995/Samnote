@@ -4,6 +4,7 @@ import {
   Button,
   IconButton,
   TextField,
+  CircularProgress,
   Typography,
   InputBase,
   Avatar,
@@ -27,16 +28,16 @@ const Incognito = () => {
   const [sendMess, setSendMess] = useState([]);
   const [idRecei, setIdReceive] = useState(null);
   const [nowRoom, setNowRoom] = useState();
+  const [loading, setLoading] = useState(false);
   const [reload, setReload] = useState(0);
   const navigate = useNavigate();
   let { state: { userInfomations = [] } = {} } = useLocation();
   const [userInfo, setUserInfo] = useState(userInfomations);
   const [searchData, setSearchMessage] = useState("");
-  const [dataSearch, setdataSearch] = useState([]);
+  const [dataSearch, setdataSearch] = useState(null);
   const [nowChat, setNowChat] = useState(
     userInfomations !== null ? userInfomations : null
   );
-  console.log("userInfo", userInfo);
 
   const handleInputChange = (event) => {
     setSendMess(event.target.value);
@@ -121,13 +122,17 @@ const Incognito = () => {
 
   const SearchMessage = async () => {
     try {
+      setLoading(true);
       const res = await api.get(
         `/message/search_unknown_by_text/${user.id}/${searchData}`
       );
-      setdataSearch(res.data.data);
-      console.log("res.data.data seach", res.data.data);
+      setdataSearch(res.data);
+
+      console.log(" res.status", res.data.status, dataSearch);
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false); // Set loading state to false after request is complete
     }
   };
 
@@ -247,89 +252,100 @@ const Incognito = () => {
               }}
               InputLabelProps={{ style: { color: "#000" } }}
             />
-            <IconButton sx={{}}>
-              <SearchIcon className="mr-1 my-1" onClick={SearchMessage} />
+            <IconButton disabled={loading}>
+              {loading ? (
+                <CircularProgress size={24} className="mr-1 my-1" />
+              ) : (
+                <SearchIcon className="mr-1 my-1" onClick={SearchMessage} />
+              )}
             </IconButton>
           </Box>
-          <Box className="max-h-[85vh] min-w-[100%] overflow-auto absolute bg-white px-4  z-[10] rounded-xl left-[50%] transform -translate-x-1/2 pt-[30px]">
-            <CloseIcon className="bg-black fixed z-20 right-2 top-2" />
+          {dataSearch && (
+            <Box className="max-h-[85vh] min-w-[100%] overflow-auto absolute bg-white px-1  z-[10] rounded-xl left-[50%] transform -translate-x-1/2 py-[30px]">
+              <CloseIcon
+                className="bg-black fixed z-20 right-2 top-2 cursor-pointer"
+                onClick={() => {
+                  setdataSearch(null);
+                }}
+              />
 
-            {dataSearch?.length > 0 ? (
-              dataSearch.map((item, idx) => (
-                <Box
-                  key={idx}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    borderRadius: "10px",
-                    margin: "5px 0px",
-                    padding: "5px",
-                    backgroundColor: "#56565DCC",
-                    justifyContent: "space-between",
-                  }}
-                  // onClick={() => {
-                  //   getMess(item);
-                  //   setNowRoom(item.idRoom);
-                  //   setUserInfo(null);
-                  //   setNowChat(item);
-                  // }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    {item.user === "Unknow" ? (
-                      <svg
-                        width="48"
-                        height="48"
-                        viewBox="0 0 48 48"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M32.2804 4.30225H15.7736C8.60355 4.30225 4.3291 8.57669 4.3291 15.7467V32.2536C4.3291 37.7887 6.87013 41.5904 11.3416 43.0283C12.6416 43.4814 14.1387 43.698 15.7736 43.698H32.2804C33.9154 43.698 35.4124 43.4814 36.7125 43.0283C41.1839 41.5904 43.7249 37.7887 43.7249 32.2536V15.7467C43.7249 8.57669 39.4505 4.30225 32.2804 4.30225ZM40.7702 32.2536C40.7702 36.4689 39.1156 39.1281 35.7867 40.2312C33.876 36.4689 29.3455 33.79 24.027 33.79C18.7086 33.79 14.1978 36.4492 12.2674 40.2312H12.2477C8.95811 39.1675 7.28379 36.4886 7.28379 32.2733V15.7467C7.28379 10.1919 10.2188 7.25693 15.7736 7.25693H32.2804C37.8353 7.25693 40.7702 10.1919 40.7702 15.7467V32.2536Z"
-                          fill="black"
-                        />
-                        <path
-                          d="M24.0304 16.1208C20.1302 16.1208 16.9785 19.2725 16.9785 23.1727C16.9785 27.0729 20.1302 30.2442 24.0304 30.2442C27.9306 30.2442 31.0822 27.0729 31.0822 23.1727C31.0822 19.2725 27.9306 16.1208 24.0304 16.1208Z"
-                          fill="black"
-                        />
-                      </svg>
-                    ) : (
-                      <Avatar
-                        sx={{ width: "40px", height: "40px", margin: "4px" }}
-                        src={item.user.avatar}
-                      />
-                    )}
-                    <Box sx={{ marginLeft: "10px" }}>
+              {dataSearch.status == 200 ? (
+                dataSearch.data.map((item, idx) => (
+                  <Box
+                    key={idx}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      borderRadius: "10px",
+                      margin: "5px 0px",
+                      padding: "5px",
+                      backgroundColor: "#56565DCC",
+                      justifyContent: "space-between",
+                    }}
+                    // onClick={() => {
+                    //   getMess(item);
+                    //   setNowRoom(item.idRoom);
+                    //   setUserInfo(null);
+                    //   setNowChat(item);
+                    // }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
                       {item.user === "Unknow" ? (
-                        <Typography variant="body1">User name</Typography>
+                        <svg
+                          width="48"
+                          height="48"
+                          viewBox="0 0 48 48"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M32.2804 4.30225H15.7736C8.60355 4.30225 4.3291 8.57669 4.3291 15.7467V32.2536C4.3291 37.7887 6.87013 41.5904 11.3416 43.0283C12.6416 43.4814 14.1387 43.698 15.7736 43.698H32.2804C33.9154 43.698 35.4124 43.4814 36.7125 43.0283C41.1839 41.5904 43.7249 37.7887 43.7249 32.2536V15.7467C43.7249 8.57669 39.4505 4.30225 32.2804 4.30225ZM40.7702 32.2536C40.7702 36.4689 39.1156 39.1281 35.7867 40.2312C33.876 36.4689 29.3455 33.79 24.027 33.79C18.7086 33.79 14.1978 36.4492 12.2674 40.2312H12.2477C8.95811 39.1675 7.28379 36.4886 7.28379 32.2733V15.7467C7.28379 10.1919 10.2188 7.25693 15.7736 7.25693H32.2804C37.8353 7.25693 40.7702 10.1919 40.7702 15.7467V32.2536Z"
+                            fill="black"
+                          />
+                          <path
+                            d="M24.0304 16.1208C20.1302 16.1208 16.9785 19.2725 16.9785 23.1727C16.9785 27.0729 20.1302 30.2442 24.0304 30.2442C27.9306 30.2442 31.0822 27.0729 31.0822 23.1727C31.0822 19.2725 27.9306 16.1208 24.0304 16.1208Z"
+                            fill="black"
+                          />
+                        </svg>
                       ) : (
-                        <Typography variant="body1">
-                          {item.user.username}
-                        </Typography>
+                        <Avatar
+                          sx={{ width: "40px", height: "40px", margin: "4px" }}
+                          src={item.user.avatar}
+                        />
                       )}
-                      <Typography
-                        sx={{
-                          overflow: "hidden",
-                          width: "140px",
-                          whiteSpace: "nowrap",
-                          textOverflow: "ellipsis",
-                        }}
-                        variant="body2"
-                      >
-                        {item.text}
-                      </Typography>
+                      <Box sx={{ marginLeft: "10px" }}>
+                        {item.user === "Unknow" ? (
+                          <Typography variant="body1">User name</Typography>
+                        ) : (
+                          <Typography variant="body1">
+                            {item.user.username}
+                          </Typography>
+                        )}
+                        <Typography
+                          sx={{
+                            overflow: "hidden",
+                            width: "140px",
+                            whiteSpace: "nowrap",
+                            textOverflow: "ellipsis",
+                          }}
+                          variant="body2"
+                        >
+                          {item.text}
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
-                </Box>
-              ))
-            ) : (
-              <Typography
-                variant="body2"
-                sx={{ margin: "20px 0", color: "black" }}
-              >
-                No chat messages available.
-              </Typography>
-            )}
-          </Box>
+                ))
+              ) : (
+                <Typography
+                  variant="body2"
+                  sx={{ margin: "20px 0", color: "black" }}
+                >
+                  No chat messages available.
+                </Typography>
+              )}
+            </Box>
+          )}
         </Box>
         <Box
           sx={{
@@ -609,9 +625,9 @@ const Incognito = () => {
               borderBottomrightRadius: "15px",
             }}
           >
-            <IconButton sx={{ p: "10px" }}>
+            {/* <IconButton sx={{ p: "10px" }}>
               <EmojiEmotionsIcon />
-            </IconButton>
+            </IconButton> */}
             <InputBase
               sx={{ ml: 1, flex: 1 }}
               placeholder="Type your message..."
@@ -621,9 +637,9 @@ const Incognito = () => {
               onKeyDown={sendMess ? handleKeyDown : undefined}
               // onKeyDown={handleKeyDown}
             />
-            <IconButton sx={{ p: "10px" }}>
+            {/* <IconButton sx={{ p: "10px" }}>
               <AttachFileIcon />
-            </IconButton>
+            </IconButton> */}
             <IconButton
               color={sendMess ? "primary" : "rgba(0,0,0,0.3)"}
               sx={{ p: "10px" }}
