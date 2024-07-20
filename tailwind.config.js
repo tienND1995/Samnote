@@ -14,7 +14,17 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      const newUtilities = {
+        ".scrollbar-none": {
+          "scrollbar-width": "none" /* Firefox */,
+        },
+      };
+
+      addUtilities(newUtilities, ["responsive", "hover"]);
+    },
+  ],
   corePlugins: {
     preflight: false,
   },

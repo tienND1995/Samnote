@@ -15,6 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import api from "../api";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
+import CloseIcon from "@mui/icons-material/Close";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SubdirectoryArrowRightSharpIcon from "@mui/icons-material/SubdirectoryArrowRightSharp";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -30,8 +31,12 @@ const Incognito = () => {
   const navigate = useNavigate();
   let { state: { userInfomations = [] } = {} } = useLocation();
   const [userInfo, setUserInfo] = useState(userInfomations);
-  const [nowChat, setNowChat] = useState([]);
-  console.log("nowChat", nowChat);
+  const [searchData, setSearchMessage] = useState("");
+  const [dataSearch, setdataSearch] = useState([]);
+  const [nowChat, setNowChat] = useState(
+    userInfomations !== null ? userInfomations : null
+  );
+  console.log("userInfo", userInfo);
 
   const handleInputChange = (event) => {
     setSendMess(event.target.value);
@@ -71,7 +76,6 @@ const Incognito = () => {
     return formattedDateTime;
   }
   const getMess = async (data) => {
-    setIdReceive(data.idReceive);
     const payload = {
       number: 0,
       idRoom: `${data.idRoom}`,
@@ -85,15 +89,14 @@ const Incognito = () => {
       console.log(err);
     }
   };
-
   useEffect(() => {
-    if (userInfomations?.id) {
+    if (userInfo !== null) {
       getMess({
-        idReceive: userInfomations.id,
-        idRoom: `${user.id}#${userInfomations.id}`,
+        idReceive: userInfo.id,
+        idRoom: `${user.id}#${userInfo.id}`,
       });
     }
-  }, [userInfomations?.id]);
+  }, [userInfo]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -116,11 +119,13 @@ const Incognito = () => {
     }
   };
 
-  const searchMessage = async () => {
+  const SearchMessage = async () => {
     try {
-      const res = await api.post(`/message/chat-unknown-id`);
-      setSearchMessage(res.data.data.reverse());
-      console.log("res.data.data", res.data.data);
+      const res = await api.get(
+        `/message/search_unknown_by_text/${user.id}/${searchData}`
+      );
+      setdataSearch(res.data.data);
+      console.log("res.data.data seach", res.data.data);
     } catch (err) {
       console.log(err);
     }
@@ -129,19 +134,14 @@ const Incognito = () => {
   const SendMessage = async () => {
     const sendAt = getCurrentFormattedDateTime();
     const [part1, part2] = nowRoom ? nowRoom.split("#") : [];
-    const idReceiveValue =
-      part1 && part2 ? (part1 !== user.id ? part1 : part2) : null;
-    const idReceive = userInfomations?.id || idReceiveValue;
 
-    if (!idReceive) {
-      console.error("idReceive is not defined");
-      return;
-    }
+    setIdReceive(part1 !== user.id ? part1 : part2);
 
     const senmess = {
       content: sendMess,
-      idReceive,
-      idRoom: nowRoom ? nowRoom : `${user.id}#${userInfomations.id}`,
+      idReceive:
+        userInfo !== null ? userInfo.id : part1 != user.id ? part1 : part2,
+      idRoom: nowRoom ? nowRoom : `${user.id}#${userInfo.id}`,
       sendAt,
     };
 
@@ -149,9 +149,6 @@ const Incognito = () => {
       await api.post(`/message/chat-unknown/${user.id}`, senmess);
       setMess((prev) => (Array.isArray(prev) ? [...prev, senmess] : [senmess]));
       setSendMess("");
-      console.log("mess sau khi gửi ", senmess);
-      console.log("idRecei", idReceive);
-      console.log("nowRoom", nowRoom);
       setReload((prev) => prev + 1);
       scrollToBottom();
     } catch (err) {
@@ -223,34 +220,117 @@ const Incognito = () => {
           alignItems: "center",
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            background: "#fff",
-            borderRadius: "30px",
-            height: "40px",
-            margin: "10px 0",
-            width: "90%",
-            justifyContent: "center",
-          }}
-        >
-          <TextField
-            id="input-with-sx"
-            label="Search messenger"
-            variant="standard"
+        <Box className="relative">
+          {" "}
+          <Box
             sx={{
+              display: "flex",
+              alignItems: "center",
+              background: "#fff",
+              borderRadius: "30px",
+              height: "40px",
+              margin: "10px 0",
               width: "90%",
-              margin: "0 0 20px  10px",
-              input: { color: "#000" },
+              justifyContent: "center",
             }}
-            InputLabelProps={{ style: { color: "#000" } }}
-          />
-          <IconButton sx={{}}>
-            <SearchIcon className="mr-1 my-1" />
-          </IconButton>
-        </Box>
+          >
+            <TextField
+              id="input-with-sx"
+              variant="standard"
+              placeholder="Search messenger"
+              value={searchData}
+              onChange={(event) => setSearchMessage(event.target.value)}
+              sx={{
+                width: "90%",
+                margin: "0 0 0px 10px",
+                input: { color: "#000" },
+              }}
+              InputLabelProps={{ style: { color: "#000" } }}
+            />
+            <IconButton sx={{}}>
+              <SearchIcon className="mr-1 my-1" onClick={SearchMessage} />
+            </IconButton>
+          </Box>
+          <Box className="max-h-[85vh] min-w-[100%] overflow-auto absolute bg-white px-4  z-[10] rounded-xl left-[50%] transform -translate-x-1/2 pt-[30px]">
+            <CloseIcon className="bg-black fixed z-20 right-2 top-2" />
 
+            {dataSearch?.length > 0 ? (
+              dataSearch.map((item, idx) => (
+                <Box
+                  key={idx}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    borderRadius: "10px",
+                    margin: "5px 0px",
+                    padding: "5px",
+                    backgroundColor: "#56565DCC",
+                    justifyContent: "space-between",
+                  }}
+                  // onClick={() => {
+                  //   getMess(item);
+                  //   setNowRoom(item.idRoom);
+                  //   setUserInfo(null);
+                  //   setNowChat(item);
+                  // }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    {item.user === "Unknow" ? (
+                      <svg
+                        width="48"
+                        height="48"
+                        viewBox="0 0 48 48"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M32.2804 4.30225H15.7736C8.60355 4.30225 4.3291 8.57669 4.3291 15.7467V32.2536C4.3291 37.7887 6.87013 41.5904 11.3416 43.0283C12.6416 43.4814 14.1387 43.698 15.7736 43.698H32.2804C33.9154 43.698 35.4124 43.4814 36.7125 43.0283C41.1839 41.5904 43.7249 37.7887 43.7249 32.2536V15.7467C43.7249 8.57669 39.4505 4.30225 32.2804 4.30225ZM40.7702 32.2536C40.7702 36.4689 39.1156 39.1281 35.7867 40.2312C33.876 36.4689 29.3455 33.79 24.027 33.79C18.7086 33.79 14.1978 36.4492 12.2674 40.2312H12.2477C8.95811 39.1675 7.28379 36.4886 7.28379 32.2733V15.7467C7.28379 10.1919 10.2188 7.25693 15.7736 7.25693H32.2804C37.8353 7.25693 40.7702 10.1919 40.7702 15.7467V32.2536Z"
+                          fill="black"
+                        />
+                        <path
+                          d="M24.0304 16.1208C20.1302 16.1208 16.9785 19.2725 16.9785 23.1727C16.9785 27.0729 20.1302 30.2442 24.0304 30.2442C27.9306 30.2442 31.0822 27.0729 31.0822 23.1727C31.0822 19.2725 27.9306 16.1208 24.0304 16.1208Z"
+                          fill="black"
+                        />
+                      </svg>
+                    ) : (
+                      <Avatar
+                        sx={{ width: "40px", height: "40px", margin: "4px" }}
+                        src={item.user.avatar}
+                      />
+                    )}
+                    <Box sx={{ marginLeft: "10px" }}>
+                      {item.user === "Unknow" ? (
+                        <Typography variant="body1">User name</Typography>
+                      ) : (
+                        <Typography variant="body1">
+                          {item.user.username}
+                        </Typography>
+                      )}
+                      <Typography
+                        sx={{
+                          overflow: "hidden",
+                          width: "140px",
+                          whiteSpace: "nowrap",
+                          textOverflow: "ellipsis",
+                        }}
+                        variant="body2"
+                      >
+                        {item.text}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              ))
+            ) : (
+              <Typography
+                variant="body2"
+                sx={{ margin: "20px 0", color: "black" }}
+              >
+                No chat messages available.
+              </Typography>
+            )}
+          </Box>
+        </Box>
         <Box
           sx={{
             backgroundColor: "#56565DCC",
@@ -283,7 +363,7 @@ const Incognito = () => {
             Quit
           </Button>
         </Box>
-        <Box className="max-h-[47vh] w-[90%] lg:max-h-[53vh] sm:w-[95%] overflow-auto">
+        <Box className="max-h-[47vh] w-[90%] lg:max-h-[50vh] sm:w-[99%] overflow-auto scrollbar-none">
           {" "}
           {userChat.length > 0 ? (
             userChat.map((item, idx) => (
@@ -351,10 +431,12 @@ const Incognito = () => {
                   </Box>
                 </Box>
                 <DeleteIcon
+                  className="cursor-pointer"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     deleteBoxChat(item);
+                    setNowChat(null);
                   }}
                 />
               </Box>
@@ -366,7 +448,7 @@ const Incognito = () => {
           )}
         </Box>
       </Box>
-      {messenger !== null || userInfomations === null ? (
+      {nowChat !== null ? (
         <Box className="fixed inset-0 z-[3] sm:static w-full">
           <Box
             sx={{
@@ -390,13 +472,11 @@ const Incognito = () => {
                 className="sm:hidden block"
                 sx={{ marginRight: "10px" }}
                 onClick={() => {
-                  setMess(null);
-                  userInfomations === null;
+                  setNowChat(null);
                 }}
               />
-              {userInfo !== null ? (
+              {userInfo ? (
                 <>
-                  {" "}
                   <Avatar
                     sx={{
                       width: "40px",
@@ -407,6 +487,20 @@ const Incognito = () => {
                   />
                   <Typography variant="body1">
                     {userInfomations.name}
+                  </Typography>
+                </>
+              ) : nowChat.user !== "Unknow" ? (
+                <>
+                  <Avatar
+                    sx={{
+                      width: "40px",
+                      height: "40px",
+                      marginRight: "5px",
+                    }}
+                    src={nowChat.user.avatar}
+                  />
+                  <Typography variant="body1">
+                    {nowChat.user.username}
                   </Typography>
                 </>
               ) : (
