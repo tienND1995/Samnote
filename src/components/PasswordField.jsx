@@ -18,7 +18,7 @@ const PasswordField = ({ label, value, onChange, placeholder }) => {
       placeholder={placeholder}
       value={value}
       onChange={onChange}
-      sx={{ width: "300px", marginTop: "10px" }}
+      sx={{ width: "300px" }}
       InputProps={{
         endAdornment: (
           <IconButton onClick={handleClickShowPassword}>
