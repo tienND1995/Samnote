@@ -641,7 +641,7 @@ const UserSketch = () => {
     }
   };
 
-  const outputDate = format(new Date(remindAt), "yyyy/M/d HH:mm:ss");
+  const outputDate = format(new Date(remindAt), "dd/MM/yyyy HH:mm a '+07:00'");
   const stageRef = useRef(null);
 
   const uploadImage = async () => {
@@ -994,8 +994,18 @@ const UserSketch = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "flex-end",
+              gap: "10px",
             }}
           >
+            <Button
+              variant="outlined"
+              onClick={() => {
+                handleWidthChange(8);
+                handleColorChange("#fff");
+              }}
+            >
+              delete
+            </Button>
             <Button variant="outlined" onClick={handleUndo}>
               undo
             </Button>

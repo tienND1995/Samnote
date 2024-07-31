@@ -322,9 +322,7 @@ const CreateNote = () => {
                   <MenuItem key={index} value={data.id}>
                     {data.nameFolder}
                   </MenuItem>
-                  // <DeleteFolder folderId={data.id} setReload={setReload} />
                 ))}
-              {/* <CreateFolder number={user.id} setReload={setReload} /> */}
               <Folder setReloadfunction={handleReload} />
             </Select>
           </FormControl>

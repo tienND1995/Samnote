@@ -18,6 +18,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import api from "../api";
 import { AppContext } from "../context";
 import { format } from "date-fns";
+import Folder from "../components/Folder";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -136,6 +137,7 @@ export default function UserNotes() {
   const [noteEdit, setNoteEdit] = useState(null);
   const [updateTrigger, setUpdateTrigger] = useState(0);
   const [allColor, setAllColor] = useState([]);
+  const [reload, setReload] = useState(0);
   const appContext = useContext(AppContext);
   const { user, setSnackbar } = appContext;
 
@@ -147,7 +149,8 @@ export default function UserNotes() {
           `https://samnote.mangasocial.online/allfolder/${user.id}`
         );
         if (!ignore) {
-          setUserFolder(res.data.folder);
+          setUserFolder(res.data.folder.reverse());
+          console.log("Folder", folder);
         }
       } catch (err) {
         console.log(err);
@@ -159,7 +162,7 @@ export default function UserNotes() {
     return () => {
       ignore = true;
     };
-  }, [user.id]);
+  }, [user.id, reload]);
 
   useEffect(() => {
     let ignore = false;
@@ -189,6 +192,10 @@ export default function UserNotes() {
       ignore = true;
     };
   }, [user.id, updateTrigger]);
+
+  const handleReload = () => {
+    setReload((prev) => prev + 1);
+  };
 
   useEffect(() => {
     const getAllColor = async () => {
@@ -227,7 +234,6 @@ export default function UserNotes() {
       a: 1,
     };
 
-    console.log("parsedColor", parsedColor);
     const payload = {
       type,
       data: payloadData,
@@ -251,7 +257,9 @@ export default function UserNotes() {
         message: "Update note successfully ",
         severity: "success",
       });
+
       setUpdateTrigger((prev) => prev + 1); // Trigger the useEffect to fetch notes again
+      console.log("payload", payload);
     } catch (err) {
       console.error(err);
       const errorMessage = err.response?.data?.message;
@@ -296,6 +304,7 @@ export default function UserNotes() {
     setNotePublic(info.notePublic);
     setColor(info.color);
     console.log("now color", info.color);
+    console.log("idFolder", info.idFolder);
   };
   return (
     <Box className="grid grid-cols-[350px_1fr]">
@@ -431,6 +440,7 @@ export default function UserNotes() {
               <Select
                 style={{ width: "300px" }}
                 size="small"
+                // value="rtgiuy"
                 value={idFolder}
                 onChange={(e) => setIdFolder(e.target.value)}
               >
@@ -440,6 +450,7 @@ export default function UserNotes() {
                       {data.nameFolder}
                     </MenuItem>
                   ))}
+                <Folder setReloadfunction={handleReload} />
               </Select>
             </FormControl>
             <TextField
