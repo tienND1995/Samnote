@@ -315,10 +315,11 @@ const Folder = ({ setReloadfunction }) => {
         + create new folder
       </MenuItem>
       {showInputBox && (
-        <div className="fixed h-screen w-screen flex items-center justify-center inset-0 bg-[rgba(0,0,0,0.9)]">
-          <div className="bg-white w-[300px] h-[400px] flex items-center justify-between flex-col rounded-md overflow-auto p-4">
+        <div className="fixed h-screen w-screen flex items-center justify-center inset-0 bg-[rgba(0,0,0,0.1)]">
+          <div className=" bg-[#3A3F42] w-[300px] h-[400px] flex items-center justify-between flex-col rounded-md overflow-auto p-4">
             <div className="mb-4">
               <TextField
+                className="bg-white rounded-1"
                 label="Folder Name"
                 type="text"
                 value={folderName}
@@ -345,8 +346,8 @@ const Folder = ({ setReloadfunction }) => {
 
             <div>
               <Button
-                className="mr-2"
-                variant="outlined"
+                className="mr-2 border-[1px] border-white border-solid text-white"
+                // variant="outlined"
                 onClick={() => {
                   setShowInputBox(false);
                 }}
@@ -355,7 +356,8 @@ const Folder = ({ setReloadfunction }) => {
               </Button>
               <Button
                 disabled={loadingCreateFolder}
-                variant="contained"
+                className="mr-2 border-[1px] border-white border-solid text-white"
+                // variant="contained"
                 onClick={handleCreateFolder}
               >
                 {loadingCreateFolder ? (
@@ -369,7 +371,7 @@ const Folder = ({ setReloadfunction }) => {
               {folders.map((folder) => (
                 <div
                   key={folder.id}
-                  className="flex items-center justify-between p-2 rounded-md bg-gray-100 hover:bg-gray-200"
+                  className="flex items-center justify-between p-2 mt-1 rounded-md bg-gray-100 hover:bg-gray-200"
                 >
                   <div>{folder.nameFolder}</div>
                   <div>

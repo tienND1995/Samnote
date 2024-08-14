@@ -17,11 +17,21 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import api from "../api";
 import Folder from "../components/Folder";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 import { AppContext } from "../context";
 import { format } from "date-fns";
+import CloseIcon from "@mui/icons-material/Close";
+
+import { Navigation } from "swiper/modules";
+
+// Import Swiper styles
+import "swiper/css";
+import "./createnote.css";
+import "swiper/css/navigation";
 
 const types = ["text", "checkList"];
-const notePublicOptions = ["private", "public"];
+const notePublicOptions = ["public", "private"];
 
 const ChecklistComponent = ({ checklistItems, setChecklistItems }) => {
   const [newItem, setNewItem] = useState("");
@@ -99,6 +109,8 @@ const CreateNote = () => {
   const [folder, setUserFolder] = useState(null);
   const [allColor, setAllColor] = useState([]);
   const [reload, setReload] = useState(0);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedForDeletion, setSelectedForDeletion] = useState([]);
   const appContext = useContext(AppContext);
   const { user, setSnackbar } = appContext;
   console.log("remindAt", remindAt);
@@ -137,7 +149,208 @@ const CreateNote = () => {
 
     return formattedDateTime;
   }
+  function ImageUploader() {
+    const [checkWidth, setCheckWidth] = useState(window.innerWidth - 330);
 
+    console.log("selectedForDeletion", selectedForDeletion);
+    console.log("Selected Files state:", selectedFiles);
+    const updateCheckWidth = () => {
+      window.innerWidth > 1024
+        ? setCheckWidth(window.innerWidth - 330)
+        : setCheckWidth(window.innerWidth - 60);
+    };
+
+    // Sử dụng useEffect để lắng nghe sự kiện resize của cửa sổ
+    useEffect(() => {
+      // Cập nhật giá trị ngay lập tức khi component được render
+      updateCheckWidth();
+
+      // Thêm event listener khi component được mount
+      window.addEventListener("resize", updateCheckWidth);
+
+      // Cleanup event listener khi component bị unmount
+      return () => {
+        window.removeEventListener("resize", updateCheckWidth);
+      };
+    }, []);
+    const handleImageChange = (event) => {
+      const files = Array.from(event.target.files);
+
+      // Cập nhật danh sách các file đã chọn
+      setSelectedFiles((prevFiles) => [...prevFiles, ...files]);
+    };
+
+    const handleSelectForDeletion = (file) => {
+      setSelectedForDeletion((prevSelection) =>
+        prevSelection.includes(file)
+          ? prevSelection.filter((f) => f !== file)
+          : [...prevSelection, file]
+      );
+    };
+
+    const handleDeleteImage = (file) => {
+      setSelectedFiles((prevFiles) => prevFiles.filter((f) => f !== file));
+      URL.revokeObjectURL(file); // Giải phóng tài nguyên
+    };
+
+    const handleDeleteSelected = () => {
+      setSelectedFiles((prevFiles) =>
+        prevFiles.filter((f) => !selectedForDeletion.includes(f))
+      );
+      selectedForDeletion.forEach((file) => URL.revokeObjectURL(file)); // Giải phóng tài nguyên
+      setSelectedForDeletion([]); // Xóa danh sách chọn
+    };
+    return (
+      <div
+        style={{
+          margin: "20px",
+          padding: "0 0 10px",
+          backgroundColor: "#fff",
+          borderRadius: "4px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            padding: "10px 0",
+          }}
+        >
+          <div style={{ marginBottom: "0px" }}>
+            <label
+              htmlFor="file-upload"
+              style={{
+                display: "inline-block",
+                padding: "3px 10px",
+                fontSize: "16px",
+                color: "#fff",
+                backgroundColor: "#007bff",
+                border: "none",
+                borderRadius: "5px",
+                marginRight: "10px",
+                cursor: "pointer",
+                textAlign: "center",
+                lineHeight: "30px",
+              }}
+            >
+              Select Image
+            </label>
+            <input
+              id="file-upload"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageChange}
+              style={{ display: "none" }}
+            />
+          </div>
+          {selectedForDeletion.length >= 1 ? (
+            <div style={{ marginBottom: "0px" }}>
+              <button
+                onClick={handleDeleteSelected}
+                style={{
+                  padding: "3px 10px",
+                  marginRight: "10px",
+                  fontSize: "16px",
+                  color: "#fff",
+                  backgroundColor: "#dc3545",
+                  border: "none",
+                  borderRadius: "5px",
+                  lineHeight: "30px",
+                  cursor: "pointer",
+                }}
+              >
+                Delete All
+              </button>
+            </div>
+          ) : (
+            ""
+          )}
+        </div>
+
+        <div style={{ width: `${checkWidth}px` }}>
+          {" "}
+          <Swiper
+            modules={[Navigation]}
+            spaceBetween={5}
+            slidesPerView={5}
+            breakpoints={{
+              551: {
+                slidesPerView: 3,
+              },
+
+              1024: {
+                slidesPerView: 5,
+              },
+            }}
+            navigation
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              flexWrap: "wrap",
+              margin: "0px auto",
+            }}
+          >
+            {selectedFiles.map((file, index) => {
+              const imageUrl = URL.createObjectURL(file);
+              return (
+                <SwiperSlide
+                  key={index}
+                  style={{ position: "relative", margin: "10px 2px" }}
+                >
+                  <img
+                    src={imageUrl}
+                    alt={`Selected ${index}`}
+                    style={{
+                      width: "100%",
+                      height: "200px",
+                      objectFit: "cover",
+                      display: "block",
+                      borderRadius: "4px",
+                    }}
+                  />
+                  <button
+                    onClick={() => handleDeleteImage(file)}
+                    style={{
+                      position: "absolute",
+                      top: "5px",
+                      left: "5px",
+                      color: "#000",
+                      borderRadius: "50%",
+                      cursor: "pointer",
+                      width: "25px",
+                      height: "25px",
+                      border: "0.2px solid #000",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    <CloseIcon />
+                  </button>
+                  <input
+                    type="checkbox"
+                    checked={selectedForDeletion.includes(file)}
+                    onChange={() => handleSelectForDeletion(file)}
+                    style={{
+                      position: "absolute",
+                      top: "5px",
+                      right: "15px",
+                      backgroundColor: "#fff",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  />
+                </SwiperSlide>
+              );
+            })}
+          </Swiper>
+        </div>
+      </div>
+    );
+  }
   const handleReload = () => {
     setReload((prev) => prev + 1);
   };
@@ -194,16 +407,23 @@ const CreateNote = () => {
   const handleSubmit = async () => {
     const payloadData = type === "text" ? dataText : checklistItems;
 
-    const selectedColor = allColor.find((col) => col.id === color);
+    const selectedColor = allColor.find((col) => col.id === color) || {
+      r: 255,
+      g: 255,
+      b: 255,
+    };
 
-    const parsedColor = selectedColor
-      ? {
-          r: parseInt(selectedColor.r),
-          g: parseInt(selectedColor.g),
-          b: parseInt(selectedColor.b),
-          a: 1,
-        }
-      : { r: 255, g: 255, b: 255, a: 1 };
+    console.log("selectedColor", selectedColor);
+
+    const parsedColor =
+      selectedColor != undefined
+        ? {
+            r: parseInt(selectedColor.r),
+            g: parseInt(selectedColor.g),
+            b: parseInt(selectedColor.b),
+            a: 1,
+          }
+        : { r: 255, g: 255, b: 255, a: 1 };
 
     const payload = {
       type,
@@ -218,11 +438,30 @@ const CreateNote = () => {
       linkNoteShare: "",
       notePublic,
     };
+    const formPayload = new FormData();
+    formPayload.append("image_note", selectedFiles);
 
-    console.log("payload", payload); // Check payload structure before sending
+    console.log("payload", payload.color.r);
+    console.log("formPayload", formPayload);
 
     try {
-      await api.post(`/notes/${user.id}`, payload);
+      const res = await api.post(`/notes/${user.id}`, payload);
+      console.log("res", res.data.note);
+      const formPayload = new FormData();
+      selectedFiles.forEach((file) => {
+        formPayload.append("image_note", file);
+      });
+      formPayload.append("id_note", res.data.note.idNote);
+      formPayload.append("id_user", user.id);
+      const respon = await fetch(
+        `https://samnote.mangasocial.online/add_image_note`,
+        {
+          method: "POST",
+          body: formPayload,
+        }
+      );
+      console.log("respon", selectedFiles, res.data.note.idNote, user.id);
+
       setSnackbar({
         isOpen: true,
         message: "Created new note successfully",
@@ -240,20 +479,34 @@ const CreateNote = () => {
 
   return (
     <>
-      <Box className="max-w mx-auto mt-3">
-        <Box className="flex justify-between">
-          <h2 className="ml-2 mb-4 uppercase">Create Note</h2>
-          <Button
-            className="mt-2 mb-5 mr-4"
-            variant="contained"
-            onClick={handleSubmit}
+      <Box className="max-w mx-auto pt-3 bg-[#3A3F42]">
+        <Box className="flex justify-center">
+          <svg
+            width="25"
+            height="25"
+            viewBox="0 0 53 53"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            Create
-          </Button>
+            <path
+              d="M45.295 53H9.10978C8.88515 53 8.66972 52.9108 8.51089 52.7519C8.35205 52.5931 8.26282 52.3777 8.26282 52.153V0.846965C8.26282 0.622336 8.35205 0.406907 8.51089 0.24807C8.66972 0.0892336 8.88515 0 9.10978 0L29.8943 0L46.1421 16.2478V52.153C46.1421 52.3777 46.0528 52.5931 45.8939 52.7519C45.7351 52.9108 45.5196 53 45.295 53Z"
+              fill="#F9E7C0"
+            />
+            <path
+              d="M29.8943 0L46.1421 16.2478H33.3478C31.4404 16.2478 29.8942 14.7016 29.8942 12.7942V0H29.8943Z"
+              fill="#EAC083"
+            />
+            <path
+              d="M24.3342 9.56494H13.0899C12.4535 9.56494 11.9377 9.04912 11.9377 8.41281C11.9377 7.7765 12.4535 7.26068 13.0899 7.26068H24.3342C24.9706 7.26068 25.4864 7.7765 25.4864 8.41281C25.4864 9.04912 24.9706 9.56494 24.3342 9.56494ZM25.4864 15.9542C25.4864 15.3179 24.9706 14.8021 24.3342 14.8021H13.0899C12.4535 14.8021 11.9377 15.3179 11.9377 15.9542C11.9377 16.5905 12.4535 17.1064 13.0899 17.1064H24.3342C24.9706 17.1064 25.4864 16.5905 25.4864 15.9542ZM25.4864 23.4958C25.4864 22.8595 24.9706 22.3436 24.3342 22.3436H13.0899C12.4535 22.3436 11.9377 22.8595 11.9377 23.4958C11.9377 24.1321 12.4535 24.6479 13.0899 24.6479H24.3342C24.9706 24.6478 25.4864 24.1321 25.4864 23.4958ZM35.2208 31.0372C35.2208 30.401 34.705 29.8851 34.0686 29.8851H13.0899C12.4535 29.8851 11.9377 30.4009 11.9377 31.0372C11.9377 31.6735 12.4535 32.1893 13.0899 32.1893H34.0686C34.705 32.1893 35.2208 31.6735 35.2208 31.0372ZM39.1019 23.4958C39.1019 22.8595 38.5861 22.3436 37.9498 22.3436H30.1876C29.5514 22.3436 29.0355 22.8595 29.0355 23.4958C29.0355 24.1321 29.5513 24.6479 30.1876 24.6479H37.9498C38.5861 24.6478 39.1019 24.1321 39.1019 23.4958ZM31.0464 38.5787C31.0464 37.9425 30.5306 37.4266 29.8943 37.4266H13.0899C12.4535 37.4266 11.9377 37.9424 11.9377 38.5787C11.9377 39.215 12.4535 39.7308 13.0899 39.7308H29.8943C30.5306 39.7307 31.0464 39.2149 31.0464 38.5787ZM37.9002 46.1201C37.9002 45.4839 37.3844 44.968 36.748 44.968H13.0899C12.4535 44.968 11.9377 45.4838 11.9377 46.1201C11.9377 46.7564 12.4535 47.2723 13.0899 47.2723H36.748C37.3843 47.2723 37.9002 46.7564 37.9002 46.1201Z"
+              fill="#597B91"
+            />
+          </svg>
+
+          <h5 className="ml-1 mb-4 uppercase text-white">Create Note</h5>
         </Box>
 
         <Box className="flex flex-wrap">
-          <FormControl className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2">
+          <FormControl className="w-full bg-white rounded-1 md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2">
             <InputLabel id="demo-simple-select-label">Type</InputLabel>
             <Select
               labelId="demo-simple-select-label"
@@ -271,14 +524,14 @@ const CreateNote = () => {
             </Select>
           </FormControl>
           <TextField
-            className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2"
+            className="w-full bg-white rounded-1 md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2"
             label="Title"
             size="small"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
 
-          <FormControl className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2">
+          <FormControl className="w-full bg-white rounded-1 md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2">
             <InputLabel id="demo-simple-select-color-label">
               Background-color
             </InputLabel>
@@ -307,7 +560,7 @@ const CreateNote = () => {
             </Select>
           </FormControl>
 
-          <FormControl className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2">
+          <FormControl className="w-full bg-white rounded-1 md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2">
             <InputLabel id="demo-simple-select-folder">Folder</InputLabel>
             <Select
               label="Folder"
@@ -328,7 +581,7 @@ const CreateNote = () => {
           </FormControl>
 
           <TextField
-            className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2"
+            className="w-full md:w-1/3 bg-white rounded-1 lg:w-1/4 xl:w-1/4 mx-4 my-2"
             label="Lock"
             size="small"
             type="password"
@@ -336,7 +589,7 @@ const CreateNote = () => {
             onChange={(e) => setLock(e.target.value)}
           />
 
-          <FormControl className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2">
+          <FormControl className="w-full bg-white rounded-1 md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2">
             <InputLabel id="demo-simple-select-notePublic">
               Note Public
             </InputLabel>
@@ -356,8 +609,8 @@ const CreateNote = () => {
             </Select>
           </FormControl>
 
-          <Box className="flex items-center w-full md:w-1/3 lg:w-1/4 xl:w-1/4 z-50 mx-4 my-2">
-            <h6>RemindAt:</h6>
+          <Box className="flex items-start text-white w-full flex-col md:w-1/3 lg:w-1/4 xl:w-1/4 z-50 mx-4 my-2">
+            <span className="relative top-0 left-0">RemindAt</span>
             {/* <DatePicker
               selected={remindAt}
               onChange={(date) => setRemindAt(date)}
@@ -365,6 +618,7 @@ const CreateNote = () => {
               dateFormat="Pp"
             /> */}
             <DatePicker
+              className="w-[250px] "
               selected={remindAt ? remindAt : null}
               onChange={(date) => setRemindAt(date)}
               showTimeSelect
@@ -374,35 +628,54 @@ const CreateNote = () => {
             />
           </Box>
           <FormControlLabel
-            className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2"
+            className="w-full text-white rounded-1 md:w-1/3 lg:w-1/4 xl:w-1/4 mx-4 my-2"
             label="Pinned"
             control={
               <Checkbox
+                className="text-white"
                 checked={pinned}
                 onChange={(e) => setPinned(e.target.checked)}
               />
             }
           />
+          <Box className="flex items-center">
+            <Button
+              className="h-[35px]"
+              variant="contained"
+              onClick={handleSubmit}
+            >
+              Create
+            </Button>
+          </Box>
         </Box>
+        <div>
+          <ImageUploader />
+        </div>
         {type === "text" ? (
           <>
-            <h5 className="ml-2">Content</h5>
             <Editor
               apiKey="c9fpvuqin9s9m9702haau5pyi6k0t0zj29nelhczdvjdbt3y"
               value={dataText}
               init={{
-                height: "50vh",
+                height: "500px",
                 menubar: true,
+                // menubar: false,
                 statusbar: false,
                 plugins: [
-                  "advlist autolink lists link image charmap print preview anchor",
+                  "advlist autolink lists link charmap print preview anchor",
                   "searchreplace visualblocks code fullscreen",
                   "insertdatetime media table paste code help wordcount",
+                  "image",
+                ],
+                bold: [
+                  { inline: "strong", remove: "all" },
+                  { inline: "p", styles: { fontWeight: "bold" } },
+                  { inline: "b", remove: "all" },
                 ],
                 toolbar:
-                  "undo redo | formatselect | bold italic backcolor | \
+                  "undo redo |formatselect | bold italic backcolor | \
               alignleft aligncenter alignright alignjustify | \
-              bullist numlist outdent indent | removeformat | help",
+              bullist numlist outdent indent | removeformat|",
               }}
               onEditorChange={(content) => setDataText(content)}
             />

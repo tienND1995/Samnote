@@ -110,7 +110,7 @@ const ChecklistComponent = ({ checklistItems, setChecklistItems, data }) => {
           style={{ height: "40px" }}
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
-          placeholder="Add a new list item"
+          placeholder="  Add a new list item"
         />
         <span onClick={handleAddItem}>
           <AddIcon />
@@ -140,7 +140,7 @@ export default function UserNotes() {
   const [reload, setReload] = useState(0);
   const appContext = useContext(AppContext);
   const { user, setSnackbar } = appContext;
-
+  console.log("color", color);
   useEffect(() => {
     let ignore = false;
     const getUserFolder = async () => {

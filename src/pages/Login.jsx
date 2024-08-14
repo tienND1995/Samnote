@@ -374,7 +374,7 @@ const Login = () => {
         <Typography className="text-2xl lg:text-4xl md:text-3xl text-white">
           A place to store and share your ideas. Anytime, anywhere.
         </Typography>
-        <Box className="flex gap-12 justify-center">
+        <Box className="flex gap-3 justify-center md:flex-row flex-col">
           <Button
             variant="contained"
             className="w-[200px] h-[50px] bg-[#5BE260] text-[20px] font-black  text-black rounded-[30px]"

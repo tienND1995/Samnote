@@ -583,7 +583,6 @@ const UserSketch = () => {
     updateDimensions(); // Cập nhật chiều rộng ban đầu
     window.addEventListener("resize", updateDimensions); // Cập nhật khi thay đổi kích thước
 
-    // Cleanup event listener khi component bị unmount
     return () => {
       window.removeEventListener("resize", updateDimensions);
     };
@@ -659,6 +658,7 @@ const UserSketch = () => {
       const blob = new Blob([byteArray], { type: "image/png" });
       const file = new File([blob], "screenshot.png", { type: "image/png" });
       const selectedColor = allColor.find((col) => col.id === color);
+      console.log("file", file);
 
       const payload = {
         type: "image",
