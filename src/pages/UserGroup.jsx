@@ -1,11 +1,5 @@
-import {
-  useState,
-  useEffect,
-  useContext,
-  useMemo,
-  useRef,
-  useCallback,
-} from "react";
+// @ts-nocheck
+import { useState, useEffect, useContext, useMemo, useRef } from "react";
 import io from "socket.io-client";
 import { AppContext } from "../context";
 import api from "../api";
@@ -35,7 +29,7 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SubdirectoryArrowRightSharpIcon from "@mui/icons-material/SubdirectoryArrowRightSharp";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useLocation } from "react-router-dom";
-import EmojiPicker from "emoji-picker-react";
+import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 
 const newSocket = io("https://samnote.mangasocial.online");
 
@@ -68,6 +62,7 @@ const UserGroup = () => {
       type: "",
     },
   ]);
+  const [messageGroup, setMessageGroup] = useState("");
   const [userChat, setUserChat] = useState([
     {
       idMessage: 0,
@@ -76,6 +71,7 @@ const UserGroup = () => {
       idSend: 0,
       is_seen: 0,
       last_text: "",
+      last_image: "",
       sendAt: "",
       user: {
         Avarta: "",
@@ -96,7 +92,10 @@ const UserGroup = () => {
       },
     },
   ]);
+  const [isSeen, setIsSeen] = useState(false);
   const [isEmoji, setIsEmoji] = useState(false);
+  const [inputEmoji, setInputEmoji] = useState(null);
+  const [emojiBase64, setEmojiBase64] = useState("");
   const [messageContent, setMessageContent] = useState("");
   const [imageContent, setImageContent] = useState(null);
   const [socketMess, setSocketMess] = useState([]);
@@ -104,6 +103,7 @@ const UserGroup = () => {
   const appContext = useContext(AppContext);
   const { setSnackbar, user } = appContext;
   const [socket, setSocket] = useState(null);
+  const pickerEmojiRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
   const handleOpen = () => setOpen(true);
@@ -113,7 +113,9 @@ const UserGroup = () => {
     setGroupDescription(e.target.value);
   const handleMemberIdChange = (e) => setMemberId(e.target.value);
   const handleMemberEmailChange = (e) => setMemberEmail(e.target.value);
-  const handleMessageContentChange = (e) => setMessageContent(e.target.value);
+  const handleMessageContentChange = (e) => {
+    setMessageContent(e.target.value);
+  };
 
   // Kết nối tới server Socket.IO khi component được tạo ra
   useMemo(() => {
@@ -138,6 +140,22 @@ const UserGroup = () => {
         setUserChat(response.data.data);
       }
     };
+    const getGroup = async () => {
+      try {
+        const res = await api.get(`/group/all/${user.id}`);
+        if (res && res.data.status === 200) {
+          res.data.data.map((item) => {
+            newSocket.emit("join_room", { room: item.idGroup });
+          });
+          setGroup(res.data.data);
+        }
+        console.log("group", res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    getGroup();
     fetchUserChat();
 
     return () => {
@@ -169,19 +187,43 @@ const UserGroup = () => {
   }, [socketMess]);
 
   console.log(userChat);
-  const handleGroupClick = async (group) => {
+  const handleUserChatClick = async (group) => {
     console.log(group);
     console.log(user.id);
+    if (group.is_seen === 0) {
+      const response = await api.post(
+        `https://samnote.mangasocial.online/message/${group.idMessage}`
+      );
+      console.log(response.data);
+    }
     const response = await api.get(
-      `https://samnote.mangasocial.online/message/list_message_chat1vs1/${user.id}/${group.id}`
+      `https://samnote.mangasocial.online/message/list_message_chat1vs1/${user.id}/${group.user.id}`
     );
     console.log(response.data.data[0].messages);
     if (response && response.data.status === 200) {
+      setMessageGroup("");
       setMessage(response.data.data[0].messages);
       setSocketMess([]);
     }
-    setSelectedGroup(group);
-    setDataInfomations(group);
+    setSelectedGroup(group.user);
+    setDataInfomations(group.user);
+  };
+
+  const handleGroupClick = async (group) => {
+    try {
+      console.log(group);
+      const response = await api.get(
+        `https://samnote.mangasocial.online/group/messages/${group.idGroup}`
+      );
+      console.log(response.data.status);
+      if (response && response.data.status === 200) {
+        setMessageGroup(response.data.data);
+        setSocketMess([]);
+      }
+      setSelectedGroup(group);
+    } catch (err) {
+      console.log(err);
+    }
   };
   console.log(message);
 
@@ -255,6 +297,7 @@ const UserGroup = () => {
       newSocket.emit("send_message", { room, data }); // Gửi sự kiện "send_message" tới server
       setMessageContent("");
       setImageContent(null);
+      setInputEmoji(null);
 
       // Xử lý logic khi tin nhắn được gửi đi
       // Ví dụ: cập nhật giao diện ngay lập tức
@@ -264,34 +307,17 @@ const UserGroup = () => {
     }
   };
 
-  useEffect(() => {
-    const getGroup = async () => {
-      try {
-        const res = await api.get(`/group/all/${user.id}`);
-        setGroup(res.data.data);
-        console.log("group", res.data.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    getGroup();
-  }, [user.id]);
-
   const handleImageChange = (event) => {
     const reader = new FileReader();
     reader.onload = () => {
       setImageContent(reader.result);
     };
     reader.readAsDataURL(event.target.files[0]);
+    event.target.files[0] = null;
   };
 
   console.log(imageContent);
-  console.log(
-    socketMess.filter(
-      (item) => item.ReceivedID === user.id || item.SenderID === user.id
-    )
-  );
+  console.log(socketMess);
 
   const handleButtonSend = () => {
     if (selectedGroup) {
@@ -328,8 +354,23 @@ const UserGroup = () => {
           ),
           textData
         );
-      } else {
-        return;
+      } else if (inputEmoji !== null) {
+        const emojiData = {
+          idSend: +user.id,
+          idReceive:
+            selectedGroup.id !== 0 ? +selectedGroup.id : +dataInfomations.id,
+          type: "icon-image", // Giả sử loại tin nhắn là text
+          state: "",
+          data: emojiBase64,
+          content: messageContent,
+        };
+        sendMessage(
+          roomSplit(
+            +user.id,
+            selectedGroup.id !== 0 ? +selectedGroup.id : +dataInfomations.id
+          ),
+          emojiData
+        );
       }
     }
   };
@@ -338,14 +379,27 @@ const UserGroup = () => {
     if (event.key === "Enter") {
       handleButtonSend();
     }
+    if (event.key === "Backspace") {
+      if (inputEmoji !== null) {
+        setInputEmoji(null);
+      }
+    }
   };
 
-  const handleLastText = (lastText, idSend) => {
+  const handleLastText = (lastText, idSend, image) => {
     if (!lastText) {
       if (idSend === user.id) {
-        return "Bạn đã gửi 1 ảnh";
+        if (image.includes(`dataimage/pngbase64`)) {
+          return "Bạn đã gửi 1 nhãn dán";
+        } else {
+          return "Bạn đã gửi 1 ảnh";
+        }
       } else {
-        ("Đã gửi 1 ảnh");
+        if (image.includes(`dataimage/pngbase64`)) {
+          return "Bạn đã gửi 1 nhãn dán";
+        } else {
+          ("Đã gửi 1 ảnh");
+        }
       }
     } else {
       if (idSend === user.id) {
@@ -360,8 +414,91 @@ const UserGroup = () => {
     setIsEmoji(!isEmoji);
   };
 
+  const handleClickEmoji = (emoji) => {
+    console.log(emoji);
+    setInputEmoji(emoji.emoji);
+    convertEmojiToBase64(emoji.emoji);
+  };
+  console.log("emoji", emojiBase64);
+
+  const convertEmojiToBase64 = (emoji) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 64;
+    const context = canvas.getContext("2d");
+    context.font = "48px Arial";
+    context.fillText(emoji, 0, 48);
+
+    const base64 = canvas.toDataURL();
+    setEmojiBase64(base64);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        pickerEmojiRef.current &&
+        !pickerEmojiRef.current.contains(event.target)
+      ) {
+        setIsEmoji(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleImageMess = (image) => {
+    if (image === null) {
+      return;
+    }
+    const imageType = ["png", "jpeg", "jpg"];
+    for (let i = 0; i < imageType.length; i++) {
+      if (image.includes(`dataimage/${imageType[i]}base64`)) {
+        if (image.includes(`dataimage/pngbase64`)) {
+          const newImage = image.replace(
+            `dataimage/${imageType[i]}base64`,
+            `data:image/${imageType[i]};base64,`
+          );
+          const newImageReal = newImage.slice(0, -1);
+          return newImageReal;
+        } else {
+          const newImage = image.replace(
+            `dataimage/${imageType[i]}base64`,
+            `data:image/${imageType[i]};base64,`
+          );
+          return newImage;
+        }
+      } else {
+        continue;
+      }
+    }
+  };
+
+  const handleTimeUserChat = (time) => {
+    const realTime = new Date();
+    const diffInMs = realTime.getTime() - new Date(time).getTime();
+    const daysDifference = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    const monthsDifference = Math.floor(daysDifference / 30.436875); // Trung bình số ngày trong một tháng
+    const yearsDifference = Math.floor(daysDifference / 365.25);
+    const timeSplit = time.split(" ");
+
+    if (daysDifference < 1) {
+      return `${timeSplit[4].slice(0, -3)}`;
+    } else if (daysDifference < 7) {
+      return `${timeSplit[0].slice(0, -1)}`;
+    } else if (daysDifference < 30) {
+      return `${timeSplit[1]}${timeSplit[2]}`;
+    } else if (monthsDifference < 12) {
+      return `${timeSplit[2]}`;
+    } else {
+      return `${timeSplit[3]}`;
+    }
+  };
   return (
     <div
+      className="mb-[3rem] lg:mb-0"
       style={{
         display: "grid",
         gridTemplateColumns: "40% 60%",
@@ -451,7 +588,7 @@ const UserGroup = () => {
                         cursor: "pointer",
                       },
                     }}
-                    onClick={() => handleGroupClick(item.user)}
+                    onClick={() => handleUserChatClick(item)}
                   >
                     <Avatar
                       src={item.user.Avarta}
@@ -470,15 +607,22 @@ const UserGroup = () => {
                         {item.user.name}
                       </strong>
                       <p
-                        style={{
-                          padding: 0,
-                          margin: 0,
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
+                        className={
+                          item.is_seen === 0 && item.idReceive === user.id
+                            ? "p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[700]"
+                            : "p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis"
+                        }
                       >
-                        {handleLastText(item.last_text, item.idSend)}
+                        {handleLastText(
+                          item.last_text,
+                          item.idSend,
+                          item.last_image
+                        )}
+                      </p>
+                    </div>
+                    <div className="h-full mr-4 flex items-start">
+                      <p className="mt-3 text-xs">
+                        {handleTimeUserChat(item.sendAt)}
                       </p>
                     </div>
                   </Box>
@@ -581,19 +725,20 @@ const UserGroup = () => {
               alt=""
             />
           </div>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div>
-              {selectedGroup && (
-                <>
-                  <h3 style={{ margin: 0 }}>
-                    {dataInfomations
-                      ? dataInfomations.name
-                      : selectedGroup.name}
-                  </h3>
-                  <p style={{ margin: 0 }}>{selectedGroup.describe}</p>
-                </>
-              )}
-            </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {selectedGroup && (
+              <>
+                <h3 style={{ margin: 0 }}>{selectedGroup.name}</h3>
+                <p style={{ margin: 0 }}>{selectedGroup.describe}</p>
+              </>
+            )}
           </div>
           <MoreHorizIcon />
         </Box>
@@ -606,97 +751,155 @@ const UserGroup = () => {
             scrollbarWidth: "none",
           }}
         >
-          {/* Đây là ví dụ về cách hiển thị tin nhắn, bạn cần thay đổi để hiển thị tin nhắn thực tế */}
           {/* Đã cập nhật để hiển thị tin nhắn từ server */}
-          {message
-            .slice()
-            .reverse()
-            .map((item, index) =>
-              item.idSend === user.id ? (
-                <div
-                  key={`message ${index}`}
-                  className="w-[98%] h-auto my-2 ml-2 flex flex-col items-end"
-                >
-                  {item.image ? (
-                    <img
-                      className="w-[100px] h-auto "
-                      src={item.image.replace(
-                        "dataimage/jpegbase64",
-                        "data:image/jpeg;base64,"
+          {messageGroup.length > 0 ? (
+            <>
+              {messageGroup
+                .slice()
+                .reverse()
+                .map((item, index) =>
+                  item.idSend === user.id ? (
+                    <div
+                      key={`message ${index}`}
+                      className="w-[98%] h-auto my-2 ml-2 flex flex-col items-end"
+                    >
+                      {item.image ? (
+                        <img
+                          className={
+                            item.image.includes(`dataimage/pngbase64`)
+                              ? "w-[50px] h-auto"
+                              : "w-[100px] h-auto"
+                          }
+                          src={handleImageMess(item.image)}
+                        />
+                      ) : (
+                        <p className="max-w-[50%] break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto">
+                          {item.content}
+                        </p>
                       )}
-                    />
+                    </div>
                   ) : (
-                    <p className="max-w-[50%] break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto">
-                      {item.text}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div
-                  key={`message ${index}`}
-                  className="w-full h-auto my-2 ml-2 flex flex-col items-start"
-                >
-                  {item.image ? (
-                    <img
-                      className="w-[100px] h-auto "
-                      src={item.image.replace(
-                        "dataimage/jpegbase64",
-                        "data:image/jpeg;base64,"
+                    <div
+                      key={`message ${index}`}
+                      className="w-full h-auto my-2 ml-2 flex flex-col items-start"
+                    >
+                      {item.image ? (
+                        <img
+                          className={
+                            item.image.includes(`dataimage/pngbase64`)
+                              ? "w-[50px] h-auto"
+                              : "w-[100px] h-auto"
+                          }
+                          src={handleImageMess(item.image)}
+                        />
+                      ) : (
+                        <p className="max-w-[50%] break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto">
+                          {item.content}
+                        </p>
                       )}
-                    />
+                    </div>
+                  )
+                )}
+            </>
+          ) : (
+            <>
+              {message
+                .slice()
+                .reverse()
+                .map((item, index) =>
+                  item.idSend === user.id ? (
+                    <div
+                      key={`message ${index}`}
+                      className="w-[98%] h-auto my-2 ml-2 flex flex-col items-end"
+                    >
+                      {item.image ? (
+                        <img
+                          className={
+                            item.image.includes(`dataimage/pngbase64`)
+                              ? "w-[50px] h-auto"
+                              : "w-[100px] h-auto"
+                          }
+                          src={handleImageMess(item.image)}
+                        />
+                      ) : (
+                        <p className="max-w-[50%] break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto">
+                          {item.text}
+                        </p>
+                      )}
+                    </div>
                   ) : (
-                    <p className="max-w-[50%] break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto">
-                      {item.text}
-                    </p>
-                  )}
-                </div>
+                    <div
+                      key={`message ${index}`}
+                      className="w-full h-auto my-2 ml-2 flex flex-col items-start"
+                    >
+                      {item.image ? (
+                        <img
+                          className={
+                            item.image.includes(`dataimage/pngbase64`)
+                              ? "w-[50px] h-auto"
+                              : "w-[100px] h-auto"
+                          }
+                          src={handleImageMess(item.image)}
+                        />
+                      ) : (
+                        <p className="max-w-[50%] break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto">
+                          {item.text}
+                        </p>
+                      )}
+                    </div>
+                  )
+                )}
+            </>
+          )}
+          {socketMess &&
+            socketMess
+              .filter(
+                (item) =>
+                  item.ReceivedID === user.id || item.SenderID === user.id
               )
-            )}
-          {socketMess
-            .filter(
-              (item) => item.ReceivedID === user.id || item.SenderID === user.id
-            )
-            .map((item, index) =>
-              item.SenderID === user.id ? (
-                <div
-                  key={`message ${index}`}
-                  className="w-[98%] h-auto my-2 ml-2 flex flex-col items-end"
-                >
-                  {item.Image ? (
-                    <img
-                      className="w-[100px] h-auto "
-                      src={item.Image.replace(
-                        "dataimage/jpegbase64",
-                        "data:image/jpeg;base64,"
-                      )}
-                    />
-                  ) : (
-                    <p className="max-w-[50%] break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto">
-                      {item.Content}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div
-                  key={`message ${index}`}
-                  className="w-full h-auto my-2 ml-2 flex flex-col items-start"
-                >
-                  {item.Image ? (
-                    <img
-                      className="w-[100px] h-auto "
-                      src={item.Image.replace(
-                        "dataimage/jpegbase64",
-                        "data:image/jpeg;base64,"
-                      )}
-                    />
-                  ) : (
-                    <p className="max-w-[50%] break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto">
-                      {item.data}
-                    </p>
-                  )}
-                </div>
-              )
-            )}
+              .map((item, index) =>
+                item.SenderID === user.id ? (
+                  <div
+                    key={`message ${index}`}
+                    className="w-[98%] h-auto my-2 ml-2 flex flex-col items-end"
+                  >
+                    {item.Content === "" ? (
+                      <img
+                        className={
+                          item.Image.includes(`dataimage/pngbase64`)
+                            ? "w-[50px] h-auto"
+                            : "w-[100px] h-auto"
+                        }
+                        src={handleImageMess(item.Image)}
+                      />
+                    ) : (
+                      <p className="max-w-[50%] break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto">
+                        {item.Content}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    key={`message ${index}`}
+                    className="w-full h-auto my-2 ml-2 flex flex-col items-start"
+                  >
+                    {item.Content === "" ? (
+                      <img
+                        className={
+                          item.Image.includes(`dataimage/pngbase64`)
+                            ? "w-[50px] h-auto"
+                            : "w-[100px] h-auto"
+                        }
+                        src={handleImageMess(item.Image)}
+                      />
+                    ) : (
+                      <p className="max-w-[50%] break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto">
+                        {item.Content}
+                      </p>
+                    )}
+                  </div>
+                )
+              )}
         </Box>
         <Box
           sx={{
@@ -705,6 +908,7 @@ const UserGroup = () => {
             justifyContent: "space-between",
             backgroundColor: "#FFFFFF",
             height: "auto",
+            position: "relative",
           }}
         >
           <Box
@@ -719,11 +923,10 @@ const UserGroup = () => {
               position: "relative",
             }}
           >
-            <IconButton className="relative">
+            <IconButton>
               <button className="border-none" onClick={handleToggleEmoji}>
                 <EmojiEmotionsIcon />
               </button>
-              {isEmoji && <EmojiPicker className="absolute w-[5px] h-[5px]" />}
             </IconButton>
             <div
               className={
@@ -754,7 +957,7 @@ const UserGroup = () => {
             <InputBase
               sx={{ ml: 1, flex: 1 }}
               placeholder="Type your message..."
-              value={messageContent}
+              value={inputEmoji ? inputEmoji : messageContent}
               onChange={handleMessageContentChange}
               onKeyUp={handleKeyUp}
             />
@@ -775,13 +978,27 @@ const UserGroup = () => {
               aria-label="Send message"
               onClick={() => handleButtonSend()}
               className={
-                messageContent === "" && imageContent === null
+                messageContent === "" &&
+                imageContent === null &&
+                inputEmoji === null
                   ? "text-black"
                   : "text-[#1976d2]"
               }
             >
               <SubdirectoryArrowRightSharpIcon sx={{ cursor: "pointer" }} />
             </IconButton>
+            <div
+              ref={pickerEmojiRef}
+              className="absolute top-[-705%] left-[6%] w-[5px] h-[5px]"
+            >
+              {isEmoji && (
+                <EmojiPicker
+                  emojiStyle={EmojiStyle.FACEBOOK}
+                  lazyLoadEmojis={true}
+                  onEmojiClick={handleClickEmoji}
+                />
+              )}
+            </div>
           </Box>
         </Box>
       </div>

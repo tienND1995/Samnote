@@ -720,7 +720,7 @@ const UserSketch = () => {
   const boardHeight = 500;
 
   return (
-    <div className="w-full">
+    <div className="w-full h-auto">
       <div className="flex flex-wrap items-center justify-between px-2 py-3">
         <h3 className="uppercase">sketch note</h3>
         <Button
@@ -796,6 +796,7 @@ const UserSketch = () => {
           onChange={(event) => setPayloadData(event.target.value)}
         />
       </div>
+
       <div>
         <div
           id="screenshot"
@@ -835,182 +836,181 @@ const UserSketch = () => {
               ))}
             </Layer>
           </Stage>
-        </div>
-      </div>
-      <div className="flex items-center justify-center py-2">
-        <Box
-          className="list-button"
-          sx={{
-            width: "fit-content",
-            height: "fit-content",
-            padding: "0 20px",
-            borderRadius: "40px",
-            zIndex: "5",
-            backgroundColor: "#999",
-            display: "flex",
-            color: "text.main",
-            flexDirection: "row",
-            justifyContent: "center",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <button
-              className="color-button"
-              style={{
-                backgroundColor: "#0000FF",
-                width: "20px",
-                height: "20px",
-                margin: "5px",
-                borderRadius: "50%",
-                cursor: "pointer",
-                border:
-                  selectedColor === "#0000FF"
-                    ? "3px solid #fff"
-                    : "0.5px solid #fff",
-              }}
-              onClick={() => handleColorChange("#0000FF")}
-            />
-            <button
-              className="color-button"
-              style={{
-                backgroundColor: "#FF0000",
-                width: "20px",
-                height: "20px",
-                margin: "5px",
-                borderRadius: "50%",
-                cursor: "pointer",
-                border:
-                  selectedColor === "#FF0000"
-                    ? "3px solid #fff"
-                    : "0.5px solid #fff",
-              }}
-              onClick={() => handleColorChange("#FF0000")}
-            />
-            <button
-              className="color-button"
-              style={{
-                backgroundColor: "#800080",
-                width: "20px",
-                height: "20px",
-                margin: "5px",
-                borderRadius: "50%",
-                cursor: "pointer",
-                border:
-                  selectedColor === "#800080"
-                    ? "3px solid #fff"
-                    : "0.5px solid #fff",
-              }}
-              onClick={() => handleColorChange("#800080")}
-            />
-            <button
-              className="color-button"
-              style={{
-                backgroundColor: "#FFFF00",
-                width: "20px",
-                height: "20px",
-                margin: "5px",
-                borderRadius: "50%",
-                cursor: "pointer",
-                border:
-                  selectedColor === "#FFFF00"
-                    ? "3px solid #fff"
-                    : "0.5px solid #fff",
-              }}
-              onClick={() => handleColorChange("#FFFF00")}
-            />
-            <button
-              className="color-button"
-              style={{
-                backgroundColor: "#000000",
-                width: "20px",
-                height: "20px",
-                margin: "5px",
-                borderRadius: "50%",
-                cursor: "pointer",
-                border:
-                  selectedColor === "#000000"
-                    ? "3px solid #fff"
-                    : "0.5px solid #fff",
-              }}
-              onClick={() => handleColorChange("#000000")}
-            />
-          </div>
-          <div
-            style={{
-              marginLeft: "20px",
+        </div>{" "}
+        <div className="flex items-center justify-center py-2">
+          <Box
+            className="list-button"
+            sx={{
+              width: "fit-content",
+              height: "fit-content",
+              padding: "0 20px",
+              borderRadius: "40px",
+              zIndex: "20",
+              backgroundColor: "#999",
               display: "flex",
-              alignItems: "center",
-              height: "80px",
+              color: "text.main",
+              flexDirection: "row",
+              justifyContent: "center",
             }}
           >
-            <button
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <button
+                className="color-button"
+                style={{
+                  backgroundColor: "#0000FF",
+                  width: "20px",
+                  height: "20px",
+                  margin: "5px",
+                  borderRadius: "50%",
+                  cursor: "pointer",
+                  border:
+                    selectedColor === "#0000FF"
+                      ? "3px solid #fff"
+                      : "0.5px solid #fff",
+                }}
+                onClick={() => handleColorChange("#0000FF")}
+              />
+              <button
+                className="color-button"
+                style={{
+                  backgroundColor: "#FF0000",
+                  width: "20px",
+                  height: "20px",
+                  margin: "5px",
+                  borderRadius: "50%",
+                  cursor: "pointer",
+                  border:
+                    selectedColor === "#FF0000"
+                      ? "3px solid #fff"
+                      : "0.5px solid #fff",
+                }}
+                onClick={() => handleColorChange("#FF0000")}
+              />
+              <button
+                className="color-button"
+                style={{
+                  backgroundColor: "#800080",
+                  width: "20px",
+                  height: "20px",
+                  margin: "5px",
+                  borderRadius: "50%",
+                  cursor: "pointer",
+                  border:
+                    selectedColor === "#800080"
+                      ? "3px solid #fff"
+                      : "0.5px solid #fff",
+                }}
+                onClick={() => handleColorChange("#800080")}
+              />
+              <button
+                className="color-button"
+                style={{
+                  backgroundColor: "#FFFF00",
+                  width: "20px",
+                  height: "20px",
+                  margin: "5px",
+                  borderRadius: "50%",
+                  cursor: "pointer",
+                  border:
+                    selectedColor === "#FFFF00"
+                      ? "3px solid #fff"
+                      : "0.5px solid #fff",
+                }}
+                onClick={() => handleColorChange("#FFFF00")}
+              />
+              <button
+                className="color-button"
+                style={{
+                  backgroundColor: "#000000",
+                  width: "20px",
+                  height: "20px",
+                  margin: "5px",
+                  borderRadius: "50%",
+                  cursor: "pointer",
+                  border:
+                    selectedColor === "#000000"
+                      ? "3px solid #fff"
+                      : "0.5px solid #fff",
+                }}
+                onClick={() => handleColorChange("#000000")}
+              />
+            </div>
+            <div
               style={{
-                margin: "0",
-                padding: "0 2px",
-
-                cursor: "pointer",
-                borderColor: "#f2f2f2",
-
-                backgroundColor: "#999",
-                transform: lineWidth === 2 ? "scale(1.1)" : "scale(0.8)",
+                marginLeft: "20px",
+                display: "flex",
+                alignItems: "center",
+                height: "80px",
               }}
-              onClick={() => handleWidthChange(2)}
             >
-              1X
-            </button>
-            <button
+              <button
+                style={{
+                  margin: "0",
+                  padding: "0 2px",
+
+                  cursor: "pointer",
+                  borderColor: "#f2f2f2",
+
+                  backgroundColor: "#999",
+                  transform: lineWidth === 2 ? "scale(1.1)" : "scale(0.8)",
+                }}
+                onClick={() => handleWidthChange(2)}
+              >
+                1X
+              </button>
+              <button
+                style={{
+                  margin: "0 10px",
+                  cursor: "pointer",
+                  backgroundColor: "#999",
+                  borderColor: "#f2f2f2",
+                  padding: "0 2px",
+                  transform: lineWidth === 4 ? "scale(1.1)" : "scale(0.8)",
+                }}
+                onClick={() => handleWidthChange(4)}
+              >
+                2X
+              </button>{" "}
+              <button
+                style={{
+                  margin: "0",
+                  padding: "0 2px",
+
+                  cursor: "pointer",
+                  backgroundColor: "#999",
+                  borderColor: "#f2f2f2",
+
+                  transform: lineWidth === 8 ? "scale(1.1)" : "scale(0.8)",
+                }}
+                onClick={() => handleWidthChange(8)}
+              >
+                4X
+              </button>{" "}
+            </div>
+            <div
               style={{
-                margin: "0 10px",
-                cursor: "pointer",
-                backgroundColor: "#999",
-                borderColor: "#f2f2f2",
-                padding: "0 2px",
-                transform: lineWidth === 4 ? "scale(1.1)" : "scale(0.8)",
-              }}
-              onClick={() => handleWidthChange(4)}
-            >
-              2X
-            </button>{" "}
-            <button
-              style={{
-                margin: "0",
-                padding: "0 2px",
-
-                cursor: "pointer",
-                backgroundColor: "#999",
-                borderColor: "#f2f2f2",
-
-                transform: lineWidth === 8 ? "scale(1.1)" : "scale(0.8)",
-              }}
-              onClick={() => handleWidthChange(8)}
-            >
-              4X
-            </button>{" "}
-          </div>
-          <div
-            style={{
-              marginLeft: "20px",
-              whiteSpace: "nowrap",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              gap: "10px",
-            }}
-          >
-            <Button
-              variant="outlined"
-              onClick={() => {
-                handleWidthChange(8);
-                handleColorChange("#fff");
+                marginLeft: "20px",
+                whiteSpace: "nowrap",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: "10px",
               }}
             >
-              delete
-            </Button>
-            <Button variant="outlined" onClick={handleUndo}>
-              undo
-            </Button>
-          </div>
-          {/* <div
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  handleWidthChange(8);
+                  handleColorChange("#fff");
+                }}
+              >
+                delete
+              </Button>
+              <Button variant="outlined" onClick={handleUndo}>
+                undo
+              </Button>
+            </div>
+            {/* <div
               style={{
                 marginLeft: "10px",
                 whiteSpace: "nowrap",
@@ -1023,7 +1023,8 @@ const UserSketch = () => {
                 dowload img
               </Button>
             </div> */}
-        </Box>
+          </Box>
+        </div>
       </div>
     </div>
   );
