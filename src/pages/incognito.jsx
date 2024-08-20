@@ -17,6 +17,7 @@ import api from "../api";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import CloseIcon from "@mui/icons-material/Close";
+import bg_chat from "../assets/img-chat-an-danh.jpg";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SubdirectoryArrowRightSharpIcon from "@mui/icons-material/SubdirectoryArrowRightSharp";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -74,13 +75,13 @@ const Incognito = () => {
 
     return formattedDateTime;
   }
+  //lấy tin nhắn
   const getMess = async (data) => {
     const payload = {
-      number: 0,
       idRoom: `${data.idRoom}`,
     };
     try {
-      const res = await api.post(`/message/chat-unknown-id`, payload);
+      const res = await api.post(`/message/chat-unknown-id?page=1`, payload);
       setMess(res.data.data.reverse());
       console.log("res.data.data", res.data.data);
       scrollToBottom();
@@ -145,11 +146,15 @@ const Incognito = () => {
       idReceive:
         userInfo !== null ? userInfo.id : part1 != user.id ? part1 : part2,
       idRoom: nowRoom ? nowRoom : `${user.id}#${userInfo.id}`,
-      sendAt,
+      img: null,
+      gif: null,
+      type: "text",
     };
 
     try {
       await api.post(`/message/chat-unknown/${user.id}`, senmess);
+      console.log("tin nhăns gửi ", senmess);
+
       setMess((prev) => (Array.isArray(prev) ? [...prev, senmess] : [senmess]));
       setSendMess("");
       setReload((prev) => prev + 1);
@@ -159,6 +164,18 @@ const Incognito = () => {
     }
   };
 
+  // const getSendMess = async (data) => {
+  //   try {
+  //     const res = await api.get(
+  //       `/message/chat-unknown-id/${data.idReceive}/${user.id}`
+  //     );
+  //     scrollToBottom();
+  //     console.log("check data", data);
+  //     setSendMess(res.data.data);
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
   const getSendMess = async (data) => {
     try {
       const res = await api.get(
@@ -212,18 +229,27 @@ const Incognito = () => {
   }, [user.id, reload]);
 
   return (
-    <Box className="text-white lg:flex bg-[#999] sm:grid sm:grid-cols-[300px_1fr]">
+    <Box className="text-white lg:flex bg-[#DFFFFE] sm:grid sm:grid-cols-[300px_1fr]">
       <Box
         className="sm:w-[300px]"
         sx={{
           display: "flex",
           flexDirection: "column",
-          margin: "0 10px",
-          // justifyContent: "center",
+          boxShadow: "2px 0 4px rgba(0, 0, 0, 0.1)",
           alignItems: "center",
         }}
       >
-        <Box className="relative">
+        <Box className="bg-[#B6F6FF] uppercase text-black w-full py-3 text-center font-bold">
+          chat
+        </Box>
+
+        <Box
+          className="relative"
+          style={{
+            margin: "0 10px",
+            boxShadow: "0 -2px 4px rgba(0, 0, 0, 0.1)",
+          }}
+        >
           {" "}
           <Box
             sx={{
@@ -345,39 +371,8 @@ const Incognito = () => {
             </Box>
           )}
         </Box>
-        <Box
-          sx={{
-            backgroundColor: "#56565DCC",
-            textAlign: "center",
-            borderRadius: "10px",
-            margin: "0 10px 10px",
-          }}
-        >
-          <div style={{ margin: "10px 0 0", padding: "0 10px 0" }}>
-            <img
-              style={{
-                height: "20px",
-                width: "20px",
-                marginRight: "5px",
-              }}
-              src="https://s3-alpha-sig.figma.com/img/9765/1fb1/545af073cb81365ffa194ba6a7206ff1?Expires=1721001600&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YP-6PnN36sD7~7-JrZkVVV7aDWVv4Ne6ZNik-vcASGppOo9~APa9puyjcWdbmvJp9z8RNmp6wMYmqquBvku5PUk6VjpGIpVbzDUS6M4BRabGwIKIiBIDCiM0zSiFEs8Aswgqp0aJ8YGDDhMoC5xfNoJyWHllBw0kuZCkhhJ9jGkRi-yp-niJCH38JZCi2nf9BsySXNaffArMVHFnECnOLKnk1nbVXHljJ-qbZ-rpdE2Kem9GOw4KYA~EnkIxbFhGIPzn2glqv5lOVZoUphbQ79wkVtjIfEAqN5egw8jT7kMIn-s7AMmpzKjGD1KfSD91P5wSA7TUAbJkt89e70gyEA__"
-              alt="Incognito"
-            />
-            Incognito
-          </div>
-          <p style={{ padding: "0 10px 0" }}>
-            You are now in incognito mode. You can send anonymous text with
-            other people.
-          </p>
-          <Button
-            variant="contained"
-            sx={{ padding: "5px 10px", borderRadius: "10px", margin: "10px 0" }}
-            onClick={() => navigate(`/user`)}
-          >
-            Quit
-          </Button>
-        </Box>
-        <Box className="max-h-[47vh] w-[90%] lg:max-h-[50vh] sm:w-[99%] overflow-auto scrollbar-none">
+
+        <Box className="max-h-[47vh] w-[90%] lg:max-h-[50vh] sm:w-[99%] overflow-auto scrollbar-none text-black">
           {" "}
           {userChat.length > 0 ? (
             userChat.map((item, idx) => (
@@ -386,10 +381,10 @@ const Incognito = () => {
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  borderRadius: "10px",
+                  borderRadius: "30px",
                   margin: "5px 10px",
-                  padding: "5px",
-                  backgroundColor: "#56565DCC",
+                  // padding: "5px",
+                  backgroundColor: "#fff",
                   justifyContent: "space-between",
                 }}
                 onClick={() => {
@@ -419,15 +414,17 @@ const Incognito = () => {
                     </svg>
                   ) : (
                     <Avatar
-                      sx={{ width: "40px", height: "40px", margin: "4px" }}
+                      sx={{ width: "40px", height: "40px" }}
                       src={item.user.avatar}
                     />
                   )}
-                  <Box sx={{ marginLeft: "10px" }}>
+                  <Box sx={{ marginLeft: "10px", fontWeight: "700" }}>
                     {item.user === "Unknow" ? (
-                      <Typography variant="body1">User name</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: "700" }}>
+                        User name
+                      </Typography>
                     ) : (
-                      <Typography variant="body1">
+                      <Typography variant="body1" sx={{ fontWeight: "700" }}>
                         {item.user.username}
                       </Typography>
                     )}
@@ -445,7 +442,7 @@ const Incognito = () => {
                   </Box>
                 </Box>
                 <DeleteIcon
-                  className="cursor-pointer"
+                  className="cursor-pointer mr-3"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -463,15 +460,18 @@ const Incognito = () => {
         </Box>
       </Box>
       {nowChat !== null ? (
-        <Box className="fixed inset-0 z-[3] sm:static w-full">
+        <Box className="fixed inset-0 z-[3] sm:static w-full text-black">
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
               padding: "5px 10px",
-              backgroundColor: "#999",
+              backgroundColor: "#DFFFFE",
+              boxShadow: "0 4px 4px rgba(0, 0, 0, 0.3)",
               justifyContent: "space-between",
               height: "50px",
+              position: "relative",
+              zIndex: 100,
             }}
           >
             {" "}
@@ -545,9 +545,13 @@ const Incognito = () => {
             className="h-[74vh] lg:h-[79vh]"
             sx={{
               width: "100%",
-              backgroundColor: "#888",
+              // backgroundColor: "#888",
+              backgroundImage: `url(${bg_chat})`,
               overflow: "auto",
               scrollbarWidth: "none",
+              backgroundPosition: "center bottom", // Vị trí trung tâm và phần dưới của hình ảnh
+              backgroundSize: "200%", // Phóng to hình ảnh lên 150% kích thước gốc
+              backgroundRepeat: "no-repeat",
             }}
           >
             {messenger?.map((info, index) => (

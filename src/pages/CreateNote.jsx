@@ -155,9 +155,13 @@ const CreateNote = () => {
     console.log("selectedForDeletion", selectedForDeletion);
     console.log("Selected Files state:", selectedFiles);
     const updateCheckWidth = () => {
-      window.innerWidth > 1024
-        ? setCheckWidth(window.innerWidth - 330)
-        : setCheckWidth(window.innerWidth - 60);
+      if (window.innerWidth > 1200) {
+        setCheckWidth(950);
+      } else if (window.innerWidth > 1024) {
+        setCheckWidth(window.innerWidth - 330);
+      } else {
+        setCheckWidth(window.innerWidth - 60);
+      }
     };
 
     // Sử dụng useEffect để lắng nghe sự kiện resize của cửa sổ
@@ -438,11 +442,6 @@ const CreateNote = () => {
       linkNoteShare: "",
       notePublic,
     };
-    const formPayload = new FormData();
-    formPayload.append("image_note", selectedFiles);
-
-    console.log("payload", payload.color.r);
-    console.log("formPayload", formPayload);
 
     try {
       const res = await api.post(`/notes/${user.id}`, payload);
