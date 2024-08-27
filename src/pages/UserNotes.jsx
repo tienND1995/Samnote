@@ -152,6 +152,7 @@ export default function UserNotes() {
   const [updateTrigger, setUpdateTrigger] = useState(0);
   const [allColor, setAllColor] = useState([]);
   const [reload, setReload] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const appContext = useContext(AppContext);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [selectedForDeletion, setSelectedForDeletion] = useState([]);
@@ -227,33 +228,20 @@ export default function UserNotes() {
   };
 
   useEffect(() => {
-    let ignore = false;
     const getUserNote = async () => {
       try {
-        const res = await api.get(
-          `https://samnote.mangasocial.online/notes/${user.id}`
-        );
-        if (!ignore) {
-          const filteredNotes = res.data.notes.filter(
-            (note) =>
-              note.type === "text" ||
-              note.type === "checkList" ||
-              note.type === "checklist"
-          );
-          setUserNote(filteredNotes);
-          console.log(filteredNotes);
-        }
+        const res = await api.get(`/notes/${user.id}?page=${currentPage}`);
+        console.log(`notes/${user.id}?page=${currentPage}`);
+        console.log("res", res.data);
+
+        setUserNote(res.data.notes);
       } catch (err) {
         console.log(err);
       }
     };
 
     getUserNote();
-
-    return () => {
-      ignore = true;
-    };
-  }, [user.id, updateTrigger]);
+  }, [user.id, updateTrigger, currentPage]);
 
   const handleReload = () => {
     setReload((prev) => prev + 1);
@@ -410,8 +398,6 @@ export default function UserNotes() {
   };
 
   const Pagination = ({ totalPage }) => {
-    const [currentPage, setCurrentPage] = useState(1);
-
     const handlePageClick = (page) => {
       setCurrentPage(page);
     };
@@ -646,7 +632,7 @@ export default function UserNotes() {
                     dangerouslySetInnerHTML={{ __html: info.data }}
                   />
                 )}
-                <div className="flex gap-2">
+                <div className="flex gap-2 overflow-hidden">
                   {info.image &&
                     info.image.map((image, index) => (
                       <img

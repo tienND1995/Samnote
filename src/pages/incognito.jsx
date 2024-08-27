@@ -40,10 +40,10 @@ const Incognito = () => {
   const [searchData, setSearchMessage] = useState("");
   const [dataSearch, setdataSearch] = useState(null);
   const [nowChat, setNowChat] = useState(userInfomations);
-  const [nowType, setNowType] = useState("text");
   const [selectedImage, setSelectedImage] = useState(null); // State for a single image
   const inputRef = useRef(null);
   const [showGiphySearch, setShowGiphySearch] = useState(false);
+  const [page, setPage] = useState(1);
   //----------------------------------------------------------------
   function GiphySearch() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -51,6 +51,7 @@ const Incognito = () => {
     const [selectedGif, setSelectedGif] = useState(null); // State để theo dõi GIF được chọn
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
     const API_KEY = "3f9X5UA8I0bbK3h9fwysbiEbluBM6JrC"; // Thay thế bằng API key của bạn
 
     // Hàm tìm kiếm hoặc tải GIFs phổ biến
@@ -373,7 +374,7 @@ const Incognito = () => {
     const senmess = {
       content: null,
       idReceive:
-        userInfo !== null ? userInfo.id : part1 !== user.id ? part1 : part2,
+        userInfo != null ? userInfo.id : part1 != user.id ? part1 : part2,
       idRoom: nowRoom ? nowRoom : `${user.id}#${userInfo.id}`,
       img: selectedImage.url, // Sử dụng URL tạm thời để hiển thị ảnh
       gif: null,
@@ -822,9 +823,17 @@ const Incognito = () => {
                         {info.content}
                       </Box>
                     ) : info.type === "image" ? (
-                      <img src={info.img} alt="image" />
+                      <img
+                        src={info.img}
+                        alt="image"
+                        className="w-[30wh] h-[40vh] m-2"
+                      />
                     ) : info.type === "gif" ? (
-                      <img src={info.gif} alt="GIF" />
+                      <img
+                        src={info.gif}
+                        alt="GIF"
+                        className="max-w-[30wh] max-h-[40vh] m-2"
+                      />
                     ) : null}
                   </>
                 ) : (
@@ -846,13 +855,13 @@ const Incognito = () => {
                       <img
                         src={info.img}
                         alt="image"
-                        className="w-[30wh] h-[50vh] m-2"
+                        className="w-[30wh] h-[40vh] m-2"
                       />
                     ) : info.type === "gif" ? (
                       <img
                         src={info.gif}
                         alt="GIF"
-                        className="max-w-[30wh] max-h-[50vh] m-2"
+                        className="max-w-[30wh] max-h-[40vh] m-2"
                       />
                     ) : (
                       ""
