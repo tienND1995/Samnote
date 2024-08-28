@@ -21,7 +21,13 @@ import "../bootstrap.css";
 import { useEffect, useState, useContext } from "react";
 import { AppContext } from "../context";
 import axios from "axios";
-
+import { Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import NorthEastIcon from "@mui/icons-material/NorthEast";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -54,10 +60,10 @@ const ScrollClassAdder = ({ targetId, className, threshold }) => {
       const targetElement = document.getElementById(targetId);
 
       if (scrollTop >= threshold && !isScrolled) {
-        targetElement.classList.add(className);
+        targetElement.classList.add(className.trim()); // Xóa khoảng trắng thừa
         setIsScrolled(true);
       } else if (scrollTop < threshold && isScrolled) {
-        targetElement.classList.remove(className);
+        targetElement.classList.remove(className.trim());
         setIsScrolled(false);
       }
     };
@@ -71,12 +77,6 @@ const ScrollClassAdder = ({ targetId, className, threshold }) => {
   return null;
 };
 
-const Mybox = styled(Box)({
-  textAlign: "center",
-  fontSize: "50px",
-  fontWeight: "700",
-  marginBottom: "30px",
-});
 const Home = () => {
   const [informations, setInformation] = useState(null);
   const [newNotes, setLastPublicNote] = useState(null);
@@ -86,7 +86,6 @@ const Home = () => {
   const [canRefresh, setCanRefresh] = useState(true);
   const appContext = useContext(AppContext);
   const { user } = appContext;
-
   const navigate = useNavigate();
 
   const getProfile = async () => {
@@ -160,7 +159,7 @@ const Home = () => {
   };
   const mdScreen = useMediaQuery("(max-width:767px)");
   return (
-    <Box sx={{ maxWidth: "760px", margin: "0 auto" }}>
+    <Box sx={{}}>
       <ScrollClassAdder
         targetId="myElement"
         className="active "
@@ -170,7 +169,9 @@ const Home = () => {
         id="myElement"
         style={{
           display: "flex",
+          backgroundColor: "#E95B31",
           height: "70px",
+          padding: "0 30px",
           alignItems: "center",
           justifyContent: "space-between",
         }}
@@ -182,12 +183,7 @@ const Home = () => {
             justifyContent: "center",
           }}
         >
-          <img
-            src="../public/logo.png"
-            alt="logo"
-            style={{ width: "32px", height: "32px", marginRight: "20px" }}
-          />
-          <Typography color="text.primary">SAMNOTES</Typography>
+          <p style={{ fontWeight: "700", padding: 0, margin: 0 }}>SAMNOTES</p>
         </div>
 
         <div
@@ -212,14 +208,23 @@ const Home = () => {
                     backgroundColor: "#323436",
                     padding: "20px 30px",
                   }
-                : { display: "flex", marginBottom: "0px", alignItems: "center" }
+                : {
+                    display: "flex",
+                    marginBottom: "0px",
+                    alignItems: "center",
+                    color: "#fff",
+                  }
             }
           >
             <li
               style={
                 mdScreen
                   ? { color: "#fff", padding: "10px 0px" }
-                  : { whiteSpace: "nowrap", fontSize: "14px" }
+                  : {
+                      whiteSpace: "nowrap",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                    }
               }
               onClick={() => navigate(`/user/note`)}
             >
@@ -233,6 +238,7 @@ const Home = () => {
                       whiteSpace: "nowrap",
                       margin: "0 10px",
                       fontSize: "14px",
+                      fontWeight: "500",
                     }
               }
             >
@@ -242,7 +248,11 @@ const Home = () => {
               style={
                 mdScreen
                   ? { color: "#fff", padding: "10px 0px" }
-                  : { whiteSpace: "nowrap", fontSize: "14px" }
+                  : {
+                      whiteSpace: "nowrap",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                    }
               }
             >
               Help
@@ -255,6 +265,7 @@ const Home = () => {
                       whiteSpace: "nowrap",
                       margin: "0 10px",
                       fontSize: "14px",
+                      fontWeight: "500",
                     }
               }
             >
@@ -264,7 +275,11 @@ const Home = () => {
               style={
                 mdScreen
                   ? { color: "#fff", padding: "10px 0px" }
-                  : { whiteSpace: "nowrap", fontSize: "14px" }
+                  : {
+                      whiteSpace: "nowrap",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                    }
               }
             >
               Support Forum
@@ -278,6 +293,7 @@ const Home = () => {
                         whiteSpace: "nowrap",
                         margin: "0 10px",
                         fontSize: "14px",
+                        fontWeight: "500",
                       }
                 }
                 onClick={() => {
@@ -286,9 +302,24 @@ const Home = () => {
               >
                 <Link
                   to="login"
-                  style={{ textDecoration: "none", color: "black" }}
+                  style={{
+                    textDecoration: "none",
+                    fontWeight: "500",
+                    color: "#fff",
+                  }}
                 >
-                  Login
+                  <svg
+                    width="25"
+                    height="25"
+                    viewBox="0 0 25 25"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12.5 12.5C13.7432 12.5 14.9355 12.0061 15.8146 11.1271C16.6936 10.248 17.1875 9.0557 17.1875 7.8125C17.1875 6.5693 16.6936 5.37701 15.8146 4.49794C14.9355 3.61886 13.7432 3.125 12.5 3.125C11.2568 3.125 10.0645 3.61886 9.18544 4.49794C8.30636 5.37701 7.8125 6.5693 7.8125 7.8125C7.8125 9.0557 8.30636 10.248 9.18544 11.1271C10.0645 12.0061 11.2568 12.5 12.5 12.5ZM15.625 7.8125C15.625 8.6413 15.2958 9.43616 14.7097 10.0222C14.1237 10.6083 13.3288 10.9375 12.5 10.9375C11.6712 10.9375 10.8763 10.6083 10.2903 10.0222C9.70424 9.43616 9.375 8.6413 9.375 7.8125C9.375 6.9837 9.70424 6.18884 10.2903 5.60279C10.8763 5.01674 11.6712 4.6875 12.5 4.6875C13.3288 4.6875 14.1237 5.01674 14.7097 5.60279C15.2958 6.18884 15.625 6.9837 15.625 7.8125ZM21.875 20.3125C21.875 21.875 20.3125 21.875 20.3125 21.875H4.6875C4.6875 21.875 3.125 21.875 3.125 20.3125C3.125 18.75 4.6875 14.0625 12.5 14.0625C20.3125 14.0625 21.875 18.75 21.875 20.3125ZM20.3125 20.3062C20.3109 19.9219 20.0719 18.7656 19.0125 17.7062C17.9938 16.6875 16.0766 15.625 12.5 15.625C8.92344 15.625 7.00625 16.6875 5.9875 17.7062C4.92813 18.7656 4.69062 19.9219 4.6875 20.3062H20.3125Z"
+                      fill="black"
+                    />
+                  </svg>
                 </Link>
               </li>
             ) : (
@@ -329,12 +360,273 @@ const Home = () => {
         </div>
       </header>
 
-      <main>
+      <main style={{ maxWidth: "760px", margin: "0 auto" }}>
         {" "}
-        <Mybox component="h2">
+        <div className="flex flex-col items-center text-center gap-3 my-4">
+          {" "}
+          <img
+            src="../public/logo.png"
+            alt="logo"
+            style={{ width: "80px", height: "80px", marginRight: "20px" }}
+          />
+          <h2
+            style={{
+              textTransform: "uppercase",
+              fontSize: "40px",
+              fontWeight: "700",
+            }}
+          >
+            samnote
+          </h2>
+          <p style={{ fontSize: "20px", fontWeight: "700" }}>
+            Visit the app store for more information
+          </p>
+          <div>
+            <button
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: "30px",
+                padding: "5px 10px",
+                margin: "0 5px",
+                width: "180px",
+                textAlign: "center",
+              }}
+            >
+              Google Play Store <NorthEastIcon />
+            </button>
+            <button
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: "30px",
+                padding: "5px 10px",
+                margin: "0 5px",
+                width: "180px",
+                textAlign: "center",
+              }}
+            >
+              App Store
+              <NorthEastIcon />
+            </button>
+          </div>
+          <h2
+            style={{
+              fontSize: "40px",
+              fontWeight: "700",
+            }}
+          >
+            About Samsung Notes
+          </h2>
+          <p>
+            With Samsung Notes you can create notes containing texts, images
+            with footnotes, voice recordings, and music. Moreover, you can share
+            your notes easily to SNS.nPreviously made any memos from S Note and
+            Memo also can be imported into Samsung Notes.nSamsung Notes provides
+            various brush types and color mixers, so that you can draw fabulous
+            paintings like professional painters.
+          </p>
+          <div className="w-[750px] h-[350px]">
+            {" "}
+            <Swiper
+              modules={[Navigation, Pagination]}
+              spaceBetween={20}
+              slidesPerView={1}
+              pagination={{ clickable: true }}
+              navigation
+              onSlideChange={() => console.log("slide change")}
+              onSwiper={(swiper) => console.log(swiper)}
+            >
+              <SwiperSlide
+                className={`rounded-xl bg-[url(/img-slider-1.png)] h-[350px] bg-center bg-no-repeat bg-cover`}
+              ></SwiperSlide>
+              <SwiperSlide
+                className={`rounded-xl bg-[url(/img-slider-2.png)] h-[350px] bg-center bg-no-repeat bg-cover`}
+              ></SwiperSlide>
+              <SwiperSlide
+                className={`rounded-xl bg-[url(/img-slider-3.png)] h-[350px] bg-center bg-no-repeat bg-cover`}
+              ></SwiperSlide>
+              <SwiperSlide
+                className={`rounded-xl bg-[url(/img-slider-4.png)] h-[350px] bg-center bg-no-repeat bg-cover`}
+              ></SwiperSlide>
+              <SwiperSlide
+                className={`rounded-xl bg-[url(/img-slider-5.png)] h-[350px] bg-center bg-no-repeat bg-cover`}
+              ></SwiperSlide>{" "}
+              <SwiperSlide
+                className={`rounded-xl bg-[url(/img-slider-6.png)] h-[350px] bg-center bg-no-repeat bg-cover`}
+              ></SwiperSlide>{" "}
+              <SwiperSlide
+                className={`rounded-xl bg-[url(/img-slider-8.png)] h-[350px] bg-center bg-no-repeat bg-cover`}
+              ></SwiperSlide>
+              <SwiperSlide
+                className={`rounded-xl bg-[url(/img-slider-9.png)] h-[350px] bg-center bg-no-repeat bg-cover`}
+              ></SwiperSlide>{" "}
+              <SwiperSlide
+                className={`rounded-xl bg-[url(/img-slider-7.png)] h-[350px] bg-center bg-no-repeat bg-cover relative`}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "40px",
+                    left: "50%",
+                    display: "flex",
+                    transform: "translateX(-50%)",
+                  }}
+                >
+                  <a
+                    style={{
+                      backgroundColor: "#fff",
+                      borderRadius: "30px",
+                      padding: "5px 10px",
+                      display: "inline-block",
+                      margin: "0 5px",
+                      width: "180px",
+                      textAlign: "center",
+                    }}
+                  >
+                    Google Play Store <NorthEastIcon />
+                  </a>
+                  <a
+                    style={{
+                      backgroundColor: "#fff",
+                      borderRadius: "30px",
+                      padding: "5px 10px",
+                      display: "inline-block",
+                      margin: "0 5px",
+                      width: "180px",
+                      textAlign: "center",
+                    }}
+                  >
+                    App Store
+                    <NorthEastIcon />
+                  </a>
+                </div>
+              </SwiperSlide>{" "}
+            </Swiper>
+          </div>
+          <h2
+            style={{
+              textAlign: "center",
+              fontSize: "40px",
+              fontWeight: "700",
+              marginBottom: "30px",
+            }}
+          >
+            Find solutions
+          </h2>
+          <div className="w-[750px] rounded-xl border border-gray-500 p-3 flex items-center gap-2">
+            <img
+              className="w-[170px] h-[100px] object-cover rounded-xl"
+              src="/img-Find-solutions-1.png"
+              alt=""
+            />
+            <div className="text-left ">
+              <h5>Sync Samsung Notes with Microsoft OneNote</h5>
+              <p className="text-justify text-xs">
+                If your Samsung Notes app is full of important folders, notes,
+                and tasks, you can make sure they'll never get lost by using
+                Microsoft OneNote. This service allows you to sync your notes
+                across all of your devices so you can view them from Microsoft
+                Office on a PC. You’ll just need to make sure you’re signed in
+                to your Microsoft account on your Galaxy phone or tablet. You
+                can sync the Reminder app with Microsoft To Do as well, if you’d
+                like to view both your notes and reminders...
+              </p>
+            </div>
+          </div>
+          <div className="w-[750px] rounded-xl border border-gray-500 p-3 flex items-center gap-2">
+            <img
+              className="w-[170px] h-[100px] object-cover rounded-xl"
+              src="/img-Find-solutions-2.png"
+              alt=""
+            />
+            <div className="text-left ">
+              <h5>Use Samsung Notes on your Samsung PC</h5>
+              <p className="text-justify text-xs">
+                Create memos and reminders with the Samsung Notes app on
+                a Samsung Galaxy Book. It lets you type notes using the keyboard
+                or draw right on the screen with an S Pen. If your model doesn't
+                include an S Pen but has a touch screen, you can use a stylus or
+                your finger to create notes instead. If you have voice
+                recognition enabled, you can speak to the app so it will write
+                notes for you. Your notes can be saved for future editing and
+                browsing if you need to check them again....
+              </p>
+            </div>
+          </div>
+          <div className="w-[750px] rounded-xl border border-gray-500 p-3 flex items-center gap-2">
+            <img
+              className="w-[170px] h-[100px] object-cover rounded-xl"
+              src="/img-Find-solutions-3.png"
+              alt=""
+            />
+            <div className="text-left ">
+              <h5>Use Samsung Notes handwriting functions with your S Pen</h5>
+              <p className="text-justify text-xs">
+                Handwriting mode in the Samsung Notes app makes it easier than
+                ever to copy down your ideas or draw a picture any time your
+                muse inspires you. While you can use your finger to draw or
+                write in the app, an S Pen truly enhances the experience!
+                Handwriting in notes can be altered, moved, and converted to
+                text as well so you'll be able to organize your notes and share
+                them with your friends or associates via text or email...{" "}
+              </p>
+            </div>
+          </div>
+          <div className="w-[750px] rounded-xl border border-gray-500 p-3 flex items-center gap-2">
+            <img
+              className="w-[170px] h-[100px] object-cover rounded-xl"
+              src="/img-Find-solutions-4.png"
+              alt=""
+            />
+            <div className="text-left ">
+              <h5>Import and export PDFs with Samsung Notes</h5>
+              <p className="text-justify text-xs">
+                The Samsung Notes app on your Note20 5G or Note20 Ultra 5G has a
+                new feature that lets you import PDF documents. You can write
+                on, draw on, and annotate your PDFs right from the app and then
+                save them for future use. There are additional options for
+                exporting PDFs and notes as well, such as PowerPoint
+                presentations or Microsoft Word documents, if you need to add
+                the contents elsewhere...
+              </p>
+            </div>
+          </div>
+          <button
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "30px",
+              padding: "5px 10px",
+              display: "inline-block",
+              margin: "0 5px",
+              width: "120px",
+              textAlign: "center",
+            }}
+          >
+            View more
+          </button>
+          <div className="bg-[url(/bg-SamNotes-Account.png)] w-[1100px] h-[150px] bg-cover bg-center bg-no-repeat flex items-center flex-col justify-center">
+            <h5>SamNotes Account</h5>
+            <p>
+              Access your SamNotes account to get product support, order
+              tracking, exclusive rewards and offers.
+            </p>
+            <h6>
+              <a className="text-black" href="">
+                Sign in to SamNotes
+              </a>
+            </h6>
+          </div>
+        </div>
+        <h2
+          style={{
+            textAlign: "center",
+            fontSize: "40px",
+            fontWeight: "700",
+            marginBottom: "30px",
+          }}
+        >
           The simplest way to <br></br>
           keep notes
-        </Mybox>
+        </h2>
         <p style={{ marginBottom: "30px", textAlign: "center" }}>
           All your notes, synced on all your devices. Get Samnotes now for iOS,
           Android or in your browser.
@@ -361,8 +653,7 @@ const Home = () => {
         </div>
         <div
           style={{
-            backgroundImage:
-              "linear-gradient(to left,    rgba(113, 236, 70, 0.64),    rgba(233, 15, 237, 0.35)  )",
+            backgroundColor: "#E95B31",
             padding: "20px",
             borderRadius: "10px",
           }}
@@ -472,13 +763,19 @@ const Home = () => {
             backgroundColor: "text.primary",
           }}
         ></Box>
-        <h5 style={{ fontSize: "24px", marginTop: "40px" }}>
+        <h5
+          style={{
+            fontSize: "24px",
+            marginTop: "40px",
+            fontWeight: "700",
+            textAlign: "center",
+          }}
+        >
           Lastest Public Notes
         </h5>
         <div
           style={{
-            backgroundImage:
-              "linear-gradient(to right,    rgba(113, 236, 70, 0.64),    rgba(233, 15, 237, 0.35)  )",
+            backgroundColor: "#E95B31",
             padding: "20px",
             borderRadius: "10px",
           }}
@@ -532,11 +829,19 @@ const Home = () => {
             backgroundColor: "text.primary",
           }}
         ></Box>
-        <h5 style={{ fontSize: "24px", marginTop: "40px" }}>New Users</h5>
+        <h5
+          style={{
+            fontSize: "24px",
+            marginTop: "40px",
+            fontWeight: "700",
+            textAlign: "center",
+          }}
+        >
+          New Users
+        </h5>
         <div
           style={{
-            backgroundImage:
-              "linear-gradient(to right,    rgba(113, 236, 70, 0.44),    rgba(233, 15, 237, 0.15)  )",
+            backgroundColor: "#E95B31",
             padding: "20px",
             borderRadius: "10px",
           }}
@@ -593,14 +898,20 @@ const Home = () => {
         ></Box>
         <div
           style={{
-            backgroundImage:
-              "linear-gradient(to top,    rgba(113, 236, 70, 0.64),    rgba(233, 15, 237, 0.35)  )",
-            padding: "60px 40px 40px",
+            backgroundColor: "#E95B31",
+            padding: "20px 40px 40px",
             borderRadius: "10px",
             marginTop: "50px",
           }}
         >
-          <span style={{ fontSize: "20px" }}>Online</span>
+          <h2
+            style={{
+              color: "#fff",
+              fontWeight: "700",
+            }}
+          >
+            Online
+          </h2>
           {userOnline !== null ? (
             userOnline?.map((item, index) => (
               <div
@@ -668,7 +979,16 @@ const Home = () => {
           }}
         ></Box>
         <section>
-          <Mybox>Comprehensive underneath, simple on the surface</Mybox>
+          <p
+            style={{
+              textAlign: "center",
+              fontSize: "40px",
+              fontWeight: "700",
+              marginBottom: "30px",
+            }}
+          >
+            Comprehensive underneath,<br></br> simple on the surface
+          </p>
           <div className="container">
             <div className="row">
               <div className="col-lg-4 col-sm-6 col-12">
@@ -748,7 +1068,16 @@ const Home = () => {
           </div>
         </section>
         <section className="saying">
-          <Mybox>What people are saying</Mybox>
+          <p
+            style={{
+              textAlign: "center",
+              fontSize: "40px",
+              fontWeight: "700",
+              marginBottom: "30px",
+            }}
+          >
+            What people are saying
+          </p>
           <div className="container">
             <div className="row">
               <div
@@ -810,7 +1139,16 @@ const Home = () => {
           </div>
         </section>
         <section>
-          <Mybox>Available on all your devices</Mybox>
+          <p
+            style={{
+              textAlign: "center",
+              fontSize: "40px",
+              fontWeight: "700",
+              marginBottom: "30px",
+            }}
+          >
+            Available on all your devices
+          </p>
           <Box
             component="p"
             sx={{

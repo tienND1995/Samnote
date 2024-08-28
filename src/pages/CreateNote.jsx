@@ -18,14 +18,12 @@ import "react-datepicker/dist/react-datepicker.css";
 import api from "../api";
 import Folder from "../components/Folder";
 import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
 import { AppContext } from "../context";
 import { format } from "date-fns";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { Navigation } from "swiper/modules";
-
-// Import Swiper styles
+import "swiper/css";
 import "swiper/css";
 import "./createnote.css";
 import "swiper/css/navigation";

@@ -11,12 +11,14 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import SvgIcon from "@mui/material/SvgIcon";
 import Avatar from "@mui/material/Avatar";
+import { Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
+import "swiper/css/navigation";
 import RestoreIcon from "@mui/icons-material/Restore";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { Pagination } from "swiper/modules";
 
 const UserDustbin = () => {
   const appContext = useContext(AppContext);
@@ -298,9 +300,6 @@ const UserDustbin = () => {
                       spaceBetween={10}
                       slidesPerView={1}
                       navigation
-                      pagination={{
-                        clickable: true,
-                      }}
                       breakpoints={{
                         551: {
                           slidesPerView: 2,
