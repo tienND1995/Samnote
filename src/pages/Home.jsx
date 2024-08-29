@@ -21,7 +21,7 @@ import "../bootstrap.css";
 import { useEffect, useState, useContext } from "react";
 import { AppContext } from "../context";
 import axios from "axios";
-import { Navigation, Pagination } from "swiper/modules";
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -219,11 +219,12 @@ const Home = () => {
             <li
               style={
                 mdScreen
-                  ? { color: "#fff", padding: "10px 0px" }
+                  ? { color: "#fff", padding: "10px 0px", cursor: "pointer" }
                   : {
                       whiteSpace: "nowrap",
                       fontSize: "14px",
                       fontWeight: "500",
+                      cursor: "pointer",
                     }
               }
               onClick={() => navigate(`/user/note`)}
@@ -233,66 +234,93 @@ const Home = () => {
             <li
               style={
                 mdScreen
-                  ? { color: "#fff", padding: "10px 0px" }
+                  ? { color: "#fff", padding: "10px 0px", cursor: "pointer" }
                   : {
                       whiteSpace: "nowrap",
                       margin: "0 10px",
                       fontSize: "14px",
+                      cursor: "pointer",
+                      fontWeight: "500",
+                    }
+              }
+              onClick={() => navigate(`/user/photo`)}
+            >
+              Photos
+            </li>
+            <li
+              style={
+                mdScreen
+                  ? { color: "#fff", cursor: "pointer", padding: "10px 0px" }
+                  : {
+                      whiteSpace: "nowrap",
+                      margin: "0 10px",
+                      fontSize: "14px",
+                      cursor: "pointer",
+                      fontWeight: "500",
+                    }
+              }
+              onClick={() => navigate(`/user/group`)}
+            >
+              Group
+            </li>
+            <li
+              style={
+                mdScreen
+                  ? { color: "#fff", cursor: "pointer", padding: "10px 0px" }
+                  : {
+                      whiteSpace: "nowrap",
+                      margin: "0 10px",
+                      fontSize: "14px",
+                      cursor: "pointer",
+                      fontWeight: "500",
+                    }
+              }
+              onClick={() => navigate(`/user/dustbin`)}
+            >
+              Dustbin
+            </li>
+            <li
+              style={
+                mdScreen
+                  ? { color: "#fff", cursor: "pointer", padding: "10px 0px" }
+                  : {
+                      whiteSpace: "nowrap",
+                      margin: "0 10px",
+                      fontSize: "14px",
+                      cursor: "pointer",
+                      fontWeight: "500",
+                    }
+              }
+              onClick={() => navigate(`/user/sketch`)}
+            >
+              Sketch
+            </li>
+            <li
+              style={
+                mdScreen
+                  ? { color: "#fff", cursor: "pointer", padding: "10px 0px" }
+                  : {
+                      whiteSpace: "nowrap",
+                      margin: "0 10px",
+                      fontSize: "14px",
+                      cursor: "pointer",
                       fontWeight: "500",
                     }
               }
             >
               Contact Us
             </li>
-            <li
-              style={
-                mdScreen
-                  ? { color: "#fff", padding: "10px 0px" }
-                  : {
-                      whiteSpace: "nowrap",
-                      fontSize: "14px",
-                      fontWeight: "500",
-                    }
-              }
-            >
-              Help
-            </li>
-            <li
-              style={
-                mdScreen
-                  ? { color: "#fff", padding: "10px 0px" }
-                  : {
-                      whiteSpace: "nowrap",
-                      margin: "0 10px",
-                      fontSize: "14px",
-                      fontWeight: "500",
-                    }
-              }
-            >
-              Blog
-            </li>
-            <li
-              style={
-                mdScreen
-                  ? { color: "#fff", padding: "10px 0px" }
-                  : {
-                      whiteSpace: "nowrap",
-                      fontSize: "14px",
-                      fontWeight: "500",
-                    }
-              }
-            >
-              Support Forum
-            </li>
+
             {user === null ? (
               <li
                 style={
                   mdScreen
-                    ? { color: "#fff", padding: "10px 0px" }
+                    ? { color: "#fff", cursor: "pointer", padding: "10px 0px" }
                     : {
                         whiteSpace: "nowrap",
                         margin: "0 10px",
                         fontSize: "14px",
+                        cursor: "pointer",
                         fontWeight: "500",
                       }
                 }
@@ -305,6 +333,7 @@ const Home = () => {
                   style={{
                     textDecoration: "none",
                     fontWeight: "500",
+                    cursor: "pointer",
                     color: "#fff",
                   }}
                 >
@@ -365,7 +394,7 @@ const Home = () => {
         <div className="flex flex-col items-center text-center gap-3 my-4">
           {" "}
           <img
-            src="../public/logo.png"
+            src="https://i.ibb.co/wcgXW9s/logo.png"
             alt="logo"
             style={{ width: "80px", height: "80px", marginRight: "20px" }}
           />
@@ -394,19 +423,25 @@ const Home = () => {
             >
               Google Play Store <NorthEastIcon />
             </button>
-            <button
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: "30px",
-                padding: "5px 10px",
-                margin: "0 5px",
-                width: "180px",
-                textAlign: "center",
-              }}
+            <a
+              style={{ textDecoration: "none" }}
+              href="https://apps.apple.com/us/app/sam-note-sticky-remind-color/id6445824669"
             >
-              App Store
-              <NorthEastIcon />
-            </button>
+              {" "}
+              <button
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: "30px",
+                  padding: "5px 10px",
+                  margin: "0 5px",
+                  width: "180px",
+                  textAlign: "center",
+                }}
+              >
+                App Store
+                <NorthEastIcon />
+              </button>
+            </a>{" "}
           </div>
           <h2
             style={{
@@ -427,11 +462,15 @@ const Home = () => {
           <div className="w-[750px] h-[350px]">
             {" "}
             <Swiper
-              modules={[Navigation, Pagination]}
+              modules={[Navigation, Pagination, Autoplay]}
               spaceBetween={20}
               slidesPerView={1}
               pagination={{ clickable: true }}
               navigation
+              autoplay={{
+                delay: 2500,
+                // disableOnInteraction: false,
+              }}
               onSlideChange={() => console.log("slide change")}
               onSwiper={(swiper) => console.log(swiper)}
             >
@@ -485,7 +524,10 @@ const Home = () => {
                     Google Play Store <NorthEastIcon />
                   </a>
                   <a
+                    href="https://apps.apple.com/us/app/sam-note-sticky-remind-color/id6445824669"
                     style={{
+                      textDecoration: "none ",
+                      color: "#000",
                       backgroundColor: "#fff",
                       borderRadius: "30px",
                       padding: "5px 10px",
@@ -590,19 +632,6 @@ const Home = () => {
               </p>
             </div>
           </div>
-          <button
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: "30px",
-              padding: "5px 10px",
-              display: "inline-block",
-              margin: "0 5px",
-              width: "120px",
-              textAlign: "center",
-            }}
-          >
-            View more
-          </button>
           <div className="bg-[url(/bg-SamNotes-Account.png)] w-[1100px] h-[150px] bg-cover bg-center bg-no-repeat flex items-center flex-col justify-center">
             <h5>SamNotes Account</h5>
             <p>
@@ -1167,51 +1196,56 @@ const Home = () => {
             }}
           >
             <div>
-              <Button
-                sx={{
-                  bgcolor: "mycolor.dark",
-                  color: "text.primary",
+              <a
+                href="https://apps.apple.com/us/app/sam-note-sticky-remind-color/id6445824669"
+                style={{
+                  color: "#000",
                   border: "1px solid",
-                  borderColor: "text.primary",
+                  borderColor: "#000",
                   padding: "10px 15px",
                   height: "65px",
                   width: "235px",
+                  borderRadius: "5px",
                   margin: "20px",
                   display: "flex",
+                  textDecoration: "none",
                   justifyContent: "space-evenly",
                   textTransform: "none",
+                  alignItems: "center",
                   fontSize: "16px",
                 }}
               >
                 <AppleIcon />
-                <div>
+                <div style={{ textAlign: "center" }}>
                   <p style={{ margin: 0 }}>Download on the </p>
                   <p style={{ margin: 0 }}>App Store</p>
                 </div>
-              </Button>
+              </a>
             </div>
-            <Button
-              sx={{
-                bgcolor: "mycolor.dark",
-                color: "text.primary",
+            <a
+              style={{
+                color: "#000",
                 border: "1px solid",
-                borderColor: "text.primary",
-                textTransform: "none",
+                borderColor: "#000",
                 padding: "10px 15px",
                 height: "65px",
-                fontSize: "16px",
                 width: "235px",
+                borderRadius: "5px",
                 margin: "20px",
                 display: "flex",
+                textDecoration: "none",
                 justifyContent: "space-evenly",
+                textTransform: "none",
+                alignItems: "center",
+                fontSize: "16px",
               }}
             >
               <AndroidIcon />
-              <div>
+              <div style={{ textAlign: "center" }}>
                 <p style={{ margin: 0 }}>Download on the </p>
                 <p style={{ margin: 0 }}>Google play</p>
               </div>
-            </Button>
+            </a>
           </div>
         </section>
       </main>
