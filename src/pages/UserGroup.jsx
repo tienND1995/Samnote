@@ -125,10 +125,10 @@ const UserGroup = () => {
       console.log("Connected to server");
     });
     newSocket.on("send_message", (result) => {
-      console.log(result.data, result.data.ReceivedID, selectedGroup.id);
       setSocketMess((prevMessages) => [...prevMessages, result.data]);
       fetchUserChat();
     });
+
     const fetchUserChat = async () => {
       const response = await api.get(
         `https://samnote.mangasocial.online/message/list_user_chat1vs1/${user.id}`

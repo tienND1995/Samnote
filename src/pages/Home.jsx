@@ -411,18 +411,24 @@ const Home = () => {
             Visit the app store for more information
           </p>
           <div>
-            <button
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: "30px",
-                padding: "5px 10px",
-                margin: "0 5px",
-                width: "180px",
-                textAlign: "center",
-              }}
+            <a
+              style={{ textDecoration: "none" }}
+              href="https://play.google.com/store/apps/details?id=com.thinkdiffai.cloud_note&fbclid=IwY2xjawE_8sBleHRuA2FlbQIxMAABHYHaE1EWM6Iw4ZzcIta8_d6hLRUNJapdVbYO_a18uKUB20nuk851Tb-QEg_aem_ECePGLD4eDM--aBNYVTGoQ"
             >
-              Google Play Store <NorthEastIcon />
-            </button>
+              {" "}
+              <button
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: "30px",
+                  padding: "5px 10px",
+                  margin: "0 5px",
+                  width: "180px",
+                  textAlign: "center",
+                }}
+              >
+                Google Play Store <NorthEastIcon />
+              </button>
+            </a>{" "}
             <a
               style={{ textDecoration: "none" }}
               href="https://apps.apple.com/us/app/sam-note-sticky-remind-color/id6445824669"
@@ -511,12 +517,15 @@ const Home = () => {
                   }}
                 >
                   <a
+                    href="https://play.google.com/store/apps/details?id=com.thinkdiffai.cloud_note&fbclid=IwY2xjawE_8sBleHRuA2FlbQIxMAABHYHaE1EWM6Iw4ZzcIta8_d6hLRUNJapdVbYO_a18uKUB20nuk851Tb-QEg_aem_ECePGLD4eDM--aBNYVTGoQ"
                     style={{
                       backgroundColor: "#fff",
                       borderRadius: "30px",
                       padding: "5px 10px",
                       display: "inline-block",
                       margin: "0 5px",
+                      textDecoration: "none ",
+                      color: "#000",
                       width: "180px",
                       textAlign: "center",
                     }}
@@ -1223,6 +1232,7 @@ const Home = () => {
               </a>
             </div>
             <a
+              href="https://play.google.com/store/apps/details?id=com.thinkdiffai.cloud_note&fbclid=IwY2xjawE_8eZleHRuA2FlbQIxMAABHYHaE1EWM6Iw4ZzcIta8_d6hLRUNJapdVbYO_a18uKUB20nuk851Tb-QEg_aem_ECePGLD4eDM--aBNYVTGoQ"
               style={{
                 color: "#000",
                 border: "1px solid",
