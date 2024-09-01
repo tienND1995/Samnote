@@ -13,6 +13,7 @@ import AppleIcon from "@mui/icons-material/Apple";
 import AndroidIcon from "@mui/icons-material/Android";
 import { Typography } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import Iframe from "react-iframe";
 import ClearIcon from "@mui/icons-material/Clear";
 import { styled } from "@mui/styles";
 import Avatar from "@mui/material/Avatar";
@@ -465,6 +466,16 @@ const Home = () => {
             various brush types and color mixers, so that you can draw fabulous
             paintings like professional painters.
           </p>
+          <Iframe
+            width="750"
+            height="350"
+            src="https://www.youtube.com/embed/VyP-Fix9I-8?si=rRMEizqO0HOYdeT-"
+            title="YouTube video player"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+          ></Iframe>
           <div className="w-[750px] h-[350px]">
             {" "}
             <Swiper

@@ -27,6 +27,7 @@
     "react-color": "^2.19.3",
     "react-datepicker": "^6.9.0",
     "react-dom": "^18.2.0",
+    "react-iframe": "^1.8.5",
     "react-konva": "^18.2.10",
     "react-paginate": "^8.2.0",
     "react-router-dom": "^6.23.1",
