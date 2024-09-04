@@ -79,6 +79,7 @@ function App() {
         {publicRoutes.map((r) => (
           <Route path={r.path} element={r.element} key={r.path} />
         ))}
+        
         {authRoutes.map((r) => (
           <Route
             path={r.path}
