@@ -32,36 +32,24 @@ import { useLocation } from 'react-router-dom'
 import EmojiPicker, { EmojiStyle } from 'emoji-picker-react'
 import CancelIcon from '@mui/icons-material/Cancel'
 
-import avatarDefault from '../assets/avatar-default.png'
-
 import config from '../configs/configs.json'
 import axios from 'axios'
-const { BASE64_URL } = config
+const { BASE64_URL, API_SERVER_URL } = config
 
-const newSocket = io('https://samnote.mangasocial.online')
+const newSocket = io(API_SERVER_URL)
 
 const UserGroup = () => {
  const location = useLocation()
 
- const [group, setGroup] = useState([])
  const [open, setOpen] = useState(false)
  const [groupName, setGroupName] = useState('')
  const [groupDescription, setGroupDescription] = useState('')
  const [members, setMembers] = useState([])
  const [memberEmail, setMemberEmail] = useState('')
  const [memberId, setMemberId] = useState('')
- const [selectedGroup, setSelectedGroup] = useState({
-  id: 0,
-  Avarta: '',
-  name: '',
-  describe: '',
- })
 
  const [message, setMessage] = useState([])
- const [messageGroup, setMessageGroup] = useState('')
  const [userChat, setUserChat] = useState([])
-
- const [socketMess, setSocketMess] = useState([])
 
  const appContext = useContext(AppContext)
  const { setSnackbar, user } = appContext
@@ -75,6 +63,11 @@ const UserGroup = () => {
  const handleGroupDescriptionChange = (e) => setGroupDescription(e.target.value)
  const handleMemberIdChange = (e) => setMemberId(e.target.value)
  const handleMemberEmailChange = (e) => setMemberEmail(e.target.value)
+
+ // form message
+ const [groupList, setGroupList] = useState([])
+ const [groupItem, setGroupItem] = useState({})
+ const [infoOtherUser, setInfoOtherUser] = useState({})
 
  // Kết nối tới server Socket.IO khi component được tạo ra
 
@@ -93,32 +86,34 @@ const UserGroup = () => {
   }
  }
 
+ const getGroups = async (idOwner) => {
+  try {
+   const res = await api.get(`/group/all/${idOwner}`)
+   res.data.data.map((item) => {
+    if (item.numberMems >= 1) {
+     newSocket.emit('join_room', { room: item.idGroup })
+    }
+   })
+
+   setGroupList(res.data.data)
+  } catch (err) {
+   console.error(err)
+  }
+ }
+
  useMemo(() => {
   setSocket(newSocket)
+
   newSocket.on('connect', () => {
    console.log('Connected to server')
   })
+
   newSocket.on('send_message', (result) => {
-   console.log(result.data, result.data.ReceivedID, selectedGroup.id)
-   setSocketMess((prevMessages) => [...prevMessages, result.data])
+   console.log('send message', result)
    fetchUserChat()
   })
 
-  const getGroup = async () => {
-   try {
-    const res = await api.get(`/group/all/${user.id}`)
-    if (res && res.data.status === 200) {
-     res.data.data.map((item) => {
-      newSocket.emit('join_room', { room: item.idGroup })
-     })
-     setGroup(res.data.data)
-    }
-   } catch (err) {
-    console.error(err)
-   }
-  }
-
-  getGroup()
+  getGroups(user.id)
   fetchUserChat()
 
   return () => {
@@ -129,24 +124,22 @@ const UserGroup = () => {
  useEffect(() => {
   const scrollContainer = scrollContainerRef.current
   scrollContainer.scrollTop = scrollContainer.scrollHeight
- }, [selectedGroup])
+ }, [infoOtherUser, groupItem])
 
  useEffect(() => {
   const scrollContainer = scrollContainerRef.current
   scrollContainer.scrollTop =
    scrollContainer.scrollHeight - scrollContainer.clientHeight
- }, [socketMess])
+ }, [infoOtherUser, groupItem])
 
  const handleGroupClick = async (group) => {
   try {
-   const response = await api.get(
-    `https://samnote.mangasocial.online/group/messages/${group.idGroup}`
-   )
-   if (response && response.data.status === 200) {
-    setMessageGroup(response.data.data)
-    setSocketMess([])
-   }
-   setSelectedGroup(group)
+   fetchMessagesGroup(group.idGroup)
+
+   setInfoOtherUser({})
+   setGroupItem(group)
+   setMessage([])
+   setFormName('group')
   } catch (err) {
    console.log(err)
   }
@@ -160,52 +153,6 @@ const UserGroup = () => {
 
  const handleRemoveMember = (index) => {
   setMembers(members.filter((_, i) => i !== index))
- }
-
- const handleCreateGroup = async () => {
-  try {
-   const groupData = {
-    name: groupName,
-    createAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
-    idOwner: user.id,
-    describe: groupDescription,
-    members: [
-     {
-      gmail: memberEmail,
-      id: memberId,
-      role: 'member',
-     },
-     ...members,
-    ],
-   }
-   const res = await api.post(`/group/create/${user.id}`, groupData)
-
-   setGroup([...group, res.data])
-   handleClose()
-   setSnackbar({
-    isOpen: true,
-    message: `Create group complete`,
-    severity: 'success',
-   })
-  } catch (err) {
-   console.error(err)
-
-   const errorMessage = err.response?.data?.message || 'Failed to create group'
-
-   setSnackbar({
-    isOpen: true,
-    message: errorMessage,
-    severity: 'error',
-   })
-  }
- }
-
- const handleLastText = (lastText, idSend) => {
-  if (idSend === user.id) {
-   return `Bạn: ${lastText}`
-  } else {
-   return `${lastText}`
-  }
  }
 
  useEffect(() => {
@@ -224,6 +171,77 @@ const UserGroup = () => {
   }
  }, [])
 
+ // todo new code message
+
+ const [formName, setFormName] = useState('chat')
+
+ const [messageForm, setMessageForm] = useState({
+  content: '',
+  image: null,
+  emoji: null,
+ })
+ const { content, image, emoji } = messageForm
+ const [showEmoji, setShowEmoji] = useState(false)
+
+ useEffect(() => {
+  if (location.state) {
+   setInfoOtherUser(location.state)
+   getMessageChats(user.id, location.state.id)
+  }
+ }, [location.state])
+
+ //..........
+
+ const getMessageChats = async (userID, otherUserID) => {
+  try {
+   const response = await api.get(
+    `https://samnote.mangasocial.online/message/list_message_chat1vs1/${userID}/${otherUserID}`
+   )
+
+   setMessageGroup([])
+   setMessage(response.data.data[0].messages)
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
+ const handleUserChatClick = async (otherUser) => {
+  if (otherUser.is_seen === 0 && otherUser.idReceive === user.id) {
+   fetchUpdateSeenMessage(otherUser.idMessage)
+  }
+
+  getMessageChats(user.id, otherUser.user.id)
+
+  setInfoOtherUser(otherUser.user)
+  setGroupItem({})
+  setMessageGroup([])
+  setFormName('chat')
+ }
+
+ const fetchUpdateSeenMessage = async (messageID) => {
+  try {
+   const response = await api.post(
+    `https://samnote.mangasocial.online/message/${messageID}`
+   )
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
+ const handleDeleteMessage = async (messageID) => {
+  try {
+   const response = await axios.delete(
+    `https://samnote.mangasocial.online/message/${messageID}`
+   )
+
+   getMessageChats(user.id, infoOtherUser.id)
+   fetchUserChat()
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
+ // handle convert time, image, emoji, roomID
  const handleTimeUserChat = (time) => {
   const realTime = new Date()
   const diffInMs = realTime.getTime() - new Date(time).getTime()
@@ -245,66 +263,13 @@ const UserGroup = () => {
   }
  }
 
- // todo new code message
-
- const [infoOtherUser, setInfoOtherUser] = useState({})
-
- useEffect(() => {
-  if (location.state) {
-   setInfoOtherUser(location.state)
-   getMessageChats(user.id, location.state.id)
-  }
- }, [location.state])
-
- //update status seen message
- const fetchUpdateSeenMessage = async (messageID) => {
-  try {
-   const response = await api.post(
-    `https://samnote.mangasocial.online/message/${messageID}`
-   )
-
-   console.log(response)
-  } catch (error) {
-   console.log(error)
+ const handleChatLastText = (lastText, idSend) => {
+  if (idSend === user.id) {
+   return `Bạn: ${lastText}`
+  } else {
+   return `${lastText}`
   }
  }
- //..........
-
- const getMessageChats = async (userID, otherUserID) => {
-  try {
-   const response = await api.get(
-    `https://samnote.mangasocial.online/message/list_message_chat1vs1/${userID}/${otherUserID}`
-   )
-
-   setMessageGroup([])
-   setMessage(response.data.data[0].messages)
-   setSocketMess([])
-  } catch (error) {
-   console.log(error)
-  }
- }
-
- const handleUserChatClick = async (otherUser) => {
-  console.log('otherUser:', otherUser)
-
-  setInfoOtherUser(otherUser.user)
-
-  if (otherUser.is_seen === 0 && otherUser.idReceive === user.id) {
-   fetchUpdateSeenMessage(otherUser.idMessage)
-  }
-
-  getMessageChats(user.id, otherUser.user.id)
-  setSelectedGroup(otherUser.user)
- }
-
- const [messageForm, setMessageForm] = useState({
-  content: '',
-  image: null,
-  emoji: null,
- })
-
- const { content, image, emoji } = messageForm
- const [showEmoji, setShowEmoji] = useState(false)
 
  const convertEmojiToBase64 = (emoji) => {
   const canvas = document.createElement('canvas')
@@ -326,20 +291,69 @@ const UserGroup = () => {
   }
  }
 
- const sendMessage = (room, data) => {
-  if (socket) {
-   newSocket.emit('send_message', { room, data }) // Gửi sự kiện "send_message" tới server
-   setMessageForm({ content: '', image: null, emoji: null })
+ // ******** GROUPS ********
 
-   // Xử lý logic khi tin nhắn được gửi đi
+ const [messageGroup, setMessageGroup] = useState([])
 
-   getMessageChats(user.id, infoOtherUser.id)
-   fetchUserChat()
-  } else {
-   console.error('Socket.io not initialized.')
-   // Xử lý khi socket chưa được khởi tạo
+ const fetchMessagesGroup = async (groupID) => {
+  try {
+   const response = await api.get(
+    `https://samnote.mangasocial.online/group/messages/${groupID}`
+   )
+   setMessageGroup(response.data.data)
+  } catch (error) {
+   console.log(error)
   }
  }
+
+ const postGroup = async (dataGroup, userID) => {
+  try {
+   const response = await axios.post(
+    `${API_SERVER_URL}/group/create/${userID}`,
+    dataGroup
+   )
+
+   handleClose()
+   setSnackbar({
+    isOpen: true,
+    message: `Create group complete`,
+    severity: 'success',
+   })
+
+   getGroups(user.id)
+  } catch (error) {
+   setSnackbar({
+    isOpen: true,
+    message: error.message,
+    severity: 'error',
+   })
+  }
+ }
+
+ const handleCreateGroup = async () => {
+  const dataGroup = {
+   name: groupName,
+   createAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
+   idOwner: user.id,
+   describe: groupDescription,
+   r: 255,
+   g: 255,
+   b: 255,
+   a: 0.99,
+   members: [
+    {
+     gmail: memberEmail,
+     id: memberId,
+     role: 'member',
+    },
+    ...members,
+   ],
+  }
+
+  postGroup(dataGroup, user.id)
+ }
+
+ //  ** handle submit form message
 
  const handleChangeValueMsg = (e) => {
   setMessageForm({
@@ -375,23 +389,87 @@ const UserGroup = () => {
   setShowEmoji(false)
  }
 
- const handleSubmitMessage = () => {
-  const roomID = roomSplit(user.id, infoOtherUser.id)
+ const sendMessage = (room, data) => {
+  if (socket) {
+   // * send message chat
+   if (formName === 'chat') {
+    newSocket.emit('send_message', { room, data }) // Gửi sự kiện "send_message" tới server
+    setMessageForm({ content: '', image: null, emoji: null })
 
-  if (!infoOtherUser.id) return
+    // Xử lý logic khi tin nhắn được gửi đi
+    getMessageChats(user.id, infoOtherUser.id)
+    fetchUserChat()
+
+    return
+   }
+
+   // * send message group
+
+   if (formName === 'group') {
+    newSocket.emit('chat_group', { room, data }) // Gửi sự kiện "send_message" tới server
+    setMessageForm({ content: '', image: null, emoji: null })
+
+    fetchMessagesGroup(groupItem.idGroup)
+    return
+   }
+  } else {
+   console.error('Socket.io not initialized.')
+   // Xử lý khi socket chưa được khởi tạo
+  }
+ }
+
+ const handleSubmitMessage = () => {
+  // * submit form chat
+
+  if (formName === 'chat') {
+   const roomID = roomSplit(user.id, infoOtherUser.id)
+
+   if (!infoOtherUser.id) return
+
+   const dataForm = {
+    idSend: `${user.id}`,
+    idReceive: `${infoOtherUser.id}`,
+    type: 'text',
+    state: '',
+    content: content,
+   }
+
+   if (image) {
+    dataForm.type = 'image'
+    dataForm.content = emoji ? '' : content
+    dataForm.data = image
+
+    sendMessage(roomID, dataForm)
+    return
+   }
+
+   if (emoji) {
+    dataForm.type = 'icon-image'
+    dataForm.content = ''
+    dataForm.data = emoji
+
+    sendMessage(roomID, dataForm)
+    return
+   }
+
+   if (content.trim() !== '') {
+    sendMessage(roomID, dataForm)
+   }
+   return
+  }
+
+  // * submit form group chat
+
+  const roomID = groupItem.idGroup
 
   const dataForm = {
    idSend: `${user.id}`,
-   idReceive: `${infoOtherUser.id}`,
    type: 'text',
-   state: '',
-   content: content,
   }
 
   if (image) {
    dataForm.type = 'image'
-   dataForm.content = emoji ? '' : content
-   dataForm.data = image
+   dataForm.metaData = image
 
    sendMessage(roomID, dataForm)
    return
@@ -399,33 +477,18 @@ const UserGroup = () => {
 
   if (emoji) {
    dataForm.type = 'icon-image'
-   dataForm.content = ''
-   dataForm.data = emoji
+   dataForm.metaData = emoji
 
    sendMessage(roomID, dataForm)
    return
   }
 
   if (content.trim() !== '') {
+   dataForm.content = content
    sendMessage(roomID, dataForm)
   }
+  return null
  }
-
- const handleDeleteMessage = async (messageID) => {
-  try {
-   const response = await axios.delete(
-    `https://samnote.mangasocial.online/message/${messageID}`
-   )
-
-   getMessageChats(user.id, infoOtherUser.id)
-   fetchUserChat()
-  } catch (error) {
-   console.log(error)
-  }
- }
-
- console.log(message)
- // ******************
 
  return (
   <div
@@ -503,7 +566,6 @@ const UserGroup = () => {
        }}
       >
        {userChat.map((item, index) => {
-        console.log(item)
         return (
          <Box
           key={`chat ${index}`}
@@ -547,7 +609,7 @@ const UserGroup = () => {
               : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis'
             }
            >
-            {handleLastText(item.last_text, item.idSend)}
+            {handleChatLastText(item.last_text, item.idSend)}
            </p>
           </div>
           <div className='h-full mr-4 flex items-start'>
@@ -576,16 +638,17 @@ const UserGroup = () => {
         overflowY: 'auto',
        }}
       >
-       {group?.map((item, index) => {
+       {groupList?.map((item, index) => {
         if (item.numberMems >= 1) {
          return (
           <Box
            key={index}
            sx={{
             display: 'flex',
-            justifyContent: 'flex-start',
+            justifyContent: 'space-between',
             alignItems: 'center',
             margin: '20px',
+            padding: '10px',
             color: 'text.main',
             '&:hover': {
              backgroundColor: '#BFEFFF',
@@ -594,24 +657,28 @@ const UserGroup = () => {
            }}
            onClick={() => handleGroupClick(item)}
           >
-           <Avatar
-            src='../public/groupImg.png'
-            sx={{ width: '30px', height: '30px', margin: '20px' }}
-           />
-           <div style={{ width: '100%' }}>
-            <strong>{item.name}</strong>
-            <p
-             style={{
-              padding: 0,
-              margin: 0,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-             }}
-            >
-             {item.describe}
-            </p>
+           <div className='flex gap-2 items-center'>
+            <Avatar
+             src={item.linkAvatar}
+             sx={{ width: '30px', height: '30px' }}
+            />
+            <div className='flex flex-col gap-2' style={{ width: '100%' }}>
+             <h3 className='text-capitalize fs-6 fw-bold mb-0'>{item.name}</h3>
+             {/* <p
+              style={{
+               padding: 0,
+               margin: 0,
+               whiteSpace: 'nowrap',
+               overflow: 'hidden',
+               textOverflow: 'ellipsis',
+              }}
+             >
+              {msgGroupLast.type}
+             </p> */}
+            </div>
            </div>
+
+           {/* <p className='mb-0'>{item.numberMems}</p> */}
           </Box>
          )
         } else {
@@ -642,35 +709,20 @@ const UserGroup = () => {
       borderBottom: '1px solid #999',
      }}
     >
-     <div style={{ display: 'flex', alignItems:'center' }}>
+     <div style={{ display: 'flex', alignItems: 'center' }}>
       <Avatar
        style={{
         height: '40px',
         width: '40px',
         marginRight: '15px',
        }}
-       src={infoOtherUser.Avarta ? infoOtherUser.Avarta : avatarDefault}
-       //  src={infoOtherUser ? infoOtherUser.Avarta : selectedGroup.Avarta}
+       src={infoOtherUser.Avarta || groupItem.linkAvatar}
        alt='avatar'
       />
 
-      {infoOtherUser.name ? (
-       <h3 style={{ margin: 0, textTransform: 'capitalize' }}>
-        {infoOtherUser.name}
-       </h3>
-      ) : (
-       <h3 style={{ margin: 0, textTransform: 'capitalize' }}>Anonymous chatter</h3>
-      )}
-
-      {/* {selectedGroup && (
-       <>
-        <h3 style={{ margin: 0, textTransform: 'capitalize' }}>
-         {selectedGroup.name}
-        </h3>
-        <p style={{ margin: 0 }}>{selectedGroup?.describe}</p>
-       </>
-      )} */}
-
+      <h3 style={{ margin: 0, textTransform: 'capitalize' }}>
+       {infoOtherUser.name || groupItem.name || 'Anonymous chatter'}
+      </h3>
      </div>
      <div
       style={{
@@ -695,61 +747,96 @@ const UserGroup = () => {
      {/* Đã cập nhật để hiển thị tin nhắn từ server */}
      {messageGroup.length > 0 ? (
       <>
-       {messageGroup
-        .slice()
-        .reverse()
-        .map((item, index) =>
-         item.idSend === user.id ? (
-          <div
-           key={`message ${index}`}
-           className='w-[98%] h-auto my-2 ml-2 flex flex-col items-end'
-          >
-           {item.image ? (
-            <img
-             className={
-              item.image.includes(`dataimage/pngbase64`)
-               ? 'w-[50px] h-auto'
-               : 'w-[100px] h-auto'
-             }
-             src={item.image}
-            />
-           ) : (
-            <p className='max-w-[50%] break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto'>
-             {item.content}
-            </p>
-           )}
+       {messageGroup.map((item) =>
+        item.idSend === user.id ? (
+         <div key={item.id} className='h-auto mb-2 flex flex-col items-end'>
+          <div className='flex gap-2 mb-1'>
+           <div className='flex items-center hover-message gap-1'>
+            <div className='flex flex-col gap-1 items-end'>
+             {item.image.trim() !== '' && (
+              <div>
+               <img
+                className={`h-auto rounded-md ${
+                 item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
+                }`}
+                src={item.image}
+               />
+              </div>
+             )}
+
+             {item.content && (
+              <p
+               style={{
+                width: 'max-content',
+                overflowWrap: 'anywhere',
+                maxWidth: '250px',
+               }}
+               className='break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto'
+              >
+               {item.content}
+              </p>
+             )}
+            </div>
+           </div>
           </div>
-         ) : (
-          <div
-           key={`message ${index}`}
-           className='w-full h-auto my-2 ml-2 flex flex-col items-start'
-          >
-           {item.image ? (
+
+          <time className='text-xs text-black-50'>
+           {handleTimeUserChat(item.sendAt)}
+          </time>
+         </div>
+        ) : (
+         <div key={item.id} className='h-auto mb-2'>
+          <div className='flex gap-2 mb-1'>
+           <div className='flex gap-1 items-end'>
             <img
-             className={
-              item.image.includes(`dataimage/pngbase64`)
-               ? 'w-[50px] h-auto'
-               : 'w-[100px] h-auto'
-             }
-             src={item.image}
+             className='object-fit-cover rounded-circle'
+             style={{ width: '40px', height: '40px' }}
+             src={item.avt}
+             alt='avatar other_user'
             />
-           ) : (
-            <p className='max-w-[50%] break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto'>
-             {item.content}
-            </p>
-           )}
+           </div>
+
+           <div className='flex items-center hover-message gap-1'>
+            <div className='flex flex-col gap-1'>
+             {item.image.trim() !== '' && (
+              <div>
+               <img
+                className={`h-auto rounded-md ${
+                 item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
+                }`}
+                src={item.image}
+               />
+              </div>
+             )}
+
+             {item.content && (
+              <p
+               style={{
+                width: 'max-content',
+                overflowWrap: 'anywhere',
+                maxWidth: '250px',
+               }}
+               className='break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto'
+              >
+               {item.content}
+              </p>
+             )}
+            </div>
+           </div>
           </div>
-         )
-        )}
+
+          <time className='text-xs text-black-50'>
+           {handleTimeUserChat(item.sendAt)}
+          </time>
+         </div>
+        )
+       )}
       </>
      ) : (
       <>
-       {message.slice().map((item, index) =>
+       {message.map((item) =>
         item.idSend === user.id ? (
-         <div
-          key={`message ${index}`}
-          className='h-auto mb-2 flex flex-col items-end'
-         >
+         <div key={item.id} className='h-auto mb-2 flex flex-col items-end'>
           <div className='flex gap-2 mb-1'>
            <div className='flex items-center hover-message gap-1'>
             <button
@@ -799,7 +886,7 @@ const UserGroup = () => {
           </time>
          </div>
         ) : (
-         <div key={`message ${index}`} className='h-auto mb-2'>
+         <div key={item.id} className='h-auto mb-2'>
           <div className='flex gap-2 mb-1'>
            <div className='flex gap-1 items-end'>
             <img
@@ -860,54 +947,6 @@ const UserGroup = () => {
        )}
       </>
      )}
-     {socketMess &&
-      socketMess
-       .filter(
-        (item) => item.ReceivedID === user.id || item.SenderID === user.id
-       )
-       .map((item, index) =>
-        item.SenderID === user.id ? (
-         <div
-          key={`message ${index}`}
-          className='w-[98%] h-auto my-2 ml-2 flex flex-col items-end'
-         >
-          {item.Content === '' ? (
-           <img
-            className={
-             item.Image.includes(`dataimage/pngbase64`)
-              ? 'w-[50px] h-auto'
-              : 'w-[100px] h-auto'
-            }
-            src={item.Image}
-           />
-          ) : (
-           <p className='max-w-[50%] break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto'>
-            {item.Content}
-           </p>
-          )}
-         </div>
-        ) : (
-         <div
-          key={`message ${index}`}
-          className='w-full h-auto my-2 ml-2 flex flex-col items-start'
-         >
-          {item.Content === '' ? (
-           <img
-            className={
-             item.Image.includes(`dataimage/pngbase64`)
-              ? 'w-[50px] h-auto'
-              : 'w-[100px] h-auto'
-            }
-            src={item.Image}
-           />
-          ) : (
-           <p className='max-w-[50%] break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto'>
-            {item.Content}
-           </p>
-          )}
-         </div>
-        )
-       )}
     </Box>
 
     <form
