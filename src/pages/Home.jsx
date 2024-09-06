@@ -467,8 +467,9 @@ const Home = () => {
             paintings like professional painters.
           </p>
           <Iframe
-            width="750"
-            height="350"
+            className="mb-4"
+            width="550"
+            height="300"
             src="https://www.youtube.com/embed/VyP-Fix9I-8?si=rRMEizqO0HOYdeT-"
             title="YouTube video player"
             frameborder="0"

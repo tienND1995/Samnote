@@ -52,7 +52,11 @@ const UserPanel = () => {
   const appContext = useContext(AppContext);
   const { user, setUser } = appContext;
   const [userInfomations, setUserInformations] = useState(null);
+  const [searchValue, setSearchValue] = useState("");
 
+  const handleSearchInputChange = (event) => {
+    setSearchValue(event.target.value);
+  };
   const navigate = useNavigate();
   useEffect(() => {
     let ignore = false;
@@ -114,11 +118,20 @@ const UserPanel = () => {
                 id="input-with-sx"
                 label="Search messenger"
                 variant="standard"
+                value={searchValue}
+                onChange={handleSearchInputChange}
                 sx={{ input: { color: "white" }, width: "80%" }}
                 InputLabelProps={{ style: { color: "white" } }}
               />
               <IconButton sx={{ p: "10px" }}>
-                <SearchIcon className="mr-1 mt-2 text-white" />
+                <SearchIcon
+                  className="mr-1 mt-2 text-white"
+                  onClick={() =>
+                    navigate("/user/search", {
+                      state: { searchValue },
+                    })
+                  }
+                />
               </IconButton>
             </Box>
 

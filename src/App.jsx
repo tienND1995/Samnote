@@ -17,6 +17,7 @@ import { Alert, Snackbar, Button } from "@mui/material";
 import OtherUser from "./pages/OtherUser";
 import UserPhoto from "./pages/UserPhoto";
 import CreateNote from "./pages/CreateNote";
+import SearchResults from "./pages/searchNote";
 
 const publicRoutes = [{ path: "/", element: <Home /> }];
 
@@ -34,6 +35,7 @@ const userRoutes = [
   { path: "/user/create-note", element: <CreateNote /> },
   { path: "/user/profile", element: <UserProfile /> },
   { path: "/user/incognito", element: <Incognito /> },
+  { path: "/user/search", element: <SearchResults /> },
 ];
 
 const AppSnackbar = () => {
