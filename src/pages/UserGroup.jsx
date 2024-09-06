@@ -2,7 +2,12 @@
 import { useState, useEffect, useContext, useMemo, useRef } from 'react'
 import io from 'socket.io-client'
 import { AppContext } from '../context'
-import api from '../api'
+
+import moment from 'moment'
+import { useForm } from 'react-hook-form'
+import { schemaGroup } from '../utils/schema/schema'
+import { joiResolver } from '@hookform/resolvers/joi'
+
 import {
  Box,
  Typography,
@@ -20,6 +25,7 @@ import {
  ListItemText,
  ListItemSecondaryAction,
 } from '@mui/material'
+
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import AddIcon from '@mui/icons-material/Add'
@@ -42,11 +48,6 @@ const UserGroup = () => {
  const location = useLocation()
 
  const [open, setOpen] = useState(false)
- const [groupName, setGroupName] = useState('')
- const [groupDescription, setGroupDescription] = useState('')
- const [members, setMembers] = useState([])
- const [memberEmail, setMemberEmail] = useState('')
- const [memberId, setMemberId] = useState('')
 
  const [message, setMessage] = useState([])
  const [userChat, setUserChat] = useState([])
@@ -59,10 +60,6 @@ const UserGroup = () => {
 
  const handleOpen = () => setOpen(true)
  const handleClose = () => setOpen(false)
- const handleGroupNameChange = (e) => setGroupName(e.target.value)
- const handleGroupDescriptionChange = (e) => setGroupDescription(e.target.value)
- const handleMemberIdChange = (e) => setMemberId(e.target.value)
- const handleMemberEmailChange = (e) => setMemberEmail(e.target.value)
 
  // form message
  const [groupList, setGroupList] = useState([])
@@ -72,8 +69,8 @@ const UserGroup = () => {
  // Kết nối tới server Socket.IO khi component được tạo ra
 
  const fetchUserChat = async () => {
-  const response = await api.get(
-   `https://samnote.mangasocial.online/message/list_user_chat1vs1/${user.id}`
+  const response = await axios.get(
+   `${API_SERVER_URL}/message/list_user_chat1vs1/${user.id}`
   )
 
   try {
@@ -81,6 +78,8 @@ const UserGroup = () => {
     newSocket.emit('join_room', { room: item.idRoom })
    })
    setUserChat(response.data.data)
+
+   console.log(response.data.data)
   } catch (error) {
    console.log(error)
   }
@@ -88,7 +87,7 @@ const UserGroup = () => {
 
  const getGroups = async (idOwner) => {
   try {
-   const res = await api.get(`/group/all/${idOwner}`)
+   const res = await axios.get(`${API_SERVER_URL}/group/all/${idOwner}`)
    res.data.data.map((item) => {
     if (item.numberMems >= 1) {
      newSocket.emit('join_room', { room: item.idGroup })
@@ -109,7 +108,7 @@ const UserGroup = () => {
   })
 
   newSocket.on('send_message', (result) => {
-   console.log('send message', result)
+   console.log('send message', result.data)
    fetchUserChat()
   })
 
@@ -132,36 +131,13 @@ const UserGroup = () => {
    scrollContainer.scrollHeight - scrollContainer.clientHeight
  }, [infoOtherUser, groupItem])
 
- const handleGroupClick = async (group) => {
-  try {
-   fetchMessagesGroup(group.idGroup)
-
-   setInfoOtherUser({})
-   setGroupItem(group)
-   setMessage([])
-   setFormName('group')
-  } catch (err) {
-   console.log(err)
-  }
- }
-
- const handleAddMember = () => {
-  setMembers([...members, { gmail: memberEmail, id: memberId, role: 'member' }])
-  setMemberEmail('')
-  setMemberId('')
- }
-
- const handleRemoveMember = (index) => {
-  setMembers(members.filter((_, i) => i !== index))
- }
-
  useEffect(() => {
   const handleClickOutside = (event) => {
    if (
     pickerEmojiRef.current &&
     !pickerEmojiRef.current.contains(event.target)
    ) {
-    setIsEmoji(false)
+    // setIsEmoji(false)
    }
   }
 
@@ -171,7 +147,7 @@ const UserGroup = () => {
   }
  }, [])
 
- // todo new code message
+ // todo new code form message
 
  const [formName, setFormName] = useState('chat')
 
@@ -190,15 +166,25 @@ const UserGroup = () => {
   }
  }, [location.state])
 
+ const resetGroup = () => {
+  setGroupItem({})
+  setMessageGroup([])
+  setFormName('chat')
+ }
+
+ const resetChat = () => {
+  setInfoOtherUser({})
+  setMessage([])
+  setFormName('group')
+ }
+
  //..........
 
  const getMessageChats = async (userID, otherUserID) => {
   try {
-   const response = await api.get(
-    `https://samnote.mangasocial.online/message/list_message_chat1vs1/${userID}/${otherUserID}`
+   const response = await axios.get(
+    `${API_SERVER_URL}/message/list_message_chat1vs1/${userID}/${otherUserID}`
    )
-
-   setMessageGroup([])
    setMessage(response.data.data[0].messages)
   } catch (error) {
    console.log(error)
@@ -211,65 +197,20 @@ const UserGroup = () => {
   }
 
   getMessageChats(user.id, otherUser.user.id)
-
   setInfoOtherUser(otherUser.user)
-  setGroupItem({})
-  setMessageGroup([])
-  setFormName('chat')
- }
 
- const fetchUpdateSeenMessage = async (messageID) => {
-  try {
-   const response = await api.post(
-    `https://samnote.mangasocial.online/message/${messageID}`
-   )
-  } catch (error) {
-   console.log(error)
-  }
- }
-
- const handleDeleteMessage = async (messageID) => {
-  try {
-   const response = await axios.delete(
-    `https://samnote.mangasocial.online/message/${messageID}`
-   )
-
-   getMessageChats(user.id, infoOtherUser.id)
-   fetchUserChat()
-  } catch (error) {
-   console.log(error)
-  }
+  resetGroup()
  }
 
  // handle convert time, image, emoji, roomID
- const handleTimeUserChat = (time) => {
-  const realTime = new Date()
-  const diffInMs = realTime.getTime() - new Date(time).getTime()
-  const daysDifference = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
-  const monthsDifference = Math.floor(daysDifference / 30.436875) // Trung bình số ngày trong một tháng
-  const yearsDifference = Math.floor(daysDifference / 365.25)
-  const timeSplit = time.split(' ')
 
-  if (daysDifference < 1) {
-   return `${timeSplit[4].slice(0, -3)}`
-  } else if (daysDifference < 7) {
-   return `${timeSplit[0].slice(0, -1)}`
-  } else if (daysDifference < 30) {
-   return `${timeSplit[1]}${timeSplit[2]}`
-  } else if (monthsDifference < 12) {
-   return `${timeSplit[2]}`
-  } else {
-   return `${timeSplit[3]}`
-  }
- }
+ const convertTime = (time) => moment(`${time}+0700`).calendar()
 
- const handleChatLastText = (lastText, idSend) => {
-  if (idSend === user.id) {
-   return `Bạn: ${lastText}`
-  } else {
-   return `${lastText}`
-  }
- }
+ const handleChatLastText = (lastText, idSend) =>
+  idSend === user.id ? `Bạn: ${lastText}` : `${lastText}`
+
+ const roomSplit = (idUser, idOther) =>
+  idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
 
  const convertEmojiToBase64 = (emoji) => {
   const canvas = document.createElement('canvas')
@@ -283,77 +224,7 @@ const UserGroup = () => {
   return base64
  }
 
- const roomSplit = (idUser, idOther) => {
-  if (idUser > idOther) {
-   return `${idOther}#${idUser}`
-  } else {
-   return `${idUser}#${idOther}`
-  }
- }
-
- // ******** GROUPS ********
-
- const [messageGroup, setMessageGroup] = useState([])
-
- const fetchMessagesGroup = async (groupID) => {
-  try {
-   const response = await api.get(
-    `https://samnote.mangasocial.online/group/messages/${groupID}`
-   )
-   setMessageGroup(response.data.data)
-  } catch (error) {
-   console.log(error)
-  }
- }
-
- const postGroup = async (dataGroup, userID) => {
-  try {
-   const response = await axios.post(
-    `${API_SERVER_URL}/group/create/${userID}`,
-    dataGroup
-   )
-
-   handleClose()
-   setSnackbar({
-    isOpen: true,
-    message: `Create group complete`,
-    severity: 'success',
-   })
-
-   getGroups(user.id)
-  } catch (error) {
-   setSnackbar({
-    isOpen: true,
-    message: error.message,
-    severity: 'error',
-   })
-  }
- }
-
- const handleCreateGroup = async () => {
-  const dataGroup = {
-   name: groupName,
-   createAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
-   idOwner: user.id,
-   describe: groupDescription,
-   r: 255,
-   g: 255,
-   b: 255,
-   a: 0.99,
-   members: [
-    {
-     gmail: memberEmail,
-     id: memberId,
-     role: 'member',
-    },
-    ...members,
-   ],
-  }
-
-  postGroup(dataGroup, user.id)
- }
-
- //  ** handle submit form message
+ //  ** handle form message
 
  const handleChangeValueMsg = (e) => {
   setMessageForm({
@@ -372,7 +243,7 @@ const UserGroup = () => {
   }
 
   reader.readAsDataURL(e.target.files[0])
-  e.target.files[0] = null
+  e.target.value = null
  }
 
  const handleToggleEmoji = () => {
@@ -399,7 +270,6 @@ const UserGroup = () => {
     // Xử lý logic khi tin nhắn được gửi đi
     getMessageChats(user.id, infoOtherUser.id)
     fetchUserChat()
-
     return
    }
 
@@ -459,7 +329,6 @@ const UserGroup = () => {
   }
 
   // * submit form group chat
-
   const roomID = groupItem.idGroup
 
   const dataForm = {
@@ -489,6 +358,142 @@ const UserGroup = () => {
   }
   return null
  }
+
+ const fetchUpdateSeenMessage = async (messageID) => {
+  try {
+   const response = await axios.post(`${API_SERVER_URL}/message/${messageID}`)
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
+ const handleDeleteMessage = async (messageID) => {
+  try {
+   const response = await axios.delete(`${API_SERVER_URL}/message/${messageID}`)
+
+   getMessageChats(user.id, infoOtherUser.id)
+   fetchUserChat()
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
+ // ******** GROUPS ********
+
+ const [messageGroup, setMessageGroup] = useState([])
+ const [memberGroup, setMemberGroup] = useState({ gmail: '', id: '' })
+ const [memberListGroup, setMemberListGroup] = useState([])
+
+ const {
+  register,
+  handleSubmit,
+  setValue,
+  getValues,
+  reset,
+  formState: { errors },
+ } = useForm({
+  resolver: joiResolver(schemaGroup),
+  defaultValues: { groupName: '', desc: '', members: null },
+ })
+
+ const handleGroupClick = async (group) => {
+  try {
+   fetchMessagesGroup(group.idGroup)
+   setGroupItem(group)
+
+   resetChat()
+  } catch (err) {
+   console.log(err)
+  }
+ }
+
+ const fetchMessagesGroup = async (groupID) => {
+  try {
+   const response = await axios.get(
+    `${API_SERVER_URL}/group/messages/${groupID}`
+   )
+   setMessageGroup(response.data.data)
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
+ const postGroup = async (dataGroup, userID) => {
+  try {
+   const response = await axios.post(
+    `${API_SERVER_URL}/group/create/${userID}`,
+    dataGroup
+   )
+
+   handleClose()
+   setSnackbar({
+    isOpen: true,
+    message: `Create group complete`,
+    severity: 'success',
+   })
+
+   // cập nhật group list
+   getGroups(user.id)
+
+   // reset form create group
+   reset()
+   setMemberListGroup([])
+   setMemberGroup({ gmail: '', id: '' })
+  } catch (error) {
+   setSnackbar({
+    isOpen: true,
+    message: error.response.data.message,
+    severity: 'error',
+   })
+  }
+ }
+
+ const onSubmit = (data) => {
+  const { groupName, desc, members } = data
+
+  const group = {
+   name: groupName,
+   createAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
+   idOwner: user.id,
+   describe: desc,
+   r: 255,
+   g: 255,
+   b: 255,
+   a: 0.99,
+   members: members,
+  }
+
+  postGroup(group, user.id)
+ }
+
+ const handleAddMember = () => {
+  const membersChema = getValues('members')
+  const { gmail, id } = memberGroup
+
+  const member = { gmail, id, role: 'member' }
+  setMemberListGroup([...memberListGroup, member])
+  setMemberGroup({ gmail: '', id: '' })
+
+  setValue(
+   'members',
+   membersChema
+    ? [...membersChema, { gmail: gmail, id: id, role: 'member' }]
+    : [{ gmail, id: id, role: 'member' }]
+  )
+ }
+
+ const handleDeleteMember = (index) => {
+  setMemberListGroup(memberListGroup.filter((member, idx) => idx !== index))
+
+  const membersChema = getValues('members')
+  setValue(
+   'members',
+   membersChema.filter((member, idx) => idx !== index)
+  )
+ }
+
+ const handleChangeMemberGroup = (e) =>
+  setMemberGroup({ ...memberGroup, [e.target.name]: e.target.value })
 
  return (
   <div
@@ -613,7 +618,7 @@ const UserGroup = () => {
            </p>
           </div>
           <div className='h-full mr-4 flex items-start'>
-           <p className='mt-3 text-xs'>{handleTimeUserChat(item.sendAt)}</p>
+           <p className='mt-3 text-xs'>{convertTime(item.sendAt)}</p>
           </div>
          </Box>
         )
@@ -781,7 +786,7 @@ const UserGroup = () => {
           </div>
 
           <time className='text-xs text-black-50'>
-           {handleTimeUserChat(item.sendAt)}
+           {convertTime(item.sendAt)}
           </time>
          </div>
         ) : (
@@ -826,7 +831,7 @@ const UserGroup = () => {
           </div>
 
           <time className='text-xs text-black-50'>
-           {handleTimeUserChat(item.sendAt)}
+           {convertTime(item.sendAt)}
           </time>
          </div>
         )
@@ -882,7 +887,7 @@ const UserGroup = () => {
           </div>
 
           <time className='text-xs text-black-50'>
-           {handleTimeUserChat(item.sendAt)}
+           {convertTime(item.sendAt)}
           </time>
          </div>
         ) : (
@@ -940,7 +945,7 @@ const UserGroup = () => {
           </div>
 
           <time className='text-xs text-black-50'>
-           {handleTimeUserChat(item.sendAt)}
+           {convertTime(item.sendAt)}
           </time>
          </div>
         )
@@ -1027,6 +1032,8 @@ const UserGroup = () => {
     aria-describedby='modal-modal-description'
    >
     <Box
+     component='form'
+     onSubmit={handleSubmit(onSubmit)}
      sx={{
       position: 'absolute',
       top: '50%',
@@ -1045,25 +1052,31 @@ const UserGroup = () => {
      <TextField
       fullWidth
       label='Group Name'
+      type='text'
       variant='outlined'
       margin='normal'
-      value={groupName}
-      onChange={handleGroupNameChange}
+      {...register('groupName')}
      />
+     {errors.groupName && (
+      <Box sx={{ mt: 1, color: 'red' }}>{errors.groupName.message}</Box>
+     )}
      <TextField
       fullWidth
       label='Description'
+      type='text'
       variant='outlined'
       margin='normal'
-      value={groupDescription}
-      onChange={handleGroupDescriptionChange}
+      {...register('desc')}
      />
+     {errors.desc && (
+      <Box sx={{ mt: 1, color: 'red' }}>{errors.desc.message}</Box>
+     )}
      <List>
-      {members?.map((member, index) => (
+      {memberListGroup?.map((member, index) => (
        <ListItem key={index}>
         <ListItemText primary={member.gmail} secondary={member.role} />
         <ListItemSecondaryAction>
-         <IconButton edge='end' onClick={() => handleRemoveMember(index)}>
+         <IconButton edge='end' onClick={() => handleDeleteMember(index)}>
           <DeleteIcon />
          </IconButton>
         </ListItemSecondaryAction>
@@ -1076,26 +1089,43 @@ const UserGroup = () => {
        alignItems: 'center',
        justifyContent: 'space-between',
        mt: 2,
+       gap: '5px',
       }}
      >
       <TextField
        label='Member Email'
-       value={memberEmail}
-       onChange={handleMemberEmailChange}
+       name='gmail'
+       type='email'
        fullWidth
+       onChange={handleChangeMemberGroup}
+       value={memberGroup.gmail}
       />
+
       <TextField
        label='Member ID'
-       value={memberId}
-       onChange={handleMemberIdChange}
+       name='id'
+       type='number'
        fullWidth
+       onChange={handleChangeMemberGroup}
+       value={memberGroup.id}
       />
-      <IconButton onClick={handleAddMember}>
+
+      <IconButton
+       disabled={
+        memberGroup.gmail.trim() !== '' && memberGroup.id.trim() !== ''
+         ? false
+         : true
+       }
+       onClick={handleAddMember}
+      >
        <AddIcon />
       </IconButton>
      </Box>
+     {errors.members && (
+      <Box sx={{ mt: 1, color: 'red' }}>{errors.members.message}</Box>
+     )}
      <Box sx={{ mt: 3, textAlign: 'right' }}>
-      <Button variant='contained' color='primary' onClick={handleCreateGroup}>
+      <Button type='submit' variant='contained' color='primary'>
        Create
       </Button>
      </Box>
