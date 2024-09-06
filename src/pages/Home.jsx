@@ -489,8 +489,8 @@ const Home = () => {
                 delay: 2500,
                 // disableOnInteraction: false,
               }}
-              onSlideChange={() => console.log("slide change")}
-              onSwiper={(swiper) => console.log(swiper)}
+              // onSlideChange={() => console.log("slide change")}
+              // onSwiper={(swiper) => console.log(swiper)}
             >
               <SwiperSlide
                 className={`rounded-xl bg-[url(/img-slider-1.png)] h-[350px] bg-center bg-no-repeat bg-cover`}
