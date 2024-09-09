@@ -50,6 +50,7 @@ const UserProfile = () => {
     const newSocket = io("https://samnote.mangasocial.online");
     console.log(newSocket);
     setSocket(newSocket);
+    
     newSocket.on("connect", () => {
       console.log("Connected to socket.IO server", newSocket.id);
     });

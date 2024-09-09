@@ -42,8 +42,6 @@ import config from '../configs/configs.json'
 import axios from 'axios'
 const { BASE64_URL, API_SERVER_URL } = config
 
-const newSocket = io(API_SERVER_URL)
-
 const UserGroup = () => {
  const location = useLocation()
 
@@ -54,7 +52,7 @@ const UserGroup = () => {
 
  const appContext = useContext(AppContext)
  const { setSnackbar, user } = appContext
- const [socket, setSocket] = useState(null)
+
  const pickerEmojiRef = useRef(null)
  const scrollContainerRef = useRef(null)
 
@@ -66,59 +64,42 @@ const UserGroup = () => {
  const [groupItem, setGroupItem] = useState({})
  const [infoOtherUser, setInfoOtherUser] = useState({})
 
- // Kết nối tới server Socket.IO khi component được tạo ra
+ const [socket, setSocket] = useState(null)
 
- const fetchUserChat = async () => {
-  const response = await axios.get(
-   `${API_SERVER_URL}/message/list_user_chat1vs1/${user.id}`
-  )
+ useEffect(() => {
+  // Kết nối tới server Socket.IO khi component được tạo ra
+  const socketIo = io(API_SERVER_URL)
 
-  try {
-   response.data.data.map((item) => {
-    newSocket.emit('join_room', { room: item.idRoom })
-   })
-   setUserChat(response.data.data)
-
-   console.log(response.data.data)
-  } catch (error) {
-   console.log(error)
-  }
- }
-
- const getGroups = async (idOwner) => {
-  try {
-   const res = await axios.get(`${API_SERVER_URL}/group/all/${idOwner}`)
-   res.data.data.map((item) => {
-    if (item.numberMems >= 1) {
-     newSocket.emit('join_room', { room: item.idGroup })
-    }
-   })
-
-   setGroupList(res.data.data)
-  } catch (err) {
-   console.error(err)
-  }
- }
-
- useMemo(() => {
-  setSocket(newSocket)
-
-  newSocket.on('connect', () => {
+  socketIo.on('connect', () => {
    console.log('Connected to server')
+   setSocket(socketIo)
   })
-
-  newSocket.on('send_message', (result) => {
-   console.log('send message', result.data)
-   fetchUserChat()
-  })
-
-  getGroups(user.id)
-  fetchUserChat()
 
   return () => {
-   newSocket.disconnect() // Ngắt kết nối khi component bị xoá
+   socketIo.disconnect() // Ngắt kết nối khi component bị xoá
   }
  }, [])
+
+ useEffect(() => {
+  if (socket) {
+   socket.on('send_message', (result) => {
+    const { ReceivedID, SenderID } = result.data
+    fetchUserChat()
+    getMessageChats(user.id, ReceivedID === user.id ? SenderID : ReceivedID)
+   })
+
+   socket.on('chat_group', (result) => {
+    console.log('chat received', result)
+   })
+
+   socket.on('join_group', (result) => {
+    console.log('join group', result)
+   })
+
+   getGroups(user.id)
+   fetchUserChat()
+  }
+ }, [socket])
 
  useEffect(() => {
   const scrollContainer = scrollContainerRef.current
@@ -146,6 +127,38 @@ const UserGroup = () => {
    document.removeEventListener('mousedown', handleClickOutside)
   }
  }, [])
+
+ const fetchUserChat = async () => {
+  const response = await axios.get(
+   `${API_SERVER_URL}/message/list_user_chat1vs1/${user.id}`
+  )
+
+  try {
+   response.data.data.map((item) => {
+    return socket.emit('join_room', { room: item.idRoom })
+   })
+   setUserChat(response.data.data)
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
+ const getGroups = async (idOwner) => {
+  try {
+   const res = await axios.get(`${API_SERVER_URL}/group/all/${idOwner}`)
+
+   //    console.log('groups:', res.data.data)
+   res.data.data.map((item) => {
+    if (item.numberMems >= 1) {
+     socket.emit('join_group ', { room: item.idGroup })
+    }
+   })
+
+   setGroupList(res.data.data)
+  } catch (err) {
+   console.error(err)
+  }
+ }
 
  // todo new code form message
 
@@ -264,7 +277,7 @@ const UserGroup = () => {
   if (socket) {
    // * send message chat
    if (formName === 'chat') {
-    newSocket.emit('send_message', { room, data }) // Gửi sự kiện "send_message" tới server
+    socket.emit('send_message', { room, data }) // Gửi sự kiện "send_message" tới server
     setMessageForm({ content: '', image: null, emoji: null })
 
     // Xử lý logic khi tin nhắn được gửi đi
@@ -276,7 +289,7 @@ const UserGroup = () => {
    // * send message group
 
    if (formName === 'group') {
-    newSocket.emit('chat_group', { room, data }) // Gửi sự kiện "send_message" tới server
+    socket.emit('chat_group', { room, data }) // Gửi sự kiện "send_message" tới server
     setMessageForm({ content: '', image: null, emoji: null })
 
     fetchMessagesGroup(groupItem.idGroup)
@@ -670,16 +683,16 @@ const UserGroup = () => {
             <div className='flex flex-col gap-2' style={{ width: '100%' }}>
              <h3 className='text-capitalize fs-6 fw-bold mb-0'>{item.name}</h3>
              {/* <p
-              style={{
-               padding: 0,
-               margin: 0,
-               whiteSpace: 'nowrap',
-               overflow: 'hidden',
-               textOverflow: 'ellipsis',
-              }}
-             >
-              {msgGroupLast.type}
-             </p> */}
+               style={{
+                padding: 0,
+                margin: 0,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+               }}
+              >
+               {msgGroupLast.type}
+              </p> */}
             </div>
            </div>
 
