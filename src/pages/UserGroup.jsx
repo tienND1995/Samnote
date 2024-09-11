@@ -1,45 +1,45 @@
 // @ts-nocheck
-import { useState, useEffect, useContext, useMemo, useRef } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import io from 'socket.io-client'
 import { AppContext } from '../context'
 
+import { joiResolver } from '@hookform/resolvers/joi'
 import moment from 'moment'
 import { useForm } from 'react-hook-form'
 import { schemaGroup } from '../utils/schema/schema'
-import { joiResolver } from '@hookform/resolvers/joi'
 
 import {
- Box,
- Typography,
- Avatar,
- InputBase,
- IconButton,
- Modal,
- TextField,
- Button,
  Accordion,
- AccordionSummary,
  AccordionDetails,
+ AccordionSummary,
+ Avatar,
+ Box,
+ Button,
+ IconButton,
+ InputBase,
  List,
  ListItem,
- ListItemText,
  ListItemSecondaryAction,
+ ListItemText,
+ Modal,
+ TextField,
+ Typography,
 } from '@mui/material'
 
+import AddIcon from '@mui/icons-material/Add'
+import AttachFileIcon from '@mui/icons-material/AttachFile'
+import CancelIcon from '@mui/icons-material/Cancel'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
-import AddIcon from '@mui/icons-material/Add'
 import SearchIcon from '@mui/icons-material/Search'
-import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions'
-import AttachFileIcon from '@mui/icons-material/AttachFile'
 import SubdirectoryArrowRightSharpIcon from '@mui/icons-material/SubdirectoryArrowRightSharp'
-import DeleteIcon from '@mui/icons-material/Delete'
-import { useLocation } from 'react-router-dom'
 import EmojiPicker, { EmojiStyle } from 'emoji-picker-react'
-import CancelIcon from '@mui/icons-material/Cancel'
 
-import config from '../configs/configs.json'
 import axios from 'axios'
+import config from '../configs/configs.json'
 const { BASE64_URL, API_SERVER_URL } = config
 
 const UserGroup = () => {
@@ -85,15 +85,12 @@ const UserGroup = () => {
    socket.on('send_message', (result) => {
     const { ReceivedID, SenderID } = result.data
     fetchUserChat()
-    getMessageChats(user.id, ReceivedID === user.id ? SenderID : ReceivedID)
+    formName === 'chat' &&
+     getMessageChats(user.id, ReceivedID === user.id ? SenderID : ReceivedID)
    })
 
-   socket.on('chat_group', (result) => {
-    console.log('chat received', result)
-   })
-
-   socket.on('join_group', (result) => {
-    console.log('join group', result)
+   socket.once('chat_group', (result) => {
+    console.log('message received from server', result)
    })
 
    getGroups(user.id)
@@ -118,7 +115,7 @@ const UserGroup = () => {
     pickerEmojiRef.current &&
     !pickerEmojiRef.current.contains(event.target)
    ) {
-    // setIsEmoji(false)
+    setShowEmoji(false)
    }
   }
 
@@ -150,7 +147,7 @@ const UserGroup = () => {
    //    console.log('groups:', res.data.data)
    res.data.data.map((item) => {
     if (item.numberMems >= 1) {
-     socket.emit('join_group ', { room: item.idGroup })
+     socket.emit('join_room ', { room: item.idGroup })
     }
    })
 
@@ -162,7 +159,7 @@ const UserGroup = () => {
 
  // todo new code form message
 
- const [formName, setFormName] = useState('chat')
+ const [formName, setFormName] = useState(null)
 
  const [messageForm, setMessageForm] = useState({
   content: '',
@@ -198,6 +195,7 @@ const UserGroup = () => {
    const response = await axios.get(
     `${API_SERVER_URL}/message/list_message_chat1vs1/${userID}/${otherUserID}`
    )
+
    setMessage(response.data.data[0].messages)
   } catch (error) {
    console.log(error)
@@ -290,6 +288,7 @@ const UserGroup = () => {
 
    if (formName === 'group') {
     socket.emit('chat_group', { room, data }) // Gửi sự kiện "send_message" tới server
+
     setMessageForm({ content: '', image: null, emoji: null })
 
     fetchMessagesGroup(groupItem.idGroup)
@@ -342,39 +341,43 @@ const UserGroup = () => {
   }
 
   // * submit form group chat
-  const roomID = groupItem.idGroup
+  if (formName === 'group') {
+   const roomID = groupItem.idGroup
 
-  const dataForm = {
-   idSend: `${user.id}`,
-   type: 'text',
+   const dataForm = {
+    idSend: `${user.id}`,
+    type: 'text',
+   }
+
+   if (image) {
+    dataForm.type = 'image'
+    dataForm.metaData = image
+
+    sendMessage(roomID, dataForm)
+    return
+   }
+
+   if (emoji) {
+    dataForm.type = 'icon-image'
+    dataForm.metaData = emoji
+
+    sendMessage(roomID, dataForm)
+    return
+   }
+
+   if (content.trim() !== '') {
+    dataForm.content = content
+    sendMessage(roomID, dataForm)
+   }
   }
 
-  if (image) {
-   dataForm.type = 'image'
-   dataForm.metaData = image
-
-   sendMessage(roomID, dataForm)
-   return
-  }
-
-  if (emoji) {
-   dataForm.type = 'icon-image'
-   dataForm.metaData = emoji
-
-   sendMessage(roomID, dataForm)
-   return
-  }
-
-  if (content.trim() !== '') {
-   dataForm.content = content
-   sendMessage(roomID, dataForm)
-  }
   return null
  }
 
  const fetchUpdateSeenMessage = async (messageID) => {
   try {
    const response = await axios.post(`${API_SERVER_URL}/message/${messageID}`)
+   fetchUserChat()
   } catch (error) {
    console.log(error)
   }
@@ -508,12 +511,17 @@ const UserGroup = () => {
  const handleChangeMemberGroup = (e) =>
   setMemberGroup({ ...memberGroup, [e.target.name]: e.target.value })
 
+ // search message
+ const handleSubmitSearchMessage = (e) => {
+  e.preventDefault()
+  console.log('Search')
+ }
  return (
   <div
    className='mb-[3rem] lg:mb-0'
    style={{
     display: 'grid',
-    gridTemplateColumns: '40% 60%',
+    gridTemplateColumns: '50% 50%',
    }}
   >
    <Box
@@ -551,6 +559,7 @@ const UserGroup = () => {
      >
       <Box
        component='form'
+       onSubmit={handleSubmitSearchMessage}
        sx={{
         backgroundColor: '#DADADA',
         display: 'flex',
@@ -561,7 +570,12 @@ const UserGroup = () => {
         margin: '0 10px 10px 0px',
        }}
       >
-       <SearchIcon sx={{ marginLeft: '15px', color: '#333' }} />
+       <button
+        type='submit'
+        className='border-none bg-transparent outline-none'
+       >
+        <SearchIcon sx={{ marginLeft: '15px', color: '#333' }} />
+       </button>
        <InputBase
         sx={{ ml: 1, flex: 1, color: '#333' }}
         placeholder='Search Messenger'
@@ -570,119 +584,120 @@ const UserGroup = () => {
       </Box>
      </div>
     </Box>
-    <Accordion>
-     <AccordionSummary>
-      <ExpandMoreIcon />
-      <Typography>Chat</Typography>
-     </AccordionSummary>
-     <AccordionDetails>
-      <Box
-       sx={{
-        maxHeight: '400px',
-        overflow: 'auto',
-        scrollbarWidth: 'none',
-       }}
-      >
-       {userChat.map((item, index) => {
-        return (
-         <Box
-          key={`chat ${index}`}
-          sx={{
-           margin: '2px 0',
-           display: 'flex',
-           justifyContent: 'flex-start',
-           alignItems: 'center',
-           color: 'text.main',
-           backgroundColor: ' rgba(178, 178, 178, 0.1)',
-           borderRadius: '30px',
-           '&:hover': {
-            backgroundColor: ' rgba(178, 178, 178, 0.3)',
-            cursor: 'pointer',
-           },
-          }}
-          onClick={() => handleUserChatClick(item)}
-         >
-          <Avatar
-           src={item.user.Avarta}
-           sx={{ width: '30px', height: '30px', margin: '10px' }}
-          />
-          <div style={{ width: '100%', overflow: 'hidden' }}>
-           <strong
-            style={{
-             padding: 0,
-             margin: 0,
-             whiteSpace: 'nowrap',
-             overflow: 'hidden',
-             textOverflow: 'ellipsis',
-             textTransform: 'capitalize',
-            }}
-           >
-            {item.user.name}
-           </strong>
-           <p
-            style={{ maxWidth: '200px' }}
-            className={
-             item.is_seen === 0
-              ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[700]'
-              : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis'
-            }
-           >
-            {handleChatLastText(item.last_text, item.idSend)}
-           </p>
-          </div>
-          <div className='h-full mr-4 flex items-start'>
-           <p className='mt-3 text-xs'>{convertTime(item.sendAt)}</p>
-          </div>
-         </Box>
-        )
-       })}
-      </Box>
-     </AccordionDetails>
-    </Accordion>
-
-    <Accordion>
-     <AccordionSummary
-      expandIcon={<AddIcon sx={{ cursor: 'pointer' }} onClick={handleOpen} />}
-      aria-controls='panel2a-content'
-      id='panel2a-header'
-     >
-      <ExpandMoreIcon />
-      <Typography>Group</Typography>
-     </AccordionSummary>
-     <AccordionDetails>
-      <Box
-       sx={{
-        maxHeight: '400px',
-        overflowY: 'auto',
-       }}
-      >
-       {groupList?.map((item, index) => {
-        if (item.numberMems >= 1) {
+    <div className='flex gap-2'>
+     <Accordion>
+      <AccordionSummary>
+       <ExpandMoreIcon />
+       <Typography>Chat</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+       <Box
+        sx={{
+         maxHeight: '400px',
+         overflow: 'auto',
+         scrollbarWidth: 'none',
+        }}
+       >
+        {userChat.map((item, index) => {
          return (
           <Box
-           key={index}
+           key={`chat ${index}`}
            sx={{
+            margin: '2px 0',
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-start',
             alignItems: 'center',
-            margin: '20px',
-            padding: '10px',
             color: 'text.main',
+            backgroundColor: ' rgba(178, 178, 178, 0.1)',
+            borderRadius: '30px',
             '&:hover': {
-             backgroundColor: '#BFEFFF',
+             backgroundColor: ' rgba(178, 178, 178, 0.3)',
              cursor: 'pointer',
             },
            }}
-           onClick={() => handleGroupClick(item)}
+           onClick={() => handleUserChatClick(item)}
           >
-           <div className='flex gap-2 items-center'>
-            <Avatar
-             src={item.linkAvatar}
-             sx={{ width: '30px', height: '30px' }}
-            />
-            <div className='flex flex-col gap-2' style={{ width: '100%' }}>
-             <h3 className='text-capitalize fs-6 fw-bold mb-0'>{item.name}</h3>
-             {/* <p
+           <Avatar
+            src={item.user.Avarta}
+            sx={{ width: '30px', height: '30px', margin: '10px' }}
+           />
+           <div style={{ width: '100%', overflow: 'hidden' }}>
+            <strong
+             style={{
+              padding: 0,
+              margin: 0,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              textTransform: 'capitalize',
+             }}
+            >
+             {item.user.name}
+            </strong>
+            <p
+             style={{ maxWidth: '200px' }}
+             className={
+              item.is_seen === 0
+               ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[700]'
+               : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis'
+             }
+            >
+             {handleChatLastText(item.last_text, item.idSend)}
+            </p>
+           </div>
+           <div className='h-full mr-4 flex items-start'>
+            <p className='mt-3 text-xs'>{convertTime(item.sendAt)}</p>
+           </div>
+          </Box>
+         )
+        })}
+       </Box>
+      </AccordionDetails>
+     </Accordion>
+
+     <Accordion>
+      <AccordionSummary
+       expandIcon={<AddIcon sx={{ cursor: 'pointer' }} onClick={handleOpen} />}
+       aria-controls='panel2a-content'
+       id='panel2a-header'
+      >
+       <ExpandMoreIcon />
+       <Typography>Group</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+       <Box
+        sx={{
+         maxHeight: '400px',
+         overflowY: 'auto',
+        }}
+       >
+        {groupList?.map((item, index) => {
+         if (item.numberMems >= 1) {
+          return (
+           <Box
+            key={index}
+            sx={{
+             display: 'flex',
+             justifyContent: 'space-between',
+             alignItems: 'center',
+             margin: '20px',
+             padding: '10px',
+             color: 'text.main',
+             '&:hover': {
+              backgroundColor: '#BFEFFF',
+              cursor: 'pointer',
+             },
+            }}
+            onClick={() => handleGroupClick(item)}
+           >
+            <div className='flex gap-2 items-center'>
+             <Avatar
+              src={item.linkAvatar}
+              sx={{ width: '30px', height: '30px' }}
+             />
+             <div className='flex flex-col gap-2' style={{ width: '100%' }}>
+              <h3 className='text-capitalize fs-6 fw-bold mb-0'>{item.name}</h3>
+              {/* <p
                style={{
                 padding: 0,
                 margin: 0,
@@ -693,19 +708,20 @@ const UserGroup = () => {
               >
                {msgGroupLast.type}
               </p> */}
+             </div>
             </div>
-           </div>
 
-           {/* <p className='mb-0'>{item.numberMems}</p> */}
-          </Box>
-         )
-        } else {
-         return null
-        }
-       })}
-      </Box>
-     </AccordionDetails>
-    </Accordion>
+            {/* <p className='mb-0'>{item.numberMems}</p> */}
+           </Box>
+          )
+         } else {
+          return null
+         }
+        })}
+       </Box>
+      </AccordionDetails>
+     </Accordion>
+    </div>
    </Box>
 
    <div
@@ -728,15 +744,17 @@ const UserGroup = () => {
      }}
     >
      <div style={{ display: 'flex', alignItems: 'center' }}>
-      <Avatar
-       style={{
-        height: '40px',
-        width: '40px',
-        marginRight: '15px',
-       }}
-       src={infoOtherUser.Avarta || groupItem.linkAvatar}
-       alt='avatar'
-      />
+      <Link to={`/other-user/${infoOtherUser.id}`}>
+       <Avatar
+        style={{
+         height: '40px',
+         width: '40px',
+         marginRight: '15px',
+        }}
+        src={infoOtherUser.Avarta || groupItem.linkAvatar}
+        alt='avatar'
+       />
+      </Link>
 
       <h3 style={{ margin: 0, textTransform: 'capitalize' }}>
        {infoOtherUser.name || groupItem.name || 'Anonymous chatter'}

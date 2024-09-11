@@ -27,6 +27,7 @@
     "konva": "^9.3.11",
     "moment": "^2.30.1",
     "react": "^18.2.0",
+    "react-bootstrap": "^2.10.4",
     "react-color": "^2.19.3",
     "react-datepicker": "^6.9.0",
     "react-dom": "^18.2.0",
