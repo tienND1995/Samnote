@@ -71,6 +71,7 @@ function App() {
      <Route path='/user/profile/:id' element={<UserProfile />} />
      <Route path='/user/incognito' element={<Incognito />} />
      <Route path='/group' element={<Group />} />
+     {/* <Route path='/group' element={<Demo />} /> */}
     </Route>
    </Routes>
   </main>

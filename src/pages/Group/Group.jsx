@@ -46,7 +46,6 @@ import {
  TextField,
  Typography,
 } from '@mui/material'
-import { document } from 'postcss'
 
 const { API_SERVER_URL } = configs
 
@@ -666,9 +665,6 @@ const Group = () => {
 
  useEffect(() => {
   if (!ulElementButtonsGroupRef.current || !showButtonsGroupRef.current) return
-  const bodyElement = document.body
-
-  if (!bodyElement) return
 
   const handleClickOutside = (element) => {
    if (
