@@ -5,6 +5,7 @@ import axios from 'axios'
 import moment from 'moment'
 import { Link } from 'react-router-dom'
 import io from 'socket.io-client'
+import Swal from 'sweetalert2'
 
 import { joiResolver } from '@hookform/resolvers/joi'
 import { useForm } from 'react-hook-form'
@@ -31,6 +32,8 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import SearchIcon from '@mui/icons-material/Search'
 import AddIcon from '@mui/icons-material/Add'
 import GroupAddIcon from '@mui/icons-material/GroupAdd'
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
+import SaveIcon from '@mui/icons-material/Save'
 
 import {
  Box,
@@ -43,6 +46,7 @@ import {
  TextField,
  Typography,
 } from '@mui/material'
+import { document } from 'postcss'
 
 const { API_SERVER_URL } = configs
 
@@ -125,7 +129,7 @@ const Group = () => {
   if (typeFilterChatUser === 'Read') {
    response.data.data.filter((item) => {
     if (item.is_seen !== 0)
-     return socket.emit('join_room', { room: item.idRoom })
+     return socket.emit('join_group', { room: item.idRoom })
    })
 
    return setChatUser({
@@ -138,6 +142,7 @@ const Group = () => {
  const getGroups = async (idOwner) => {
   try {
    const res = await axios.get(`${API_SERVER_URL}/group/all/${idOwner}`)
+
    res.data.data.map((item) => {
     if (item.numberMems >= 1) {
      socket.emit('join_room ', { room: item.idGroup })
@@ -168,6 +173,10 @@ const Group = () => {
     fetchUserChat()
     getMessageList(user.id, ReceivedID === user.id ? SenderID : ReceivedID)
    })
+
+   //  socket.on('join_room', (result) => {
+   //   console.log('join_room', result)
+   //  })
 
    socket.on('chat_group', (result) => {
     console.log('message received from server', result)
@@ -286,6 +295,8 @@ const Group = () => {
    name: otherUser.userName,
   }
 
+  socket.emit('join_room', { room: `${otherUser.idUser}#${user.id}` })
+
   setInfoOtherUser(newInfoOtherUser)
   resetGroup()
 
@@ -303,6 +314,7 @@ const Group = () => {
 
  const handleShowModalSearch = (e) => {
   setSearchUser({ ...searchUser, showModalSearch: true })
+  setSearchUserFormName('chat')
  }
 
  const handleHideModalSearch = (e) => {
@@ -313,6 +325,8 @@ const Group = () => {
    showModalSearch: false,
    messageNotifi: '',
   })
+
+  setSearchUserFormName('chat')
  }
 
  // * handle filter message
@@ -349,16 +363,6 @@ const Group = () => {
     heightChatGroup: `${chatGroupRef.current.offsetHeight}`,
    })
  }, [])
-
- //  const propsChatUser = {
- //   userID: user.id,
- //   socket,
- //   searchUser,
- //   setInfoOtherUser,
- //   setFormName,
- //   getMessageList,
- //   setSearchUser,
- //  }
 
  // *** handle group
 
@@ -412,6 +416,7 @@ const Group = () => {
 
  const handleClickGroupItem = (group) => {
   fetchMessagesGroup(group.idGroup)
+  setValueGroupName(group.name)
 
   setInfoGroupItem(group)
   resetChat()
@@ -511,6 +516,178 @@ const Group = () => {
   inputMessageFormRef,
   formName,
  }
+
+ //  handle buttons group
+ const [showButtonsGroup, setShowButtonsGroup] = useState(false)
+ const ulElementButtonsGroupRef = useRef()
+ const showButtonsGroupRef = useRef()
+ const [typeButtonGroup, setTypeButtonGroup] = useState(null)
+
+ const fetchQuitGroup = async () => {}
+
+ const handleQuitGroup = () => {
+  setTypeButtonGroup('quit')
+  // setShowButtonsGroup(false)
+
+  Swal.fire({
+   title: 'Are you sure?',
+   text: 'Do you want to leave the group?',
+   icon: 'warning',
+   showCancelButton: true,
+   confirmButtonColor: '#3085d6',
+   cancelButtonColor: '#d33',
+   confirmButtonText: 'Yes',
+  }).then((result) => {
+   if (result.isConfirmed) {
+    Swal.fire({
+     title: 'Quitted!',
+     text: 'You have left the group.',
+     icon: 'success',
+    })
+   }
+  })
+ }
+
+ const [searchUserFormName, setSearchUserFormName] = useState('chat')
+
+ const handleShowModalSearchUserGroup = () => {
+  setSearchUser({ ...searchUser, showModalSearch: true })
+  setSearchUserFormName('group')
+  setTypeButtonGroup('add')
+ }
+
+ const handleClickSearchUserBtnAdd = (user) => {
+  const idMemberList = [user.idUser]
+  const idGroup = infoGroupItem.idGroup
+  if (!idMemberList || !idGroup) return
+
+  postMembersGroup(idMemberList, idGroup)
+ }
+
+ const postMembersGroup = async (idMemberList, idGroup) => {
+  try {
+   const response = await axios.post(`${API_SERVER_URL}/group/add/${idGroup}`, {
+    idMembers: idMemberList,
+   })
+
+   handleHideModalSearch()
+   setSnackbar({
+    isOpen: true,
+    message: `Add members successfully!`,
+    severity: 'success',
+   })
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
+ const [showModalMemberList, setShowModalMemberList] = useState(false)
+ const [groupMemberList, setGroupMemberList] = useState([])
+
+ useEffect(() => {
+  infoGroupItem.idGroup && fetchAllMemberGroup(infoGroupItem.idGroup)
+ }, [infoGroupItem.idGroup])
+
+ const fetchAllMemberGroup = async (idGroup) => {
+  try {
+   const response = await axios.get(
+    `https://samnote.mangasocial.online/group/only/${idGroup}`
+   )
+
+   setGroupMemberList(response.data.data.members)
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
+ const handleShowAllMembers = () => {
+  setShowModalMemberList(true)
+  setTypeButtonGroup('delete')
+ }
+
+ const handleHideModalMembers = () => {
+  setShowModalMemberList(false)
+ }
+
+ const deleteMember = async (idMember) => {
+  try {
+   const response = await axios.delete(
+    `https://samnote.mangasocial.online/group/quit/${idMember}>`
+   )
+
+   setSnackbar({
+    isOpen: true,
+    message: `Delete members successfully!`,
+    severity: 'success',
+   })
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
+ const [valueGroupName, setValueGroupName] = useState('')
+ const [disableGroupName, setDisableGroupName] = useState(true)
+ const inputGroupNameRef = useRef()
+ const formGroupNameRef = useRef()
+ const buttonClickEditNameGroup = useRef()
+
+ const updateNameGroup = async (idGroup, newName) => {
+  try {
+   const response = await axios.patch(
+    `${API_SERVER_URL}/group/update/${idGroup}`,
+    { groupName: newName }
+   )
+
+   getGroups(user.id)
+   setDisableGroupName(true)
+   setInfoGroupItem({ ...infoGroupItem, name: newName })
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
+ const handleChangeNameGroup = (e) => {
+  setValueGroupName(e.target.value)
+ }
+ const handleSubmitFormNameGroup = (e) => {
+  e.preventDefault()
+  if (!infoGroupItem.idGroup) return
+  if (
+   valueGroupName.trim() !== '' &&
+   valueGroupName.trim() !== infoGroupItem.name
+  ) {
+   updateNameGroup(infoGroupItem.idGroup, valueGroupName)
+  }
+ }
+
+ useEffect(() => {
+  !disableGroupName && inputGroupNameRef.current.focus()
+ }, [disableGroupName])
+
+ useEffect(() => {
+  if (!ulElementButtonsGroupRef.current || !showButtonsGroupRef.current) return
+  const bodyElement = document.body
+
+  if (!bodyElement) return
+
+  const handleClickOutside = (element) => {
+   if (
+    !ulElementButtonsGroupRef?.current?.contains(element) &&
+    !showButtonsGroupRef.current?.contains(element)
+   ) {
+    setShowButtonsGroup(false)
+    setTypeButtonGroup(null)
+   }
+  }
+
+  document.body.addEventListener('click', (e) => {
+   handleClickOutside(e.target)
+  })
+
+  return document.body.removeEventListener('click', (e) => {
+   handleClickOutside(e.target)
+  })
+ }, [ulElementButtonsGroupRef, showButtonsGroupRef])
 
  return (
   <div className='w-fluid'>
@@ -612,10 +789,6 @@ const Group = () => {
         </IconButton>
        </Box>
 
-       {/* {errors.members && (
-          <Box sx={{ mt: 1, color: 'red' }}>{errors.members.message}</Box>
-         )} */}
-
        {memberListGroup.length > 0 ? (
         ''
        ) : (
@@ -642,7 +815,7 @@ const Group = () => {
       </Box>
      </Modal>
 
-     <Modal   show={showModalSearch} onHide={handleHideModalSearch}>
+     <Modal show={showModalSearch} onHide={handleHideModalSearch}>
       <div className='p-3'>
        <h3 className='text-[25px] font-medium'>Search user</h3>
 
@@ -693,13 +866,25 @@ const Group = () => {
            </div>
           </div>
 
-          <button
-           onClick={() => handleClickSearchBtn(user)}
-           type='button'
-           className='bg-[#F56852] text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
-          >
-           Chat
-          </button>
+          {searchUserFormName === 'chat' && (
+           <button
+            onClick={() => handleClickSearchBtn(user)}
+            type='button'
+            className='bg-[#F56852] text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
+           >
+            Chat
+           </button>
+          )}
+
+          {searchUserFormName === 'group' && (
+           <button
+            onClick={() => handleClickSearchUserBtnAdd(user)}
+            type='button'
+            className='bg-black text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
+           >
+            Add
+           </button>
+          )}
          </li>
         ))}
 
@@ -713,6 +898,66 @@ const Group = () => {
          className='text-[25px] font-medium text-[#ff2d2d]'
          type='button'
          onClick={handleHideModalSearch}
+        >
+         Cancel
+        </button>
+       </div>
+      </div>
+     </Modal>
+
+     <Modal
+      dialogClassName='modal-members'
+      show={showModalMemberList}
+      onHide={handleHideModalSearch}
+     >
+      <div className='p-3 '>
+       <h3 className='text-[25px] font-medium'>All member</h3>
+
+       <ul className='flex flex-col gap-2 py-[20px]'>
+        {groupMemberList?.map((user) => (
+         <li
+          key={user.id}
+          className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
+         >
+          <div className='flex gap-2 items-center'>
+           <div>
+            <img
+             onError={(e) => {
+              e.target.src = avatarDefault
+             }}
+             src={user.avt}
+             alt='avatar '
+             className='w-[50px] h-[50px] object-cover rounded-[100%]'
+            />
+           </div>
+
+           <div>
+            <h5 className='text-lg font-extrabold capitalize'>{user.name}</h5>
+           </div>
+          </div>
+
+          <button
+           onClick={() => {
+            console.log(user.id)
+           }}
+           type='button'
+           className='text-red-500 rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
+          >
+           <RemoveCircleIcon className='text-[30px]' />
+          </button>
+         </li>
+        ))}
+
+        {messageNotifi.trim() !== '' && (
+         <li className='font-bold capitalize'>{messageNotifi} !</li>
+        )}
+       </ul>
+
+       <div className='text-right'>
+        <button
+         className='text-[25px] font-medium text-[#ff2d2d]'
+         type='button'
+         onClick={handleHideModalMembers}
         >
          Cancel
         </button>
@@ -960,35 +1205,103 @@ const Group = () => {
          alt='avatar'
         />
        </Link>
-       <h5>
-        {infoOtherUser.name || infoGroupItem.name || 'Anonymous chatter'}
-       </h5>
+       {formName === null && <h5>Anonymous chatter</h5>}
+       {formName === 'chat' && <h5>{infoOtherUser.name}</h5>}
+       {formName === 'group' && (
+        <form
+         onSubmit={handleSubmitFormNameGroup}
+         className='flex items-center'
+         ref={formGroupNameRef}
+        >
+         <div>
+          <input
+           disabled={disableGroupName}
+           type='text'
+           size={valueGroupName.length}
+           value={valueGroupName}
+           onChange={handleChangeNameGroup}
+           ref={inputGroupNameRef}
+           autoFocus={true}
+           className={`px-2 py-1 rounded-md ${
+            disableGroupName ? '' : 'bg-[#252f31] text-white'
+           }`}
+          />
+         </div>
+         {disableGroupName && (
+          <button
+           onClick={() => setDisableGroupName(false)}
+           title='Edit name'
+           type='button'
+           ref={buttonClickEditNameGroup}
+          >
+           <img src={textNote} alt='search user' />
+          </button>
+         )}
 
-       <button>
-        <img src={textNote} alt='search user' />
-       </button>
+         {!disableGroupName && (
+          <button
+           title='save name'
+           type='submit'
+           disabled={valueGroupName === infoGroupItem.name}
+           className={
+            valueGroupName.trim() === infoGroupItem.name
+             ? 'cursor-not-allowed text-[#d1deeb]'
+             : 'text-[#1976d2]'
+           }
+          >
+           <SaveIcon className='text-[40px]' />
+          </button>
+         )}
+        </form>
+       )}
       </div>
 
       <div className='position-relative show-buttons'>
-       <button>
+       <button
+        ref={showButtonsGroupRef}
+        onClick={() => {
+         setShowButtonsGroup((prevState) => !prevState)
+         setTypeButtonGroup(null)
+        }}
+       >
         <MoreVertIcon className='text-[40px]' />
        </button>
 
-       <ul className='bg-black p-2 position-absolute top-100 right-[100%] w-max'>
+       <ul
+        className={`bg-black p-2 position-absolute top-100 right-[100%] w-max ${
+         showButtonsGroup ? 'active' : null
+        }`}
+        ref={ulElementButtonsGroupRef}
+       >
         <li>
-         <button className='text-[25px]'>
+         <button
+          className={`text-[25px] ${
+           typeButtonGroup === 'quit' ? 'active' : null
+          }`}
+          onClick={handleQuitGroup}
+         >
           <LogoutIcon className='me-2 text-[30px]' /> Quit group
          </button>
         </li>
 
         <li>
-         <button className='text-[25px]'>
+         <button
+          className={`text-[25px] ${
+           typeButtonGroup === 'add' ? 'active' : null
+          }`}
+          onClick={handleShowModalSearchUserGroup}
+         >
           <AddCircleOutlineIcon className='me-2 text-[30px]' /> Add member
          </button>
         </li>
 
         <li>
-         <button className='text-[25px]'>
+         <button
+          className={`text-[25px] ${
+           typeButtonGroup === 'delete' ? 'active' : null
+          }`}
+          onClick={handleShowAllMembers}
+         >
           <HighlightOffIcon className='me-2 text-[30px]' /> Delete member
          </button>
         </li>

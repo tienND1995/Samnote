@@ -39,6 +39,7 @@
     "react-slick": "^0.30.2",
     "slick-carousel": "^1.8.1",
     "socket.io-client": "^4.7.5",
+    "sweetalert2": "^11.14.0",
     "swiper": "^11.1.4",
     "tinymce": "^7.1.2",
     "websocket": "^1.0.35",

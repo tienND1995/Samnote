@@ -27,6 +27,10 @@
  transition: all 0.3;
 }
 
+.show-buttons > ul.active {
+ display: block;
+}
+
 .show-buttons > ul > li > button {
  padding: 5px;
  transition: 0.3s;
@@ -35,7 +39,12 @@
  text-align: left;
 }
 
-.show-buttons > ul > li > button:hover {
+.show-buttons > ul > li > button:hover,
+.show-buttons > ul > li > button.active {
  background-color: white;
  color: black;
+}
+
+.modal-members {
+    width: 400px;
 }
