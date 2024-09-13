@@ -1,93 +1,137 @@
+import { useContext, useEffect, useRef, useState } from 'react'
 import './Group.css'
-import { useState, useEffect, useContext, useRef } from 'react'
 
-import { Link, useLocation } from 'react-router-dom'
 import axios from 'axios'
-import io from 'socket.io-client'
 import moment from 'moment'
-import EmojiPicker, { EmojiStyle } from 'emoji-picker-react'
+import { Link } from 'react-router-dom'
+import io from 'socket.io-client'
+
+import { joiResolver } from '@hookform/resolvers/joi'
+import { useForm } from 'react-hook-form'
+import { schemaGroup } from '../../utils/schema/schema'
 
 import Modal from 'react-bootstrap/Modal'
-import Button from 'react-bootstrap/Button'
 
+import addUser from '../../assets/add-user.png'
 import avatarDefault from '../../assets/avatar-default.png'
 import bgMessage from '../../assets/img-chat-an-danh.jpg'
-import addUser from '../../assets/add-user.png'
 import textNote from '../../assets/text-note.png'
 
 import configs from '../../configs/configs.json'
 import { AppContext } from '../../context'
+import FormMessage from './FormMessage/FormMessage'
 
-import SearchIcon from '@mui/icons-material/Search'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions'
-import AttachFileIcon from '@mui/icons-material/AttachFile'
-import SendIcon from '@mui/icons-material/Send'
-import LogoutIcon from '@mui/icons-material/Logout'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
-import HighlightOffIcon from '@mui/icons-material/HighlightOff'
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import CheckIcon from '@mui/icons-material/Check'
 import DeleteIcon from '@mui/icons-material/Delete'
-import CancelIcon from '@mui/icons-material/Cancel'
+import HighlightOffIcon from '@mui/icons-material/HighlightOff'
+import LogoutIcon from '@mui/icons-material/Logout'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import SearchIcon from '@mui/icons-material/Search'
+import AddIcon from '@mui/icons-material/Add'
+import GroupAddIcon from '@mui/icons-material/GroupAdd'
 
-const { BASE64_URL, API_SERVER_URL } = configs
+import {
+ Box,
+ Button,
+ IconButton,
+ List,
+ ListItem,
+ ListItemSecondaryAction,
+ ListItemText,
+ TextField,
+ Typography,
+} from '@mui/material'
+
+const { API_SERVER_URL } = configs
 
 const Group = () => {
  const appContext = useContext(AppContext)
  const { setSnackbar, user } = appContext
 
  const [socket, setSocket] = useState(null)
- const [userList, setUserList] = useState([])
- const [groupList, setGroupList] = useState([])
- const messagesRef = useRef()
 
- const [messagesUser, setMessagesUser] = useState([])
- const [infoOtherUser, setInfoOtherUser] = useState(null)
- const inputMessageFormRef = useRef()
+ // var chat users
+ const [chatUser, setChatUser] = useState({
+  userList: [],
+  chatUserRef: useRef(),
+  heightChatUser: '300',
+ })
+ const { userList, chatUserRef, heightChatUser } = chatUser
+ const [typeFilterChatUser, setTypeFilterChatUser] = useState('All')
+ const [infoOtherUser, setInfoOtherUser] = useState({})
+ const [messageList, setMessageList] = useState([])
 
- const [typeFilterMessage, setTypeFilterMessage] = useState('All')
+ // var search user
+ const [searchUser, setSearchUser] = useState({
+  searchUserName: '',
+  searchUserResult: [],
+  showModalSearch: false,
+  messageNotifi: '',
+ })
+ const { searchUserName, searchUserResult, showModalSearch, messageNotifi } =
+  searchUser
+
+ // var chat group
+ const [chatGroup, setChatGroup] = useState({
+  groupList: [],
+  chatGroupRef: useRef(),
+  heightChatGroup: '300',
+ })
+ const { groupList, chatGroupRef, heightChatGroup } = chatGroup
+ const [typeFilterChatGroup, setTypeFilterChatGroup] = useState('All')
+ const [infoGroupItem, setInfoGroupItem] = useState({})
+ const [messageGroupList, setMessageGroupList] = useState([])
+
+ // var content message
+ const [messageContent, setMessageContent] = useState({
+  messageContentRef: useRef(),
+  inputMessageFormRef: useRef(),
+  heightMessageContent: '500',
+ })
+ const { inputMessageFormRef, messageContentRef, heightMessageContent } =
+  messageContent
 
  const [formName, setFormName] = useState(null)
 
- const [messageForm, setMessageForm] = useState({
-  content: '',
-  image: null,
-  emoji: null,
- })
- const { content, image, emoji } = messageForm
- const [showEmoji, setShowEmoji] = useState(false)
+ //______________________________________
 
  const fetchUserChat = async () => {
   const response = await axios.get(
    `${API_SERVER_URL}/message/list_user_chat1vs1/${user.id}`
   )
 
-  if (typeFilterMessage === 'All') {
+  if (typeFilterChatUser === 'All') {
    response.data.data.filter((item) => {
     return socket.emit('join_room', { room: item.idRoom })
    })
-   setUserList(response.data.data)
-   return
+
+   return setChatUser({ ...chatUser, userList: response.data.data })
   }
 
-  if (typeFilterMessage === 'Unread') {
-   setUserList(response.data.data.filter((user) => user.is_seen !== 1))
-
+  if (typeFilterChatUser === 'Unread') {
    response.data.data.filter((item) => {
     if (item.is_seen !== 1)
      return socket.emit('join_room', { room: item.idRoom })
    })
-   return
+
+   return setChatUser({
+    ...chatUser,
+    userList: response.data.data.filter((user) => user.is_seen !== 1),
+   })
   }
 
-  if (typeFilterMessage === 'Read') {
-   setUserList(response.data.data.filter((user) => user.is_seen !== 0))
-
+  if (typeFilterChatUser === 'Read') {
    response.data.data.filter((item) => {
     if (item.is_seen !== 0)
      return socket.emit('join_room', { room: item.idRoom })
    })
-   return
+
+   return setChatUser({
+    ...chatUser,
+    userList: response.data.data.filter((user) => user.is_seen !== 0),
+   })
   }
  }
 
@@ -100,7 +144,7 @@ const Group = () => {
     }
    })
 
-   setGroupList(res.data.data)
+   setChatGroup({ ...chatGroup, groupList: res.data.data })
   } catch (err) {
    console.error(err)
   }
@@ -119,43 +163,44 @@ const Group = () => {
   if (socket) {
    socket.on('send_message', (result) => {
     const { ReceivedID, SenderID } = result.data
+    console.log(result)
 
     fetchUserChat()
-    getMessagesUser(user.id, ReceivedID === user.id ? SenderID : ReceivedID)
-    // formName === 'chat' &&
-    //  getMessageChats(user.id, ReceivedID === user.id ? SenderID : ReceivedID)
+    getMessageList(user.id, ReceivedID === user.id ? SenderID : ReceivedID)
    })
 
-   socket.once('chat_group', (result) => {
+   socket.on('chat_group', (result) => {
     console.log('message received from server', result)
+
+    getGroups(user.id)
+    fetchMessagesGroup(infoGroupItem.idGroup)
    })
 
    getGroups(user.id)
    fetchUserChat()
   }
- }, [socket, typeFilterMessage])
+ }, [socket, typeFilterChatUser])
 
  // *********** handle chat user messages
- // handle convert time, image, emoji, roomID
+ const handleClickChatUser = (otherUser) => {
+  if (otherUser.is_seen === 0 && otherUser.idReceive === user.id) {
+   fetchUpdateSeenMessage(otherUser.idMessage)
+  }
+  getMessageList(user.id, otherUser.user.id)
 
- const convertTime = (time) => moment(`${time}+0700`).calendar()
+  setInfoOtherUser(otherUser.user)
+  resetGroup()
+ }
 
- const handleChatLastText = (lastText, idSend) =>
-  idSend === user.id ? `Bạn: ${lastText}` : `${lastText}`
+ const handleDeleteMessage = async (messageID) => {
+  try {
+   const response = await axios.delete(`${API_SERVER_URL}/message/${messageID}`)
 
- const roomSplit = (idUser, idOther) =>
-  idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
-
- const convertEmojiToBase64 = (emoji) => {
-  const canvas = document.createElement('canvas')
-  canvas.width = 64
-  canvas.height = 64
-  const context = canvas.getContext('2d')
-  context.font = '48px Arial'
-  context.fillText(emoji, 0, 48)
-
-  const base64 = canvas.toDataURL().split(',')[1]
-  return base64
+   getMessageList(user.id, infoOtherUser.id)
+   fetchUserChat()
+  } catch (error) {
+   console.log(error)
+  }
  }
 
  const fetchUpdateSeenMessage = async (messageID) => {
@@ -167,178 +212,29 @@ const Group = () => {
   }
  }
 
- const getMessagesUser = async (userID, otherUserID) => {
+ const getMessageList = async (userID, otherUserID) => {
   try {
    const response = await axios.get(
     `${API_SERVER_URL}/message/list_message_chat1vs1/${userID}/${otherUserID}`
    )
 
-   setMessagesUser(response.data.data[0].messages)
+   setMessageList(
+    response.data.data.length ? response.data.data[0].messages : []
+   )
+
    // @ts-ignore
-   messagesRef.current.scrollTop = heightMessages
+   messageContentRef.current.scrollTop = heightMessageContent
   } catch (error) {
    console.log(error)
   }
  }
 
- const handleClickChatUser = (otherUser) => {
-  if (otherUser.is_seen === 0 && otherUser.idReceive === user.id) {
-   fetchUpdateSeenMessage(otherUser.idMessage)
-  }
-  getMessagesUser(user.id, otherUser.user.id)
-  setInfoOtherUser(otherUser.user)
-  //   resetGroup()
- }
+ const convertTime = (time) => moment(`${time}+0700`).calendar()
 
- const handleDeleteMessage = async (messageID) => {
-  try {
-   const response = await axios.delete(`${API_SERVER_URL}/message/${messageID}`)
+ const handleChatLastText = (lastText, idSend) =>
+  idSend === user.id ? `Bạn: ${lastText}` : `${lastText}`
 
-   getMessagesUser(user.id, infoOtherUser.id)
-   fetchUserChat()
-  } catch (error) {
-   console.log(error)
-  }
- }
-
- const handleChangeValueMsg = (e) => {
-  setMessageForm({
-   ...messageForm,
-   content: emoji ? '' : e.target.value,
-   emoji: null,
-  })
- }
-
- const handleChangeImageMsg = (e) => {
-  const reader = new FileReader()
-
-  reader.onload = () => {
-   // @ts-ignore
-   const imageBase64 = reader.result.split(',')[1]
-   setMessageForm({ ...messageForm, image: imageBase64 })
-  }
-
-  reader.readAsDataURL(e.target.files[0])
-  e.target.value = null
- }
-
- const handleToggleEmoji = () => {
-  setShowEmoji((prevState) => !prevState)
- }
-
- const handleClickEmoji = (data) => {
-  setMessageForm({
-   ...messageForm,
-   content: data.emoji,
-   emoji: convertEmojiToBase64(data.emoji),
-  })
-
-  setShowEmoji(false)
- }
-
- const sendMessage = (room, data) => {
-  if (socket) {
-   // * send message chat
-   socket.emit('send_message', { room, data }) // Gửi sự kiện "send_message" tới server
-   setMessageForm({ content: '', image: null, emoji: null })
-
-   // Xử lý logic khi tin nhắn được gửi đi
-   getMessagesUser(user.id, infoOtherUser.id)
-   fetchUserChat()
-
-   messagesRef.current.scrollTop = heightMessages
-
-   // * send message group
-
-   //  if (formName === 'group') {
-   //   socket.emit('chat_group', { room, data }) // Gửi sự kiện "send_message" tới server
-
-   //   setMessageForm({ content: '', image: null, emoji: null })
-
-   //   fetchMessagesGroup(groupItem.idGroup)
-   //   return
-   //  }
-  } else {
-   console.error('Socket.io not initialized.')
-   // Xử lý khi socket chưa được khởi tạo
-  }
- }
-
- const handleSubmitMessage = (e) => {
-  e.preventDefault()
-  // * submit form chat
-
-  if (!infoOtherUser?.id) return
-  const roomID = roomSplit(user.id, infoOtherUser.id)
-
-  const dataForm = {
-   idSend: `${user.id}`,
-   idReceive: `${infoOtherUser.id}`,
-   type: 'text',
-   state: '',
-   content: content,
-  }
-
-  if (image) {
-   dataForm.type = 'image'
-   dataForm.content = emoji ? '' : content
-   dataForm.data = image
-
-   sendMessage(roomID, dataForm)
-   return
-  }
-
-  if (emoji) {
-   dataForm.type = 'icon-image'
-   dataForm.content = ''
-   dataForm.data = emoji
-
-   sendMessage(roomID, dataForm)
-   return
-  }
-
-  if (content.trim() !== '') {
-   sendMessage(roomID, dataForm)
-  }
-  return
-
-  // * submit form group chat
-  // if (formName === 'group') {
-  //  const roomID = groupItem.idGroup
-
-  //  const dataForm = {
-  //   idSend: `${user.id}`,
-  //   type: 'text',
-  //  }
-
-  //  if (image) {
-  //   dataForm.type = 'image'
-  //   dataForm.metaData = image
-
-  //   sendMessage(roomID, dataForm)
-  //   return
-  //  }
-
-  //  if (emoji) {
-  //   dataForm.type = 'icon-image'
-  //   dataForm.metaData = emoji
-
-  //   sendMessage(roomID, dataForm)
-  //   return
-  //  }
-
-  //  if (content.trim() !== '') {
-  //   dataForm.content = content
-  //   sendMessage(roomID, dataForm)
-  //  }
-  // }
-
-  return null
- }
-
- // search user buy name
- const [userNameSearch, serUserNameSearch] = useState('')
- const [searchUserResult, setSearchUserResult] = useState([])
+ // ** search user buy name
 
  const fetchSearchUser = async (userName) => {
   try {
@@ -347,34 +243,56 @@ const Group = () => {
     start_name: userName,
    })
 
-   setSearchUserResult(response.data.data)
+   setSearchUser({
+    ...searchUser,
+    searchUserResult: response.data.data ? response.data.data : [],
+    messageNotifi: response.data.message ? response.data.message : '',
+   })
   } catch (error) {
    console.error(error)
   }
  }
 
+ const postRelation = async (userID, otherUserID) => {
+  try {
+   const response = await axios.post(`${API_SERVER_URL}/chatblock/${userID}`, {
+    idReceive: otherUserID,
+   })
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
  const handleChangeSearchUser = (e) => {
-  serUserNameSearch(e.target.value)
+  setSearchUser({ ...searchUser, searchUserName: e.target.value })
  }
 
  const handleSubmitSearchUser = (e) => {
   e.preventDefault()
-  if (userNameSearch.trim().split(' ').length !== 1) return
+  if (
+   searchUserName.trim().split(' ').length !== 1 ||
+   searchUserName.trim() === ''
+  )
+   return
 
-  fetchSearchUser(userNameSearch)
+  fetchSearchUser(searchUserName)
  }
 
- const handleClickChatBtn = (user) => {
-  if (!user) return
-  const infoOtherUser = {
-   id: user.idUser,
-   Avarta: user.linkAvatar,
-   name: user.userName,
+ const handleClickSearchBtn = (otherUser) => {
+  if (!otherUser) return
+  const newInfoOtherUser = {
+   id: otherUser.idUser,
+   Avarta: otherUser.linkAvatar,
+   name: otherUser.userName,
   }
 
-  setInfoOtherUser(infoOtherUser)
-  handleHideModalSearch()
+  setInfoOtherUser(newInfoOtherUser)
+  resetGroup()
 
+  postRelation(user.id, otherUser.idUser)
+  getMessageList(user.id, otherUser.idUser)
+
+  handleHideModalSearch()
   inputMessageFormRef.current.focus()
  }
 
@@ -383,33 +301,216 @@ const Group = () => {
   console.log('search group')
  }
 
- const handleFilterMessage = (e) => {
-  const type = e.target.innerHTML
-  if (type === typeFilterMessage) return
-
-  setTypeFilterMessage(type)
- }
-
- const [showModalSearch, setShowModalSearch] = useState(false)
  const handleShowModalSearch = (e) => {
-  setShowModalSearch(true)
+  setSearchUser({ ...searchUser, showModalSearch: true })
  }
 
  const handleHideModalSearch = (e) => {
-  setShowModalSearch(false)
-  setSearchUserResult([])
-  serUserNameSearch('')
+  setSearchUser({
+   ...searchUser,
+   searchUserResult: [],
+   searchUserName: '',
+   showModalSearch: false,
+   messageNotifi: '',
+  })
  }
 
- // set height messages
- const [heightMessages, setHeightMessages] = useState('500')
+ // * handle filter message
+ const handleFilterMessage = (e) => {
+  const type = e.target.innerHTML
+  if (type === typeFilterChatUser) return
 
+  setTypeFilterChatUser(type)
+ }
+
+ // set height messages, height chat messages, height chat group
  useEffect(() => {
   // @ts-ignore
-  messagesRef.current.offsetHeight &&
+  messageContentRef.current.offsetHeight &&
    // @ts-ignore
-   setHeightMessages(messagesRef.current.offsetHeight - 50)
- }, [messagesUser])
+   setMessageContent({
+    ...messageContent,
+    heightMessageContent: `${messageContentRef.current.offsetHeight - 50}`,
+   })
+
+  // @ts-ignore
+  chatUserRef.current.offsetHeight &&
+   // @ts-ignore
+   setChatUser({
+    ...chatUser,
+    heightChatUser: `${chatUserRef.current.offsetHeight}`,
+   })
+
+  // @ts-ignore
+  chatGroupRef.current.offsetHeight &&
+   // @ts-ignore
+   setChatGroup({
+    ...chatGroup,
+    heightChatGroup: `${chatGroupRef.current.offsetHeight}`,
+   })
+ }, [])
+
+ //  const propsChatUser = {
+ //   userID: user.id,
+ //   socket,
+ //   searchUser,
+ //   setInfoOtherUser,
+ //   setFormName,
+ //   getMessageList,
+ //   setSearchUser,
+ //  }
+
+ // *** handle group
+
+ const resetGroup = () => {
+  setInfoGroupItem({})
+  setMessageGroupList([])
+  setFormName('chat')
+ }
+
+ const resetChat = () => {
+  setInfoOtherUser({})
+  setMessageList([])
+  setFormName('group')
+ }
+
+ // *********** handle group
+
+ const [memberGroup, setMemberGroup] = useState({ gmail: '', id: '' })
+ const [memberListGroup, setMemberListGroup] = useState([])
+
+ const [showModalCreateGroup, setShowModalCreateGroup] = useState(false)
+
+ const {
+  register,
+  handleSubmit,
+  setValue,
+  getValues,
+  reset,
+  formState: { errors },
+ } = useForm({
+  resolver: joiResolver(schemaGroup),
+  defaultValues: { groupName: '', desc: '', members: null },
+ })
+
+ const resetModalCreateGroup = () => {
+  setMemberGroup({ gmail: '', id: '' })
+  setMemberListGroup([])
+  reset()
+ }
+
+ const fetchMessagesGroup = async (groupID) => {
+  try {
+   const response = await axios.get(
+    `${API_SERVER_URL}/group/messages/${groupID}`
+   )
+   setMessageGroupList(response.data.data)
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
+ const handleClickGroupItem = (group) => {
+  fetchMessagesGroup(group.idGroup)
+
+  setInfoGroupItem(group)
+  resetChat()
+ }
+
+ const handleShowModalCreateGroup = () => {
+  setShowModalCreateGroup(true)
+ }
+
+ const handleHideModalCreateGroup = () => {
+  setShowModalCreateGroup(false)
+  resetModalCreateGroup()
+ }
+
+ const postGroup = async (dataGroup, userID) => {
+  try {
+   const response = await axios.post(
+    `${API_SERVER_URL}/group/create/${userID}`,
+    dataGroup
+   )
+   setSnackbar({
+    isOpen: true,
+    message: `Create group complete`,
+    severity: 'success',
+   })
+
+   // cập nhật group list
+   getGroups(userID)
+
+   // reset form create group
+   setShowModalCreateGroup(false)
+   resetModalCreateGroup()
+  } catch (error) {
+   setSnackbar({
+    isOpen: true,
+    message: error.response.data.message,
+    severity: 'error',
+   })
+  }
+ }
+
+ const onSubmit = (data) => {
+  const { groupName, desc, members } = data
+
+  const group = {
+   name: groupName,
+   createAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
+   idOwner: user.id,
+   describe: desc,
+   r: 255,
+   g: 255,
+   b: 255,
+   a: 0.99,
+   members: members,
+  }
+
+  postGroup(group, user.id)
+ }
+
+ const handleAddMember = () => {
+  const membersChema = getValues('members')
+  const { gmail, id } = memberGroup
+
+  const member = { gmail, id, role: 'member' }
+  setMemberListGroup([...memberListGroup, member])
+  setMemberGroup({ gmail: '', id: '' })
+
+  setValue(
+   'members',
+   membersChema
+    ? [...membersChema, { gmail: gmail, id: id, role: 'member' }]
+    : [{ gmail, id: id, role: 'member' }]
+  )
+ }
+
+ const handleDeleteMember = (index) => {
+  setMemberListGroup(memberListGroup.filter((member, idx) => idx !== index))
+
+  const membersChema = getValues('members')
+  setValue(
+   'members',
+   membersChema.filter((member, idx) => idx !== index)
+  )
+ }
+
+ const handleChangeMemberGroup = (e) =>
+  setMemberGroup({ ...memberGroup, [e.target.name]: e.target.value })
+
+ // props form message
+ const propsFormMessage = {
+  userID: user.id,
+  otherUserID: infoOtherUser?.id,
+  idGroup: infoGroupItem.idGroup,
+  socket,
+  messageContentRef,
+  heightMessageContent,
+  inputMessageFormRef,
+  formName,
+ }
 
  return (
   <div className='w-fluid'>
@@ -417,81 +518,210 @@ const Group = () => {
     <div className='col-6 group-sidebar flex flex-col px-0'>
      <h3 className='text-center py-[60px] px-3 font-bold'>Chat</h3>
 
-     <div className='flex gap-2 h-100 flex-grow-1'>
-      <Modal show={showModalSearch} onHide={handleHideModalSearch}>
-       <div className='p-3'>
-        <h3 className='text-[25px] font-medium'>Search user</h3>
+     <Modal
+      show={showModalCreateGroup}
+      onHide={handleHideModalCreateGroup}
+      size='sm'
+      centered={false}
+     >
+      <Box
+       component='form'
+       onSubmit={handleSubmit(onSubmit)}
+       sx={{
+        width: 'max-content',
+        maxWidth: '400px',
+        bgcolor: 'background.paper',
+        border: '2px solid #000',
+        boxShadow: 24,
+        p: 4,
+       }}
+      >
+       <Typography id='modal-modal-title' variant='h6' component='h2'>
+        Create Group
+       </Typography>
+       <TextField
+        fullWidth
+        label='Group Name'
+        type='text'
+        variant='outlined'
+        margin='normal'
+        {...register('groupName')}
+       />
+       {errors.groupName && (
+        <Box sx={{ mt: 1, color: 'red' }}>{errors.groupName.message}</Box>
+       )}
+       <TextField
+        fullWidth
+        label='Description'
+        type='text'
+        variant='outlined'
+        margin='normal'
+        {...register('desc')}
+       />
+       {errors.desc && (
+        <Box sx={{ mt: 1, color: 'red' }}>{errors.desc.message}</Box>
+       )}
+       <List>
+        {memberListGroup?.map((member, index) => (
+         <ListItem key={index}>
+          <ListItemText primary={member.gmail} secondary={member.role} />
+          <ListItemSecondaryAction>
+           <IconButton edge='end' onClick={() => handleDeleteMember(index)}>
+            <DeleteIcon />
+           </IconButton>
+          </ListItemSecondaryAction>
+         </ListItem>
+        ))}
+       </List>
+       <Box
+        sx={{
+         display: 'flex',
+         alignItems: 'center',
+         justifyContent: 'space-between',
+         mt: 2,
+         gap: '5px',
+        }}
+       >
+        <TextField
+         label='Member Email'
+         name='gmail'
+         type='email'
+         fullWidth
+         onChange={handleChangeMemberGroup}
+         value={memberGroup.gmail}
+        />
 
-        <form
-         onSubmit={handleSubmitSearchUser}
-         className='flex gap-2 ms-4 me-2 my-3 items-center'
+        <TextField
+         label='Member ID'
+         name='id'
+         type='number'
+         fullWidth
+         onChange={handleChangeMemberGroup}
+         value={memberGroup.id}
+        />
+
+        <IconButton
+         disabled={
+          memberGroup.gmail.trim() !== '' && memberGroup.id.trim() !== ''
+           ? false
+           : true
+         }
+         onClick={handleAddMember}
         >
-         <div className='border border-black rounded-sm p-2 w-100'>
-          <input
-           className='w-100 text-[25px]'
-           type='text'
-           placeholder='User name'
-           onChange={handleChangeSearchUser}
-           value={userNameSearch}
-          />
-         </div>
+         <AddIcon />
+        </IconButton>
+       </Box>
 
-         <button
-          className='bg-black h-max text-white text-[20px] px-3 py-1 rounded-md'
-          type='submit'
+       {/* {errors.members && (
+          <Box sx={{ mt: 1, color: 'red' }}>{errors.members.message}</Box>
+         )} */}
+
+       {memberListGroup.length > 0 ? (
+        ''
+       ) : (
+        <Box sx={{ mt: 1, color: 'red' }}>{errors?.members?.message}</Box>
+       )}
+
+       <div className='flex justify-end gap-2 mt-3'>
+        <Box>
+         <Button
+          type='button'
+          variant='contained'
+          color='secondary'
+          onClick={handleHideModalCreateGroup}
          >
-          Search
-         </button>
-        </form>
+          cancel
+         </Button>
+        </Box>
+        <Box>
+         <Button type='submit' variant='contained' color='primary'>
+          Create
+         </Button>
+        </Box>
+       </div>
+      </Box>
+     </Modal>
 
-        <ul className='flex flex-col gap-2'>
-         {searchUserResult?.map((user) => (
-          <li
-           key={user.idUser}
-           className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
-          >
-           <div className='flex gap-2 items-center'>
-            <div>
-             <img
-              onError={(e) => {
-               e.target.src = avatarDefault
-              }}
-              src={user.linkAvatar}
-              alt='avatar'
-              className='w-[50px] h-[50px] object-cover rounded-[100%]'
-             />
-            </div>
+     <Modal   show={showModalSearch} onHide={handleHideModalSearch}>
+      <div className='p-3'>
+       <h3 className='text-[25px] font-medium'>Search user</h3>
 
-            <div>
-             <h5 className='text-lg font-extrabold capitalize'>
-              {user.userName}
-             </h5>
-            </div>
+       <form
+        onSubmit={handleSubmitSearchUser}
+        className='flex gap-2 ms-4 me-2 my-3 items-center'
+       >
+        <div className='border border-black rounded-sm p-2 w-100'>
+         <input
+          className='w-100 text-[25px]'
+          type='text'
+          placeholder='User name'
+          onChange={handleChangeSearchUser}
+          value={searchUserName}
+         />
+        </div>
+
+        <button
+         className='bg-black h-max text-white text-[20px] px-3 py-1 rounded-md'
+         type='submit'
+        >
+         Search
+        </button>
+       </form>
+
+       <ul className='flex flex-col gap-2'>
+        {searchUserResult?.map((user) => (
+         <li
+          key={user.idUser}
+          className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
+         >
+          <div className='flex gap-2 items-center'>
+           <div>
+            <img
+             onError={(e) => {
+              e.target.src = avatarDefault
+             }}
+             src={user.linkAvatar}
+             alt='avatar '
+             className='w-[50px] h-[50px] object-cover rounded-[100%]'
+            />
            </div>
 
-           <button
-            onClick={() => handleClickChatBtn(user)}
-            type='button'
-            className='bg-[#F56852] text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
-           >
-            Chat
-           </button>
-          </li>
-         ))}
-        </ul>
+           <div>
+            <h5 className='text-lg font-extrabold capitalize'>
+             {user.userName}
+            </h5>
+           </div>
+          </div>
 
-        <div className='text-right'>
-         <button
-          className='text-[25px] font-medium text-[#ff2d2d]'
-          type='button'
-          onClick={handleHideModalSearch}
-         >
-          Cancel
-         </button>
-        </div>
+          <button
+           onClick={() => handleClickSearchBtn(user)}
+           type='button'
+           className='bg-[#F56852] text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
+          >
+           Chat
+          </button>
+         </li>
+        ))}
+
+        {messageNotifi.trim() !== '' && (
+         <li className='font-bold capitalize'>{messageNotifi} !</li>
+        )}
+       </ul>
+
+       <div className='text-right'>
+        <button
+         className='text-[25px] font-medium text-[#ff2d2d]'
+         type='button'
+         onClick={handleHideModalSearch}
+        >
+         Cancel
+        </button>
        </div>
-      </Modal>
-      <div className='w-50 search-message px-3 shadow-lg'>
+      </div>
+     </Modal>
+
+     <div className='flex gap-2 h-100 flex-grow-1'>
+      <div className='w-50 search-message px-3 shadow-lg flex flex-col'>
        <div className='flex mt-4 mb-5 justify-between gap-2'>
         <button
          onClick={handleShowModalSearch}
@@ -499,15 +729,6 @@ const Group = () => {
         >
          <SearchIcon />
          Search messenger
-         {/* <div className='w-100'>
-          <input
-           className='outline-none border-none bg-transparent w-100'
-           type='text'
-           placeholder='Search messenger'
-           //  value={messageSearch}
-           onChange={handleChangeMessageSearch}
-          />
-         </div> */}
         </button>
 
         <button type='button' className=''>
@@ -515,12 +736,12 @@ const Group = () => {
         </button>
        </div>
 
-       <div>
+       <div className='flex flex-col flex-grow-1'>
         <ul className='flex justify-between group-buttons mb-4'>
          <li>
           <button
            onClick={handleFilterMessage}
-           className={typeFilterMessage === 'All' && 'active'}
+           className={typeFilterChatUser === 'All' && 'active'}
            type='button'
           >
            All
@@ -529,7 +750,7 @@ const Group = () => {
 
          <li>
           <button
-           className={typeFilterMessage === 'Unread' && 'active'}
+           className={typeFilterChatUser === 'Unread' && 'active'}
            onClick={handleFilterMessage}
            type='button'
           >
@@ -539,7 +760,7 @@ const Group = () => {
 
          <li>
           <button
-           className={typeFilterMessage === 'Read' && 'active'}
+           className={typeFilterChatUser === 'Read' && 'active'}
            onClick={handleFilterMessage}
            type='button'
           >
@@ -548,7 +769,11 @@ const Group = () => {
          </li>
         </ul>
 
-        <ul className='flex flex-col gap-4'>
+        <ul
+         className='flex flex-col flex-grow-1 gap-4 overflow-y-auto pb-[30px]'
+         ref={chatUserRef}
+         style={{ height: `${heightChatUser}px` }}
+        >
          {userList.length > 0
           ? userList.map((user) => (
              <li
@@ -604,7 +829,9 @@ const Group = () => {
        </div>
       </div>
 
-      <div className='w-50 search-message px-3 shadow-lg'>
+      {/* <ChatUser {...propsChatUser} /> */}
+
+      <div className='w-50 flex flex-col search-message px-3 shadow-lg'>
        <form
         onSubmit={handleSubmitSearchGroup}
         className='flex mt-4 mb-5 justify-between gap-2'
@@ -626,12 +853,17 @@ const Group = () => {
          </div>
         </div>
 
-        <button type='button' className=''>
-         <img src={addUser} alt='add user' />
+        <button
+         type='button'
+         className=''
+         title='add group'
+         onClick={handleShowModalCreateGroup}
+        >
+         <GroupAddIcon className='text-[36px]' />
         </button>
        </form>
 
-       <div>
+       <div className='flex flex-col flex-grow-1'>
         <ul className='flex justify-between group-buttons mb-4'>
          <li>
           <button className='active' type='button'>
@@ -648,82 +880,70 @@ const Group = () => {
          </li>
         </ul>
 
-        <ul className='flex flex-col gap-4'>
-         <li className='flex justify-between bg-white items-center rounded-[40px]'>
-          <div className='flex gap-2 items-center'>
-           <div>
-            <img
-             style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-             src={avatarDefault}
-             alt='avatar'
-            />
-           </div>
+        <ul
+         className='flex flex-col gap-4 flex-grow-1 overflow-y-auto pb-[30px]'
+         ref={chatGroupRef}
+         style={{ height: `${heightChatGroup}px`, scrollbarWidth: 'none' }}
+        >
+         {groupList.length > 0 ? (
+          groupList.map((group) => (
+           <li
+            key={group.idGroup}
+            className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
+            onClick={() => handleClickGroupItem(group)}
+           >
+            <div className='flex gap-2 items-center'>
+             <div>
+              <img
+               src={group.linkAvatar || avatarDefault}
+               alt='avatar'
+               className='w-[50px] h-[50px] object-cover rounded-[100%]'
+              />
+             </div>
 
+             <div>
+              <h5 className='text-lg font-extrabold capitalize'>
+               {group.name}
+              </h5>
+              <p
+               style={{ maxWidth: '200px' }}
+               className={
+                group.is_seen === 0
+                 ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[600] text-lg'
+                 : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
+               }
+              >
+               {handleChatLastText(group.describe, group.idSend)}
+              </p>
+             </div>
+            </div>
+
+            <div
+             className={
+              user.is_seen === 0
+               ? 'text-[#ff0404] text-[16px] me-2'
+               : 'text-[#00ff73] text-[16px] me-2'
+             }
+            >
+             {user.is_seen === 0 ? (
+              <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
+               1
+              </p>
+             ) : (
+              <CheckIcon />
+             )}
+            </div>
+           </li>
+          ))
+         ) : (
+          <div className='text-center'>
            <div>
-            <h5 className='text-lg font-extrabold'>User name 1</h5>
-            <p className='text-lg'>Message 1</p>
+            <ChatBubbleOutlineIcon className='text-[80px]' />
            </div>
+           <h3>Không có tin nhắn nào</h3>
+           <p>Tin nhắn mới sẽ được hiện thị tại đây</p>
           </div>
-
-          <div>count 1</div>
-         </li>
-
-         <li className='flex justify-between bg-white items-center rounded-[40px]'>
-          <div className='flex gap-2 items-center'>
-           <div>
-            <img
-             style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-             src={avatarDefault}
-             alt='avatar'
-            />
-           </div>
-
-           <div>
-            <h5 className='text-lg font-extrabold'>User name 1</h5>
-            <p className='text-lg'>Message 1</p>
-           </div>
-          </div>
-
-          <div>count 1</div>
-         </li>
-
-         <li className='flex justify-between bg-white items-center rounded-[40px]'>
-          <div className='flex gap-2 items-center'>
-           <div>
-            <img
-             style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-             src={avatarDefault}
-             alt='avatar'
-            />
-           </div>
-
-           <div>
-            <h5 className='text-lg font-extrabold'>User name 1</h5>
-            <p className='text-lg'>Message 1</p>
-           </div>
-          </div>
-
-          <div>count 1</div>
-         </li>
-
-         <li className='flex justify-between bg-white items-center rounded-[40px]'>
-          <div className='flex gap-2 items-center'>
-           <div>
-            <img
-             style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-             src={avatarDefault}
-             alt='avatar'
-            />
-           </div>
-
-           <div>
-            <h5 className='text-lg font-extrabold'>User name 1</h5>
-            <p className='text-lg'>Message 1</p>
-           </div>
-          </div>
-
-          <div>count 1</div>
-         </li>
+         )}
         </ul>
        </div>
       </div>
@@ -733,14 +953,16 @@ const Group = () => {
     <div className='col-6 px-0  flex flex-col'>
      <div className='flex justify-between items-center bg-[#dffffe] py-[30px] px-[20px]'>
       <div className='flex gap-2 items-center'>
-       <Link to={infoOtherUser && `/other-user/${infoOtherUser.id}`}>
+       <Link to={infoOtherUser.id && `/other-user/${infoOtherUser.id}`}>
         <img
          className='w-[90px] h-[90px] object-cover rounded-[100%]'
-         src={infoOtherUser?.Avarta || avatarDefault}
+         src={infoOtherUser.Avarta || infoGroupItem.linkAvatar || avatarDefault}
          alt='avatar'
         />
        </Link>
-       <h5>{infoOtherUser?.name || 'Anonymous chatter'}</h5>
+       <h5>
+        {infoOtherUser.name || infoGroupItem.name || 'Anonymous chatter'}
+       </h5>
 
        <button>
         <img src={textNote} alt='search user' />
@@ -784,195 +1006,213 @@ const Group = () => {
        style={{
         overflowY: 'auto',
         scrollbarWidth: 'none',
-        height: `${heightMessages}px`,
+        height: `${heightMessageContent}px`,
        }}
        className='flex-grow-1 p-[20px]'
-       ref={messagesRef}
+       ref={messageContentRef}
       >
        <ul>
-        {messagesUser.length > 0
-         ? messagesUser.map((item) =>
-            item.idSend === user.id ? (
-             <div key={item.id} className='h-auto flex flex-col items-end'>
-              <div className='flex gap-2 mb-1'>
-               <div className='flex items-center hover-message gap-1'>
-                <button
-                 style={{
-                  border: 'none',
-                  backgroundColor: 'transparent',
-                  transition: 'all .3s ease-in-out',
-                 }}
-                 className='d-none'
-                 onClick={() => {
-                  handleDeleteMessage(item.id)
-                 }}
-                >
-                 <DeleteIcon />
-                </button>
+        {formName === 'chat' &&
+         messageList?.map((item) =>
+          item.idSend === user.id ? (
+           <div key={item.id} className='h-auto flex flex-col items-end'>
+            <div className='flex gap-2 mb-1'>
+             <div className='flex items-center hover-message gap-1'>
+              <button
+               style={{
+                border: 'none',
+                backgroundColor: 'transparent',
+                transition: 'all .3s ease-in-out',
+               }}
+               className='d-none'
+               onClick={() => {
+                handleDeleteMessage(item.id)
+               }}
+              >
+               <DeleteIcon />
+              </button>
 
-                <div className='flex flex-col gap-1 items-end'>
-                 {item.image && (
-                  <div>
-                   <img
-                    className={`h-auto rounded-md ${
-                     item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
-                    }`}
-                    src={item.image}
-                   />
-                  </div>
-                 )}
-
-                 {item.text.trim() !== '' && (
-                  <p
-                   style={{
-                    width: 'max-content',
-                    overflowWrap: 'anywhere',
-                    maxWidth: '250px',
-                   }}
-                   className='break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto'
-                  >
-                   {item.text}
-                  </p>
-                 )}
+              <div className='flex flex-col gap-1 items-end'>
+               {item.image && (
+                <div>
+                 <img
+                  className={`h-auto rounded-md ${
+                   item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
+                  }`}
+                  src={item.image}
+                 />
                 </div>
-               </div>
-              </div>
+               )}
 
-              <time className='text-xs text-black-50'>
-               {convertTime(item.sendAt)}
-              </time>
-             </div>
-            ) : (
-             <div key={item.id} className='h-auto mb-2'>
-              <div className='flex gap-2 mb-1'>
-               <div className='flex gap-1 items-end'>
-                <img
-                 className='object-fit-cover rounded-circle'
-                 style={{ width: '40px', height: '40px' }}
-                 src={infoOtherUser.Avarta}
-                 alt='avatar other_user'
-                />
-               </div>
-
-               <div className='flex items-center hover-message gap-1'>
-                <div className='flex flex-col gap-1'>
-                 {item.image && (
-                  <div>
-                   <img
-                    className={`h-auto rounded-md ${
-                     item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
-                    }`}
-                    src={item.image}
-                   />
-                  </div>
-                 )}
-
-                 {item.text.trim() !== '' && (
-                  <p
-                   style={{
-                    width: 'max-content',
-                    overflowWrap: 'anywhere',
-                    maxWidth: '250px',
-                   }}
-                   className='break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto'
-                  >
-                   {item.text}
-                  </p>
-                 )}
-                </div>
-                <button
+               {item.text.trim() !== '' && (
+                <p
                  style={{
-                  border: 'none',
-                  backgroundColor: 'transparent',
-                  transition: 'all .3s ease-in-out',
+                  width: 'max-content',
+                  overflowWrap: 'anywhere',
+                  maxWidth: '250px',
                  }}
-                 className='d-none'
-                 onClick={() => {
-                  handleDeleteMessage(item.id)
-                 }}
+                 className='break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto'
                 >
-                 <DeleteIcon />
-                </button>
-               </div>
+                 {item.text}
+                </p>
+               )}
               </div>
-
-              <time className='text-xs text-black-50'>
-               {convertTime(item.sendAt)}
-              </time>
              </div>
-            )
-           )
-         : null}
+            </div>
+
+            <time className='text-xs text-black-50'>
+             {convertTime(item.sendAt)}
+            </time>
+           </div>
+          ) : (
+           <div key={item.id} className='h-auto mb-2'>
+            <div className='flex gap-2 mb-1'>
+             <div className='flex gap-1 items-end'>
+              <img
+               className='object-fit-cover rounded-circle'
+               style={{ width: '40px', height: '40px' }}
+               src={infoOtherUser.Avarta}
+               alt='avatar other_user'
+              />
+             </div>
+
+             <div className='flex items-center hover-message gap-1'>
+              <div className='flex flex-col gap-1'>
+               {item.image && (
+                <div>
+                 <img
+                  className={`h-auto rounded-md ${
+                   item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
+                  }`}
+                  src={item.image}
+                 />
+                </div>
+               )}
+
+               {item.text.trim() !== '' && (
+                <p
+                 style={{
+                  width: 'max-content',
+                  overflowWrap: 'anywhere',
+                  maxWidth: '250px',
+                 }}
+                 className='break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto'
+                >
+                 {item.text}
+                </p>
+               )}
+              </div>
+              <button
+               style={{
+                border: 'none',
+                backgroundColor: 'transparent',
+                transition: 'all .3s ease-in-out',
+               }}
+               className='d-none'
+               onClick={() => {
+                handleDeleteMessage(item.id)
+               }}
+              >
+               <DeleteIcon />
+              </button>
+             </div>
+            </div>
+
+            <time className='text-xs text-black-50'>
+             {convertTime(item.sendAt)}
+            </time>
+           </div>
+          )
+         )}
+
+        {formName === 'group' &&
+         messageGroupList?.map((item) =>
+          item.idSend === user.id ? (
+           <div key={item.id} className='h-auto mb-2 flex flex-col items-end'>
+            <div className='flex gap-2 mb-1'>
+             <div className='flex items-center hover-message gap-1'>
+              <div className='flex flex-col gap-1 items-end'>
+               {item.image.trim() !== '' && (
+                <div>
+                 <img
+                  className={`h-auto rounded-md ${
+                   item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
+                  }`}
+                  src={item.image}
+                 />
+                </div>
+               )}
+
+               {item.content && (
+                <p
+                 style={{
+                  width: 'max-content',
+                  overflowWrap: 'anywhere',
+                  maxWidth: '250px',
+                 }}
+                 className='break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto'
+                >
+                 {item.content}
+                </p>
+               )}
+              </div>
+             </div>
+            </div>
+
+            <time className='text-xs text-black-50'>
+             {convertTime(item.sendAt)}
+            </time>
+           </div>
+          ) : (
+           <div key={item.id} className='h-auto mb-2'>
+            <div className='flex gap-2 mb-1'>
+             <div className='flex gap-1 items-end'>
+              <img
+               className='object-fit-cover rounded-circle'
+               style={{ width: '40px', height: '40px' }}
+               src={item.avt}
+               alt='avatar other_user'
+              />
+             </div>
+
+             <div className='flex items-center hover-message gap-1'>
+              <div className='flex flex-col gap-1'>
+               {item.image.trim() !== '' && (
+                <div>
+                 <img
+                  className={`h-auto rounded-md ${
+                   item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
+                  }`}
+                  src={item.image}
+                 />
+                </div>
+               )}
+
+               {item.content && (
+                <p
+                 style={{
+                  width: 'max-content',
+                  overflowWrap: 'anywhere',
+                  maxWidth: '250px',
+                 }}
+                 className='break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto'
+                >
+                 {item.content}
+                </p>
+               )}
+              </div>
+             </div>
+            </div>
+
+            <time className='text-xs text-black-50'>
+             {convertTime(item.sendAt)}
+            </time>
+           </div>
+          )
+         )}
        </ul>
       </div>
-
-      <form
-       onSubmit={handleSubmitMessage}
-       className='flex items-end bg-white mx-5 border rounded-[54px] p-3 mb-5 gap-1 position-relative form-message'
-      >
-       <button type='button' onClick={handleToggleEmoji}>
-        <EmojiEmotionsIcon className='text-[40px] text-[#0095ff]' />
-       </button>
-
-       {showEmoji && (
-        <div className='position-absolute bottom-[100%] left-0'>
-         <EmojiPicker
-          width='20em'
-          onEmojiClick={handleClickEmoji}
-          emojiStyle={EmojiStyle.FACEBOOK}
-          lazyLoadEmojis={true}
-         />
-        </div>
-       )}
-
-       <div>
-        <input
-         onChange={handleChangeImageMsg}
-         id='file'
-         type='file'
-         className='hidden m-0'
-        />
-        <label htmlFor='file'>
-         <AttachFileIcon className='text-[40px] text-[#0095ff]' />
-        </label>
-       </div>
-
-       <div className='w-100'>
-        {image && (
-         <div
-          style={{ width: 'max-content' }}
-          className='mb-1 position-relative'
-         >
-          <button
-           className='delete-image'
-           onClick={() => setMessageForm({ ...messageForm, image: null })}
-          >
-           <CancelIcon />
-          </button>
-
-          <img
-           style={{ width: '80px', height: '50px', objectFit: 'cover' }}
-           src={`${BASE64_URL}${image}`}
-           alt='anh message'
-           className='rounded'
-          />
-         </div>
-        )}
-
-        <input
-         onChange={handleChangeValueMsg}
-         type='text'
-         className='w-100 h-100'
-         placeholder='Type your message...'
-         value={content}
-         ref={inputMessageFormRef}
-        />
-       </div>
-
-       <button type='submit'>
-        <SendIcon className='text-[40px] text-[#0095ff]' />
-       </button>
-      </form>
+      <FormMessage {...propsFormMessage} />
      </div>
     </div>
    </div>
