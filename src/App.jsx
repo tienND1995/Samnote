@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 import { Alert, Snackbar } from '@mui/material'
 import { Navigate, Route, Routes } from 'react-router-dom'
@@ -71,7 +71,6 @@ function App() {
      <Route path='/user/profile/:id' element={<UserProfile />} />
      <Route path='/user/incognito' element={<Incognito />} />
      <Route path='/group' element={<Group />} />
-     {/* <Route path='/group' element={<Demo />} /> */}
     </Route>
    </Routes>
   </main>

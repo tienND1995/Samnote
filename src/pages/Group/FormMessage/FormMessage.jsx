@@ -8,7 +8,7 @@ import CancelIcon from '@mui/icons-material/Cancel'
 import SendIcon from '@mui/icons-material/Send'
 
 import configs from '../../../configs/configs.json'
-const { BASE64_URL, API_SERVER_URL } = configs
+const { BASE64_URL } = configs
 
 const FormMessage = ({
  userID,
