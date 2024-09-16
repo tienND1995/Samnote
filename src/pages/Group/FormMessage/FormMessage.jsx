@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import io from 'socket.io-client'
 
 import EmojiPicker, { EmojiStyle } from 'emoji-picker-react'
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions'
@@ -8,7 +9,7 @@ import CancelIcon from '@mui/icons-material/Cancel'
 import SendIcon from '@mui/icons-material/Send'
 
 import configs from '../../../configs/configs.json'
-const { BASE64_URL } = configs
+const { BASE64_URL, API_SERVER_URL } = configs
 
 const FormMessage = ({
  userID,
@@ -16,6 +17,7 @@ const FormMessage = ({
  socket,
  messageContentRef,
  heightMessageContent,
+ messageContentUlRef,
  formName,
  inputMessageFormRef,
  idGroup,
@@ -73,7 +75,7 @@ const FormMessage = ({
   if (socket) {
    // * send message chat
 
-   if ((formName === 'chat')) {
+   if (formName === 'chat') {
     socket.emit('send_message', { room, data }) // Gửi sự kiện "send_message" tới server
 
     setMessageForm({
@@ -83,14 +85,14 @@ const FormMessage = ({
      showEmoji: false,
     })
 
-    messageContentRef.current.scrollTop = heightMessageContent
     return
    }
 
    // * send message group
 
    if (formName === 'group') {
-    socket.emit('chat_group', { room, data }) // Gửi sự kiện "send_message" tới server
+    socket.emit('join_room', { room })
+    socket.emit('chat_group', { room, data }) // Gửi sự kiện "chat_group" tới server
 
     setMessageForm({
      content: '',
@@ -99,7 +101,7 @@ const FormMessage = ({
      showEmoji: false,
     })
 
-    // fetchMessagesGroup(groupItem.idGroup)
+    
     return
    }
   } else {

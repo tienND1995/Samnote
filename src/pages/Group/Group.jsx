@@ -32,20 +32,21 @@ import LogoutIcon from '@mui/icons-material/Logout'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import SearchIcon from '@mui/icons-material/Search'
+import CameraAltIcon from '@mui/icons-material/CameraAlt'
 
 import {
-  Box,
-  Button,
-  IconButton,
-  List,
-  ListItem,
-  ListItemSecondaryAction,
-  ListItemText,
-  TextField,
-  Typography,
+ Box,
+ Button,
+ IconButton,
+ List,
+ ListItem,
+ ListItemSecondaryAction,
+ ListItemText,
+ TextField,
+ Typography,
 } from '@mui/material'
 
-const { API_SERVER_URL } = configs
+const { API_SERVER_URL, BASE64_URL } = configs
 
 const Group = () => {
  const appContext = useContext(AppContext)
@@ -90,9 +91,14 @@ const Group = () => {
   messageContentRef: useRef(),
   inputMessageFormRef: useRef(),
   heightMessageContent: '500',
+  messageContentUlRef: useRef(),
  })
- const { inputMessageFormRef, messageContentRef, heightMessageContent } =
-  messageContent
+ const {
+  inputMessageFormRef,
+  messageContentRef,
+  heightMessageContent,
+  messageContentUlRef,
+ } = messageContent
 
  const [formName, setFormName] = useState(null)
 
@@ -140,12 +146,6 @@ const Group = () => {
   try {
    const res = await axios.get(`${API_SERVER_URL}/group/all/${idOwner}`)
 
-   res.data.data.map((item) => {
-    if (item.numberMems >= 1) {
-     socket.emit('join_room ', { room: item.idGroup })
-    }
-   })
-
    setChatGroup({ ...chatGroup, groupList: res.data.data })
   } catch (err) {
    console.error(err)
@@ -156,7 +156,6 @@ const Group = () => {
   const socketIo = io(API_SERVER_URL)
 
   socketIo.on('connect', () => {
-   console.log('Connected to server')
    setSocket(socketIo)
   })
  }, [])
@@ -165,27 +164,33 @@ const Group = () => {
   if (socket) {
    socket.on('send_message', (result) => {
     const { ReceivedID, SenderID } = result.data
-    console.log(result)
-
     fetchUserChat()
-    getMessageList(user.id, ReceivedID === user.id ? SenderID : ReceivedID)
+    if (formName === 'chat') {
+     getMessageList(user.id, ReceivedID === user.id ? SenderID : ReceivedID)
+    }
    })
 
-   //  socket.on('join_room', (result) => {
-   //   console.log('join_room', result)
-   //  })
-
    socket.on('chat_group', (result) => {
-    console.log('message received from server', result)
-
     getGroups(user.id)
-    fetchMessagesGroup(infoGroupItem.idGroup)
+    if (formName === 'group') {
+     fetchMessagesGroup(infoGroupItem.idGroup)
+    }
    })
 
    getGroups(user.id)
    fetchUserChat()
+
+   if (messageContentRef.current && messageContentUlRef.current) {
+    messageContentRef.current.scrollTop =
+     messageContentUlRef.current.offsetHeight
+   }
   }
- }, [socket, typeFilterChatUser])
+ }, [
+  socket,
+  typeFilterChatUser,
+  formName,
+  messageContentUlRef.current?.offsetHeight,
+ ])
 
  // *********** handle chat user messages
  const handleClickChatUser = (otherUser) => {
@@ -195,6 +200,7 @@ const Group = () => {
   getMessageList(user.id, otherUser.user.id)
 
   setInfoOtherUser(otherUser.user)
+  inputMessageFormRef.current.focus()
   resetGroup()
  }
 
@@ -227,9 +233,6 @@ const Group = () => {
    setMessageList(
     response.data.data.length ? response.data.data[0].messages : []
    )
-
-   // @ts-ignore
-   messageContentRef.current.scrollTop = heightMessageContent
   } catch (error) {
    console.log(error)
   }
@@ -237,9 +240,9 @@ const Group = () => {
 
  const convertTime = (time) => moment(`${time}+0700`).calendar()
 
- const handleChatLastText = (lastText, idSend) =>
-  idSend === user.id ? `Bạn: ${lastText}` : `${lastText}`
-
+ const handleChatLastText = (lastText, idSend) => {
+  return idSend === user.id ? `Bạn: ${lastText}` : `${lastText}`
+ }
  // ** search user buy name
 
  const fetchSearchUser = async (userName) => {
@@ -414,9 +417,11 @@ const Group = () => {
  const handleClickGroupItem = (group) => {
   fetchMessagesGroup(group.idGroup)
   setValueGroupName(group.name)
+  setNewAvatarGroup(null)
 
   setInfoGroupItem(group)
   resetChat()
+  inputMessageFormRef.current.focus()
  }
 
  const handleShowModalCreateGroup = () => {
@@ -523,11 +528,32 @@ const Group = () => {
  const showButtonsGroupRef = useRef()
  const [typeButtonGroup, setTypeButtonGroup] = useState(null)
 
- const fetchQuitGroup = async () => {}
+ const fetchQuitGroup = async (idMem) => {
+  try {
+   const response = await axios.delete(
+    `https://samnote.mangasocial.online/group/quit/${idMem}`
+   )
+
+   fetchAllMemberGroup(infoGroupItem.idGroup)
+   //  setShowModalMemberList(false)
+  } catch (error) {
+   console.error(error)
+  }
+ }
 
  const handleQuitGroup = () => {
   setTypeButtonGroup('quit')
-  // setShowButtonsGroup(false)
+
+  if (infoGroupItem.idOwner === user.id) {
+   return Swal.fire({
+    icon: 'warning',
+    title: 'You are the team leader',
+   })
+  }
+
+  const memberQuit = infoGroupItem.member.filter(
+   (member) => member.idUser === user.id
+  )
 
   Swal.fire({
    title: 'Are you sure?',
@@ -539,9 +565,33 @@ const Group = () => {
    confirmButtonText: 'Yes',
   }).then((result) => {
    if (result.isConfirmed) {
+    fetchQuitGroup(memberQuit.idMem)
     Swal.fire({
      title: 'Quitted!',
      text: 'You have left the group.',
+     icon: 'success',
+    })
+   }
+  })
+ }
+
+ const handleDeleteMemberGroup = (idMember) => {
+  if (!idMember) return
+
+  Swal.fire({
+   title: 'Are you sure?',
+   text: 'Do you want to delete this member?',
+   icon: 'warning',
+   showCancelButton: true,
+   confirmButtonColor: '#3085d6',
+   cancelButtonColor: '#d33',
+   confirmButtonText: 'Yes',
+  }).then((result) => {
+   if (result.isConfirmed) {
+    fetchQuitGroup(idMember)
+    Swal.fire({
+     title: 'Delete!',
+     text: 'This member has been removed from the group.',
      icon: 'success',
     })
    }
@@ -622,23 +672,8 @@ const Group = () => {
   setShowModalMemberList(false)
  }
 
- const deleteMember = async (idMember) => {
-  try {
-   const response = await axios.delete(
-    `https://samnote.mangasocial.online/group/quit/${idMember}>`
-   )
-
-   setSnackbar({
-    isOpen: true,
-    message: `Delete members successfully!`,
-    severity: 'success',
-   })
-  } catch (error) {
-   console.log(error)
-  }
- }
-
  const [valueGroupName, setValueGroupName] = useState('')
+ const [newAvatarGroup , setNewAvatarGroup] = useState(null)
  const [disableGroupName, setDisableGroupName] = useState(true)
  const inputGroupNameRef = useRef()
  const formGroupNameRef = useRef()
@@ -659,12 +694,30 @@ const Group = () => {
   }
  }
 
+ const updateAvatarGroup = async (idGroup, newAvatar) => {
+  try {
+   const response = await axios.patch(
+    `${API_SERVER_URL}/group/update/${idGroup}`,
+    {
+     linkAvatar: newAvatar,
+    }
+   )
+
+   getGroups(user.id)
+   setNewAvatarGroup(newAvatar)
+   
+  } catch (error) {
+   console.error(error)
+  }
+ }
+
  const handleChangeNameGroup = (e) => {
   setValueGroupName(e.target.value)
  }
  const handleSubmitFormNameGroup = (e) => {
   e.preventDefault()
   if (!infoGroupItem.idGroup) return
+
   if (
    valueGroupName.trim() !== '' &&
    valueGroupName.trim() !== infoGroupItem.name
@@ -673,10 +726,20 @@ const Group = () => {
   }
  }
 
- useEffect(() => {
-  !disableGroupName && inputGroupNameRef.current.focus()
-  disableGroupName && setValueGroupName(infoGroupItem.name)
- }, [disableGroupName])
+ const handleChangeAvatarGroup = async (e) => {
+  if (!infoGroupItem) return
+  const { idGroup } = infoGroupItem
+
+  const reader = new FileReader()
+  reader.readAsDataURL(e.target.files[0])
+  reader.onload = () => {
+   // @ts-ignore
+   const imageBase64 = reader.result.split(',')[1]
+   updateAvatarGroup(idGroup, imageBase64)
+  }
+
+  e.target.value = null
+ }
 
  // hande click outside element
  useEffect(() => {
@@ -715,8 +778,6 @@ const Group = () => {
    handleClickOutside(e.target)
   })
  }, [ulElementButtonsGroupRef, showButtonsGroupRef])
-
- console.log(groupList)
 
  return (
   <div className='w-fluid'>
@@ -945,7 +1006,7 @@ const Group = () => {
        <ul className='flex flex-col gap-2 py-[20px] max-h-[60vh] overflow-y-auto'>
         {groupMemberList?.map((user) => (
          <li
-          key={user.id}
+          key={user.idMember}
           className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
          >
           <div className='flex gap-2 items-center'>
@@ -967,7 +1028,7 @@ const Group = () => {
 
           <button
            onClick={() => {
-            console.log(user.id)
+            handleDeleteMemberGroup(user.idMember)
            }}
            type='button'
            className='text-red-500 rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
@@ -1044,7 +1105,7 @@ const Group = () => {
         </ul>
 
         <ul
-         className='flex flex-col flex-grow-1 gap-4 overflow-y-auto pb-[30px]'
+         className='flex flex-col flex-grow-1 gap-4 overflow-y-auto pb-[30px] overflow-x-hidden'
          ref={chatUserRef}
          style={{ height: `${heightChatUser}px` }}
         >
@@ -1187,7 +1248,7 @@ const Group = () => {
                  : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
                }
               >
-               {handleChatLastText(group.describe, group.idSend)}
+               {group.text_lastest_message_in_group}
               </p>
              </div>
             </div>
@@ -1227,13 +1288,32 @@ const Group = () => {
     <div className='col-6 px-0  flex flex-col'>
      <div className='flex justify-between items-center bg-[#dffffe] py-[30px] px-[20px]'>
       <div className='flex gap-2 items-center'>
-       <Link to={infoOtherUser.id && `/other-user/${infoOtherUser.id}`}>
-        <img
-         className='w-[90px] h-[90px] object-cover rounded-[100%]'
-         src={infoOtherUser.Avarta || infoGroupItem.linkAvatar || avatarDefault}
-         alt='avatar'
-        />
-       </Link>
+       <div className='position-relative'>
+        <Link to={infoOtherUser.id && `/other-user/${infoOtherUser.id}`}>
+         <img
+          className='w-[90px] h-[90px] object-cover rounded-[100%]'
+          src={
+            !newAvatarGroup? (infoOtherUser.Avarta || infoGroupItem.linkAvatar || avatarDefault):`${BASE64_URL}${newAvatarGroup}`
+          }
+          alt='avatar'
+         />
+        </Link>
+
+        {formName === 'group' && (
+         <div className='position-absolute bg-[#d9d9d9] w-[30px] h-[30px] rounded-full right-0 bottom-0 flex items-center justify-center'>
+          <input
+           onChange={handleChangeAvatarGroup}
+           id='file'
+           type='file'
+           className='hidden m-0'
+           disabled={!(infoGroupItem.idOwner === user.id)}
+          />
+          <label htmlFor='file' className='flex'>
+           <CameraAltIcon className='text-[20px]' />
+          </label>
+         </div>
+        )}
+       </div>
        {formName === null && <h5>Anonymous chatter</h5>}
        {formName === 'chat' && <h5>{infoOtherUser.name}</h5>}
        {formName === 'group' && (
@@ -1258,11 +1338,13 @@ const Group = () => {
          </div>
 
          <button
-          onClick={(e) =>
-           disableGroupName
+          onClick={(e) => {
+           if (infoGroupItem.idOwner !== user.id) return
+
+           return disableGroupName
             ? setDisableGroupName(false)
             : handleSubmitFormNameGroup(e)
-          }
+          }}
           ref={buttonClickEditNameGroup}
           title={disableGroupName ? 'Edit name' : 'Save name'}
           type='button'
@@ -1370,7 +1452,7 @@ const Group = () => {
        className='flex-grow-1 p-[20px]'
        ref={messageContentRef}
       >
-       <ul>
+       <ul id='message-content' ref={messageContentUlRef}>
         {formName === 'chat' &&
          messageList?.map((item) =>
           item.idSend === user.id ? (
@@ -1531,6 +1613,7 @@ const Group = () => {
                style={{ width: '40px', height: '40px' }}
                src={item.avt}
                alt='avatar other_user'
+               onError={(e) => (e.target.src = avatarDefault)}
               />
              </div>
 
