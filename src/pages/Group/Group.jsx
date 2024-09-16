@@ -673,11 +673,15 @@ const Group = () => {
  }
 
  const [valueGroupName, setValueGroupName] = useState('')
- const [newAvatarGroup , setNewAvatarGroup] = useState(null)
+ const [newAvatarGroup, setNewAvatarGroup] = useState(null)
  const [disableGroupName, setDisableGroupName] = useState(true)
  const inputGroupNameRef = useRef()
  const formGroupNameRef = useRef()
  const buttonClickEditNameGroup = useRef()
+
+ const isLeaderTeam = (idOwner) => {
+  return idOwner === user.id
+ }
 
  const updateNameGroup = async (idGroup, newName) => {
   try {
@@ -705,7 +709,6 @@ const Group = () => {
 
    getGroups(user.id)
    setNewAvatarGroup(newAvatar)
-   
   } catch (error) {
    console.error(error)
   }
@@ -1293,7 +1296,9 @@ const Group = () => {
          <img
           className='w-[90px] h-[90px] object-cover rounded-[100%]'
           src={
-            !newAvatarGroup? (infoOtherUser.Avarta || infoGroupItem.linkAvatar || avatarDefault):`${BASE64_URL}${newAvatarGroup}`
+           !newAvatarGroup
+            ? infoOtherUser.Avarta || infoGroupItem.linkAvatar || avatarDefault
+            : `${BASE64_URL}${newAvatarGroup}`
           }
           alt='avatar'
          />
@@ -1306,7 +1311,8 @@ const Group = () => {
            id='file'
            type='file'
            className='hidden m-0'
-           disabled={!(infoGroupItem.idOwner === user.id)}
+           //  disabled={!(infoGroupItem.idOwner === user.id)}
+           disabled={!isLeaderTeam(infoGroupItem.idOwner)}
           />
           <label htmlFor='file' className='flex'>
            <CameraAltIcon className='text-[20px]' />
@@ -1339,7 +1345,7 @@ const Group = () => {
 
          <button
           onClick={(e) => {
-           if (infoGroupItem.idOwner !== user.id) return
+           if (!isLeaderTeam(infoGroupItem.idOwner)) return
 
            return disableGroupName
             ? setDisableGroupName(false)
@@ -1423,16 +1429,18 @@ const Group = () => {
          </button>
         </li>
 
-        <li>
-         <button
-          className={`text-[25px] ${
-           typeButtonGroup === 'delete' ? 'active' : null
-          }`}
-          onClick={handleShowAllMembers}
-         >
-          <HighlightOffIcon className='me-2 text-[30px]' /> Delete member
-         </button>
-        </li>
+        {isLeaderTeam(infoGroupItem.idOwner) && (
+         <li>
+          <button
+           className={`text-[25px] ${
+            typeButtonGroup === 'delete' ? 'active' : null
+           }`}
+           onClick={handleShowAllMembers}
+          >
+           <HighlightOffIcon className='me-2 text-[30px]' /> Delete member
+          </button>
+         </li>
+        )}
        </ul>
       </div>
      </div>
