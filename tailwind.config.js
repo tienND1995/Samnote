@@ -9,6 +9,9 @@ export default {
       xl: "1280px",
     },
     extend: {
+      fontSize: {
+        custom: "calc(100vw / 20)", // Tạo fontSize tùy chỉnh
+      },
       backgroundImage: {
         login: "url('/public/loginBackground.png')",
       },
@@ -19,6 +22,10 @@ export default {
       const newUtilities = {
         ".scrollbar-none": {
           "scrollbar-width": "none" /* Firefox */,
+          "-ms-overflow-style": "none" /* Internet Explorer 10+ */,
+          "&::-webkit-scrollbar": {
+            display: "none" /* Chrome, Safari, Opera */,
+          },
         },
       };
 

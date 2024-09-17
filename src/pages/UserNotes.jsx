@@ -552,7 +552,7 @@ export default function UserNotes() {
         </div>
       </Box>{" "}
       <Box className="grid grid-cols-[350px_1fr] border-top border-black border-solid">
-        <div className="mx-3 overflow-y-auto h-[100vh] border-r border-black border-solid">
+        <div className="overflow-y-auto h-[100vh] ">
           <div className="flex items-center flex-col">
             {" "}
             <Box

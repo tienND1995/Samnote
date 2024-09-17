@@ -88,6 +88,7 @@ const Home = () => {
   const appContext = useContext(AppContext);
   const { user } = appContext;
   const navigate = useNavigate();
+  console.log("cjieeuf rộng amnf hình", window.innerWidth);
 
   const getProfile = async () => {
     try {
@@ -171,7 +172,7 @@ const Home = () => {
         style={{
           display: "flex",
           backgroundColor: "#E95B31",
-          height: "70px",
+          height: "14vh",
           padding: "0 30px",
           alignItems: "center",
           justifyContent: "space-between",

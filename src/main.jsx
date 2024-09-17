@@ -7,7 +7,7 @@ import AppProvider from "./context/index.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AppProvider>
-      <div className="max-w-[1260px] mx-auto">
+      <div className="w-full">
         {" "}
         <App />
       </div>

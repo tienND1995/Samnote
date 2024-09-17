@@ -540,8 +540,8 @@ const UserPhoto = () => {
                   alt={`Image ${imgIndex + 1}`}
                   className={
                     img.type == "image"
-                      ? "w-full h-[130px] object-cover rounded-lg border-2 border-r-indigo-500 border-solid"
-                      : "w-full h-[130px] object-cover rounded-lg"
+                      ? "w-full aspect-[3/2] object-cover rounded-lg border-2 border-r-indigo-500 border-solid"
+                      : "w-full aspect-[3/2] object-cover rounded-lg"
                   }
                 />
               ))}
