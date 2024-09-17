@@ -19,6 +19,7 @@ import UserSketch from './pages/UserSketch'
 
 import RootLayout from './layout/RootLayout'
 import Group from './pages/Group/Group'
+import Demo from './pages/Demo/Demo'
 
 const AppSnackbar = () => {
  const appContext = useContext(AppContext)
@@ -71,6 +72,8 @@ function App() {
      <Route path='/user/profile/:id' element={<UserProfile />} />
      <Route path='/user/incognito' element={<Incognito />} />
      <Route path='/group' element={<Group />} />
+     <Route path='/demo' element={<Demo/>}/>
+
      {/* tao 1 route em lam ở đây, code 1 file mơi luôn nhe e */}
     </Route>
    </Routes>

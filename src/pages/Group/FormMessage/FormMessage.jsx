@@ -1,11 +1,10 @@
-import React, { useState } from 'react'
-import io from 'socket.io-client'
+import { useState } from 'react'
 
-import EmojiPicker, { EmojiStyle } from 'emoji-picker-react'
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions'
+import EmojiPicker, { EmojiStyle } from 'emoji-picker-react'
 
-import AttachFileIcon from '@mui/icons-material/AttachFile'
 import CancelIcon from '@mui/icons-material/Cancel'
+import ImageIcon from '@mui/icons-material/Image'
 import SendIcon from '@mui/icons-material/Send'
 
 import configs from '../../../configs/configs.json'
@@ -88,7 +87,7 @@ const FormMessage = ({
    // * send message group
 
    if (formName === 'group') {
-    socket.emit('join_room', { room })
+    // socket.emit('join_room', { room })
     socket.emit('chat_group', { room, data }) // Gửi sự kiện "chat_group" tới server
 
     setMessageForm({
@@ -106,7 +105,6 @@ const FormMessage = ({
    // Xử lý khi socket chưa được khởi tạo
   }
  }
-
  const handleSubmitMessage = (e) => {
   e.preventDefault()
 
@@ -226,7 +224,7 @@ const FormMessage = ({
      className='hidden m-0'
     />
     <label htmlFor='file'>
-     <AttachFileIcon className='text-[40px] text-[#0095ff]' />
+     <ImageIcon className='text-[40px] text-[#0095ff]' />
     </label>
    </div>
 

@@ -2,10 +2,6 @@
  background: #b6f6ff;
 }
 
-.search-message {
- background: #dffffe;
-}
-
 .group-buttons > li button {
  transition: all 0.3;
  padding: 2px 5px;
@@ -46,5 +42,15 @@
 }
 
 .modal-members {
-    width: 400px;
+ width: 400px;
+}
+
+ul.list-chat > li {
+ transition: all 0.3s;
+ background: #fff;
+}
+
+ul.list-chat > li:hover,
+ul.list-chat > li.active {
+ background: #70ffff;
 }

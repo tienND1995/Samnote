@@ -33,6 +33,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import SearchIcon from '@mui/icons-material/Search'
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
+import InfoIcon from '@mui/icons-material/Info'
 
 import {
  Box,
@@ -45,6 +46,7 @@ import {
  TextField,
  Typography,
 } from '@mui/material'
+import Information from './Information/Information'
 
 const { API_SERVER_URL, BASE64_URL } = configs
 
@@ -75,14 +77,7 @@ const Group = () => {
  const { searchUserName, searchUserResult, showModalSearch, messageNotifi } =
   searchUser
 
- // var chat group
- const [chatGroup, setChatGroup] = useState({
-  groupList: [],
-  chatGroupRef: useRef(),
-  heightChatGroup: '300',
- })
- const { groupList, chatGroupRef, heightChatGroup } = chatGroup
- const [typeFilterChatGroup, setTypeFilterChatGroup] = useState('All')
+ const [groupList, setGroupList] = useState([])
  const [infoGroupItem, setInfoGroupItem] = useState({})
  const [messageGroupList, setMessageGroupList] = useState([])
 
@@ -102,6 +97,8 @@ const Group = () => {
 
  const [formName, setFormName] = useState(null)
 
+ const [activeListChatItem, setActiveListChatItem] = useState(false)
+
  //______________________________________
 
  const fetchUserChat = async () => {
@@ -110,7 +107,7 @@ const Group = () => {
   )
 
   if (typeFilterChatUser === 'All') {
-   response.data.data.filter((item) => {
+   response.data.data.map((item) => {
     return socket.emit('join_room', { room: item.idRoom })
    })
 
@@ -132,7 +129,7 @@ const Group = () => {
   if (typeFilterChatUser === 'Read') {
    response.data.data.filter((item) => {
     if (item.is_seen !== 0)
-     return socket.emit('join_group', { room: item.idRoom })
+     return socket.emit('join_room', { room: item.idRoom })
    })
 
    return setChatUser({
@@ -144,9 +141,47 @@ const Group = () => {
 
  const getGroups = async (idOwner) => {
   try {
-   const res = await axios.get(`${API_SERVER_URL}/group/all/${idOwner}`)
+   const response = await axios.get(`${API_SERVER_URL}/group/all/${idOwner}`)
 
-   setChatGroup({ ...chatGroup, groupList: res.data.data })
+   if (typeFilterChatUser === 'All') {
+    response.data.data.map((item) =>
+     socket.emit('join_room', { room: item.idGroup })
+    )
+
+    return setGroupList(response.data.data)
+   }
+
+   if (typeFilterChatUser === 'Unread') {
+    response.data.data.filter((item) => {
+     if (
+      item.listUserReaded === 0 ||
+      !isReadMessageGroup(item.listUserReaded)
+     ) {
+      return socket.emit('join_room', { room: item.idGroup })
+     }
+    })
+
+    return setGroupList(
+     response.data.data.filter(
+      (item) =>
+       item.listUserReaded === 0 || !isReadMessageGroup(item.listUserReaded)
+     )
+    )
+   }
+
+   if (typeFilterChatUser === 'Read') {
+    response.data.data.filter((item) => {
+     if (item.listUserReaded > 0 && isReadMessageGroup(item.listUserReaded)) {
+      return socket.emit('join_room', { room: item.idGroup })
+     }
+    })
+
+    return setGroupList(
+     response.data.data.filter((group) =>
+      isReadMessageGroup(group.listUserReaded)
+     )
+    )
+   }
   } catch (err) {
    console.error(err)
   }
@@ -156,6 +191,7 @@ const Group = () => {
   const socketIo = io(API_SERVER_URL)
 
   socketIo.on('connect', () => {
+   console.log('Connected')
    setSocket(socketIo)
   })
  }, [])
@@ -163,9 +199,14 @@ const Group = () => {
  useEffect(() => {
   if (socket) {
    socket.on('send_message', (result) => {
-    const { ReceivedID, SenderID } = result.data
     fetchUserChat()
-    if (formName === 'chat') {
+    console.log('send_message')
+
+    const { ReceivedID, SenderID } = result.data
+    if (
+     formName === 'chat' &&
+     (ReceivedID === infoOtherUser.id || SenderID === infoOtherUser.id)
+    ) {
      getMessageList(user.id, ReceivedID === user.id ? SenderID : ReceivedID)
     }
    })
@@ -272,6 +313,9 @@ const Group = () => {
   }
  }
 
+ const roomSplit = (idUser, idOther) =>
+  idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
+
  const handleChangeSearchUser = (e) => {
   setSearchUser({ ...searchUser, searchUserName: e.target.value })
  }
@@ -295,12 +339,17 @@ const Group = () => {
    name: otherUser.userName,
   }
 
-  socket.emit('join_room', { room: `${otherUser.idUser}#${user.id}` })
+  const roomID = roomSplit(user.id, otherUser.idUser)
+  socket.emit('join_room', { room: roomID })
 
+  // console.log(socket)
+
+  setFormName('chat')
   setInfoOtherUser(newInfoOtherUser)
   resetGroup()
 
   postRelation(user.id, otherUser.idUser)
+
   getMessageList(user.id, otherUser.idUser)
 
   handleHideModalSearch()
@@ -353,14 +402,6 @@ const Group = () => {
    setChatUser({
     ...chatUser,
     heightChatUser: `${chatUserRef.current.offsetHeight}`,
-   })
-
-  // @ts-ignore
-  chatGroupRef.current.offsetHeight &&
-   // @ts-ignore
-   setChatGroup({
-    ...chatGroup,
-    heightChatGroup: `${chatGroupRef.current.offsetHeight}`,
    })
  }, [])
 
@@ -634,6 +675,7 @@ const Group = () => {
 
  const [showModalMemberList, setShowModalMemberList] = useState(false)
  const [groupMemberList, setGroupMemberList] = useState([])
+ const [showInforMation, setShowInforMation] = useState(false)
 
  useEffect(() => {
   infoGroupItem.idGroup && fetchAllMemberGroup(infoGroupItem.idGroup)
@@ -666,6 +708,16 @@ const Group = () => {
  const handleShowAllMembers = () => {
   setShowModalMemberList(true)
   setTypeButtonGroup('delete')
+ }
+
+ const handleShowInformation = () => {
+  setShowInforMation(true)
+  setTypeButtonGroup(null)
+  setShowButtonsGroup(false)
+ }
+
+ const handleHideInformation = () => {
+  setShowInforMation(false)
  }
 
  const handleHideModalMembers = () => {
@@ -782,10 +834,18 @@ const Group = () => {
   })
  }, [ulElementButtonsGroupRef, showButtonsGroupRef])
 
+ const isReadMessageGroup = (listUserReaded) => {
+  if (listUserReaded.length < 1) return false
+  return listUserReaded.some(
+   (userReaded) => Number(userReaded.idUser) === user.id
+  )
+ }
+
+
  return (
   <div className='w-fluid'>
    <div className='row vh-100 mx-0'>
-    <div className='col-6 group-sidebar flex flex-col px-0'>
+    <div className='col-3 group-sidebar flex flex-col px-0'>
      <h3 className='text-center py-[60px] px-3 font-bold'>Chat</h3>
 
      <Modal
@@ -1058,139 +1118,20 @@ const Group = () => {
       </div>
      </Modal>
 
-     <div className='flex gap-2 h-100 flex-grow-1'>
-      <div className='w-50 search-message px-3 shadow-lg flex flex-col'>
-       <div className='flex mt-4 mb-5 justify-between gap-2'>
-        <button
-         onClick={handleShowModalSearch}
-         className='flex gap-2 items-center bg-white p-2 rounded-5 shadow-lg w-100 text-[#686464CC]'
-        >
-         <SearchIcon />
-         Search messenger
-        </button>
+     <div className='shadow-lg bg-[#dffffe] flex flex-col flex-grow-1 px-[20px]'>
+      <div className='flex mt-4 mb-5 justify-between gap-2'>
+       <button
+        onClick={handleShowModalSearch}
+        className='flex gap-2 items-center bg-white p-2 rounded-5 shadow-lg w-100 text-[#686464CC]'
+       >
+        <SearchIcon />
+        Search user
+       </button>
 
-        <button type='button' className=''>
-         <img src={addUser} alt='add user' />
-        </button>
-       </div>
-
-       <div className='flex flex-col flex-grow-1'>
-        <ul className='flex justify-between group-buttons mb-4'>
-         <li>
-          <button
-           onClick={handleFilterMessage}
-           className={typeFilterChatUser === 'All' && 'active'}
-           type='button'
-          >
-           All
-          </button>
-         </li>
-
-         <li>
-          <button
-           className={typeFilterChatUser === 'Unread' && 'active'}
-           onClick={handleFilterMessage}
-           type='button'
-          >
-           Unread
-          </button>
-         </li>
-
-         <li>
-          <button
-           className={typeFilterChatUser === 'Read' && 'active'}
-           onClick={handleFilterMessage}
-           type='button'
-          >
-           Read
-          </button>
-         </li>
-        </ul>
-
-        <ul
-         className='flex flex-col flex-grow-1 gap-4 overflow-y-auto pb-[30px] overflow-x-hidden'
-         ref={chatUserRef}
-         style={{ height: `${heightChatUser}px` }}
-        >
-         {userList.length > 0
-          ? userList.map((user) => (
-             <li
-              key={user.idMessage}
-              className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
-              onClick={() => handleClickChatUser(user)}
-             >
-              <div className='flex gap-2 items-center'>
-               <div>
-                <img
-                 src={user.user.Avarta}
-                 alt='avatar'
-                 className='w-[50px] h-[50px] object-cover rounded-[100%]'
-                />
-               </div>
-
-               <div>
-                <h5 className='text-lg font-extrabold capitalize'>
-                 {user.user.name}
-                </h5>
-                <p
-                 style={{ maxWidth: '200px' }}
-                 className={
-                  user.is_seen === 0
-                   ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[600] text-lg'
-                   : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
-                 }
-                >
-                 {handleChatLastText(user.last_text, user.idSend)}
-                </p>
-               </div>
-              </div>
-
-              <div
-               className={
-                user.is_seen === 0
-                 ? 'text-[#ff0404] text-[16px] me-2'
-                 : 'text-[#00ff73] text-[16px] me-2'
-               }
-              >
-               {user.is_seen === 0 ? (
-                <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
-                 1
-                </p>
-               ) : (
-                <CheckIcon />
-               )}
-              </div>
-             </li>
-            ))
-          : null}
-        </ul>
-       </div>
-      </div>
-
-      {/* <ChatUser {...propsChatUser} /> */}
-
-      <div className='w-50 flex flex-col search-message px-3 shadow-lg'>
        <form
         onSubmit={handleSubmitSearchGroup}
-        className='flex mt-4 mb-5 justify-between gap-2'
+        className='flex justify-between gap-2'
        >
-        <div className='flex gap-2 items-center bg-white p-2 rounded-5 shadow-lg w-100'>
-         <button
-          className='bg-transparent outline-none border-none'
-          type='submit'
-         >
-          <SearchIcon />
-         </button>
-
-         <div className='w-100'>
-          <input
-           className='outline-none border-none bg-transparent w-100'
-           type='text'
-           placeholder='Search group'
-          />
-         </div>
-        </div>
-
         <button
          type='button'
          className=''
@@ -1200,96 +1141,169 @@ const Group = () => {
          <GroupAddIcon className='text-[36px]' />
         </button>
        </form>
+      </div>
 
-       <div className='flex flex-col flex-grow-1'>
-        <ul className='flex justify-between group-buttons mb-4'>
-         <li>
-          <button className='active' type='button'>
-           All
-          </button>
-         </li>
+      <div className='flex flex-col flex-grow-1'>
+       <ul className='flex justify-between group-buttons mb-4'>
+        <li>
+         <button
+          onClick={handleFilterMessage}
+          className={typeFilterChatUser === 'All' && 'active'}
+          type='button'
+         >
+          All
+         </button>
+        </li>
 
-         <li>
-          <button type='button'>Unread</button>
-         </li>
+        <li>
+         <button
+          className={typeFilterChatUser === 'Unread' && 'active'}
+          onClick={handleFilterMessage}
+          type='button'
+         >
+          Unread
+         </button>
+        </li>
 
-         <li>
-          <button type='button'>Read</button>
-         </li>
-        </ul>
+        <li>
+         <button
+          className={typeFilterChatUser === 'Read' && 'active'}
+          onClick={handleFilterMessage}
+          type='button'
+         >
+          Read
+         </button>
+        </li>
+       </ul>
 
-        <ul
-         className='flex flex-col gap-4 flex-grow-1 overflow-y-auto pb-[30px]'
-         ref={chatGroupRef}
-         style={{ height: `${heightChatGroup}px`, scrollbarWidth: 'none' }}
-        >
-         {groupList.length > 0 ? (
-          groupList.map((group) => (
-           <li
-            key={group.idGroup}
-            className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
-            onClick={() => handleClickGroupItem(group)}
-           >
-            <div className='flex gap-2 items-center'>
-             <div>
-              <img
-               src={group.linkAvatar || avatarDefault}
-               alt='avatar'
-               className='w-[50px] h-[50px] object-cover rounded-[100%]'
-              />
-             </div>
-
-             <div>
-              <h5 className='text-lg font-extrabold capitalize'>
-               {group.name}
-              </h5>
-              <p
-               style={{ maxWidth: '200px' }}
-               className={
-                group.is_seen === 0
-                 ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[600] text-lg'
-                 : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
-               }
-              >
-               {group.text_lastest_message_in_group}
-              </p>
-             </div>
+       <ul
+        className='flex flex-col flex-grow-1 gap-4 overflow-y-auto pb-[30px] overflow-x-hidden list-chat'
+        ref={chatUserRef}
+        style={{ height: `${heightChatUser}px`, scrollbarWidth: 'none' }}
+       >
+        {/* render userlist and grouplist */}
+        {userList?.map((item) => {
+         return (
+          <li
+           key={item.idMessage}
+           className={`flex justify-between items-center rounded-[40px] cursor-pointer ${
+            infoOtherUser.id === item.user.id ? 'active' : null
+           }`}
+           onClick={() => handleClickChatUser(item)}
+          >
+           <div className='flex gap-2 items-center'>
+            <div>
+             <img
+              src={item.user.Avarta}
+              alt='avatar'
+              className='w-[50px] h-[50px] object-cover rounded-[100%]'
+             />
             </div>
 
-            <div
+            <div>
+             <h5 className='text-lg font-extrabold capitalize'>
+              {item.user.name}
+             </h5>
+             <p
+              style={{ maxWidth: '200px' }}
+              className={
+               item.is_seen === 0
+                ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[600] text-lg'
+                : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
+              }
+             >
+              {handleChatLastText(item.last_text, item.idSend)}
+             </p>
+            </div>
+           </div>
+
+           <div
+            className={
+             item.is_seen === 0
+              ? 'text-[#ff0404] text-[16px] me-2'
+              : 'text-[#00ff73] text-[16px] me-2'
+            }
+           >
+            {item.is_seen === 0 ? (
+             <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
+              1
+             </p>
+            ) : (
+             <CheckIcon />
+            )}
+           </div>
+          </li>
+         )
+        })}
+
+        {groupList?.map((item) => (
+         <li
+          key={item.idGroup}
+          className={`flex justify-between items-center rounded-[40px] cursor-pointer ${
+           item.idGroup === infoGroupItem.idGroup ? 'active' : null
+          }`}
+          onClick={() => handleClickGroupItem(item)}
+         >
+          <div className='flex gap-2 items-center'>
+           <div>
+            <img
+             src={item.linkAvatar || avatarDefault}
+             alt='avatar'
+             className='w-[50px] h-[50px] object-cover rounded-[100%]'
+            />
+           </div>
+
+           <div>
+            <h5 className='text-lg font-extrabold capitalize'>{item.name}</h5>
+            <p
+             style={{ maxWidth: '200px' }}
              className={
-              user.is_seen === 0
-               ? 'text-[#ff0404] text-[16px] me-2'
-               : 'text-[#00ff73] text-[16px] me-2'
+              item.is_seen === 0
+               ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[600] text-lg'
+               : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
              }
             >
-             {user.is_seen === 0 ? (
-              <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
-               1
-              </p>
-             ) : (
-              <CheckIcon />
-             )}
-            </div>
-           </li>
-          ))
-         ) : (
-          <div className='text-center'>
-           <div>
-            <ChatBubbleOutlineIcon className='text-[80px]' />
+             {item.text_lastest_message_in_group}
+            </p>
            </div>
-           <h3>Không có tin nhắn nào</h3>
-           <p>Tin nhắn mới sẽ được hiện thị tại đây</p>
           </div>
-         )}
-        </ul>
-       </div>
+
+          <div
+           className={
+            isReadMessageGroup(item.listUserReaded)
+             ? 'text-[#00ff73] text-[16px] me-2'
+             : 'text-[#ff0404] text-[16px] me-2'
+           }
+          >
+           {isReadMessageGroup(item.listUserReaded) ? (
+            <CheckIcon />
+           ) : (
+            <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
+             1
+            </p>
+           )}
+          </div>
+         </li>
+        ))}
+
+        {userList.length === 0 && groupList.length === 0 && (
+         <div className='text-center'>
+          <div>
+           <ChatBubbleOutlineIcon className='text-[80px]' />
+          </div>
+          <h3>Không có tin nhắn nào</h3>
+          <p>Tin nhắn mới sẽ được hiện thị tại đây</p>
+         </div>
+        )}
+       </ul>
       </div>
+
+      {/* <ChatUser {...propsChatUser} /> */}
      </div>
     </div>
 
-    <div className='col-6 px-0  flex flex-col'>
-     <div className='flex justify-between items-center bg-[#dffffe] py-[30px] px-[20px]'>
+    <div className='col-9 px-0  flex flex-col'>
+     <div className='flex justify-between items-center bg-[#dffffe] py-[30px] px-[20px] shadow-lg'>
       <div className='flex gap-2 items-center'>
        <div className='position-relative'>
         <Link to={infoOtherUser.id && `/other-user/${infoOtherUser.id}`}>
@@ -1308,13 +1322,12 @@ const Group = () => {
          <div className='position-absolute bg-[#d9d9d9] w-[30px] h-[30px] rounded-full right-0 bottom-0 flex items-center justify-center'>
           <input
            onChange={handleChangeAvatarGroup}
-           id='file'
+           id='file-avatar-group'
            type='file'
            className='hidden m-0'
-           //  disabled={!(infoGroupItem.idOwner === user.id)}
            disabled={!isLeaderTeam(infoGroupItem.idOwner)}
           />
-          <label htmlFor='file' className='flex'>
+          <label htmlFor='file-avatar-group' className='flex'>
            <CameraAltIcon className='text-[20px]' />
           </label>
          </div>
@@ -1386,11 +1399,6 @@ const Group = () => {
             </clipPath>
            </defs>
           </svg>
-          {/* {disableGroupName ? (
-           <img src={textNote} alt='search user' />
-          ) : (
-           <SaveIcon className='text-[40px]' />
-          )} */}
          </button>
         </form>
        )}
@@ -1402,7 +1410,7 @@ const Group = () => {
        </button>
 
        <ul
-        className={`bg-black p-2 position-absolute top-100 right-[100%] w-max ${
+        className={`bg-black p-2 position-absolute top-100 right-[100%] z-10 w-max ${
          showButtonsGroup ? 'active' : null
         }`}
         ref={ulElementButtonsGroupRef}
@@ -1441,6 +1449,18 @@ const Group = () => {
           </button>
          </li>
         )}
+
+        <li>
+         <button
+          className={`text-[25px] ${
+           typeButtonGroup === 'add' ? 'active' : null
+          }`}
+          onClick={handleShowInformation}
+         >
+          <InfoIcon className='me-2 text-[30px]' />
+          Information
+         </button>
+        </li>
        </ul>
       </div>
      </div>
@@ -1449,7 +1469,7 @@ const Group = () => {
       style={{
        background: `url(${bgMessage}) no-repeat center/cover`,
       }}
-      className='flex-grow-1 flex flex-col'
+      className='flex-grow-1 flex flex-col position-relative'
      >
       <div
        style={{
@@ -1663,6 +1683,13 @@ const Group = () => {
        </ul>
       </div>
       <FormMessage {...propsFormMessage} />
+
+      <Information
+       idGroup={infoGroupItem.idGroup}
+       showInfo={showInforMation}
+       onHide={handleHideInformation}
+       groupItem={infoGroupItem}
+      />
      </div>
     </div>
    </div>

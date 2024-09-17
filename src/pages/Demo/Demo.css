@@ -1,0 +1,10 @@
+.demo {
+ background: red;
+ color: white;
+}
+
+.form {
+    display: flex;
+    justify-content: space-between;
+}
+
