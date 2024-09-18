@@ -3,7 +3,7 @@ import './Group.css'
 
 import axios from 'axios'
 import moment from 'moment'
-import { Link } from 'react-router-dom'
+import { Await, Link } from 'react-router-dom'
 import io from 'socket.io-client'
 
 import Modal from 'react-bootstrap/Modal'
@@ -69,7 +69,9 @@ const Group = () => {
  const [messageGroupList, setMessageGroupList] = useState([])
 
  const [formName, setFormName] = useState(null)
+
  const [typeFilterChat, setTypeFilterChat] = useState('All')
+
  const handleChangeTypeFilterChat = (type) => setTypeFilterChat(type)
 
  //______________________________________
@@ -92,13 +94,23 @@ const Group = () => {
  }, [])
 
  useEffect(() => {
-  if (!socket || !user.id || !typeFilterChat) return
+  if (!socket) return
 
-  getGroupList()
+  console.log('type filter', typeFilterChat)
+
   getUserChatList()
+  // getGroupList()
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [user.id, socket, typeFilterChat])
+
+ useEffect(() => {
+  if (!socket) return
 
   socket.on('send_message', (result) => {
+   console.log('type:', typeFilterChat)
    getUserChatList()
+
    const { ReceivedID, SenderID } = result.data
    if (
     formName === 'chat' &&
@@ -122,18 +134,8 @@ const Group = () => {
     }
    }
   })
- }, [
-  user.id,
-  socket,
-  typeFilterChat,
-
-  formName,
-  infoGroupItem.idGroup,
-  infoOtherUser.id,
-
-  messageContentUlRef,
-  messageContentRef,
- ])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [socket, formName, typeFilterChat])
 
  // *********** handle chat user messages
  const handleClickUserItem = (otherUser) => {
@@ -406,7 +408,7 @@ const Group = () => {
     }
    )
 
-   getGroupList()
+   await getGroupList()
 
    // render new avatar
    setTimeout(() => {
@@ -910,7 +912,9 @@ const Group = () => {
               <div className='flex flex-col gap-1'>
                {item.image.trim() !== '' && (
                 <div>
-                 <h3 className='mb-1 text-[12px] font-light capitalize'>{item.name}</h3>
+                 <h3 className='mb-1 text-[12px] font-light capitalize'>
+                  {item.name}
+                 </h3>
                  <div>
                   <img
                    className={`h-auto rounded-md ${
@@ -931,7 +935,9 @@ const Group = () => {
                  }}
                  className='break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto'
                 >
-                 <h3 className='mb-1 text-[12px] font-light capitalize'>{item.name}</h3>
+                 <h3 className='mb-1 text-[12px] font-light capitalize'>
+                  {item.name}
+                 </h3>
                  <p className='font-semibold'>{item.content}</p>
                 </div>
                )}

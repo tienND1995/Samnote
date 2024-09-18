@@ -13,6 +13,8 @@ export const fetchUserChatList = async (userID, socket, typeFilter) => {
    return socket.emit('join_room', { room: item.idRoom })
   })
 
+  console.log('re-render all')
+
   return response.data.data
  }
 
@@ -21,6 +23,8 @@ export const fetchUserChatList = async (userID, socket, typeFilter) => {
    if (item.is_seen !== 1)
     return socket.emit('join_room', { room: item.idRoom })
   })
+
+  console.log('re-render unread')
 
   return response.data.data.filter((user) => user.is_seen !== 1)
  }
@@ -31,8 +35,11 @@ export const fetchUserChatList = async (userID, socket, typeFilter) => {
     return socket.emit('join_room', { room: item.idRoom })
   })
 
+  console.log('re-render read')
+
   return response.data.data.filter((user) => user.is_seen !== 0)
  }
+ 
 }
 
 const isReadMessageGroup = (listUserReaded, userID) => {

@@ -383,7 +383,6 @@ const ChatList = (props) => {
      ref={chatListRef}
      style={{ height: `${heightChatList}px`, scrollbarWidth: 'none' }}
     >
-     {/* render userlist and grouplist */}
      {userList?.map((item) => {
       return (
        <li
