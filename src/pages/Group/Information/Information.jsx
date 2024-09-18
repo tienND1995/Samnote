@@ -3,6 +3,8 @@ import axios from 'axios'
 import { Link } from 'react-router-dom'
 import avatarDefault from '../../../assets/avatar-default.png'
 
+import { fetchAllMemberGroup } from '../fetchApiGroup'
+
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import GroupsIcon from '@mui/icons-material/Groups'
@@ -10,26 +12,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import ImageIcon from '@mui/icons-material/Image'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 
-const Information = ({ idGroup, showInfo, onHide, groupItem }) => {
+const Information = (props) => {
+ const { showInfo, onHide, groupItem, groupMemberList } = props.data
  const [toggleMemberList, setToggleMemberList] = useState(false)
-
- const { member } = groupItem
-
-//  useEffect(() => {
-//   idGroup && fetchAllMemberGroup(idGroup)
-//  }, [idGroup])
-
-//  const fetchAllMemberGroup = async (idGroup) => {
-//   try {
-//    const response = await axios.get(
-//     `https://samnote.mangasocial.online/group/only/${idGroup}`
-//    )
-
-//    setMemberList(response.data.data.members)
-//   } catch (error) {
-//    console.log(error)
-//   }
-//  }
 
  return (
   <div
@@ -76,13 +61,15 @@ const Information = ({ idGroup, showInfo, onHide, groupItem }) => {
     <div className='flex gap-2 items-center'>
      <GroupsIcon className='text-[50px]' />
 
-     <h3 className='text-[30px] font-medium'>{`Group members(${member?.length})`}</h3>
+     <h3 className='text-[30px] font-medium'>{`Group members(${groupMemberList?.length})`}</h3>
     </div>
 
     <button
-     className={`rotate-${toggleMemberList ? '180' : '0'}`}
+     style={{
+      transform: `rotate(${toggleMemberList ? '180' : '0'})`,
+     }}
      onClick={() => setToggleMemberList((prevState) => !prevState)}
-     disabled={member?.length < 1}
+     disabled={groupMemberList?.length < 1}
     >
      <KeyboardArrowDownIcon className='text-[30px]' />
     </button>
@@ -94,9 +81,9 @@ const Information = ({ idGroup, showInfo, onHide, groupItem }) => {
      toggleMemberList ? null : 'hidden'
     }`}
    >
-    {member?.map((item) => (
+    {groupMemberList?.map((item) => (
      <li
-      key={item.idMem}
+      key={item.idMember}
       className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
      >
       <div className='flex gap-2 items-center'>
@@ -105,14 +92,14 @@ const Information = ({ idGroup, showInfo, onHide, groupItem }) => {
          onError={(e) => {
           e.target.src = avatarDefault
          }}
-         src={item.linkAvatar}
+         src={item.avt}
          alt='avatar '
          className='w-[50px] h-[50px] object-cover rounded-[100%]'
         />
        </div>
 
        <div>
-        <h5 className='text-lg font-extrabold capitalize'>{item.userName}</h5>
+        <h5 className='text-lg font-extrabold capitalize'>{item.name}</h5>
        </div>
       </div>
 

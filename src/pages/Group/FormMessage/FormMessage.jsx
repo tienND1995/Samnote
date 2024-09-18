@@ -8,7 +8,7 @@ import ImageIcon from '@mui/icons-material/Image'
 import SendIcon from '@mui/icons-material/Send'
 
 import configs from '../../../configs/configs.json'
-const { BASE64_URL, API_SERVER_URL } = configs
+const { BASE64_URL } = configs
 
 const FormMessage = ({
  userID,
@@ -255,7 +255,7 @@ const FormMessage = ({
     <input
      onChange={handleChangeValueMsg}
      type='text'
-     className='w-100 h-100'
+     className='w-100 h-100 mb-1'
      placeholder='Type your message...'
      value={content}
      ref={inputMessageFormRef}

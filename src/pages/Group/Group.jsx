@@ -5,48 +5,27 @@ import axios from 'axios'
 import moment from 'moment'
 import { Link } from 'react-router-dom'
 import io from 'socket.io-client'
-import Swal from 'sweetalert2'
-
-import { joiResolver } from '@hookform/resolvers/joi'
-import { useForm } from 'react-hook-form'
-import { schemaGroup } from '../../utils/schema/schema'
 
 import Modal from 'react-bootstrap/Modal'
 
-import addUser from '../../assets/add-user.png'
 import avatarDefault from '../../assets/avatar-default.png'
 import bgMessage from '../../assets/img-chat-an-danh.jpg'
 
 import configs from '../../configs/configs.json'
 import { AppContext } from '../../context'
 import FormMessage from './FormMessage/FormMessage'
-
-import AddIcon from '@mui/icons-material/Add'
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
-import CheckIcon from '@mui/icons-material/Check'
-import DeleteIcon from '@mui/icons-material/Delete'
-import GroupAddIcon from '@mui/icons-material/GroupAdd'
-import HighlightOffIcon from '@mui/icons-material/HighlightOff'
-import LogoutIcon from '@mui/icons-material/Logout'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
-import SearchIcon from '@mui/icons-material/Search'
-import CameraAltIcon from '@mui/icons-material/CameraAlt'
-import InfoIcon from '@mui/icons-material/Info'
-
 import {
- Box,
- Button,
- IconButton,
- List,
- ListItem,
- ListItemSecondaryAction,
- ListItemText,
- TextField,
- Typography,
-} from '@mui/material'
+ fetchAllMemberGroup,
+ fetchUserChatList,
+ fetchGroupList,
+} from './fetchApiGroup'
+
+import CameraAltIcon from '@mui/icons-material/CameraAlt'
+import DeleteIcon from '@mui/icons-material/Delete'
+
+import ChatList from './ChatList/ChatList'
 import Information from './Information/Information'
+import SettingGroup from './SettingGroup/SettingGroup'
 
 const { API_SERVER_URL, BASE64_URL } = configs
 
@@ -55,17 +34,6 @@ const Group = () => {
  const { setSnackbar, user } = appContext
 
  const [socket, setSocket] = useState(null)
-
- // var chat users
- const [chatUser, setChatUser] = useState({
-  userList: [],
-  chatUserRef: useRef(),
-  heightChatUser: '300',
- })
- const { userList, chatUserRef, heightChatUser } = chatUser
- const [typeFilterChatUser, setTypeFilterChatUser] = useState('All')
- const [infoOtherUser, setInfoOtherUser] = useState({})
- const [messageList, setMessageList] = useState([])
 
  // var search user
  const [searchUser, setSearchUser] = useState({
@@ -76,10 +44,6 @@ const Group = () => {
  })
  const { searchUserName, searchUserResult, showModalSearch, messageNotifi } =
   searchUser
-
- const [groupList, setGroupList] = useState([])
- const [infoGroupItem, setInfoGroupItem] = useState({})
- const [messageGroupList, setMessageGroupList] = useState([])
 
  // var content message
  const [messageContent, setMessageContent] = useState({
@@ -95,96 +59,27 @@ const Group = () => {
   messageContentUlRef,
  } = messageContent
 
- const [formName, setFormName] = useState(null)
+ const [userList, setUserList] = useState([])
+ const [groupList, setGroupList] = useState([])
 
- const [activeListChatItem, setActiveListChatItem] = useState(false)
+ const [infoOtherUser, setInfoOtherUser] = useState({})
+ const [infoGroupItem, setInfoGroupItem] = useState({})
+
+ const [messageList, setMessageList] = useState([])
+ const [messageGroupList, setMessageGroupList] = useState([])
+
+ const [formName, setFormName] = useState(null)
+ const [typeFilterChat, setTypeFilterChat] = useState('All')
+ const handleChangeTypeFilterChat = (type) => setTypeFilterChat(type)
 
  //______________________________________
-
- const fetchUserChat = async () => {
-  const response = await axios.get(
-   `${API_SERVER_URL}/message/list_user_chat1vs1/${user.id}`
-  )
-
-  if (typeFilterChatUser === 'All') {
-   response.data.data.map((item) => {
-    return socket.emit('join_room', { room: item.idRoom })
-   })
-
-   return setChatUser({ ...chatUser, userList: response.data.data })
-  }
-
-  if (typeFilterChatUser === 'Unread') {
-   response.data.data.filter((item) => {
-    if (item.is_seen !== 1)
-     return socket.emit('join_room', { room: item.idRoom })
-   })
-
-   return setChatUser({
-    ...chatUser,
-    userList: response.data.data.filter((user) => user.is_seen !== 1),
-   })
-  }
-
-  if (typeFilterChatUser === 'Read') {
-   response.data.data.filter((item) => {
-    if (item.is_seen !== 0)
-     return socket.emit('join_room', { room: item.idRoom })
-   })
-
-   return setChatUser({
-    ...chatUser,
-    userList: response.data.data.filter((user) => user.is_seen !== 0),
-   })
-  }
+ const getGroupList = async () => {
+  const groups = await fetchGroupList(user.id, socket, typeFilterChat)
+  setGroupList(groups)
  }
-
- const getGroups = async (idOwner) => {
-  try {
-   const response = await axios.get(`${API_SERVER_URL}/group/all/${idOwner}`)
-
-   if (typeFilterChatUser === 'All') {
-    response.data.data.map((item) =>
-     socket.emit('join_room', { room: item.idGroup })
-    )
-
-    return setGroupList(response.data.data)
-   }
-
-   if (typeFilterChatUser === 'Unread') {
-    response.data.data.filter((item) => {
-     if (
-      item.listUserReaded === 0 ||
-      !isReadMessageGroup(item.listUserReaded)
-     ) {
-      return socket.emit('join_room', { room: item.idGroup })
-     }
-    })
-
-    return setGroupList(
-     response.data.data.filter(
-      (item) =>
-       item.listUserReaded === 0 || !isReadMessageGroup(item.listUserReaded)
-     )
-    )
-   }
-
-   if (typeFilterChatUser === 'Read') {
-    response.data.data.filter((item) => {
-     if (item.listUserReaded > 0 && isReadMessageGroup(item.listUserReaded)) {
-      return socket.emit('join_room', { room: item.idGroup })
-     }
-    })
-
-    return setGroupList(
-     response.data.data.filter((group) =>
-      isReadMessageGroup(group.listUserReaded)
-     )
-    )
-   }
-  } catch (err) {
-   console.error(err)
-  }
+ const getUserChatList = async () => {
+  const userList = await fetchUserChatList(user.id, socket, typeFilterChat)
+  setUserList(userList)
  }
 
  useEffect(() => {
@@ -197,47 +92,55 @@ const Group = () => {
  }, [])
 
  useEffect(() => {
-  if (socket) {
-   socket.on('send_message', (result) => {
-    fetchUserChat()
-    console.log('send_message')
+  if (!socket || !user.id || !typeFilterChat) return
 
-    const { ReceivedID, SenderID } = result.data
-    if (
-     formName === 'chat' &&
-     (ReceivedID === infoOtherUser.id || SenderID === infoOtherUser.id)
-    ) {
-     getMessageList(user.id, ReceivedID === user.id ? SenderID : ReceivedID)
+  getGroupList()
+  getUserChatList()
+
+  socket.on('send_message', (result) => {
+   getUserChatList()
+   const { ReceivedID, SenderID } = result.data
+   if (
+    formName === 'chat' &&
+    (ReceivedID === infoOtherUser.id || SenderID === infoOtherUser.id)
+   ) {
+    getMessageList(user.id, ReceivedID === user.id ? SenderID : ReceivedID)
+    if (messageContentRef.current && messageContentUlRef.current) {
+     messageContentRef.current.scrollTop =
+      messageContentUlRef.current.offsetHeight
     }
-   })
-
-   socket.on('chat_group', (result) => {
-    getGroups(user.id)
-    if (formName === 'group') {
-     fetchMessagesGroup(infoGroupItem.idGroup)
-    }
-   })
-
-   getGroups(user.id)
-   fetchUserChat()
-
-   if (messageContentRef.current && messageContentUlRef.current) {
-    messageContentRef.current.scrollTop =
-     messageContentUlRef.current.offsetHeight
    }
-  }
+  })
+
+  socket.on('chat_group', (result) => {
+   getGroupList()
+   if (formName === 'group') {
+    fetchMessagesGroup(infoGroupItem.idGroup)
+    if (messageContentRef.current && messageContentUlRef.current) {
+     messageContentRef.current.scrollTop =
+      messageContentUlRef.current.offsetHeight
+    }
+   }
+  })
  }, [
+  user.id,
   socket,
-  typeFilterChatUser,
+  typeFilterChat,
+
   formName,
-  messageContentUlRef.current?.offsetHeight,
+  infoGroupItem.idGroup,
+  infoOtherUser.id,
+
+  messageContentUlRef,
+  messageContentRef,
  ])
 
  // *********** handle chat user messages
- const handleClickChatUser = (otherUser) => {
+ const handleClickUserItem = (otherUser) => {
   if (otherUser.is_seen === 0 && otherUser.idReceive === user.id) {
    fetchUpdateSeenMessage(otherUser.idMessage)
   }
+
   getMessageList(user.id, otherUser.user.id)
 
   setInfoOtherUser(otherUser.user)
@@ -250,7 +153,7 @@ const Group = () => {
    const response = await axios.delete(`${API_SERVER_URL}/message/${messageID}`)
 
    getMessageList(user.id, infoOtherUser.id)
-   fetchUserChat()
+   getUserChatList()
   } catch (error) {
    console.log(error)
   }
@@ -259,7 +162,7 @@ const Group = () => {
  const fetchUpdateSeenMessage = async (messageID) => {
   try {
    const response = await axios.post(`${API_SERVER_URL}/message/${messageID}`)
-   fetchUserChat()
+   getUserChatList()
   } catch (error) {
    console.log(error)
   }
@@ -281,9 +184,6 @@ const Group = () => {
 
  const convertTime = (time) => moment(`${time}+0700`).calendar()
 
- const handleChatLastText = (lastText, idSend) => {
-  return idSend === user.id ? `Bạn: ${lastText}` : `${lastText}`
- }
  // ** search user buy name
 
  const fetchSearchUser = async (userName) => {
@@ -356,11 +256,6 @@ const Group = () => {
   inputMessageFormRef.current.focus()
  }
 
- const handleSubmitSearchGroup = (e) => {
-  e.preventDefault()
-  console.log('search group')
- }
-
  const handleShowModalSearch = (e) => {
   setSearchUser({ ...searchUser, showModalSearch: true })
   setSearchUserFormName('chat')
@@ -378,15 +273,7 @@ const Group = () => {
   setSearchUserFormName('chat')
  }
 
- // * handle filter message
- const handleFilterMessage = (e) => {
-  const type = e.target.innerHTML
-  if (type === typeFilterChatUser) return
-
-  setTypeFilterChatUser(type)
- }
-
- // set height messages, height chat messages, height chat group
+ // set height messages
  useEffect(() => {
   // @ts-ignore
   messageContentRef.current.offsetHeight &&
@@ -395,18 +282,9 @@ const Group = () => {
     ...messageContent,
     heightMessageContent: `${messageContentRef.current.offsetHeight - 50}`,
    })
-
-  // @ts-ignore
-  chatUserRef.current.offsetHeight &&
-   // @ts-ignore
-   setChatUser({
-    ...chatUser,
-    heightChatUser: `${chatUserRef.current.offsetHeight}`,
-   })
  }, [])
 
- // *** handle group
-
+ // *** reset when click userItem, groupItem
  const resetGroup = () => {
   setInfoGroupItem({})
   setMessageGroupList([])
@@ -417,31 +295,6 @@ const Group = () => {
   setInfoOtherUser({})
   setMessageList([])
   setFormName('group')
- }
-
- // *********** handle group
-
- const [memberGroup, setMemberGroup] = useState({ gmail: '', id: '' })
- const [memberListGroup, setMemberListGroup] = useState([])
-
- const [showModalCreateGroup, setShowModalCreateGroup] = useState(false)
-
- const {
-  register,
-  handleSubmit,
-  setValue,
-  getValues,
-  reset,
-  formState: { errors },
- } = useForm({
-  resolver: joiResolver(schemaGroup),
-  defaultValues: { groupName: '', desc: '', members: null },
- })
-
- const resetModalCreateGroup = () => {
-  setMemberGroup({ gmail: '', id: '' })
-  setMemberListGroup([])
-  reset()
  }
 
  const fetchMessagesGroup = async (groupID) => {
@@ -458,196 +311,23 @@ const Group = () => {
  const handleClickGroupItem = (group) => {
   fetchMessagesGroup(group.idGroup)
   setValueGroupName(group.name)
-  setNewAvatarGroup(null)
 
   setInfoGroupItem(group)
   resetChat()
+
   inputMessageFormRef.current.focus()
  }
 
- const handleShowModalCreateGroup = () => {
-  setShowModalCreateGroup(true)
- }
-
- const handleHideModalCreateGroup = () => {
-  setShowModalCreateGroup(false)
-  resetModalCreateGroup()
- }
-
- const postGroup = async (dataGroup, userID) => {
-  try {
-   const response = await axios.post(
-    `${API_SERVER_URL}/group/create/${userID}`,
-    dataGroup
-   )
-   setSnackbar({
-    isOpen: true,
-    message: `Create group complete`,
-    severity: 'success',
-   })
-
-   // cập nhật group list
-   getGroups(userID)
-
-   // reset form create group
-   setShowModalCreateGroup(false)
-   resetModalCreateGroup()
-  } catch (error) {
-   setSnackbar({
-    isOpen: true,
-    message: error.response.data.message,
-    severity: 'error',
-   })
-  }
- }
-
- const onSubmit = (data) => {
-  const { groupName, desc, members } = data
-
-  const group = {
-   // info change
-   name: groupName,
-   members: members,
-   describe: desc,
-
-   //  info constant
-   createAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
-   idOwner: user.id,
-   r: 255,
-   g: 255,
-   b: 255,
-   a: 0.99,
-  }
-
-  postGroup(group, user.id)
- }
-
- const handleAddMember = () => {
-  const membersChema = getValues('members')
-  const { gmail, id } = memberGroup
-
-  const member = { gmail, id, role: 'member' }
-  setMemberListGroup([...memberListGroup, member])
-  setMemberGroup({ gmail: '', id: '' })
-
-  setValue(
-   'members',
-   membersChema
-    ? [...membersChema, { gmail: gmail, id: id, role: 'member' }]
-    : [{ gmail, id: id, role: 'member' }]
-  )
- }
-
- const handleDeleteMember = (index) => {
-  setMemberListGroup(memberListGroup.filter((member, idx) => idx !== index))
-
-  const membersChema = getValues('members')
-  setValue(
-   'members',
-   membersChema.filter((member, idx) => idx !== index)
-  )
- }
-
- const handleChangeMemberGroup = (e) =>
-  setMemberGroup({ ...memberGroup, [e.target.name]: e.target.value })
-
- // props form message
- const propsFormMessage = {
-  userID: user.id,
-  otherUserID: infoOtherUser?.id,
-  idGroup: infoGroupItem.idGroup,
-  socket,
-  messageContentRef,
-  heightMessageContent,
-  inputMessageFormRef,
-  formName,
- }
-
- //  handle buttons group
- const [showButtonsGroup, setShowButtonsGroup] = useState(false)
- const ulElementButtonsGroupRef = useRef()
- const showButtonsGroupRef = useRef()
- const [typeButtonGroup, setTypeButtonGroup] = useState(null)
-
- const fetchQuitGroup = async (idMem) => {
-  try {
-   const response = await axios.delete(
-    `https://samnote.mangasocial.online/group/quit/${idMem}`
-   )
-
-   fetchAllMemberGroup(infoGroupItem.idGroup)
-   //  setShowModalMemberList(false)
-  } catch (error) {
-   console.error(error)
-  }
- }
-
- const handleQuitGroup = () => {
-  setTypeButtonGroup('quit')
-
-  if (infoGroupItem.idOwner === user.id) {
-   return Swal.fire({
-    icon: 'warning',
-    title: 'You are the team leader',
-   })
-  }
-
-  const memberQuit = infoGroupItem.member.filter(
-   (member) => member.idUser === user.id
-  )
-
-  Swal.fire({
-   title: 'Are you sure?',
-   text: 'Do you want to leave the group?',
-   icon: 'warning',
-   showCancelButton: true,
-   confirmButtonColor: '#3085d6',
-   cancelButtonColor: '#d33',
-   confirmButtonText: 'Yes',
-  }).then((result) => {
-   if (result.isConfirmed) {
-    fetchQuitGroup(memberQuit.idMem)
-    Swal.fire({
-     title: 'Quitted!',
-     text: 'You have left the group.',
-     icon: 'success',
-    })
-   }
-  })
- }
-
- const handleDeleteMemberGroup = (idMember) => {
-  if (!idMember) return
-
-  Swal.fire({
-   title: 'Are you sure?',
-   text: 'Do you want to delete this member?',
-   icon: 'warning',
-   showCancelButton: true,
-   confirmButtonColor: '#3085d6',
-   cancelButtonColor: '#d33',
-   confirmButtonText: 'Yes',
-  }).then((result) => {
-   if (result.isConfirmed) {
-    fetchQuitGroup(idMember)
-    Swal.fire({
-     title: 'Delete!',
-     text: 'This member has been removed from the group.',
-     icon: 'success',
-    })
-   }
-  })
- }
+ //  handle setting group
 
  const [searchUserFormName, setSearchUserFormName] = useState('chat')
 
  const handleShowModalSearchUserGroup = () => {
   setSearchUser({ ...searchUser, showModalSearch: true })
   setSearchUserFormName('group')
-  setTypeButtonGroup('add')
  }
 
- const handleClickSearchUserBtnAdd = (user) => {
+ const handleAddUserSearch = (user) => {
   const idMemberList = [user.idUser]
   const idGroup = infoGroupItem.idGroup
   if (!idMemberList || !idGroup) return
@@ -662,7 +342,9 @@ const Group = () => {
    })
 
    handleHideModalSearch()
-   fetchAllMemberGroup(infoGroupItem.idGroup)
+   const groupMemberList = await fetchAllMemberGroup(infoGroupItem.idGroup)
+   setGroupMemberList(groupMemberList)
+
    setSnackbar({
     isOpen: true,
     message: `Add members successfully!`,
@@ -673,59 +355,24 @@ const Group = () => {
   }
  }
 
- const [showModalMemberList, setShowModalMemberList] = useState(false)
  const [groupMemberList, setGroupMemberList] = useState([])
  const [showInforMation, setShowInforMation] = useState(false)
 
  useEffect(() => {
-  infoGroupItem.idGroup && fetchAllMemberGroup(infoGroupItem.idGroup)
+  const getMemberListGroup = async () => {
+   const memberList = await fetchAllMemberGroup(infoGroupItem.idGroup)
+   setGroupMemberList(memberList)
+  }
+
+  infoGroupItem.idGroup && getMemberListGroup()
  }, [infoGroupItem.idGroup])
-
- const fetchAllMemberGroup = async (idGroup) => {
-  try {
-   const response = await axios.get(
-    `https://samnote.mangasocial.online/group/only/${idGroup}`
-   )
-
-   setGroupMemberList(response.data.data.members)
-  } catch (error) {
-   console.log(error)
-  }
- }
-
- const handleClickShowSettingsGroup = () => {
-  if (formName === 'group') {
-   setShowButtonsGroup((prevState) => !prevState)
-   setTypeButtonGroup(null)
-  }
-
-  if (formName === 'chat') {
-   console.log('chat')
-  }
-  return null
- }
-
- const handleShowAllMembers = () => {
-  setShowModalMemberList(true)
-  setTypeButtonGroup('delete')
- }
-
- const handleShowInformation = () => {
-  setShowInforMation(true)
-  setTypeButtonGroup(null)
-  setShowButtonsGroup(false)
- }
 
  const handleHideInformation = () => {
   setShowInforMation(false)
  }
 
- const handleHideModalMembers = () => {
-  setShowModalMemberList(false)
- }
-
+ // handle Change name group
  const [valueGroupName, setValueGroupName] = useState('')
- const [newAvatarGroup, setNewAvatarGroup] = useState(null)
  const [disableGroupName, setDisableGroupName] = useState(true)
  const inputGroupNameRef = useRef()
  const formGroupNameRef = useRef()
@@ -742,7 +389,7 @@ const Group = () => {
     { groupName: newName }
    )
 
-   getGroups(user.id)
+   getGroupList()
    setDisableGroupName(true)
    setInfoGroupItem({ ...infoGroupItem, name: newName })
   } catch (error) {
@@ -759,8 +406,15 @@ const Group = () => {
     }
    )
 
-   getGroups(user.id)
-   setNewAvatarGroup(newAvatar)
+   getGroupList()
+
+   // render new avatar
+   setTimeout(() => {
+    const ulElement = document.querySelector('#list-chat')
+    const liElementActive = ulElement.querySelector('li.active')
+
+    liElementActive.click()
+   }, 300)
   } catch (error) {
    console.error(error)
   }
@@ -783,14 +437,13 @@ const Group = () => {
 
  const handleChangeAvatarGroup = async (e) => {
   if (!infoGroupItem) return
-  const { idGroup } = infoGroupItem
 
   const reader = new FileReader()
   reader.readAsDataURL(e.target.files[0])
   reader.onload = () => {
    // @ts-ignore
    const imageBase64 = reader.result.split(',')[1]
-   updateAvatarGroup(idGroup, imageBase64)
+   updateAvatarGroup(infoGroupItem.idGroup, imageBase64)
   }
 
   e.target.value = null
@@ -798,17 +451,7 @@ const Group = () => {
 
  // hande click outside element
  useEffect(() => {
-  if (!ulElementButtonsGroupRef.current || !showButtonsGroupRef.current) return
-
   const handleClickOutside = (element) => {
-   if (
-    !ulElementButtonsGroupRef?.current?.contains(element) &&
-    !showButtonsGroupRef.current?.contains(element)
-   ) {
-    setShowButtonsGroup(false)
-    setTypeButtonGroup(null)
-   }
-
    if (
     !formGroupNameRef.current ||
     !inputGroupNameRef.current ||
@@ -832,141 +475,61 @@ const Group = () => {
   return document.body.removeEventListener('click', (e) => {
    handleClickOutside(e.target)
   })
- }, [ulElementButtonsGroupRef, showButtonsGroupRef])
+ }, [formGroupNameRef, inputGroupNameRef, buttonClickEditNameGroup])
 
- const isReadMessageGroup = (listUserReaded) => {
-  if (listUserReaded.length < 1) return false
-  return listUserReaded.some(
-   (userReaded) => Number(userReaded.idUser) === user.id
-  )
+ const propsFormMessage = {
+  userID: user.id,
+  otherUserID: infoOtherUser?.id,
+  idGroup: infoGroupItem.idGroup,
+  socket,
+  messageContentRef,
+  heightMessageContent,
+  inputMessageFormRef,
+  formName,
  }
 
+ const propsChatList = {
+  userID: user.id,
+  socket,
+  typeFilterChat,
+
+  userList,
+  groupList,
+  setGroupList,
+
+  userItem: infoOtherUser,
+  groupItem: infoGroupItem,
+
+  onChangeTypeFilter: handleChangeTypeFilterChat,
+  onClickUserItem: handleClickUserItem,
+  onClickGroupItem: handleClickGroupItem,
+  onShowModalSearch: handleShowModalSearch,
+  setSnackbar,
+ }
+
+ const propsSettingGroup = {
+  userID: user.id,
+  groupItem: infoGroupItem,
+  formName,
+  groupMemberList,
+  setGroupMemberList,
+  onShowModalSearch: handleShowModalSearchUserGroup,
+  setShowInforMation,
+ }
+
+ const propsInformation = {
+  showInfo: showInforMation,
+  onHide: handleHideInformation,
+
+  groupItem: infoGroupItem,
+  groupMemberList,
+ }
 
  return (
   <div className='w-fluid'>
    <div className='row vh-100 mx-0'>
     <div className='col-3 group-sidebar flex flex-col px-0'>
      <h3 className='text-center py-[60px] px-3 font-bold'>Chat</h3>
-
-     <Modal
-      show={showModalCreateGroup}
-      onHide={handleHideModalCreateGroup}
-      size='sm'
-      centered={false}
-     >
-      <Box
-       component='form'
-       onSubmit={handleSubmit(onSubmit)}
-       sx={{
-        width: 'max-content',
-        maxWidth: '400px',
-        bgcolor: 'background.paper',
-        border: '2px solid #000',
-        boxShadow: 24,
-        p: 4,
-       }}
-      >
-       <Typography id='modal-modal-title' variant='h6' component='h2'>
-        Create Group
-       </Typography>
-       <TextField
-        fullWidth
-        label='Group Name'
-        type='text'
-        variant='outlined'
-        margin='normal'
-        {...register('groupName')}
-       />
-       {errors.groupName && (
-        <Box sx={{ mt: 1, color: 'red' }}>{errors.groupName.message}</Box>
-       )}
-       <TextField
-        fullWidth
-        label='Description'
-        type='text'
-        variant='outlined'
-        margin='normal'
-        {...register('desc')}
-       />
-       {errors.desc && (
-        <Box sx={{ mt: 1, color: 'red' }}>{errors.desc.message}</Box>
-       )}
-       <List>
-        {memberListGroup?.map((member, index) => (
-         <ListItem key={index}>
-          <ListItemText primary={member.gmail} secondary={member.role} />
-          <ListItemSecondaryAction>
-           <IconButton edge='end' onClick={() => handleDeleteMember(index)}>
-            <DeleteIcon />
-           </IconButton>
-          </ListItemSecondaryAction>
-         </ListItem>
-        ))}
-       </List>
-       <Box
-        sx={{
-         display: 'flex',
-         alignItems: 'center',
-         justifyContent: 'space-between',
-         mt: 2,
-         gap: '5px',
-        }}
-       >
-        <TextField
-         label='Member Email'
-         name='gmail'
-         type='email'
-         fullWidth
-         onChange={handleChangeMemberGroup}
-         value={memberGroup.gmail}
-        />
-
-        <TextField
-         label='Member ID'
-         name='id'
-         type='number'
-         fullWidth
-         onChange={handleChangeMemberGroup}
-         value={memberGroup.id}
-        />
-
-        <IconButton
-         disabled={
-          memberGroup.gmail.trim() !== '' && memberGroup.id.trim() !== ''
-           ? false
-           : true
-         }
-         onClick={handleAddMember}
-        >
-         <AddIcon />
-        </IconButton>
-       </Box>
-
-       {memberListGroup.length > 0 ? (
-        ''
-       ) : (
-        <Box sx={{ mt: 1, color: 'red' }}>{errors?.members?.message}</Box>
-       )}
-
-       <div className='flex justify-end gap-2 mt-3'>
-        <Box>
-         <Button
-          type='button'
-          variant='contained'
-          color='secondary'
-          onClick={handleHideModalCreateGroup}
-         >
-          cancel
-         </Button>
-        </Box>
-        <Box>
-         <Button type='submit' variant='contained' color='primary'>
-          Create
-         </Button>
-        </Box>
-       </div>
-      </Box>
-     </Modal>
 
      <Modal show={showModalSearch} onHide={handleHideModalSearch}>
       <div className='p-3'>
@@ -1031,7 +594,7 @@ const Group = () => {
 
           {searchUserFormName === 'group' && (
            <button
-            onClick={() => handleClickSearchUserBtnAdd(user)}
+            onClick={() => handleAddUserSearch(user)}
             type='button'
             className='bg-black text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
            >
@@ -1042,7 +605,7 @@ const Group = () => {
         ))}
 
         {messageNotifi.trim() !== '' && (
-         <li className='font-bold capitalize'>{messageNotifi} !</li>
+         <li className='font-bold text-[#ff2d2d]'>{messageNotifi} !</li>
         )}
        </ul>
 
@@ -1057,249 +620,7 @@ const Group = () => {
        </div>
       </div>
      </Modal>
-
-     <Modal
-      dialogClassName='modal-members'
-      show={showModalMemberList}
-      onHide={() => setShowModalMemberList(false)}
-     >
-      <div className='p-3 '>
-       <h3 className='text-[25px] font-medium'>All member</h3>
-
-       <ul className='flex flex-col gap-2 py-[20px] max-h-[60vh] overflow-y-auto'>
-        {groupMemberList?.map((user) => (
-         <li
-          key={user.idMember}
-          className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
-         >
-          <div className='flex gap-2 items-center'>
-           <div>
-            <img
-             onError={(e) => {
-              e.target.src = avatarDefault
-             }}
-             src={user.avt}
-             alt='avatar '
-             className='w-[50px] h-[50px] object-cover rounded-[100%]'
-            />
-           </div>
-
-           <div>
-            <h5 className='text-lg font-extrabold capitalize'>{user.name}</h5>
-           </div>
-          </div>
-
-          <button
-           onClick={() => {
-            handleDeleteMemberGroup(user.idMember)
-           }}
-           type='button'
-           className='text-red-500 rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
-          >
-           <RemoveCircleIcon className='text-[30px]' />
-          </button>
-         </li>
-        ))}
-
-        {messageNotifi.trim() !== '' && (
-         <li className='font-bold capitalize'>{messageNotifi} !</li>
-        )}
-       </ul>
-
-       <div className='text-right'>
-        <button
-         className='text-[25px] font-medium text-[#ff2d2d]'
-         type='button'
-         onClick={handleHideModalMembers}
-        >
-         Cancel
-        </button>
-       </div>
-      </div>
-     </Modal>
-
-     <div className='shadow-lg bg-[#dffffe] flex flex-col flex-grow-1 px-[20px]'>
-      <div className='flex mt-4 mb-5 justify-between gap-2'>
-       <button
-        onClick={handleShowModalSearch}
-        className='flex gap-2 items-center bg-white p-2 rounded-5 shadow-lg w-100 text-[#686464CC]'
-       >
-        <SearchIcon />
-        Search user
-       </button>
-
-       <form
-        onSubmit={handleSubmitSearchGroup}
-        className='flex justify-between gap-2'
-       >
-        <button
-         type='button'
-         className=''
-         title='add group'
-         onClick={handleShowModalCreateGroup}
-        >
-         <GroupAddIcon className='text-[36px]' />
-        </button>
-       </form>
-      </div>
-
-      <div className='flex flex-col flex-grow-1'>
-       <ul className='flex justify-between group-buttons mb-4'>
-        <li>
-         <button
-          onClick={handleFilterMessage}
-          className={typeFilterChatUser === 'All' && 'active'}
-          type='button'
-         >
-          All
-         </button>
-        </li>
-
-        <li>
-         <button
-          className={typeFilterChatUser === 'Unread' && 'active'}
-          onClick={handleFilterMessage}
-          type='button'
-         >
-          Unread
-         </button>
-        </li>
-
-        <li>
-         <button
-          className={typeFilterChatUser === 'Read' && 'active'}
-          onClick={handleFilterMessage}
-          type='button'
-         >
-          Read
-         </button>
-        </li>
-       </ul>
-
-       <ul
-        className='flex flex-col flex-grow-1 gap-4 overflow-y-auto pb-[30px] overflow-x-hidden list-chat'
-        ref={chatUserRef}
-        style={{ height: `${heightChatUser}px`, scrollbarWidth: 'none' }}
-       >
-        {/* render userlist and grouplist */}
-        {userList?.map((item) => {
-         return (
-          <li
-           key={item.idMessage}
-           className={`flex justify-between items-center rounded-[40px] cursor-pointer ${
-            infoOtherUser.id === item.user.id ? 'active' : null
-           }`}
-           onClick={() => handleClickChatUser(item)}
-          >
-           <div className='flex gap-2 items-center'>
-            <div>
-             <img
-              src={item.user.Avarta}
-              alt='avatar'
-              className='w-[50px] h-[50px] object-cover rounded-[100%]'
-             />
-            </div>
-
-            <div>
-             <h5 className='text-lg font-extrabold capitalize'>
-              {item.user.name}
-             </h5>
-             <p
-              style={{ maxWidth: '200px' }}
-              className={
-               item.is_seen === 0
-                ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[600] text-lg'
-                : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
-              }
-             >
-              {handleChatLastText(item.last_text, item.idSend)}
-             </p>
-            </div>
-           </div>
-
-           <div
-            className={
-             item.is_seen === 0
-              ? 'text-[#ff0404] text-[16px] me-2'
-              : 'text-[#00ff73] text-[16px] me-2'
-            }
-           >
-            {item.is_seen === 0 ? (
-             <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
-              1
-             </p>
-            ) : (
-             <CheckIcon />
-            )}
-           </div>
-          </li>
-         )
-        })}
-
-        {groupList?.map((item) => (
-         <li
-          key={item.idGroup}
-          className={`flex justify-between items-center rounded-[40px] cursor-pointer ${
-           item.idGroup === infoGroupItem.idGroup ? 'active' : null
-          }`}
-          onClick={() => handleClickGroupItem(item)}
-         >
-          <div className='flex gap-2 items-center'>
-           <div>
-            <img
-             src={item.linkAvatar || avatarDefault}
-             alt='avatar'
-             className='w-[50px] h-[50px] object-cover rounded-[100%]'
-            />
-           </div>
-
-           <div>
-            <h5 className='text-lg font-extrabold capitalize'>{item.name}</h5>
-            <p
-             style={{ maxWidth: '200px' }}
-             className={
-              item.is_seen === 0
-               ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[600] text-lg'
-               : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
-             }
-            >
-             {item.text_lastest_message_in_group}
-            </p>
-           </div>
-          </div>
-
-          <div
-           className={
-            isReadMessageGroup(item.listUserReaded)
-             ? 'text-[#00ff73] text-[16px] me-2'
-             : 'text-[#ff0404] text-[16px] me-2'
-           }
-          >
-           {isReadMessageGroup(item.listUserReaded) ? (
-            <CheckIcon />
-           ) : (
-            <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
-             1
-            </p>
-           )}
-          </div>
-         </li>
-        ))}
-
-        {userList.length === 0 && groupList.length === 0 && (
-         <div className='text-center'>
-          <div>
-           <ChatBubbleOutlineIcon className='text-[80px]' />
-          </div>
-          <h3>Không có tin nhắn nào</h3>
-          <p>Tin nhắn mới sẽ được hiện thị tại đây</p>
-         </div>
-        )}
-       </ul>
-      </div>
-
-      {/* <ChatUser {...propsChatUser} /> */}
-     </div>
+     <ChatList data={propsChatList} />
     </div>
 
     <div className='col-9 px-0  flex flex-col'>
@@ -1310,9 +631,7 @@ const Group = () => {
          <img
           className='w-[90px] h-[90px] object-cover rounded-[100%]'
           src={
-           !newAvatarGroup
-            ? infoOtherUser.Avarta || infoGroupItem.linkAvatar || avatarDefault
-            : `${BASE64_URL}${newAvatarGroup}`
+           infoOtherUser.Avarta || infoGroupItem.linkAvatar || avatarDefault
           }
           alt='avatar'
          />
@@ -1345,7 +664,7 @@ const Group = () => {
           <input
            disabled={disableGroupName}
            type='text'
-           size={valueGroupName.length}
+           size={valueGroupName?.length}
            value={valueGroupName}
            onChange={handleChangeNameGroup}
            ref={inputGroupNameRef}
@@ -1369,7 +688,7 @@ const Group = () => {
           type='button'
           disabled={valueGroupName === infoGroupItem.name && !disableGroupName}
           className={
-           valueGroupName.trim() === infoGroupItem.name && !disableGroupName
+           valueGroupName?.trim() === infoGroupItem.name && !disableGroupName
             ? 'cursor-not-allowed text-[#d1deeb]'
             : disableGroupName
             ? ''
@@ -1404,65 +723,7 @@ const Group = () => {
        )}
       </div>
 
-      <div className='position-relative show-buttons'>
-       <button ref={showButtonsGroupRef} onClick={handleClickShowSettingsGroup}>
-        <MoreVertIcon className='text-[40px]' />
-       </button>
-
-       <ul
-        className={`bg-black p-2 position-absolute top-100 right-[100%] z-10 w-max ${
-         showButtonsGroup ? 'active' : null
-        }`}
-        ref={ulElementButtonsGroupRef}
-       >
-        <li>
-         <button
-          className={`text-[25px] ${
-           typeButtonGroup === 'quit' ? 'active' : null
-          }`}
-          onClick={handleQuitGroup}
-         >
-          <LogoutIcon className='me-2 text-[30px]' /> Quit group
-         </button>
-        </li>
-
-        <li>
-         <button
-          className={`text-[25px] ${
-           typeButtonGroup === 'add' ? 'active' : null
-          }`}
-          onClick={handleShowModalSearchUserGroup}
-         >
-          <AddCircleOutlineIcon className='me-2 text-[30px]' /> Add member
-         </button>
-        </li>
-
-        {isLeaderTeam(infoGroupItem.idOwner) && (
-         <li>
-          <button
-           className={`text-[25px] ${
-            typeButtonGroup === 'delete' ? 'active' : null
-           }`}
-           onClick={handleShowAllMembers}
-          >
-           <HighlightOffIcon className='me-2 text-[30px]' /> Delete member
-          </button>
-         </li>
-        )}
-
-        <li>
-         <button
-          className={`text-[25px] ${
-           typeButtonGroup === 'add' ? 'active' : null
-          }`}
-          onClick={handleShowInformation}
-         >
-          <InfoIcon className='me-2 text-[30px]' />
-          Information
-         </button>
-        </li>
-       </ul>
-      </div>
+      <SettingGroup data={propsSettingGroup} />
      </div>
 
      <div
@@ -1571,7 +832,7 @@ const Group = () => {
                 </p>
                )}
               </div>
-              <button
+              {/* <button
                style={{
                 border: 'none',
                 backgroundColor: 'transparent',
@@ -1583,7 +844,7 @@ const Group = () => {
                }}
               >
                <DeleteIcon />
-              </button>
+              </button> */}
              </div>
             </div>
 
@@ -1649,17 +910,20 @@ const Group = () => {
               <div className='flex flex-col gap-1'>
                {item.image.trim() !== '' && (
                 <div>
-                 <img
-                  className={`h-auto rounded-md ${
-                   item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
-                  }`}
-                  src={item.image}
-                 />
+                 <h3 className='mb-1 text-[12px] font-light capitalize'>{item.name}</h3>
+                 <div>
+                  <img
+                   className={`h-auto rounded-md ${
+                    item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
+                   }`}
+                   src={item.image}
+                  />
+                 </div>
                 </div>
                )}
 
                {item.content && (
-                <p
+                <div
                  style={{
                   width: 'max-content',
                   overflowWrap: 'anywhere',
@@ -1667,8 +931,9 @@ const Group = () => {
                  }}
                  className='break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto'
                 >
-                 {item.content}
-                </p>
+                 <h3 className='mb-1 text-[12px] font-light capitalize'>{item.name}</h3>
+                 <p className='font-semibold'>{item.content}</p>
+                </div>
                )}
               </div>
              </div>
@@ -1682,14 +947,10 @@ const Group = () => {
          )}
        </ul>
       </div>
+
       <FormMessage {...propsFormMessage} />
 
-      <Information
-       idGroup={infoGroupItem.idGroup}
-       showInfo={showInforMation}
-       onHide={handleHideInformation}
-       groupItem={infoGroupItem}
-      />
+      <Information data={propsInformation} />
      </div>
     </div>
    </div>

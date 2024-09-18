@@ -3,7 +3,7 @@ import configs from '../../configs/configs.json'
 
 const { API_SERVER_URL } = configs
 
-export const fetchUserChat = async (userID, socket, typeFilter) => {
+export const fetchUserChatList = async (userID, socket, typeFilter) => {
  const response = await axios.get(
   `${API_SERVER_URL}/message/list_user_chat1vs1/${userID}`
  )
@@ -35,8 +35,6 @@ export const fetchUserChat = async (userID, socket, typeFilter) => {
  }
 }
 
-// fetch group list
-
 const isReadMessageGroup = (listUserReaded, userID) => {
  if (listUserReaded.length < 1) return false
  return listUserReaded.some(
@@ -44,7 +42,7 @@ const isReadMessageGroup = (listUserReaded, userID) => {
  )
 }
 
-export const getGroups = async (userID, socket, typeFilter) => {
+export const fetchGroupList = async (userID, socket, typeFilter) => {
  try {
   const response = await axios.get(`${API_SERVER_URL}/group/all/${userID}`)
 
@@ -85,5 +83,17 @@ export const getGroups = async (userID, socket, typeFilter) => {
   }
  } catch (err) {
   console.error(err)
+ }
+}
+
+export const fetchAllMemberGroup = async (idGroup) => {
+ try {
+  const response = await axios.get(
+   `https://samnote.mangasocial.online/group/only/${idGroup}`
+  )
+
+  return response.data.data.members
+ } catch (error) {
+  console.log(error)
  }
 }
