@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
+import './ChatList.css'
+
+import TextTruncate from 'react-text-truncate'
 
 import { fetchGroupList } from '../fetchApiGroup'
 import avatarDefault from '../../../assets/avatar-default.png'
@@ -30,6 +33,9 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import CheckIcon from '@mui/icons-material/Check'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
+import CameraAltIcon from '@mui/icons-material/CameraAlt'
+
+import ClearIcon from '@mui/icons-material/Clear'
 
 const ChatList = (props) => {
  const {
@@ -64,6 +70,7 @@ const ChatList = (props) => {
   const type = e.target.innerHTML
   if (type === typeFilterChat) return
 
+  window.localStorage.setItem('typeFilterChat', type)
   onChangeTypeFilter(type)
  }
 
@@ -80,11 +87,6 @@ const ChatList = (props) => {
 
  // *********** handle create group
 
- const [memberGroupCreate, setMemberGroupCreate] = useState({
-  gmail: '',
-  id: '',
- })
- const [memberListGroupCreate, setMemberListGroupCreate] = useState([])
  const [showModalCreateGroup, setShowModalCreateGroup] = useState(false)
 
  const {
@@ -96,13 +98,16 @@ const ChatList = (props) => {
   formState: { errors },
  } = useForm({
   resolver: joiResolver(schemaGroup),
-  defaultValues: { groupName: '', desc: '', members: null },
+  defaultValues: { groupName: '', desc: '', members: [] },
  })
 
  const resetModalCreateGroup = () => {
-  setMemberGroupCreate({ gmail: '', id: '' })
-  setMemberListGroupCreate([])
   reset()
+
+  setSearchUserResult([])
+  setSearchUserNotFound(null)
+  setSearchValue('')
+  setUsersSelected([])
  }
 
  const handleShowModalCreateGroup = () => {
@@ -113,40 +118,6 @@ const ChatList = (props) => {
   setShowModalCreateGroup(false)
   resetModalCreateGroup()
  }
-
- const handleAddMemberCreate = () => {
-  const membersChema = getValues('members')
-  const { gmail, id } = memberGroupCreate
-
-  const member = { gmail, id, role: 'member' }
-  setMemberListGroupCreate([...memberListGroupCreate, member])
-  setMemberGroupCreate({ gmail: '', id: '' })
-
-  setValue(
-   'members',
-   membersChema
-    ? [...membersChema, { gmail: gmail, id: id, role: 'member' }]
-    : [{ gmail, id: id, role: 'member' }]
-  )
- }
-
- const handleDeleteMemberCreate = (index) => {
-  setMemberListGroupCreate(
-   memberListGroupCreate.filter((member, idx) => idx !== index)
-  )
-
-  const membersChema = getValues('members')
-  setValue(
-   'members',
-   membersChema.filter((member, idx) => idx !== index)
-  )
- }
-
- const handleChangeMemberGroupCreate = (e) =>
-  setMemberGroupCreate({
-   ...memberGroupCreate,
-   [e.target.name]: e.target.value,
-  })
 
  const postGroup = async (dataGroup, userID) => {
   try {
@@ -199,127 +170,296 @@ const ChatList = (props) => {
   postGroup(group, userID)
  }
 
+ // search user
+
+ const [searchUserResult, setSearchUserResult] = useState([])
+ const [searchUserNotFound, setSearchUserNotFound] = useState(null)
+ const [searchValue, setSearchValue] = useState('')
+
+ const [usersSelected, setUsersSelected] = useState([])
+ const searchUsersResultRef = useRef()
+
+ const fetchSearchUser = async (userName) => {
+  try {
+   const url = `${API_SERVER_URL}/group/search_user_by_word`
+   const response = await axios.post(url, {
+    start_name: userName,
+   })
+
+   setSearchUserResult(response.data.data ? response.data.data : [])
+   setSearchUserNotFound(response.data.message ? response.data.message : null)
+  } catch (error) {
+   console.error(error)
+  }
+ }
+
+ const handleChangeSearchValue = (e) => {
+  setSearchValue(e.target.value)
+  setSearchUserNotFound(null)
+ }
+
+ const handleSubmitSearchUser = (e) => {
+  e.preventDefault()
+  if (searchValue.trim().split(' ').length !== 1 || searchValue.trim() === '')
+   return
+
+  fetchSearchUser(searchValue)
+ }
+
+ //  add member and delete member
+ const handleChangeCheckbox = (isChecked, userResult) => {
+  if (isChecked) {
+   setUsersSelected([...usersSelected, userResult])
+   const membersChema = getValues('members')
+
+   const member = {
+    gmail: userResult.email,
+    id: userResult.idUser,
+    role: 'member',
+   }
+
+   setValue('members', membersChema ? [...membersChema, member] : [member])
+  }
+
+  if (!isChecked) {
+   setUsersSelected(
+    usersSelected.filter((user) => user.idUser !== userResult.idUser)
+   )
+
+   const membersChema = getValues('members')
+   setValue(
+    'members',
+    membersChema.filter((member) => member.id !== userResult.idUser)
+   )
+  }
+ }
+
+ const handleDeleteUserSelected = (userId) => {
+  setUsersSelected(usersSelected.filter((user) => user.idUser !== userId))
+
+  const membersChema = getValues('members')
+  setValue(
+   'members',
+   membersChema.filter((member) => member.id !== userId)
+  )
+
+  // handle change checked input
+  const liElementMatch = searchUsersResultRef.current.querySelector(
+   `li[data-id="${userId}"]`
+  )
+  const inputMatch = liElementMatch.querySelector('input')
+
+  inputMatch.checked = !inputMatch.checked
+ }
+
+ const isCheckedUser = (userId) => {
+  return usersSelected.some((user) => user.idUser === userId)
+ }
+
  return (
   <div className='shadow-lg bg-[#dffffe] flex flex-col flex-grow-1 px-[20px]'>
    <Modal
+    className='modal-create-group'
     show={showModalCreateGroup}
     onHide={handleHideModalCreateGroup}
-    size='sm'
-    centered={false}
+    size='lg'
    >
-    <Box
-     component='form'
-     onSubmit={handleSubmit(onSubmit)}
-     sx={{
-      width: 'max-content',
-      maxWidth: '400px',
-      bgcolor: 'background.paper',
-      border: '2px solid #000',
-      boxShadow: 24,
-      p: 4,
-     }}
-    >
-     <Typography id='modal-modal-title' variant='h6' component='h2'>
-      Create Group
-     </Typography>
-     <TextField
-      fullWidth
-      label='Group Name'
-      type='text'
-      variant='outlined'
-      margin='normal'
-      {...register('groupName')}
-     />
-     {errors.groupName && (
-      <Box sx={{ mt: 1, color: 'red' }}>{errors.groupName.message}</Box>
-     )}
-     <TextField
-      fullWidth
-      label='Description'
-      type='text'
-      variant='outlined'
-      margin='normal'
-      {...register('desc')}
-     />
-     {errors.desc && (
-      <Box sx={{ mt: 1, color: 'red' }}>{errors.desc.message}</Box>
-     )}
-     <List>
-      {memberListGroupCreate?.map((member, index) => (
-       <ListItem key={index}>
-        <ListItemText primary={member.gmail} secondary={member.role} />
-        <ListItemSecondaryAction>
-         <IconButton edge='end' onClick={() => handleDeleteMemberCreate(index)}>
-          <DeleteIcon />
-         </IconButton>
-        </ListItemSecondaryAction>
-       </ListItem>
-      ))}
-     </List>
-     <Box
-      sx={{
-       display: 'flex',
-       alignItems: 'center',
-       justifyContent: 'space-between',
-       mt: 2,
-       gap: '5px',
-      }}
-     >
-      <TextField
-       label='Member Email'
-       name='gmail'
-       type='email'
-       fullWidth
-       onChange={handleChangeMemberGroupCreate}
-       value={memberGroupCreate.gmail}
-      />
+    <Modal.Header closeButton className='border-none p-[20px]'>
+     <Modal.Title className='text-[30px]'>Create group</Modal.Title>
+    </Modal.Header>
 
-      <TextField
-       label='Member ID'
-       name='id'
-       type='number'
-       fullWidth
-       onChange={handleChangeMemberGroupCreate}
-       value={memberGroupCreate.id}
-      />
+    <Modal.Body className='px-[20px] py-0'>
+     <form onSubmit={handleSubmit(onSubmit)} action=''>
+      <div className='flex justify-between items-center gap-2 mb-3'>
+       <div className='position-relative'>
+        <div>
+         <img
+          className='w-[90px] h-[90px] object-cover rounded-[100%]'
+          src={avatarDefault}
+          alt='avatar'
+         />
+        </div>
 
-      <IconButton
-       disabled={
-        memberGroupCreate.gmail.trim() !== '' &&
-        memberGroupCreate.id.trim() !== ''
-         ? false
-         : true
-       }
-       onClick={handleAddMemberCreate}
+        <div className='position-absolute bg-[#d9d9d9] w-[30px] h-[30px] rounded-full right-0 bottom-0 flex items-center justify-center'>
+         <input
+          // onChange={handleChangeAvatarGroup}
+          id='file-avatar-group'
+          type='file'
+          className='hidden m-0'
+          // disabled={!isLeaderTeam(infoGroupItem.idOwner)}
+         />
+         <label htmlFor='file-avatar-group' className='flex'>
+          <CameraAltIcon className='text-[20px]' />
+         </label>
+        </div>
+       </div>
+
+       <div className='grid w-full'>
+        <input
+         type='text'
+         style={{ boxShadow: '-2px -4px 4px 0px #00000040 inset' }}
+         className='form-control border-none h-[60px] rounded-[30px] createGroup__groupName'
+         placeholder='Enter the group name...'
+         {...register('groupName')}
+        />
+
+        {errors.groupName && (
+         <Box sx={{ mt: 1, color: 'red' }}>{errors.groupName.message}</Box>
+        )}
+       </div>
+      </div>
+
+      <div className='w-1/2 mb-3'>
+       <div>
+        <input
+         className='w-100 rounded-[30px] px-3 h-[50px] bg-white border-secondary border createGroup__groupName'
+         type='text'
+         placeholder='Group description...'
+         {...register('desc')}
+        />
+       </div>
+
+       {errors.desc && (
+        <Box sx={{ mt: 1, color: 'red' }}>{errors.desc.message}</Box>
+       )}
+      </div>
+
+      <button
+       id='create-group-btn'
+       className='btn btn-dark hidden'
+       type='submit'
       >
-       <AddIcon />
-      </IconButton>
-     </Box>
+       Create
+      </button>
+     </form>
 
-     {memberListGroupCreate.length > 0 ? (
-      ''
-     ) : (
-      <Box sx={{ mt: 1, color: 'red' }}>{errors?.members?.message}</Box>
-     )}
-
-     <div className='flex justify-end gap-2 mt-3'>
-      <Box>
-       <Button
+     <div className='w-1/2 mb-3'>
+      <form
+       onSubmit={handleSubmitSearchUser}
+       className='flex rounded-[30px] gap-[20px] items-center px-2 h-[50px]  bg-white border-secondary border'
+      >
+       <button
+        title='Search user'
+        onClick={handleSubmitSearchUser}
+        className=''
         type='button'
-        variant='contained'
-        color='secondary'
-        onClick={handleHideModalCreateGroup}
        >
-        cancel
-       </Button>
-      </Box>
-      <Box>
-       <Button type='submit' variant='contained' color='primary'>
-        Create
-       </Button>
-      </Box>
+        <SearchIcon className='text-[30px]' />
+       </button>
+
+       <input
+        className='w-100 createGroup__groupName'
+        type='text'
+        placeholder='Enter username/email...'
+        value={searchValue}
+        onChange={handleChangeSearchValue}
+       />
+      </form>
+
+      {usersSelected.length > 0 ? (
+       ''
+      ) : (
+       <Box sx={{ mt: 1, color: 'red' }}>{errors?.members?.message}</Box>
+      )}
      </div>
-    </Box>
+
+     <div className='mx-[40px] mb-3'>
+      <div className={usersSelected.length === 0 ? 'hidden' : null}>
+       <h3 className='text-[25px] font-medium mb-2'>Selected</h3>
+       <ul className='flex gap-[10px] flex-wrap'>
+        {usersSelected?.map(({ idUser, linkAvatar, userName }) => (
+         <li className='text-center max-w-[100px]' key={idUser}>
+          <div className='position-relative'>
+           <img
+            className='w-[80px] h-[80px] object-cover rounded-full'
+            src={linkAvatar}
+            alt='avatar'
+            onError={(e) => (e.target.src = avatarDefault)}
+           />
+
+           <button
+            onClick={() => handleDeleteUserSelected(idUser)}
+            type='button'
+            className='position-absolute top-0 right-1 flex'
+           >
+            <ClearIcon className='text-[#34a6fa] text-[20px] bg-black rounded-full' />
+           </button>
+          </div>
+
+          <TextTruncate
+           line={1}
+           element='h6'
+           truncateText='…'
+           text={userName}
+           containerClassName='text-[18px] font-[400] capitalize'
+          />
+         </li>
+        ))}
+       </ul>
+      </div>
+     </div>
+    </Modal.Body>
+
+    {(searchUserResult.length > 0 || searchUserNotFound) && (
+     <div className='bg-white py-3 px-[60px] max-h-[45vh] overflow-y-auto createGroup-usersResult'>
+      <h5
+       className={`text-[25px] font-medium mb-2 ${
+        searchUserNotFound ? 'text-red-500' : null
+       }`}
+      >
+       {searchUserNotFound ? searchUserNotFound : 'All user'}
+      </h5>
+
+      <ul ref={searchUsersResultRef} className='flex flex-col gap-2 '>
+       {searchUserResult?.map((userResult) => (
+        <li
+         key={userResult.idUser}
+         data-id={userResult.idUser}
+         className='flex justify-between items-center'
+        >
+         <div className='flex items-center gap-4'>
+          <div>
+           <img
+            className='w-[80px] h-[80px] object-cover rounded-full'
+            onError={(e) => (e.target.src = avatarDefault)}
+            src={userResult.linkAvatar}
+            alt='avatar'
+           />
+          </div>
+
+          <h6 className='text-[18px] font-normal capitalize'>
+           {userResult.userName}
+          </h6>
+         </div>
+         <div>
+          <input
+           className='createGroup-inputRadio'
+           onChange={(e) => handleChangeCheckbox(e.target.checked, userResult)}
+           type='checkbox'
+           checked={isCheckedUser(userResult.idUser)}
+          />
+         </div>
+        </li>
+       ))}
+      </ul>
+     </div>
+    )}
+
+    <Modal.Footer className='p-[20px] border-none'>
+     <div>
+      <button
+       onClick={handleHideModalCreateGroup}
+       className='btn btn-danger'
+       type='button'
+      >
+       Cancle
+      </button>
+     </div>
+
+     <label className='btn btn-dark' htmlFor='create-group-btn'>
+      Create
+     </label>
+    </Modal.Footer>
    </Modal>
 
    <div className='flex mt-4 mb-5 justify-between gap-2'>

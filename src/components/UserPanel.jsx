@@ -156,7 +156,7 @@ const UserPanel = () => {
      Logout
     </Button>
    </Box>
-   <Outlet />
+   {/* <Outlet /> */}
   </Box>
  ) : null
 }

@@ -6,7 +6,17 @@ const RootLayout = () => {
 
  return isLogin ? (
   <section className='vw-100 min-vh-100'>
-   <UserPanel />
+   <div className='container-fluid'>
+    <div className='row'>
+     <div className='col-2'>
+      <UserPanel />
+     </div>
+     
+     <div className='col-10'>
+      <Outlet />
+     </div>
+    </div>
+   </div>
   </section>
  ) : (
   <Navigate to='/login' />

@@ -27,7 +27,7 @@ import ChatList from './ChatList/ChatList'
 import Information from './Information/Information'
 import SettingGroup from './SettingGroup/SettingGroup'
 
-const { API_SERVER_URL, BASE64_URL } = configs
+const { API_SERVER_URL } = configs
 
 const Group = () => {
  const appContext = useContext(AppContext)
@@ -70,17 +70,29 @@ const Group = () => {
 
  const [formName, setFormName] = useState(null)
 
- const [typeFilterChat, setTypeFilterChat] = useState('All')
+ const [typeFilterChat, setTypeFilterChat] = useState(
+  window.localStorage.getItem('typeFilterChat') || 'All'
+ )
 
  const handleChangeTypeFilterChat = (type) => setTypeFilterChat(type)
 
  //______________________________________
  const getGroupList = async () => {
-  const groups = await fetchGroupList(user.id, socket, typeFilterChat)
+  const typeFilterLocal = window.localStorage.getItem('typeFilterChat')
+  const groups = await fetchGroupList(
+   user.id,
+   socket,
+   typeFilterLocal || typeFilterChat
+  )
   setGroupList(groups)
  }
  const getUserChatList = async () => {
-  const userList = await fetchUserChatList(user.id, socket, typeFilterChat)
+  const typeFilterLocal = window.localStorage.getItem('typeFilterChat')
+  const userList = await fetchUserChatList(
+   user.id,
+   socket,
+   typeFilterLocal || typeFilterChat
+  )
   setUserList(userList)
  }
 
@@ -96,19 +108,16 @@ const Group = () => {
  useEffect(() => {
   if (!socket) return
 
-  console.log('type filter', typeFilterChat)
-
   getUserChatList()
-  // getGroupList()
+  getGroupList()
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [user.id, socket, typeFilterChat])
+ }, [user?.id, socket, typeFilterChat])
 
  useEffect(() => {
   if (!socket) return
 
   socket.on('send_message', (result) => {
-   console.log('type:', typeFilterChat)
    getUserChatList()
 
    const { ReceivedID, SenderID } = result.data
@@ -480,7 +489,7 @@ const Group = () => {
  }, [formGroupNameRef, inputGroupNameRef, buttonClickEditNameGroup])
 
  const propsFormMessage = {
-  userID: user.id,
+  userID: user?.id,
   otherUserID: infoOtherUser?.id,
   idGroup: infoGroupItem.idGroup,
   socket,
@@ -491,7 +500,7 @@ const Group = () => {
  }
 
  const propsChatList = {
-  userID: user.id,
+  userID: user?.id,
   socket,
   typeFilterChat,
 
@@ -510,7 +519,7 @@ const Group = () => {
  }
 
  const propsSettingGroup = {
-  userID: user.id,
+  userID: user?.id,
   groupItem: infoGroupItem,
   formName,
   groupMemberList,
@@ -528,7 +537,7 @@ const Group = () => {
  }
 
  return (
-  <div className='w-fluid'>
+  <div className='container-fluid'>
    <div className='row vh-100 mx-0'>
     <div className='col-3 group-sidebar flex flex-col px-0'>
      <h3 className='text-center py-[60px] px-3 font-bold'>Chat</h3>

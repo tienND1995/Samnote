@@ -18,8 +18,13 @@ const Information = (props) => {
 
  return (
   <div
-   className={`p-3 position-absolute right-0 top-0 h-full bg-[#dffffe] w-[480px] shadow-md ${
-    showInfo ? null : 'hidden'
+   style={{
+    transition: 'all ease-in-out .3s',
+    boxShadow: '-1px 0px 2px 2px  #00000040',
+   }}
+   
+   className={`p-3 position-absolute right-0 top-0 h-full bg-[#dffffe] ${
+    showInfo ? 'opacity-100 visible w-[480px]' : 'opacity-0 invisible w-0'
    }`}
   >
    <div className='text-center position-relative'>
