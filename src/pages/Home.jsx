@@ -261,7 +261,7 @@ const Home = () => {
                       fontWeight: "500",
                     }
               }
-              onClick={() => navigate(`/user/group`)}
+              onClick={() => navigate(`/group`)}
             >
               Group
             </li>
@@ -357,7 +357,7 @@ const Home = () => {
               <li
                 style={{ cursor: "pointer", marginLeft: "7px" }}
                 onClick={() => {
-                  navigate(`/user`);
+                  navigate(`/user/profile/${user.id}`);
                 }}
               >
                 <Avatar

@@ -326,6 +326,8 @@ const Login = () => {
       localStorage.setItem(TOKEN, res.data.jwt);
       setUserName("");
       setPassword("");
+
+      window.location.reload();
     } catch (err) {
       if (err.response.data.status == 400) {
         setNotification({

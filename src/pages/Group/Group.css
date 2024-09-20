@@ -1,0 +1,51 @@
+.group-sidebar {
+ background: #b6f6ff;
+}
+
+.group-buttons > li button {
+ transition: all 0.3;
+ padding: 2px 5px;
+ border-radius: 3px;
+}
+
+.group-buttons > li button.active {
+ background-color: black;
+ color: white;
+}
+
+.group-buttons > li button:hover {
+ background-color: black;
+ color: white;
+}
+
+.setting-group > ul {
+ transition: all 0.3;
+}
+
+.setting-group > ul > li > button {
+ padding: 5px;
+ transition: 0.3s;
+ width: 100%;
+ color: white;
+ text-align: left;
+}
+
+.setting-group > ul > li > button:hover,
+.setting-group > ul > li > button.active {
+ background-color: white;
+ color: black;
+}
+
+.modal-members {
+ width: 400px;
+}
+
+ul.list-chat > li {
+ transition: all 0.3s;
+ background: #fff;
+}
+
+ul.list-chat > li:hover,
+ul.list-chat > li.active {
+ background: #70ffff;
+}

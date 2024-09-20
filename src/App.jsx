@@ -1,42 +1,25 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Alert, Snackbar } from "@mui/material";
+import { Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
-import UserPanel from "./components/UserPanel";
 import { AppContext } from "./context";
+import CreateNote from "./pages/CreateNote";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import UserProfile from "./pages/UserProfile";
-import UserNotes from "./pages/UserNotes";
 import Incognito from "./pages/incognito";
-import UserSetting from "./pages/UserSetting";
-import UserSketch from "./pages/UserSketch";
+import Login from "./pages/Login";
+import OtherUser from "./pages/OtherUser";
 import UserDustbin from "./pages/UserDustbin";
 import UserGroup from "./pages/UserGroup";
-import { Alert, Snackbar, Button } from "@mui/material";
-import OtherUser from "./pages/OtherUser";
+import UserNotes from "./pages/UserNotes";
 import UserPhoto from "./pages/UserPhoto";
-import CreateNote from "./pages/CreateNote";
-import SearchResults from "./pages/searchNote";
+import UserProfile from "./pages/UserProfile";
+import UserSetting from "./pages/UserSetting";
+import UserSketch from "./pages/UserSketch";
 
-const publicRoutes = [{ path: "/", element: <Home /> }];
-
-const authRoutes = [{ path: "/login", element: <Login /> }];
-
-const userRoutes = [
-  { path: "/other-user/:id", element: <OtherUser /> },
-  { path: "/user", element: <UserProfile /> },
-  { path: "/user/note", element: <UserNotes /> },
-  { path: "/user/setting", element: <UserSetting /> },
-  { path: "/user/sketch", element: <UserSketch /> },
-  { path: "/user/group", element: <UserGroup /> },
-  { path: "/user/dustbin", element: <UserDustbin /> },
-  { path: "/user/photo", element: <UserPhoto /> },
-  { path: "/user/create-note", element: <CreateNote /> },
-  { path: "/user/profile", element: <UserProfile /> },
-  { path: "/user/incognito", element: <Incognito /> },
-  { path: "/user/search", element: <SearchResults /> },
-];
+import RootLayout from "./layout/RootLayout";
+import Group from "./pages/Group/Group";
+import Demo from "./pages/Demo/Demo";
 
 const AppSnackbar = () => {
   const appContext = useContext(AppContext);
@@ -70,36 +53,36 @@ const AppSnackbar = () => {
 };
 
 function App() {
-  const appContext = useContext(AppContext);
-  const { user } = appContext;
+  const isLogin = JSON.parse(localStorage.getItem("USER"));
 
   return (
-    <BrowserRouter>
+    <main>
       <AppSnackbar />
 
       <Routes>
-        {publicRoutes.map((r) => (
-          <Route path={r.path} element={r.element} key={r.path} />
-        ))}
-        
-        {authRoutes.map((r) => (
-          <Route
-            path={r.path}
-            element={!user ? r.element : <Navigate replace to="/user" />}
-            key={r.path}
-          />
-        ))}
         <Route
-          path="/"
-          element={user ? <UserPanel /> : <Navigate replace to="/login" />}
-        >
-          {userRoutes.map((r) => (
-            <Route path={r.path} element={r.element} key={r.path} />
-          ))}
-        </Route>
+          path="/login"
+          element={isLogin ? <Navigate to="/" /> : <Login />}
+        />
+        <Route path="/" element={<Home />} />
         <Route path="*" element={<Navigate replace to="/" />} />
+
+        <Route element={<RootLayout />}>
+          <Route path="/other-user/:id" element={<OtherUser />} />
+          <Route path="/user/note" element={<UserNotes />} />
+          <Route path="/user/setting" element={<UserSetting />} />
+          <Route path="/user/sketch" element={<UserSketch />} />
+          <Route path="/user/group" element={<UserGroup />} />
+          <Route path="/user/dustbin" element={<UserDustbin />} />
+          <Route path="/user/photo" element={<UserPhoto />} />
+          <Route path="/user/create-note" element={<CreateNote />} />
+          <Route path="/user/profile/:id" element={<UserProfile />} />
+          <Route path="/user/incognito" element={<Incognito />} />
+          <Route path="/group" element={<Group />} />
+          <Route path="/demo" element={<Demo />} />
+        </Route>
       </Routes>
-    </BrowserRouter>
+    </main>
   );
 }
 

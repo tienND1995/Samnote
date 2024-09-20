@@ -148,17 +148,13 @@ const CreateNote = () => {
     return formattedDateTime;
   }
   function ImageUploader() {
-    const [checkWidth, setCheckWidth] = useState(window.innerWidth - 330);
+    const [checkWidth, setCheckWidth] = useState(window.innerWidth - 160);
 
     console.log("selectedForDeletion", selectedForDeletion);
     console.log("Selected Files state:", selectedFiles);
     const updateCheckWidth = () => {
       if (window.innerWidth > 1200) {
-        setCheckWidth(950);
-      } else if (window.innerWidth > 1024) {
-        setCheckWidth(window.innerWidth - 330);
-      } else {
-        setCheckWidth(window.innerWidth - 60);
+        setCheckWidth(window.innerWidth - 160);
       }
     };
 
@@ -205,7 +201,9 @@ const CreateNote = () => {
     return (
       <div
         style={{
-          margin: "20px",
+          width: "100%",
+
+          margin: "auto",
           padding: "0 0 10px",
           backgroundColor: "#fff",
           borderRadius: "4px",
@@ -213,6 +211,7 @@ const CreateNote = () => {
       >
         <div
           style={{
+            margin: "0px 0 40px",
             display: "flex",
             justifyContent: "flex-end",
             padding: "10px 0",
@@ -448,8 +447,10 @@ const CreateNote = () => {
       selectedFiles.forEach((file) => {
         formPayload.append("image_note", file);
       });
+
       formPayload.append("id_note", res.data.note.idNote);
       formPayload.append("id_user", user.id);
+
       const respon = await fetch(
         `https://samnote.mangasocial.online/add_image_note`,
         {
@@ -457,7 +458,10 @@ const CreateNote = () => {
           body: formPayload,
         }
       );
-      console.log("respon", selectedFiles, res.data.note.idNote, user.id);
+
+      const data = await respon.json();
+
+      console.log("respon", data);
 
       setSnackbar({
         isOpen: true,
@@ -476,7 +480,7 @@ const CreateNote = () => {
 
   return (
     <>
-      <Box className="max-w mx-auto pt-3 bg-[#3A3F42]">
+      <Box className=" mx-auto pt-3 bg-[#3A3F42]">
         <Box className="flex justify-center">
           <svg
             width="25"
@@ -645,11 +649,11 @@ const CreateNote = () => {
             </Button>
           </Box>
         </Box>
-        <div>
+        <div className="w-[98%] mx-auto">
           <ImageUploader />
         </div>
         {type === "text" ? (
-          <>
+          <div className="w-[98%] mx-auto">
             <Editor
               apiKey="c9fpvuqin9s9m9702haau5pyi6k0t0zj29nelhczdvjdbt3y"
               value={dataText}
@@ -676,7 +680,7 @@ const CreateNote = () => {
               }}
               onEditorChange={(content) => setDataText(content)}
             />
-          </>
+          </div>
         ) : (
           <ChecklistComponent
             checklistItems={checklistItems}

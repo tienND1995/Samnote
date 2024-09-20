@@ -1,3 +1,4 @@
+// export default AppProvider;
 import { createContext, useState, useEffect } from "react";
 import { USER } from "../constant";
 import axios from "axios";
@@ -14,11 +15,11 @@ const AppProvider = ({ children }) => {
 
   useEffect(() => {
     // Lấy dữ liệu từ localStorage khi component mount
-    const localUser = localStorage.getItem(USER);
+    const localUser = JSON.parse(localStorage.getItem(USER));
+
     try {
-      const parseUser = JSON.parse(localUser);
-      if (parseUser) {
-        setUser(parseUser);
+      if (localUser) {
+        setUser(localUser);
       }
     } catch (error) {
       console.error("Error parsing user from localStorage:", error);

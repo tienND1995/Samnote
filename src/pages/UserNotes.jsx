@@ -540,8 +540,10 @@ export default function UserNotes() {
     setNotePublic(info.notePublic);
     setColor(info.color);
     setImage(info.image);
+
     console.log("now info", info.image);
   };
+
   return (
     <Box className="flex flex-col bg-[#3A3F42]">
       {" "}
@@ -552,7 +554,7 @@ export default function UserNotes() {
         </div>
       </Box>{" "}
       <Box className="grid grid-cols-[350px_1fr] border-top border-black border-solid">
-        <div className="overflow-y-auto h-[100vh] ">
+        <div className="mx-3 overflow-y-auto h-[100vh] border-r border-black border-solid">
           <div className="flex items-center flex-col">
             {" "}
             <Box
