@@ -72,9 +72,7 @@ function App() {
      <Route path='/user/profile/:id' element={<UserProfile />} />
      <Route path='/user/incognito' element={<Incognito />} />
      <Route path='/group' element={<Group />} />
-     <Route path='/demo' element={<Demo/>}/>
-
-     {/* tao 1 route em lam ở đây, code 1 file mơi luôn nhe e */}
+     <Route path='/demo' element={<Demo />} />
     </Route>
    </Routes>
   </main>

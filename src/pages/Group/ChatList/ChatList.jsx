@@ -144,6 +144,7 @@ const ChatList = (props) => {
     message: error.response.data.message,
     severity: 'error',
    })
+
   }
  }
 
