@@ -18,9 +18,11 @@ const Information = (props) => {
 
  const [imageList, setImageList] = useState([])
 
+ console.log(groupItem)
+
  useEffect(() => {
   groupItem.idGroup && fetchAllImageGroup(groupItem.idGroup)
- }, [groupItem.idGroup])
+ }, [groupItem?.idGroup])
 
  const fetchAllImageGroup = async (idGroup) => {
   try {
