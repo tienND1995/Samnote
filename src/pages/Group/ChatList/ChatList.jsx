@@ -13,26 +13,14 @@ import { joiResolver } from '@hookform/resolvers/joi'
 import { useForm } from 'react-hook-form'
 import { schemaGroup } from '../../../utils/schema/schema'
 import configs from '../../../configs/configs.json'
-const { API_SERVER_URL } = configs
+const { API_SERVER_URL, BASE64_URL } = configs
 
-import {
- Box,
- Button,
- IconButton,
- List,
- ListItem,
- ListItemSecondaryAction,
- ListItemText,
- TextField,
- Typography,
-} from '@mui/material'
+import { Box } from '@mui/material'
 
 import SearchIcon from '@mui/icons-material/Search'
 import GroupAddIcon from '@mui/icons-material/GroupAdd'
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import CheckIcon from '@mui/icons-material/Check'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 
 import ClearIcon from '@mui/icons-material/Clear'
@@ -98,7 +86,7 @@ const ChatList = (props) => {
   formState: { errors },
  } = useForm({
   resolver: joiResolver(schemaGroup),
-  defaultValues: { groupName: '', desc: '', members: [] },
+  defaultValues: { groupName: '', desc: '', members: [], linkAvatar: '' },
  })
 
  const resetModalCreateGroup = () => {
@@ -108,6 +96,7 @@ const ChatList = (props) => {
   setSearchUserNotFound(null)
   setSearchValue('')
   setUsersSelected([])
+  setAvatarGroup(null)
  }
 
  const handleShowModalCreateGroup = () => {
@@ -134,6 +123,7 @@ const ChatList = (props) => {
    //  cập nhật group list
    const groups = await fetchGroupList(userID, socket, typeFilterChat)
    setGroupList(groups)
+   //  postAvatar(avatarGroup)
 
    // reset form create group
    setShowModalCreateGroup(false)
@@ -144,18 +134,19 @@ const ChatList = (props) => {
     message: error.response.data.message,
     severity: 'error',
    })
-
   }
  }
 
- const onSubmit = (data) => {
+ const onSubmit = async (data) => {
   const { groupName, desc, members } = data
+  const linkAvatar = await postAvatar(fileUpload)
 
   const group = {
    // info change
    name: groupName,
    members: members,
    describe: desc,
+   linkAvatar: linkAvatar,
 
    //  info constant
    createAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
@@ -165,8 +156,6 @@ const ChatList = (props) => {
    b: 255,
    a: 0.99,
   }
-
-  console.log(group)
 
   postGroup(group, userID)
  }
@@ -257,6 +246,38 @@ const ChatList = (props) => {
   return usersSelected.some((user) => user.idUser === userId)
  }
 
+ const [avatarGroup, setAvatarGroup] = useState(null)
+ const [fileUpload, setFileUpload] = useState(null)
+
+ const postAvatar = async (file) => {
+  const formData = new FormData()
+  formData.append('image', file)
+
+  try {
+   const response = await axios.post(
+    `https://samnote.mangasocial.online/upload_image/${userID}`,
+    formData
+   )
+
+   return response.data.imagelink
+  } catch (error) {
+   console.error(error)
+  }
+ }
+
+ const handleChangeAvatarGroup = async (e) => {
+  const reader = new FileReader()
+  reader.readAsDataURL(e.target.files[0])
+  reader.onload = () => {
+   const imageBase64 = reader.result?.split(',')[1]
+   setValue('linkAvatar', imageBase64)
+   setAvatarGroup(imageBase64)
+  }
+
+  setFileUpload(e.target.files[0])
+  e.target.value = null
+ }
+
  return (
   <div className='shadow-lg bg-[#dffffe] flex flex-col flex-grow-1 px-[20px]'>
    <Modal
@@ -271,58 +292,66 @@ const ChatList = (props) => {
 
     <Modal.Body className='px-[20px] py-0'>
      <form onSubmit={handleSubmit(onSubmit)} action=''>
-      <div className='flex justify-between items-center gap-2 mb-3'>
-       <div className='position-relative'>
-        <div>
-         <img
-          className='w-[90px] h-[90px] object-cover rounded-[100%]'
-          src={avatarDefault}
-          alt='avatar'
-         />
+      <div className='flex justify-between items-center gap-3 mb-3'>
+       <div>
+        <div className='position-relative w-max'>
+         <div>
+          <img
+           className='w-[90px] h-[90px] object-cover rounded-[100%]'
+           src={avatarGroup ? `${BASE64_URL}${avatarGroup}` : avatarDefault}
+           alt='avatar'
+          />
+         </div>
+
+         <div className='position-absolute bg-[#d9d9d9] w-[30px] h-[30px] rounded-full right-0 bottom-0 flex items-center justify-center'>
+          <input
+           onChange={handleChangeAvatarGroup}
+           id='file-avatar-group'
+           type='file'
+           className='hidden m-0'
+          />
+          <label htmlFor='file-avatar-group' className='flex'>
+           <CameraAltIcon className='text-[20px]' />
+          </label>
+         </div>
         </div>
 
-        <div className='position-absolute bg-[#d9d9d9] w-[30px] h-[30px] rounded-full right-0 bottom-0 flex items-center justify-center'>
-         <input
-          // onChange={handleChangeAvatarGroup}
-          id='file-avatar-group'
-          type='file'
-          className='hidden m-0'
-          // disabled={!isLeaderTeam(infoGroupItem.idOwner)}
-         />
-         <label htmlFor='file-avatar-group' className='flex'>
-          <CameraAltIcon className='text-[20px]' />
-         </label>
-        </div>
-       </div>
-
-       <div className='grid w-full'>
-        <input
-         type='text'
-         style={{ boxShadow: '-2px -4px 4px 0px #00000040 inset' }}
-         className='form-control border-none h-[60px] rounded-[30px] createGroup__groupName'
-         placeholder='Enter the group name...'
-         {...register('groupName')}
-        />
-
-        {errors.groupName && (
-         <Box sx={{ mt: 1, color: 'red' }}>{errors.groupName.message}</Box>
+        {!avatarGroup && errors.linkAvatar && (
+         <Box sx={{ color: 'red' }}>{errors.linkAvatar.message}</Box>
         )}
        </div>
-      </div>
 
-      <div className='w-1/2 mb-3'>
-       <div>
-        <input
-         className='w-100 rounded-[30px] px-3 h-[50px] bg-white border-secondary border createGroup__groupName'
-         type='text'
-         placeholder='Group description...'
-         {...register('desc')}
-        />
+       <div className='h-[50px] flex flex-grow-1 justify-between gap-3'>
+        <div className='w-1/2'>
+         <div>
+          <input
+           type='text'
+           className='w-full rounded-[30px] px-3 h-[50px] bg-white createGroup__groupName'
+           placeholder='Enter the group name...'
+           {...register('groupName')}
+          />
+         </div>
+
+         {errors.groupName && (
+          <Box sx={{ mt: 1, color: 'red' }}>{errors.groupName.message}</Box>
+         )}
+        </div>
+
+        <div className='w-1/2'>
+         <div>
+          <input
+           className='w-full rounded-[30px] px-3 h-[50px] bg-white createGroup__groupName'
+           type='text'
+           placeholder='Group description...'
+           {...register('desc')}
+          />
+         </div>
+
+         {errors.desc && (
+          <Box sx={{ mt: 1, color: 'red' }}>{errors.desc.message}</Box>
+         )}
+        </div>
        </div>
-
-       {errors.desc && (
-        <Box sx={{ mt: 1, color: 'red' }}>{errors.desc.message}</Box>
-       )}
       </div>
 
       <button
@@ -333,38 +362,7 @@ const ChatList = (props) => {
        Create
       </button>
      </form>
-
-     <div className='w-1/2 mb-3'>
-      <form
-       onSubmit={handleSubmitSearchUser}
-       className='flex rounded-[30px] gap-[20px] items-center px-2 h-[50px]  bg-white border-secondary border'
-      >
-       <button
-        title='Search user'
-        onClick={handleSubmitSearchUser}
-        className=''
-        type='button'
-       >
-        <SearchIcon className='text-[30px]' />
-       </button>
-
-       <input
-        className='w-100 createGroup__groupName'
-        type='text'
-        placeholder='Enter username/email...'
-        value={searchValue}
-        onChange={handleChangeSearchValue}
-       />
-      </form>
-
-      {usersSelected.length > 0 ? (
-       ''
-      ) : (
-       <Box sx={{ mt: 1, color: 'red' }}>{errors?.members?.message}</Box>
-      )}
-     </div>
-
-     <div className='mx-[40px] mb-3'>
+     <div className='mx-[40px] mb-3 mt-5'>
       <div className={usersSelected.length === 0 ? 'hidden' : null}>
        <h3 className='text-[25px] font-medium mb-2'>Selected</h3>
        <ul className='flex gap-[10px] flex-wrap'>
@@ -397,6 +395,36 @@ const ChatList = (props) => {
          </li>
         ))}
        </ul>
+      </div>
+
+      <div className='w-1/2 my-3'>
+       <form
+        onSubmit={handleSubmitSearchUser}
+        className='flex rounded-[30px] gap-[20px] items-center px-2 h-[50px]  bg-white border-secondary border'
+       >
+        <button
+         title='Search user'
+         onClick={handleSubmitSearchUser}
+         className=''
+         type='button'
+        >
+         <SearchIcon className='text-[30px]' />
+        </button>
+
+        <input
+         className='w-100 createGroup__groupName'
+         type='text'
+         placeholder='Enter username/email...'
+         value={searchValue}
+         onChange={handleChangeSearchValue}
+        />
+       </form>
+
+       {usersSelected.length > 0 ? (
+        ''
+       ) : (
+        <Box sx={{ mt: 1, color: 'red' }}>{errors?.members?.message}</Box>
+       )}
       </div>
      </div>
     </Modal.Body>

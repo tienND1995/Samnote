@@ -16,6 +16,25 @@ const Information = (props) => {
  const { showInfo, onHide, groupItem, groupMemberList } = props.data
  const [toggleMemberList, setToggleMemberList] = useState(false)
 
+ const [imageList, setImageList] = useState([])
+
+ useEffect(() => {
+  groupItem.idGroup && fetchAllImageGroup(groupItem.idGroup)
+ }, [groupItem.idGroup])
+
+ const fetchAllImageGroup = async (idGroup) => {
+  try {
+   const response = await axios.get(
+    `https://samnote.mangasocial.online/group/allphoto/${idGroup}`
+   )
+
+   setImageList(response.data.data)
+  } catch (error) {
+   console.log(error)
+  }
+ }
+
+
  return (
   <div
    style={{
@@ -126,6 +145,21 @@ const Information = (props) => {
     </div>
     <h3 className='text-[30px] font-medium'>Image</h3>
    </div>
+
+   <ul className='my-3 row row-cols-3'>
+    {imageList?.map((image) => {
+     return (
+      <li key={image.id} className='col p-1'>
+       <img
+        style={{ 'aspect-ratio': '1 / 1' }}
+        className='w-full object-cover rounded-md border border-gray-400'
+        src={image.image}
+        alt=''
+       />
+      </li>
+     )
+    })}
+   </ul>
   </div>
  )
 }
