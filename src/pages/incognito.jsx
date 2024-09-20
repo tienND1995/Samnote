@@ -17,8 +17,10 @@ import { AppContext } from "../context";
 import DeleteIcon from "@mui/icons-material/Delete";
 import api from "../api";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import CloseIcon from "@mui/icons-material/Close";
 import bg_chat from "../assets/img-chat-an-danh.jpg";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SubdirectoryArrowRightSharpIcon from "@mui/icons-material/SubdirectoryArrowRightSharp";
 import { useNavigate, useLocation } from "react-router-dom";
 
