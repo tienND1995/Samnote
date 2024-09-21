@@ -1,7 +1,9 @@
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import { Editor } from "@tinymce/tinymce-react";
 import { useState, useContext, useEffect } from "react";
+import deleteIcon from "../../src/assets/delete-icon.png";
 import SearchIcon from "@mui/icons-material/Search";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Box,
   Button,
@@ -101,17 +103,22 @@ const ChecklistComponent = ({ checklistItems, setChecklistItems, data }) => {
     <div className="w-full p-2">
       <ul>
         {checklistItems.map((item, index) => (
-          <li key={index}>
+          <li key={index} className="flex items-center">
             <FormControlLabel
               control={
                 <Checkbox
+                  className="text-white"
                   checked={item.status}
                   onChange={() => handleToggleItem(index)}
                 />
               }
-              label={item.content}
+              // label={item.content}
             />
-            <span onClick={() => handleDeleteItem(index)}>
+            <p className="text-white">{item.content}</p>
+            <span
+              className="text-white"
+              onClick={() => handleDeleteItem(index)}
+            >
               <DeleteIcon />
             </span>
           </li>
@@ -120,12 +127,13 @@ const ChecklistComponent = ({ checklistItems, setChecklistItems, data }) => {
       <div className="flex items-center pl-4">
         <input
           type="text"
+          className="text-white"
           style={{ height: "40px" }}
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
           placeholder="  Add a new list item"
         />
-        <span onClick={handleAddItem}>
+        <span className="text-white" onClick={handleAddItem}>
           <AddIcon />
         </span>
       </div>
@@ -153,36 +161,35 @@ export default function UserNotes() {
   const [allColor, setAllColor] = useState([]);
   const [reload, setReload] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [maxPage, setMaxPage] = useState(null);
   const appContext = useContext(AppContext);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [selectedForDeletion, setSelectedForDeletion] = useState([]);
   const [checkWidth, setCheckWidth] = useState(window.innerWidth - 330);
   const { user, setSnackbar } = appContext;
   const [loading, setLoading] = useState(false);
-
+  const navigate = useNavigate();
   console.log("noteEdit", noteEdit);
   useEffect(() => {
-    let ignore = false;
     const getUserFolder = async () => {
+      if (!user?.id) {
+        console.log("User ID is missing or invalid");
+        return;
+      }
+
       try {
         const res = await api.get(
           `https://samnote.mangasocial.online/allfolder/${user.id}`
         );
-        if (!ignore) {
-          setUserFolder(res.data.folder.reverse());
-          console.log("Folder", folder);
-        }
+        setUserFolder(res.data.folder.reverse());
+        console.log("Folder", folder);
       } catch (err) {
         console.log(err);
       }
     };
 
     getUserFolder();
-
-    return () => {
-      ignore = true;
-    };
-  }, [user.id, reload]);
+  }, [user?.id, reload]);
 
   const handleSelectForDeletion = (file) => {
     setSelectedForDeletion((prevSelection) =>
@@ -229,11 +236,19 @@ export default function UserNotes() {
 
   useEffect(() => {
     const getUserNote = async () => {
+      // Kiểm tra nếu user.id không tồn tại
+      if (!user?.id) {
+        console.log("User ID is missing or invalid");
+        return;
+      }
+
       try {
         const res = await api.get(`/notes/${user.id}?page=${currentPage}`);
-        console.log(`notes/${user.id}?page=${currentPage}`);
-        console.log("res", res.data);
+        console.log(`/notes/${user.id}?page=${currentPage}`);
+        console.log("res", res.data.total_page);
 
+        // Cập nhật số trang tối đa và danh sách ghi chú
+        setMaxPage(res.data.total_page);
         setUserNote(res.data.notes);
       } catch (err) {
         console.log(err);
@@ -241,7 +256,7 @@ export default function UserNotes() {
     };
 
     getUserNote();
-  }, [user.id, updateTrigger, currentPage]);
+  }, [user?.id, updateTrigger, currentPage]);
 
   const handleReload = () => {
     setReload((prev) => prev + 1);
@@ -307,7 +322,9 @@ export default function UserNotes() {
         formPayload.append("image_note", file);
       });
       formPayload.append("id_note", value);
-      formPayload.append("id_user", user.id);
+      if (user.id) {
+        formPayload.append("id_user", user.id);
+      }
       const respon = await fetch(
         `https://samnote.mangasocial.online/add_image_note`,
         {
@@ -415,6 +432,7 @@ export default function UserNotes() {
             width: "20px",
             border: "none",
             borderRadius: "2px",
+            backgroundColor: "#fff",
             margin: "0 3px",
           }}
         >
@@ -436,6 +454,7 @@ export default function UserNotes() {
               width: "20px",
               border: "none",
               borderRadius: "2px",
+              backgroundColor: "#fff",
               margin: "0 3px",
             }}
           >
@@ -456,6 +475,7 @@ export default function UserNotes() {
               width: "20px",
               border: "none",
               borderRadius: "2px",
+              backgroundColor: "#fff",
               margin: "0 3px",
             }}
           >
@@ -473,6 +493,7 @@ export default function UserNotes() {
                 fontWeight: currentPage === i ? "bold" : "normal",
                 width: "20px",
                 border: "none",
+                backgroundColor: "#fff",
                 borderRadius: "2px",
                 margin: "0 3px",
               }}
@@ -497,6 +518,7 @@ export default function UserNotes() {
             fontWeight: currentPage === totalPage ? "bold" : "normal",
             width: "20px",
             border: "none",
+            backgroundColor: "#fff",
             borderRadius: "2px",
             margin: "0 3px",
           }}
@@ -509,7 +531,7 @@ export default function UserNotes() {
     };
 
     return (
-      <div className="flex items-center text-white">
+      <div className="flex items-center text-white m-auto">
         <SkipPreviousIcon
           onClick={() => handlePageClick(currentPage > 1 ? currentPage - 1 : 1)}
           style={{ cursor: "pointer" }}
@@ -545,17 +567,20 @@ export default function UserNotes() {
   };
 
   return (
-    <Box className="flex flex-col bg-[#3A3F42]">
+    <Box className="flex flex-col bg-[#3A3F42] w-full  overflow-y-auto">
       {" "}
-      <Box className="flex justify-center items-center text-white py-3 bg-[#181A1B] w-full h-[100%]">
+      <Box className="flex justify-center items-center text-white py-3 bg-[#181A1B] w-full h-[80px]">
         <div className="flex">
           <EditNoteIcon />
           <p className="m-0 p-0">Edit Note ({note.length})</p>
         </div>
       </Box>{" "}
-      <Box className="grid grid-cols-[350px_1fr] border-top border-black border-solid">
-        <div className="mx-3 overflow-y-auto h-[100vh] border-r border-black border-solid">
-          <div className="flex items-center flex-col">
+      <Box className="grid grid-cols-[1fr_1fr] h-fit">
+        <div
+          className="py-3 px-6 h-fit "
+          style={{ borderRight: "2px solid #000" }}
+        >
+          <div className="flex items-center">
             {" "}
             <Box
               sx={{
@@ -565,7 +590,7 @@ export default function UserNotes() {
                 borderRadius: "30px",
                 height: "40px",
                 margin: "10px 0",
-                width: "90%",
+                width: "50%",
                 justifyContent: "center",
               }}
             >
@@ -593,7 +618,7 @@ export default function UserNotes() {
                 )}
               </IconButton>
             </Box>
-            <Pagination totalPage={9} />
+            <Pagination totalPage={maxPage} />
           </div>
 
           {note && note.length !== 0 ? (
@@ -604,19 +629,28 @@ export default function UserNotes() {
                 style={{
                   border: "1px solid #000",
                   backgroundColor: `rgba(${info.color.r}, ${info.color.g}, ${info.color.b}, ${info.color.a})`,
+                  height: "200px",
                 }}
-                onClick={() => handleGetValue(info)}
+                onClick={() => {
+                  handleGetValue(info);
+                  navigate(`/user/note/${noteEdit.idNote}`);
+                }}
               >
                 <Box className="flex items-center justify-between">
                   <h4>{info.title}</h4>
-                  <DeleteIcon
-                    className="relative z-50 cursor-pointer"
-                    // onClick={() => deleteNote(info.idNote)}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteNote(info.idNote);
-                    }}
-                  />
+                  <div>
+                    {" "}
+                    <strong>{info.createAt.split(" ")[0]}</strong>
+                    <img
+                      className=" cursor-pointer w-[30px] h-[30px] ml-4"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteNote(info.idNote);
+                      }}
+                      src={deleteIcon}
+                      alt=""
+                    />
+                  </div>
                 </Box>
 
                 {info.type === "checkList" || info.type === "checklist" ? (
@@ -762,6 +796,7 @@ export default function UserNotes() {
               <Box className="flex items-center w-1/3 z-50 mx-2 my-2 text-white">
                 <h6>RemindAt:</h6>{" "}
                 <DatePicker
+                  className="text-white"
                   selected={remindAt}
                   onChange={(date) => setRemindAt(date)}
                   showTimeSelect
@@ -993,7 +1028,7 @@ export default function UserNotes() {
                 </div>
               </div>
               <Box className="w-full">
-                <h5 className="ml-2">Content</h5>
+                <h5 className="ml-2 text-white">Content</h5>
                 {noteEdit.type === "text" ? (
                   <div>
                     <Editor

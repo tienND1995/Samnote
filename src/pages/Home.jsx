@@ -18,6 +18,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import { styled } from "@mui/styles";
 import Avatar from "@mui/material/Avatar";
 import "../App.css";
+import api from "../api";
 import "../bootstrap.css";
 import { useEffect, useState, useContext } from "react";
 import { AppContext } from "../context";
@@ -83,13 +84,35 @@ const Home = () => {
   const [newNotes, setLastPublicNote] = useState(null);
   const [newUsers, setNewUser] = useState(null);
   const [userOnline, setUserOnline] = useState(null);
+  const [firstNote, setFirstNote] = useState(null);
   const [loading, setLoading] = useState(false);
   const [canRefresh, setCanRefresh] = useState(true);
   const appContext = useContext(AppContext);
   const { user } = appContext;
   const navigate = useNavigate();
-  console.log("cjieeuf rộng amnf hình", window.innerWidth);
+  console.log("user", user);
+  useEffect(() => {
+    const getUserNote = async () => {
+      // Kiểm tra nếu user không tồn tại
+      if (!user) {
+        console.log("User ID is missing or invalid");
+        return;
+      }
 
+      try {
+        const res = await api.get(`/notes/${user.id}?page=1`);
+        console.log("firstNote", firstNote);
+        // Cập nhật số trang tối đa và danh sách ghi chú
+        setFirstNote(res.data.notes[0]);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (user) {
+      getUserNote();
+    }
+  }, [user]);
   const getProfile = async () => {
     try {
       const res = await axios(`https://samnote.mangasocial.online/numbernote`);
@@ -229,7 +252,7 @@ const Home = () => {
                       cursor: "pointer",
                     }
               }
-              onClick={() => navigate(`/user/note`)}
+              onClick={() => navigate(`/user/note/${firstNote.idNote}`)}
             >
               Manager My Note
             </li>
