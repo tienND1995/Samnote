@@ -310,7 +310,11 @@ const ChatList = (props) => {
            type='file'
            className='hidden m-0'
           />
-          <label htmlFor='file-avatar-group' className='flex'>
+          <label
+           style={{ cursor: 'pointer' }}
+           htmlFor='file-avatar-group'
+           className='flex'
+          >
            <CameraAltIcon className='text-[20px]' />
           </label>
          </div>
