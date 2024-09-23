@@ -1,3 +1,32 @@
+/* style message form  */
+
+.form-message {
+ padding: 16px 25px;
+ background: #dffffe;
+}
+
+.form-message input {
+ width: 100%;
+ background: transparent;
+ border: none;
+ outline: none;
+ font-size: 14px;
+}
+
+.form-message button {
+ background: transparent;
+ border: none;
+}
+
+.form-message input::placeholder {
+ color: gray;
+}
+
+
+.form-message .delete-image > svg {
+ font-size: 20px;
+}
+
 .group-sidebar {
  background: #b6f6ff;
 }
