@@ -19,7 +19,7 @@
     "@mui/lab": "^5.0.0-alpha.170",
     "@mui/material": "^5.0.0",
     "@mui/styles": "^5.15.18",
-    "@tinymce/tinymce-react": "^5.0.1",
+    "@tinymce/tinymce-react": "^5.1.1",
     "axios": "^1.7.2",
     "emoji-picker-react": "^4.11.1",
     "html2canvas": "^1.4.1",
@@ -43,6 +43,7 @@
     "sweetalert2": "^11.14.0",
     "swiper": "^11.1.4",
     "tinymce": "^7.1.2",
+    "uniqid": "^5.4.0",
     "websocket": "^1.0.35",
     "zod": "^3.23.8"
   },
