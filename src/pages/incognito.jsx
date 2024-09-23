@@ -9,6 +9,7 @@ import {
   InputBase,
   Avatar,
 } from "@mui/material";
+import ClearIcon from "@mui/icons-material/Clear";
 import ImageLogo from "../assets/imagelogo.jsx";
 import GifIcon from "../assets/gifIcon.jsx";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
@@ -44,6 +45,13 @@ const Incognito = () => {
   const inputRef = useRef(null);
   const [showGiphySearch, setShowGiphySearch] = useState(false);
   const [page, setPage] = useState(1);
+  const [isOpen, setIsOpen] = useState(false);
+  console.log("userInfomations", userInfomations);
+  console.log("user", user);
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
   //----------------------------------------------------------------
   function GiphySearch() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -293,13 +301,16 @@ const Incognito = () => {
     }
   };
   useEffect(() => {
-    if (userInfo !== null) {
+    console.log("user check", user);
+
+    // Kiểm tra userInfo và user.id đều khác null
+    if (userInfo !== null && user !== null && user.id != null) {
       getMess({
         idReceive: userInfo.id,
         idRoom: `${user.id}#${userInfo.id}`,
       });
     }
-  }, [userInfo]);
+  }, [userInfo, user]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -339,31 +350,52 @@ const Incognito = () => {
   };
 
   const SendMessage = async () => {
-    const sendAt = getCurrentFormattedDateTime();
     const [part1, part2] = nowRoom ? nowRoom.split("#") : [];
 
-    setIdReceive(part1 !== user.id ? part1 : part2);
-
+    setIdReceive(part1 != user.id ? part1 : part2);
     const senmess = {
       content: sendMess,
       idReceive:
-        userInfo !== null ? userInfo.id : part1 != user.id ? part1 : part2,
+        userInfo != null ? userInfo.id : part1 != user.id ? part1 : part2,
       idRoom: nowRoom ? nowRoom : `${user.id}#${userInfo.id}`,
-      img: null,
+      img: null, // Sử dụng URL tạm thời để hiển thị ảnh
       gif: null,
       type: "text",
     };
+    console.log("nowRoom", nowRoom);
+
+    const formData = new FormData();
+    formData.append("content", sendMess);
+    formData.append(
+      "idReceive",
+      userInfo != null ? userInfo.id : part1 != user.id ? part1 : part2
+    );
+    formData.append("idRoom", nowRoom ? nowRoom : `${user.id}#${userInfo.id}`);
+    formData.append("img", ""); // Gửi trực tiếp tệp ảnh
+    formData.append("gif", "");
+    formData.append("type", "text");
+    console.log("senmess", senmess);
 
     try {
-      await api.post(`/message/chat-unknown/${user.id}`, senmess);
-      console.log("tin nhăns gửi ", senmess);
+      const response = await fetch(
+        `https://samnote.mangasocial.online/message/chat-unknown-image2/${user.id}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
 
       setMess((prev) => (Array.isArray(prev) ? [...prev, senmess] : [senmess]));
-      setSendMess("");
+      setSendMess(""); // Xóa trạng thái tin nhắn
+      setSelectedImage(null); // Đặt lại ảnh đã chọn
       setReload((prev) => prev + 1);
       scrollToBottom();
     } catch (err) {
-      console.error(err);
+      console.error("Lỗi khi gửi tin nhắn:", err);
     }
   };
 
@@ -381,14 +413,14 @@ const Incognito = () => {
       type: "image",
     };
     const formData = new FormData();
-    formData.append("content", null);
+    formData.append("content", "");
     formData.append(
       "idReceive",
       userInfo != null ? userInfo.id : part1 != user.id ? part1 : part2
     );
     formData.append("idRoom", nowRoom ? nowRoom : `${user.id}#${userInfo.id}`);
     formData.append("img", selectedImage.file); // Gửi trực tiếp tệp ảnh
-    formData.append("gif", null);
+    formData.append("gif", "");
     formData.append("type", "image");
     console.log("senmess", senmess);
 
@@ -463,26 +495,28 @@ const Incognito = () => {
   };
 
   useEffect(() => {
-    const getUserChat = async () => {
-      try {
-        const res = await api.get(
-          // `/message/list_user_unknown/77`
-          `https://samnote.mangasocial.online/message/list_user_unknown/${user.id}`
-        );
-        console.log(res.data.data);
-        setUserChat(res.data.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
+    if (user) {
+      // Kiểm tra xem user có tồn tại hay không
+      const getUserChat = async () => {
+        try {
+          const res = await api.get(
+            `https://samnote.mangasocial.online/message/list_user_unknown/${user.id}`
+          );
+          console.log(res.data.data);
+          setUserChat(res.data.data); // Cập nhật dữ liệu người dùng chat
+        } catch (err) {
+          console.log(err); // Xử lý lỗi nếu có
+        }
+      };
 
-    getUserChat();
-  }, [user.id, reload]);
+      getUserChat(); // Gọi hàm lấy dữ liệu khi user tồn tại
+    }
+  }, [user, reload]); // Đặt dependencies là user và reload
 
   return (
-    <Box className="text-white lg:flex bg-[#DFFFFE] sm:grid sm:grid-cols-[300px_1fr]">
+    <Box className="text-white lg:flex bg-[#DFFFFE] w-full sm:grid sm:grid-cols-[400px_1fr]">
       <Box
-        className="sm:w-[300px]"
+        className="sm:w-[400px]"
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -490,12 +524,12 @@ const Incognito = () => {
           alignItems: "center",
         }}
       >
-        <Box className="bg-[#B6F6FF] uppercase text-black w-full py-3 text-center font-bold">
+        <Box className="bg-[#B6F6FF] h-[140px] uppercase text-black w-full pt-[50px] text-center text-4xl font-bold">
           chat
         </Box>
 
         <Box
-          className="relative"
+          className="relative w-[90%]"
           style={{
             margin: "0 10px",
             boxShadow: "0 -2px 4px rgba(0, 0, 0, 0.1)",
@@ -623,7 +657,7 @@ const Incognito = () => {
           )}
         </Box>
 
-        <Box className="max-h-[47vh] w-[90%] lg:max-h-[50vh] sm:w-[99%] overflow-auto scrollbar-none text-black">
+        <Box className="max-h-[47vh] w-full lg:max-h-[50vh] overflow-auto scrollbar-none text-black font-bold">
           {" "}
           {userChat.length > 0 ? (
             userChat.map((item, idx) => (
@@ -635,6 +669,7 @@ const Incognito = () => {
                   borderRadius: "30px",
                   margin: "5px 10px",
                   // padding: "5px",
+                  height: "70px",
                   backgroundColor: "#fff",
                   justifyContent: "space-between",
                 }}
@@ -645,19 +680,27 @@ const Incognito = () => {
                   setNowChat(item);
                 }}
               >
-                <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
                   <Avatar
-                    sx={{ width: "40px", height: "40px" }}
+                    sx={{ width: "60px", height: "60px" }}
                     src={item.user.avatar}
                   />
 
                   <Box sx={{ marginLeft: "10px", fontWeight: "700" }}>
                     {item.user === "Unknow" ? (
-                      <Typography variant="body1" sx={{ fontWeight: "700" }}>
+                      <span style={{ fontWeight: "700", fontSize: "40px" }}>
                         User name
-                      </Typography>
+                      </span>
                     ) : (
-                      <Typography variant="body1" sx={{ fontWeight: "700" }}>
+                      <Typography
+                        variant="body1"
+                        sx={{ fontWeight: "700", fontSize: "24px" }}
+                      >
                         {item.user.username}
                       </Typography>
                     )}
@@ -665,6 +708,7 @@ const Incognito = () => {
                       sx={{
                         overflow: "hidden",
                         width: "140px",
+                        fontSize: "20px",
                         whiteSpace: "nowrap",
                         textOverflow: "ellipsis",
                       }}
@@ -675,7 +719,7 @@ const Incognito = () => {
                   </Box>
                 </Box>
                 <DeleteIcon
-                  className="cursor-pointer mr-3"
+                  className="cursor-pointer mr-3 text-4xl"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -702,7 +746,7 @@ const Incognito = () => {
               backgroundColor: "#DFFFFE",
               boxShadow: "0 4px 4px rgba(0, 0, 0, 0.3)",
               justifyContent: "space-between",
-              height: "50px",
+              height: "140px",
               position: "relative",
               zIndex: 100,
             }}
@@ -726,8 +770,8 @@ const Incognito = () => {
                 <>
                   <Avatar
                     sx={{
-                      width: "40px",
-                      height: "40px",
+                      width: "90px",
+                      height: "90px",
                       marginRight: "5px",
                     }}
                     src={userInfomations.Avarta}
@@ -740,13 +784,13 @@ const Incognito = () => {
                 <>
                   <Avatar
                     sx={{
-                      width: "40px",
-                      height: "40px",
+                      width: "90px",
+                      height: "90px",
                       marginRight: "5px",
                     }}
                     src={nowChat.user.avatar}
                   />
-                  <Typography variant="body1">
+                  <Typography variant="body1" className="text-[40px]">
                     {nowChat.user.username}
                   </Typography>
                 </>
@@ -772,7 +816,47 @@ const Incognito = () => {
                 </>
               )}
             </Box>
-            <MoreHorizIcon />
+            <div className="relative">
+              <div onClick={toggleMenu}>
+                {isOpen ? (
+                  <ClearIcon className="text-[60px] mr-5 cursor-pointer menu-mobile" />
+                ) : (
+                  <MoreHorizIcon className="text-[60px] mr-5 cursor-pointer menu-mobile" />
+                )}
+              </div>
+
+              {isOpen && (
+                <ul className="bg-black text-white absolute left-0 transform -translate-x-full rounded-xl">
+                  <li className="flex whitespace-nowrap cursor-pointer p-3">
+                    <button
+                      className="bg-black text-white"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        deleteBoxChat(nowChat);
+                        setNowChat(null);
+                      }}
+                    >
+                      {" "}
+                      <svg
+                        className="mr-2"
+                        width="27"
+                        height="27"
+                        viewBox="0 0 27 27"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M3.93239 3.9326C1.50997 6.41453 0.153961 9.74523 0.153961 13.2134C0.153961 16.6815 1.50997 20.0122 3.93239 22.4942C6.41431 24.9166 9.74501 26.2726 13.2132 26.2726C16.6813 26.2726 20.012 24.9166 22.4939 22.4942C24.9164 20.0122 26.2724 16.6815 26.2724 13.2134C26.2724 9.74523 24.9164 6.41453 22.4939 3.9326C20.012 1.51018 16.6813 0.154176 13.2132 0.154176C9.74501 0.154177 6.41431 1.51018 3.93239 3.9326ZM19.1794 8.57299L14.539 13.2134L19.1794 17.8538L17.8536 19.1796L13.2132 14.5392L8.57278 19.1796L7.24695 17.8538L11.8873 13.2134L7.24695 8.57299L8.57278 7.24717L13.2132 11.8876L17.8536 7.24717L19.1794 8.57299Z"
+                          fill="white"
+                        />
+                      </svg>
+                      Delete dialogue
+                    </button>
+                  </li>
+                </ul>
+              )}
+            </div>
           </Box>
           <Box
             className="h-[74vh] lg:h-[79vh]"
@@ -786,90 +870,91 @@ const Incognito = () => {
               backgroundRepeat: "no-repeat",
             }}
           >
-            {messenger?.map((info, index) => (
-              <Box
-                key={index}
-                sx={{
-                  marginLeft: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  color: "#000",
-                  justifyContent:
-                    info.idReceive !== user.id ? "flex-end" : "flex-start",
-                }}
-                onClick={() => {
-                  getSendMess(info);
-                }}
-              >
-                {info.idReceive === user.id ? (
-                  <>
-                    <Avatar
-                      sx={{
-                        width: "40px",
-                        height: "40px",
-                        margin: "5px",
-                      }}
-                      src={nowChat.user.avatar}
-                    />
-                    {info.type === "text" ? (
-                      <Box
+            {Array.isArray(messenger) &&
+              messenger?.map((info, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    marginLeft: "10px",
+                    display: "flex",
+                    alignItems: "center",
+                    color: "#000",
+                    justifyContent:
+                      info.idReceive !== user.id ? "flex-end" : "flex-start",
+                  }}
+                  onClick={() => {
+                    getSendMess(info);
+                  }}
+                >
+                  {info.idReceive === user.id ? (
+                    <>
+                      <Avatar
                         sx={{
-                          backgroundColor: "#fff",
-                          borderRadius: "10px",
-                          padding: "5px",
-                          maxWidth: "70%",
+                          width: "40px",
+                          height: "40px",
+                          margin: "5px",
                         }}
-                      >
-                        {info.content}
-                      </Box>
-                    ) : info.type === "image" ? (
-                      <img
-                        src={info.img}
-                        alt="image"
-                        className="w-[30wh] h-[40vh] m-2"
+                        src={nowChat.user.avatar}
                       />
-                    ) : info.type === "gif" ? (
-                      <img
-                        src={info.gif}
-                        alt="GIF"
-                        className="max-w-[30wh] max-h-[40vh] m-2"
-                      />
-                    ) : null}
-                  </>
-                ) : (
-                  <>
-                    {" "}
-                    {info.type === "text" ? (
-                      <Box
-                        sx={{
-                          backgroundColor: "#1EC0F2",
-                          borderRadius: "10px",
-                          padding: "5px",
-                          margin: "5px 10px",
-                          maxWidth: "70%",
-                        }}
-                      >
-                        {info.content}
-                      </Box>
-                    ) : info.type === "image" ? (
-                      <img
-                        src={info.img}
-                        alt="image"
-                        className="w-[30wh] h-[40vh] m-2"
-                      />
-                    ) : info.type === "gif" ? (
-                      <img
-                        src={info.gif}
-                        alt="GIF"
-                        className="max-w-[30wh] max-h-[40vh] m-2"
-                      />
-                    ) : (
-                      ""
-                    )}
-                  </>
-                )}
-              </Box>
-            ))}
+                      {info.type === "text" ? (
+                        <Box
+                          sx={{
+                            backgroundColor: "#fff",
+                            borderRadius: "10px",
+                            padding: "5px",
+                            maxWidth: "70%",
+                          }}
+                        >
+                          {info.content}
+                        </Box>
+                      ) : info.type === "image" ? (
+                        <img
+                          src={info.img}
+                          alt="image"
+                          className="w-[30wh] h-[40vh] m-2"
+                        />
+                      ) : info.type === "gif" ? (
+                        <img
+                          src={info.gif}
+                          alt="GIF"
+                          className="max-w-[30wh] max-h-[40vh] m-2"
+                        />
+                      ) : null}
+                    </>
+                  ) : (
+                    <>
+                      {" "}
+                      {info.type === "text" ? (
+                        <Box
+                          sx={{
+                            backgroundColor: "#1EC0F2",
+                            borderRadius: "10px",
+                            padding: "5px",
+                            margin: "5px 10px",
+                            maxWidth: "70%",
+                          }}
+                        >
+                          {info.content}
+                        </Box>
+                      ) : info.type === "image" ? (
+                        <img
+                          src={info.img}
+                          alt="image"
+                          className="w-[30wh] h-[40vh] m-2"
+                        />
+                      ) : info.type === "gif" ? (
+                        <img
+                          src={info.gif}
+                          alt="GIF"
+                          className="max-w-[30wh] max-h-[40vh] m-2"
+                        />
+                      ) : (
+                        ""
+                      )}
+                    </>
+                  )}
+                </Box>
+              ))}
             <div id="lastmessage" />
           </Box>
 

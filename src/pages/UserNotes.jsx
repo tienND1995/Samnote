@@ -624,7 +624,7 @@ export default function UserNotes() {
           {note && note.length !== 0 ? (
             note.map((info, index) => (
               <div
-                key={index}
+                key={info.idNote}
                 className="my-1 p-3 rounded-xl "
                 style={{
                   border: "1px solid #000",
