@@ -6,6 +6,7 @@ import TextTruncate from 'react-text-truncate'
 
 import { fetchAllMessageList, fetchGroupList } from '../fetchApiGroup'
 import avatarDefault from '../../../assets/avatar-default.png'
+import typeGroup from '../../../assets/type-group.png'
 
 import Modal from 'react-bootstrap/Modal'
 
@@ -16,7 +17,6 @@ import configs from '../../../configs/configs.json'
 const { API_SERVER_URL, BASE64_URL } = configs
 
 import { Box } from '@mui/material'
-
 import SearchIcon from '@mui/icons-material/Search'
 import GroupAddIcon from '@mui/icons-material/GroupAdd'
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
@@ -282,8 +282,12 @@ const ChatList = (props) => {
   e.target.value = null
  }
 
+
  return (
-  <div className='shadow-lg bg-[#dffffe] flex flex-col flex-grow-1 px-[20px]'>
+  <div
+   style={{ boxShadow: '4px -4px 10px 0px #00000040' }}
+   className=' bg-[#dffffe] flex flex-col flex-grow-1 px-[20px]'
+  >
    <Modal
     className='modal-create-group'
     show={showModalCreateGroup}
@@ -500,7 +504,7 @@ const ChatList = (props) => {
      <button
       onClick={onShowModalSearch}
       type='button'
-      className='flex w-full gap-2 items-center bg-white p-2 rounded-5 shadow-lg text-[#686464CC]'
+      className='flex w-full gap-2 items-center bg-white p-2 rounded-5  text-[#686464CC]'
      >
       <SearchIcon />
       Search user
@@ -620,7 +624,7 @@ const ChatList = (props) => {
        return (
         <li
          key={message.idGroup}
-         className={`flex justify-between items-center rounded-[40px] cursor-pointer ${
+         className={`flex justify-between items-center rounded-[40px] cursor-pointer gap-1 ${
           message.idGroup === groupItem?.idGroup ? 'active' : null
          }`}
          onClick={() => onClickGroupItem(message)}
@@ -636,13 +640,21 @@ const ChatList = (props) => {
           </div>
 
           <div>
-           <TextTruncate
-            line={1}
-            element='h6'
-            truncateText='…'
-            text={message.name}
-            containerClassName='text-lg font-extrabold capitalize'
-           />
+           <div className='flex gap-2 items-center'>
+            <TextTruncate
+             line={1}
+             element='h6'
+             truncateText='…'
+             text={message.name}
+             containerClassName='text-lg font-extrabold capitalize'
+            />
+
+            <img
+             className='object-cover w-[20px] h-[20px]'
+             src={typeGroup}
+             alt='group icon'
+            />
+           </div>
            <p
             style={{ maxWidth: '200px' }}
             className={

@@ -46,13 +46,13 @@ const Group = () => {
  const [messageContent, setMessageContent] = useState({
   messageContentRef: useRef(),
   inputMessageFormRef: useRef(),
-  heightMessageContent: '500',
+  // heightMessageContent: '500',
   messageContentUlRef: useRef(),
  })
  const {
   inputMessageFormRef,
   messageContentRef,
-  heightMessageContent,
+  // heightMessageContent,
   messageContentUlRef,
  } = messageContent
 
@@ -68,6 +68,7 @@ const Group = () => {
  const [typeFilterChat, setTypeFilterChat] = useState(
   window.localStorage.getItem('typeFilterChat') || 'All'
  )
+
 
  const handleChangeTypeFilterChat = (type) => setTypeFilterChat(type)
 
@@ -104,7 +105,7 @@ const Group = () => {
    if (result.message === 'Error') return
 
    getAllMessageList()
-   const { ReceivedID, SenderID } = result.data
+   const { ReceivedID, SenderID } = result?.data
    if (
     formName === 'chat' &&
     (ReceivedID === infoOtherUser.id || SenderID === infoOtherUser.id)
@@ -141,7 +142,7 @@ const Group = () => {
   getMessageList(user.id, otherUser.user.id)
 
   setInfoOtherUser(otherUser.user)
-  inputMessageFormRef.current.focus()
+
   resetGroup()
  }
 
@@ -472,13 +473,14 @@ const Group = () => {
   disableGroupName,
  ])
 
+ const infoAnonymusRef = useRef()
+
  const propsFormMessage = {
   userID: user?.id,
   otherUserID: infoOtherUser?.id,
   idGroup: infoGroupItem.idGroup,
   socket,
   messageContentRef,
-  heightMessageContent,
   inputMessageFormRef,
   formName,
  }
@@ -616,8 +618,14 @@ const Group = () => {
     <ChatList data={propsChatList} />
    </div>
 
-   <div className='col-9 px-0 flex flex-col bg-red-300'>
-    <div className='flex justify-between items-center bg-[#dffffe] py-[30px] px-[20px] shadow-lg'>
+   <div
+    style={{ boxShadow: '0px 8px 10px 0px #00000040' }}
+    className='col-9 px-0 flex flex-col bg-red-300'
+   >
+    <div
+     ref={infoAnonymusRef}
+     className='flex justify-between items-center bg-[#dffffe] py-[30px] px-[20px]'
+    >
      <div className='flex gap-2 items-center'>
       <div className='position-relative'>
        <Link to={infoOtherUser.id && `/other-user/${infoOtherUser.id}`}>
@@ -720,6 +728,8 @@ const Group = () => {
     <div
      style={{
       background: `url(${bgMessage}) no-repeat center/cover`,
+      boxShadow: '10px 0px 10px 0px #00000040, 0px 1px 10px 0px #00000040',
+      maxHeight: `calc(100% - ${infoAnonymusRef.current?.offsetHeight}px)`,
      }}
      className='flex-grow-1 flex flex-col position-relative'
     >
@@ -727,7 +737,6 @@ const Group = () => {
       style={{
        overflowY: 'auto',
        scrollbarWidth: 'none',
-       height: `${heightMessageContent}px`,
       }}
       className='flex-grow-1 p-[20px]'
       ref={messageContentRef}

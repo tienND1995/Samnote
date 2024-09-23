@@ -64,7 +64,7 @@ const Information = (props) => {
    ref={informationRef}
    style={{
     transition: 'all ease-in-out .3s',
-    boxShadow: '-1px 0px 2px 2px  #00000040',
+    boxShadow: '-1px 2px 2px 2px #00000040 ',
    }}
    className={`p-3 position-absolute right-0 top-0 h-full bg-[#dffffe] overflow-hidden ${
     showInfo ? 'opacity-100 visible w-[480px]' : 'opacity-0 invisible w-0'
@@ -177,8 +177,7 @@ const Information = (props) => {
      return (
       <li key={image.id} className='col p-1'>
        <img
-        style={{ 'aspect-ratio': '1 / 1' }}
-        className='w-full object-cover rounded-md border border-gray-400'
+        className='w-full object-cover rounded-md border border-gray-400 aspect-square'
         src={image.image}
         alt=''
        />
