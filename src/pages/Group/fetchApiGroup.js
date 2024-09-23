@@ -13,7 +13,6 @@ export const fetchUserChatList = async (userID, socket, typeFilter) => {
    return socket.emit('join_room', { room: item.idRoom })
   })
 
-
   return response.data.data
  }
 
@@ -22,7 +21,6 @@ export const fetchUserChatList = async (userID, socket, typeFilter) => {
    if (item.is_seen !== 1)
     return socket.emit('join_room', { room: item.idRoom })
   })
-
 
   return response.data.data.filter((user) => user.is_seen !== 1)
  }
@@ -33,10 +31,71 @@ export const fetchUserChatList = async (userID, socket, typeFilter) => {
     return socket.emit('join_room', { room: item.idRoom })
   })
 
-
   return response.data.data.filter((user) => user.is_seen !== 0)
  }
- 
+}
+
+export const fetchAllMessageList = async (userID, socket, typeFilter) => {
+ const response = await axios.get(
+  `${API_SERVER_URL}/message/list_all_message/${userID}`
+ )
+
+ if (typeFilter === 'All') {
+  response.data.data.map((item) => {
+   if (item.type_chat === '1chat1')
+    return socket.emit('join_room', { room: item.idRoom })
+
+   if (item.type_chat === 'chatgroup')
+    return socket.emit('join_room', { room: item.idGroup })
+  })
+
+  return response.data.data
+ }
+
+ if (typeFilter === 'Unread') {
+  response.data.data.filter((item) => {
+   if (item.type_chat === '1chat1') {
+    if (item.is_seen !== 1)
+     return socket.emit('join_room', { room: item.idRoom })
+   }
+
+   if (item.type_chat === 'chatgroup') {
+    if (!isReadMessageGroup(item.listUserReaded, userID)) {
+     return socket.emit('join_room', { room: item.idGroup })
+    }
+   }
+  })
+
+  return response.data.data.filter((item) => {
+   if (item.type_chat === '1chat1') return item.is_seen !== 1
+   if (item.type_chat === 'chatgroup')
+    return !isReadMessageGroup(item.listUserReaded, userID)
+  })
+ }
+
+ if (typeFilter === 'Read') {
+  response.data.data.filter((item) => {
+   if (item.type_chat === '1chat1') {
+    if (item.is_seen !== 0)
+     return socket.emit('join_room', { room: item.idRoom })
+   }
+
+   if (item.type_chat === 'chatgroup') {
+    if (
+     item.listUserReaded > 0 &&
+     isReadMessageGroup(item.listUserReaded, userID)
+    ) {
+     return socket.emit('join_room', { room: item.idGroup })
+    }
+   }
+  })
+
+  return response.data.data.filter((item) => {
+   if (item.type_chat === '1chat1') return item.is_seen !== 0
+   if (item.type_chat === 'chatgroup')
+    return isReadMessageGroup(item.listUserReaded, userID)
+  })
+ }
 }
 
 const isReadMessageGroup = (listUserReaded, userID) => {

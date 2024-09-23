@@ -213,7 +213,7 @@ const Login = () => {
     if (!isOpen) return null;
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div className={`p-4 rounded shadow-lg bg-white`}>
+        <div className={`p-4 rounded shadow-lg bg-white w-[400px] `}>
           <div className="flex justify-between items-center flex-col">
             <span>{message}</span>
             <button
@@ -291,12 +291,18 @@ const Login = () => {
       const createAccount = async () => {
         try {
           setLoadingCreate(true);
-          await api.post(
+          const res = await api.post(
             `https://samnote.mangasocial.online/register`,
             payload
           );
+          console.log("res đăng kí", res);
 
-          setOpenDialog(true);
+          setNotification({
+            isOpen: true,
+            message: res.data.message,
+            severity: "success",
+          });
+          // setOpenDialog(true);
         } catch (err) {
           if (err.response.data.status == 400) {
             setNotification({
@@ -319,6 +325,7 @@ const Login = () => {
       user_name: userName,
       password,
     };
+
     try {
       const res = await api.post(`/login`, payload);
       setUser(res.data.user);
@@ -329,11 +336,17 @@ const Login = () => {
 
       window.location.reload();
     } catch (err) {
-      if (err.response.data.status == 400) {
+      if (err.response.data.status === 430) {
+        setNotification({
+          isOpen: true,
+          message: "User Not Found",
+          severity: "success", // Có thể sửa thành "error"
+        });
+      } else if (err.response.data.status === 400) {
         setNotification({
           isOpen: true,
           message: err.response.data.message,
-          severity: "success",
+          severity: "success", // Có thể sửa thành "error"
         });
       }
       console.log(err);

@@ -3,7 +3,7 @@ import './Group.css'
 
 import axios from 'axios'
 import moment from 'moment'
-import { Await, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import io from 'socket.io-client'
 
 import Modal from 'react-bootstrap/Modal'
@@ -14,11 +14,7 @@ import bgMessage from '../../assets/img-chat-an-danh.jpg'
 import configs from '../../configs/configs.json'
 import { AppContext } from '../../context'
 import FormMessage from './FormMessage/FormMessage'
-import {
- fetchAllMemberGroup,
- fetchUserChatList,
- fetchGroupList,
-} from './fetchApiGroup'
+import { fetchAllMemberGroup, fetchAllMessageList } from './fetchApiGroup'
 
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -26,6 +22,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import ChatList from './ChatList/ChatList'
 import Information from './Information/Information'
 import SettingGroup from './SettingGroup/SettingGroup'
+import { info } from 'autoprefixer'
 
 const { API_SERVER_URL } = configs
 
@@ -49,24 +46,22 @@ const Group = () => {
  const [messageContent, setMessageContent] = useState({
   messageContentRef: useRef(),
   inputMessageFormRef: useRef(),
-  heightMessageContent: '500',
+  // heightMessageContent: '500',
   messageContentUlRef: useRef(),
  })
  const {
   inputMessageFormRef,
   messageContentRef,
-  heightMessageContent,
+  // heightMessageContent,
   messageContentUlRef,
  } = messageContent
-
- const [userList, setUserList] = useState([])
- const [groupList, setGroupList] = useState([])
 
  const [infoOtherUser, setInfoOtherUser] = useState({})
  const [infoGroupItem, setInfoGroupItem] = useState({})
 
  const [messageList, setMessageList] = useState([])
  const [messageGroupList, setMessageGroupList] = useState([])
+ const [allMessageList, setAllMessageList] = useState([])
 
  const [formName, setFormName] = useState(null)
 
@@ -74,26 +69,18 @@ const Group = () => {
   window.localStorage.getItem('typeFilterChat') || 'All'
  )
 
+
  const handleChangeTypeFilterChat = (type) => setTypeFilterChat(type)
 
  //______________________________________
- const getGroupList = async () => {
+ const getAllMessageList = async () => {
   const typeFilterLocal = window.localStorage.getItem('typeFilterChat')
-  const groups = await fetchGroupList(
+  const messageList = await fetchAllMessageList(
    user.id,
    socket,
    typeFilterLocal || typeFilterChat
   )
-  setGroupList(groups)
- }
- const getUserChatList = async () => {
-  const typeFilterLocal = window.localStorage.getItem('typeFilterChat')
-  const userList = await fetchUserChatList(
-   user.id,
-   socket,
-   typeFilterLocal || typeFilterChat
-  )
-  setUserList(userList)
+  setAllMessageList(messageList)
  }
 
  useEffect(() => {
@@ -107,10 +94,7 @@ const Group = () => {
 
  useEffect(() => {
   if (!socket) return
-
-  getUserChatList()
-  getGroupList()
-
+  getAllMessageList()
   // eslint-disable-next-line react-hooks/exhaustive-deps
  }, [user?.id, socket, typeFilterChat])
 
@@ -118,9 +102,10 @@ const Group = () => {
   if (!socket) return
 
   socket.on('send_message', (result) => {
-   getUserChatList()
+   if (result.message === 'Error') return
 
-   const { ReceivedID, SenderID } = result.data
+   getAllMessageList()
+   const { ReceivedID, SenderID } = result?.data
    if (
     formName === 'chat' &&
     (ReceivedID === infoOtherUser.id || SenderID === infoOtherUser.id)
@@ -134,9 +119,11 @@ const Group = () => {
   })
 
   socket.on('chat_group', (result) => {
-   getGroupList()
+   getAllMessageList()
    if (formName === 'group') {
-    fetchMessagesGroup(infoGroupItem.idGroup)
+    const newIdGroup = result.data.idGroup
+    fetchMessagesGroup(newIdGroup)
+
     if (messageContentRef.current && messageContentUlRef.current) {
      messageContentRef.current.scrollTop =
       messageContentUlRef.current.offsetHeight
@@ -155,7 +142,7 @@ const Group = () => {
   getMessageList(user.id, otherUser.user.id)
 
   setInfoOtherUser(otherUser.user)
-  inputMessageFormRef.current.focus()
+
   resetGroup()
  }
 
@@ -164,7 +151,7 @@ const Group = () => {
    const response = await axios.delete(`${API_SERVER_URL}/message/${messageID}`)
 
    getMessageList(user.id, infoOtherUser.id)
-   getUserChatList()
+   getAllMessageList()
   } catch (error) {
    console.log(error)
   }
@@ -173,7 +160,7 @@ const Group = () => {
  const fetchUpdateSeenMessage = async (messageID) => {
   try {
    const response = await axios.post(`${API_SERVER_URL}/message/${messageID}`)
-   getUserChatList()
+   getAllMessageList()
   } catch (error) {
    console.log(error)
   }
@@ -284,17 +271,6 @@ const Group = () => {
   setSearchUserFormName('chat')
  }
 
- // set height messages
- //  useEffect(() => {
- //   // @ts-ignore
- //   messageContentRef.current.offsetHeight &&
- //    // @ts-ignore
- //    setMessageContent({
- //     ...messageContent,
- //     heightMessageContent: `${messageContentRef.current.offsetHeight - 50}`,
- //    })
- //  }, [])
-
  // *** reset when click userItem, groupItem
  const resetGroup = () => {
   setInfoGroupItem({})
@@ -400,7 +376,6 @@ const Group = () => {
     { groupName: newName }
    )
 
-   getGroupList()
    setDisableGroupName(true)
    setInfoGroupItem({ ...infoGroupItem, name: newName })
   } catch (error) {
@@ -417,7 +392,7 @@ const Group = () => {
     }
    )
 
-   await getGroupList()
+   getAllMessageList()
 
    // render new avatar
    setTimeout(() => {
@@ -434,6 +409,7 @@ const Group = () => {
  const handleChangeNameGroup = (e) => {
   setValueGroupName(e.target.value)
  }
+
  const handleSubmitFormNameGroup = (e) => {
   e.preventDefault()
   if (!infoGroupItem.idGroup) return
@@ -466,16 +442,19 @@ const Group = () => {
    if (
     !formGroupNameRef.current ||
     !inputGroupNameRef.current ||
-    !buttonClickEditNameGroup.current
+    !buttonClickEditNameGroup.current ||
+    !disableGroupName ||
+    Object.keys(infoGroupItem).length === 0 ||
+    valueGroupName.trim() === ''
    )
     return
-
    if (
     !formGroupNameRef.current?.contains(element) &&
     !inputGroupNameRef.current.disabled &&
     !buttonClickEditNameGroup.current?.contains(element)
    ) {
     setDisableGroupName(true)
+    setValueGroupName(infoGroupItem.name)
    }
   }
 
@@ -486,7 +465,15 @@ const Group = () => {
   return document.body.removeEventListener('click', (e) => {
    handleClickOutside(e.target)
   })
- }, [formGroupNameRef, inputGroupNameRef, buttonClickEditNameGroup])
+ }, [
+  formGroupNameRef,
+  inputGroupNameRef,
+  buttonClickEditNameGroup,
+  infoGroupItem,
+  disableGroupName,
+ ])
+
+ const infoAnonymusRef = useRef()
 
  const propsFormMessage = {
   userID: user?.id,
@@ -494,7 +481,6 @@ const Group = () => {
   idGroup: infoGroupItem.idGroup,
   socket,
   messageContentRef,
-  heightMessageContent,
   inputMessageFormRef,
   formName,
  }
@@ -504,9 +490,8 @@ const Group = () => {
   socket,
   typeFilterChat,
 
-  userList,
-  groupList,
-  setGroupList,
+  allMessageList,
+  setAllMessageList,
 
   userItem: infoOtherUser,
   groupItem: infoGroupItem,
@@ -633,9 +618,14 @@ const Group = () => {
     <ChatList data={propsChatList} />
    </div>
 
-   <div className='col-9 px-0 flex flex-col bg-red-300'>
-    
-    <div className='flex justify-between items-center bg-[#dffffe] py-[30px] px-[20px] shadow-lg'>
+   <div
+    style={{ boxShadow: '0px 8px 10px 0px #00000040' }}
+    className='col-9 px-0 flex flex-col bg-red-300'
+   >
+    <div
+     ref={infoAnonymusRef}
+     className='flex justify-between items-center bg-[#dffffe] py-[30px] px-[20px]'
+    >
      <div className='flex gap-2 items-center'>
       <div className='position-relative'>
        <Link to={infoOtherUser.id && `/other-user/${infoOtherUser.id}`}>
@@ -738,6 +728,8 @@ const Group = () => {
     <div
      style={{
       background: `url(${bgMessage}) no-repeat center/cover`,
+      boxShadow: '10px 0px 10px 0px #00000040, 0px 1px 10px 0px #00000040',
+      maxHeight: `calc(100% - ${infoAnonymusRef.current?.offsetHeight}px)`,
      }}
      className='flex-grow-1 flex flex-col position-relative'
     >
@@ -745,7 +737,6 @@ const Group = () => {
       style={{
        overflowY: 'auto',
        scrollbarWidth: 'none',
-       height: `${heightMessageContent}px`,
       }}
       className='flex-grow-1 p-[20px]'
       ref={messageContentRef}
@@ -812,6 +803,7 @@ const Group = () => {
               style={{ width: '40px', height: '40px' }}
               src={infoOtherUser.Avarta}
               alt='avatar other_user'
+              onError={(e) => (e.target.src = avatarDefault)}
              />
             </div>
 
