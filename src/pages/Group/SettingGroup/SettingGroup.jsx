@@ -226,7 +226,7 @@ const SettingGroup = (props) => {
    >
     <li>
      <button
-      className={`text-[25px] ${typeButtonGroup === 'quit' ? 'active' : null}`}
+      className={`text-[25px] flex items-center ${typeButtonGroup === 'quit' ? 'active' : null}`}
       onClick={handleQuitGroup}
      >
       <LogoutIcon className='me-2 text-[30px]' /> Quit group
@@ -235,7 +235,7 @@ const SettingGroup = (props) => {
 
     <li>
      <button
-      className={`text-[25px] ${typeButtonGroup === 'add' ? 'active' : null}`}
+      className={`text-[25px] flex items-center ${typeButtonGroup === 'add' ? 'active' : null}`}
       onClick={onShowModalSearch}
      >
       <AddCircleOutlineIcon className='me-2 text-[30px]' /> Add member
@@ -245,7 +245,7 @@ const SettingGroup = (props) => {
     {isLeaderTeam(groupItem?.idOwner) && (
      <li>
       <button
-       className={`text-[25px] ${
+       className={`text-[25px] flex items-center ${
         typeButtonGroup === 'delete' ? 'active' : null
        }`}
        onClick={handleShowAllMembers}
@@ -257,8 +257,9 @@ const SettingGroup = (props) => {
 
     <li>
      <button
-      className={`text-[25px] ${typeButtonGroup === 'add' ? 'active' : null}`}
+      className={`text-[25px] flex items-center ${typeButtonGroup === 'add' ? 'active' : null}`}
       onClick={handleShowInformation}
+      id='show-information'
      >
       <InfoIcon className='me-2 text-[30px]' />
       Information

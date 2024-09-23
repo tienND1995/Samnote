@@ -4,7 +4,7 @@ import './ChatList.css'
 
 import TextTruncate from 'react-text-truncate'
 
-import { fetchGroupList } from '../fetchApiGroup'
+import { fetchAllMessageList, fetchGroupList } from '../fetchApiGroup'
 import avatarDefault from '../../../assets/avatar-default.png'
 
 import Modal from 'react-bootstrap/Modal'
@@ -31,11 +31,10 @@ const ChatList = (props) => {
   socket,
   typeFilterChat,
 
-  userList,
-  groupList,
-  setGroupList,
   userItem,
   groupItem,
+  allMessageList,
+  setAllMessageList,
   setSnackbar,
 
   onChangeTypeFilter,
@@ -68,8 +67,9 @@ const ChatList = (props) => {
 
  const isReadMessageGroup = (listUserReaded, userID) => {
   if (listUserReaded.length < 1) return false
+
   return listUserReaded.some(
-   (userReaded) => Number(userReaded.idUser) === userID
+   (userReaded) => parseInt(userReaded.idUser) === userID
   )
  }
 
@@ -121,9 +121,13 @@ const ChatList = (props) => {
    })
 
    //  cập nhật group list
-   const groups = await fetchGroupList(userID, socket, typeFilterChat)
-   setGroupList(groups)
-   //  postAvatar(avatarGroup)
+
+   const allMessageList = await fetchAllMessageList(
+    userID,
+    socket,
+    typeFilterChat
+   )
+   setAllMessageList(allMessageList)
 
    // reset form create group
    setShowModalCreateGroup(false)
@@ -310,7 +314,7 @@ const ChatList = (props) => {
            type='file'
            className='hidden m-0'
           />
-          <label htmlFor='file-avatar-group' className='flex'>
+          <label htmlFor='file-avatar-group' className='flex cursor-pointer'>
            <CameraAltIcon className='text-[20px]' />
           </label>
          </div>
@@ -552,111 +556,127 @@ const ChatList = (props) => {
      ref={chatListRef}
      style={{ height: `${heightChatList}px`, scrollbarWidth: 'none' }}
     >
-     {userList?.map((item) => {
-      return (
-       <li
-        key={item.idMessage}
-        className={`flex justify-between items-center rounded-[40px] cursor-pointer ${
-         userItem?.id === item.user.id ? 'active' : null
-        }`}
-        onClick={() => onClickUserItem(item)}
-       >
-        <div className='flex gap-2 items-center'>
-         <div>
-          <img
-           src={item.user.Avarta}
-           alt='avatar'
-           className='w-[50px] h-[50px] object-cover rounded-[100%]'
-          />
-         </div>
-
-         <div>
-          <h5 className='text-lg font-extrabold capitalize'>
-           {item.user.name}
-          </h5>
-          <p
-           style={{ maxWidth: '200px' }}
-           className={
-            item.is_seen === 0
-             ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[600] text-lg'
-             : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
-           }
-          >
-           {convertLastText(item.last_text, item.idSend)}
-          </p>
-         </div>
-        </div>
-
-        <div
-         className={
-          item.is_seen === 0
-           ? 'text-[#ff0404] text-[16px] me-2'
-           : 'text-[#00ff73] text-[16px] me-2'
-         }
+     {allMessageList?.map((message) => {
+      if (message.type_chat === '1chat1') {
+       return (
+        <li
+         key={message.idMessage}
+         className={`flex justify-between items-center rounded-[40px] cursor-pointer ${
+          userItem?.id === message.user.id ? 'active' : null
+         }`}
+         onClick={() => onClickUserItem(message)}
         >
-         {item.is_seen === 0 ? (
-          <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
-           1
-          </p>
-         ) : (
-          <CheckIcon />
-         )}
-        </div>
-       </li>
-      )
-     })}
+         <div className='flex gap-2 items-center'>
+          <div>
+           <img
+            src={message.user.Avarta}
+            alt='avatar'
+            className='w-[50px] h-[50px] object-cover rounded-[100%]'
+            onError={(e) => (e.target.src = avatarDefault)}
+           />
+          </div>
 
-     {groupList?.map((item) => (
-      <li
-       key={item.idGroup}
-       className={`flex justify-between items-center rounded-[40px] cursor-pointer ${
-        item.idGroup === groupItem?.idGroup ? 'active' : null
-       }`}
-       onClick={() => onClickGroupItem(item)}
-      >
-       <div className='flex gap-2 items-center'>
-        <div>
-         <img
-          src={item.linkAvatar || avatarDefault}
-          alt='avatar'
-          className='w-[50px] h-[50px] object-cover rounded-[100%]'
-         />
-        </div>
+          <div>
+           <TextTruncate
+            line={1}
+            element='h6'
+            truncateText='…'
+            text={message.user.name}
+            containerClassName='text-lg font-extrabold capitalize'
+           />
+           <p
+            style={{ maxWidth: '200px' }}
+            className={
+             message.is_seen === 0
+              ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[600] text-lg'
+              : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
+            }
+           >
+            {convertLastText(message.last_text, message.idSend)}
+           </p>
+          </div>
+         </div>
 
-        <div>
-         <h5 className='text-lg font-extrabold capitalize'>{item.name}</h5>
-         <p
-          style={{ maxWidth: '200px' }}
+         <div
           className={
-           item.is_seen === 0
-            ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[600] text-lg'
-            : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
+           message.is_seen === 0
+            ? 'text-[#ff0404] text-[16px] me-2'
+            : 'text-[#00ff73] text-[16px] me-2'
           }
          >
-          {item.text_lastest_message_in_group}
-         </p>
-        </div>
-       </div>
+          {message.is_seen === 0 ? (
+           <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
+            1
+           </p>
+          ) : (
+           <CheckIcon />
+          )}
+         </div>
+        </li>
+       )
+      }
 
-       <div
-        className={
-         isReadMessageGroup(item.listUserReaded)
-          ? 'text-[#00ff73] text-[16px] me-2'
-          : 'text-[#ff0404] text-[16px] me-2'
-        }
-       >
-        {isReadMessageGroup(item.listUserReaded) ? (
-         <CheckIcon />
-        ) : (
-         <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
-          1
-         </p>
-        )}
-       </div>
-      </li>
-     ))}
+      if (message.type_chat === 'chatgroup') {
+       return (
+        <li
+         key={message.idGroup}
+         className={`flex justify-between items-center rounded-[40px] cursor-pointer ${
+          message.idGroup === groupItem?.idGroup ? 'active' : null
+         }`}
+         onClick={() => onClickGroupItem(message)}
+        >
+         <div className='flex gap-2 items-center'>
+          <div>
+           <img
+            src={message.linkAvatar || avatarDefault}
+            alt='avatar'
+            className='w-[50px] h-[50px] object-cover rounded-[100%]'
+            onError={(e) => (e.target.src = avatarDefault)}
+           />
+          </div>
 
-     {userList.length === 0 && groupList.length === 0 && (
+          <div>
+           <TextTruncate
+            line={1}
+            element='h6'
+            truncateText='…'
+            text={message.name}
+            containerClassName='text-lg font-extrabold capitalize'
+           />
+           <p
+            style={{ maxWidth: '200px' }}
+            className={
+             isReadMessageGroup(message.listUserReaded, userID)
+              ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
+              : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[600] text-lg'
+            }
+           >
+            {message.text_lastest_message_in_group}
+           </p>
+          </div>
+         </div>
+
+         <div
+          className={
+           isReadMessageGroup(message.listUserReaded, userID)
+            ? 'text-[#00ff73] text-[16px] me-2'
+            : 'text-[#ff0404] text-[16px] me-2'
+          }
+         >
+          {isReadMessageGroup(message.listUserReaded, userID) ? (
+           <CheckIcon />
+          ) : (
+           <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
+            1
+           </p>
+          )}
+         </div>
+        </li>
+       )
+      }
+     })}
+
+     {allMessageList.length === 0 && (
       <div className='text-center'>
        <div>
         <ChatBubbleOutlineIcon className='text-[80px]' />

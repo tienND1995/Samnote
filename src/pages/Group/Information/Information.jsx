@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import avatarDefault from '../../../assets/avatar-default.png'
-
-import { fetchAllMemberGroup } from '../fetchApiGroup'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import GroupsIcon from '@mui/icons-material/Groups'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import ImageIcon from '@mui/icons-material/Image'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 
 const Information = (props) => {
@@ -17,8 +15,8 @@ const Information = (props) => {
  const [toggleMemberList, setToggleMemberList] = useState(false)
 
  const [imageList, setImageList] = useState([])
-
- console.log(groupItem)
+ const informationRef = useRef()
+ const btnBackRef = useRef()
 
  useEffect(() => {
   groupItem.idGroup && fetchAllImageGroup(groupItem.idGroup)
@@ -36,9 +34,34 @@ const Information = (props) => {
   }
  }
 
+ // hande click outside element
+ useEffect(() => {
+  const handleClickOutside = (element) => {
+   if (!informationRef.current || !btnBackRef.current || !showInfo) return
+
+   const settingBtnItem = document.querySelector('#show-information')
+
+   if (
+    showInfo &&
+    !informationRef.current?.contains(element) &&
+    !settingBtnItem.contains(element)
+   ) {
+    onHide()
+   }
+  }
+
+  document.body.addEventListener('click', (e) => {
+   handleClickOutside(e.target)
+  })
+
+  return document.body.removeEventListener('click', (e) => {
+   handleClickOutside(e.target)
+  })
+ }, [informationRef, btnBackRef, showInfo])
 
  return (
   <div
+   ref={informationRef}
    style={{
     transition: 'all ease-in-out .3s',
     boxShadow: '-1px 0px 2px 2px  #00000040',
@@ -51,6 +74,7 @@ const Information = (props) => {
     <button
      className='position-absolute left-0 top-1/2 translate-y-[-50%]'
      onClick={onHide}
+     ref={btnBackRef}
     >
      <ArrowBackIosIcon className='text-[25px]' />
     </button>
@@ -70,13 +94,13 @@ const Information = (props) => {
     <div className='position-absolute bg-[#d9d9d9] w-[30px] h-[30px] rounded-full right-0 bottom-0 flex items-center justify-center'>
      <input
       //   onChange={handleChangeAvatarGroup}
-      id='file'
+      id='info-file'
       type='file'
       className='hidden m-0'
       //  disabled={!(infoGroupItem.idOwner === user.id)}
       //   disabled={!isLeaderTeam(infoGroupItem.idOwner)}
      />
-     <label htmlFor='file' className='flex'>
+     <label htmlFor='info-file' className='flex'>
       <CameraAltIcon className='text-[20px]' />
      </label>
     </div>
@@ -91,12 +115,12 @@ const Information = (props) => {
 
     <button
      style={{
-      transform: `rotate(${toggleMemberList ? '180' : '0'})`,
+      transform: `rotate(${toggleMemberList ? 180 : 0}deg)`,
      }}
      onClick={() => setToggleMemberList((prevState) => !prevState)}
      disabled={groupMemberList?.length < 1}
     >
-     <KeyboardArrowDownIcon className='text-[30px]' />
+     <KeyboardArrowDownIcon className='text-[50px]' />
     </button>
    </div>
 
