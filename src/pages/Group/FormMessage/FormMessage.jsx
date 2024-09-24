@@ -277,7 +277,7 @@ const FormMessage = ({
     </ul>
    ) : null}
    <form
-    className='flex items-center gap-[30px] flex-grow-1'
+    className='flex items-center gap-[30px] flex-grow-1 position-relative'
     onSubmit={handleSubmitMessage}
    >
     <div className='w-100'>

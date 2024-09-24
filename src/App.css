@@ -1,3 +1,4 @@
+
 li {
  list-style-type: none;
 }
@@ -49,26 +50,4 @@ li {
  display: block !important;
 }
 
-/* todo new code */
 
-
-button, input {
- outline: none;
- border: none;
- background: transparent;
-}
-
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
- margin-bottom: 0 !important;
-}
-
-ul {
- margin-bottom: 0 !important;
- padding-left: 0 !important;
-}

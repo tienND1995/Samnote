@@ -5,12 +5,12 @@ const RootLayout = () => {
   const isLogin = JSON.parse(localStorage.getItem("USER"));
 
   return isLogin ? (
-    <section className="vh-100 flex">
-      <div className="w-[100px] h-[100%] flex flex-grow-1">
+    <section className="w-full vh-100 flex">
+      <div className="w-[100px] flex flex-grow-1">
         <UserPanel />
       </div>
 
-      <div className="w-full flex overflow-y-auto">
+      <div className="w-full flex">
         <Outlet />
       </div>
     </section>

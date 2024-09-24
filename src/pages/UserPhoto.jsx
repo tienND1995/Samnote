@@ -504,12 +504,7 @@ const UserPhoto = () => {
   const appContext = useContext(AppContext);
   const { user } = appContext;
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const convertToHttps = (url) => {
-    if (typeof url === "string" && url.startsWith("http://")) {
-      return url.replace("http://", "https://");
-    }
-    return url;
-  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
