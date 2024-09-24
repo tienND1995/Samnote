@@ -13,7 +13,7 @@ import UserDustbin from "./pages/UserDustbin";
 import UserGroup from "./pages/UserGroup";
 import UserNotes from "./pages/UserNotes";
 import UserPhoto from "./pages/UserPhoto";
-import UserProfile from "./pages/UserProfile";
+import UserProfile from "./pages/UserProfile/UserProfile";
 import UserSetting from "./pages/UserSetting";
 import UserSketch from "./pages/UserSketch";
 
