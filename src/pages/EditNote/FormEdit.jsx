@@ -10,6 +10,7 @@ import Slider from 'react-slick'
 
 import { fetchNotsList, fetchAllFolder } from './fetchApiNote'
 import { AppContext } from '../../context'
+import FormEditImages from './FormEditImages'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
@@ -50,6 +51,7 @@ const FormEdit = () => {
   setValue,
   watch,
   reset,
+  unregister,
   formState: { errors, dirtyFields },
  } = useForm({
   // resolver: joiResolver(schemaNoteEdit),
@@ -104,7 +106,7 @@ const FormEdit = () => {
    if (!noteId || noteId.length === 0) return null
 
    setNoteItem(noteId[0])
-   setContentEditor(noteId[0].data)
+   //  setContentEditor(noteId[0].data)
 
    // set values form default
    setValue('title', noteId[0].title)
@@ -153,25 +155,6 @@ const FormEdit = () => {
   const colorMatch = colorList?.filter((color) => color.name === colorForm)
   setColor(colorMatch[0])
  }, [colorForm])
-
- const settings = {
-  dots: false,
-  infinite: true,
-  speed: 500,
-  slidesToShow: 5,
-  slidesToScroll: 1,
-  className: 'editnote-btn-slick',
-  nextArrow: (
-   <button>
-    <ArrowForwardIosIcon />
-   </button>
-  ),
-  prevArrow: (
-   <button>
-    <ArrowBackIosIcon />
-   </button>
-  ),
- }
 
  const onSubmit = (data) => {
   console.log(data)
@@ -309,30 +292,7 @@ const FormEdit = () => {
      </div>
     </div>
 
-    <div className='bg-white px-3 pt-2  rounded-md'>
-     <div className='flex justify-end gap-2 mb-2'>
-      <div>
-       <button className='btn btn-primary'>Select All</button>
-      </div>
-      <div>
-       <button className='btn btn-danger'>Delete</button>
-      </div>
-     </div>
-
-     <div className='max-w-[35vw] mx-auto'>
-      <Slider {...settings}>
-       {noteItem?.image?.map(({ id, link }) => (
-        <li key={id} className='p-1  border-none outline-none'>
-         <img
-          className='object-cover aspect-[1/1] w-full rounded-md'
-          src={link}
-          alt='img-editnote'
-         />
-        </li>
-       ))}
-      </Slider>
-     </div>
-    </div>
+    <FormEditImages images={noteItem?.image} />
 
     <div className='flex justify-start items-center'>
      <FormControlLabel

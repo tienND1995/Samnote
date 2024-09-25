@@ -37,8 +37,11 @@ const NoteItem = ({ note }) => {
  return (
   <li
    key={note.idNote}
-   style={{ boxShadow: '0px 4px 10px 0px #00000040' }}
-   className='row row-cols-4 justify-between rounded-lg bg-white mx-0 p-2 position-relative cursor-pointer'
+   style={{
+    boxShadow: '0px 4px 10px 0px #00000040',
+    backgroundColor: `rgb(${note.color.r}, ${note.color.g}, ${note.color.b})`,
+   }}
+   className='row row-cols-4 justify-between rounded-lg mx-0 p-2 position-relative cursor-pointer'
   >
    <h6 className='col font-semibold'>{note.title}</h6>
    <div className='col-6 px-0'>
