@@ -49,7 +49,7 @@ export const schemaNoteEdit = Joi.object({
   'string.empty': 'Not title yet!',
  }),
 
- nodePublic: Joi.array().min(1).required().messages({
+ notePublic: Joi.array().min(1).required().messages({
   'array.min': 'At least 1 member!',
  }),
 
@@ -65,5 +65,9 @@ export const schemaNoteEdit = Joi.object({
 
  color: Joi.object().required().messages({
   'string.empty': 'Not color yet!',
+ }),
+
+ pinned: Joi.boolean().required().messages({
+  'string.empty': 'Not pinned yet!',
  }),
 })

@@ -6,11 +6,9 @@ import { useForm } from 'react-hook-form'
 import { joiResolver } from '@hookform/resolvers/joi'
 import { schemaNoteEdit } from '../../utils/schema/schema'
 import { Editor } from '@tinymce/tinymce-react'
-
 import Slider from 'react-slick'
 
-import { fetchNotsList } from './fetchApiNote'
-
+import { fetchNotsList, fetchAllFolder } from './fetchApiNote'
 import { AppContext } from '../../context'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
@@ -30,79 +28,66 @@ import configs from '../../configs/configs.json'
 const { API_SERVER_URL } = configs
 
 const FormEdit = () => {
- const [noteItem, setNoteItem] = useState({})
-
- const [colorList, setColorList] = useState([])
-
  const appContext = useContext(AppContext)
  const { user } = appContext
  const { id } = useParams()
 
- const [formEdit, setFormEdit] = useState({
-  data: '',
-  title: '',
-  color: {},
-  remindAt: '',
-  nodePublic: 0,
-  lock: '123456',
-  idFolder: 45,
+ const [noteItem, setNoteItem] = useState({})
+
+ const [colorList, setColorList] = useState([])
+ const [folderList, setFolderList] = useState([])
+ const [color, setColor] = useState({
+  r: '255',
+  g: '0',
+  b: '0',
+  name: 'red',
  })
 
- const data = {
-  type: 'text',
-  data: 'hello cac tinh yeu',
-  title: 'giang sinh an lanh',
-  color: {
-   r: 255,
-   g: 255,
-   b: 255,
-   a: 1,
-  },
-  idFolder: 45,
-  remindAt: '01/01/2024 07:00 AM +07:00',
-  nodePublic: 0,
-  dueAt: '01/01/2024 07:00 AM +07:00',
-  lock: '123456',
-  pinned: false,
-  linkNoteShare: '',
- }
-
+ // Declare variables for the form
  const {
   register,
   handleSubmit,
   setValue,
-  getValues,
+  watch,
   reset,
-  formState: { errors },
+  formState: { errors, dirtyFields },
  } = useForm({
-  resolver: joiResolver(schemaNoteEdit),
-  defaultValues: async () => {
-   const data = await fetchNoteId(1281)
-
-   return {
-    data: data?.data === 'Locked' ? '' : data.data,
-    title: data.title,
-    color: data.color,
-    remindAt: data.remindAt,
-    nodePublic: data.nodePublic,
-    lock: data.lock,
-    idFolder: '',
-   }
+  // resolver: joiResolver(schemaNoteEdit),
+  defaultValues: {
+   notePublic: 1,
+   data: '',
+   pinned: false,
+   title: '',
+   remindAt: null,
+   lock: '',
+   color: '',
+   type: '',
+   idFolder: '',
   },
  })
+ const notePublicForm = watch('notePublic')
+ const colorForm = watch('color')
+ const folderForm = watch('idFolder')
+ const dataForm = watch('data')
 
- const fetchNoteId = async (idNote) => {
-  try {
-   const response = await axios.get(
-    `https://samnote.mangasocial.online/only/${idNote}`
-   )
-
-   setNoteItem(response.data.note)
-   return response.data.note
-  } catch (error) {
-   console.error(error)
-  }
- }
+ //  const data = {
+ //   type: 'text',
+ //   data: 'hello cac tinh yeu',
+ //   title: 'giang sinh an lanh',
+ //   color: {
+ //    r: 255,
+ //    g: 255,
+ //    b: 255,
+ //    a: 1,
+ //   },
+ //   idFolder: 45,
+ //   remindAt: '01/01/2024 07:00 AM +07:00',
+ //   nodePublic: 0,
+ //   dueAt: '01/01/2024 07:00 AM +07:00',
+ //   lock: '123456',
+ //   pinned: false,
+ //   linkNoteShare: '',
+ //  }
 
  useEffect(() => {
   const fetchAllColor = async () => {
@@ -113,12 +98,61 @@ const FormEdit = () => {
     console.error(error)
    }
   }
+  const getDataNoteId = async () => {
+   const noteList = await fetchNotsList(user?.id)
+   const noteId = noteList.filter((note) => note.idNote === Number.parseInt(id))
+   if (!noteId || noteId.length === 0) return null
 
-  id && fetchNoteId(id)
+   setNoteItem(noteId[0])
+   setContentEditor(noteId[0].data)
+
+   // set values form default
+   setValue('title', noteId[0].title)
+   setValue('data', noteId[0].data)
+   setValue('pinned', noteId[0].pinned)
+   setValue('type', noteId[0].type)
+   setValue('remindAt', noteId[0].remindAt)
+   setValue('notePublic', noteId[0].notePublic)
+   setValue('idFolder', noteId[0].idFolder)
+  }
+  const getFolders = async () => {
+   const folders = await fetchAllFolder(user?.id)
+   setFolderList(folders)
+  }
+
+  if (!user?.id) return
+
+  getDataNoteId()
+  getFolders()
   fetchAllColor()
- }, [])
+ }, [user?.id])
 
- console.log(noteItem)
+ useEffect(() => {
+  // render color when component mounted
+  const handleColor = () => {
+   if (colorList.length < 1 || !noteItem.color) return
+
+   const colorMatch = colorList?.filter(
+    (item) =>
+     item.r === noteItem?.color.r &&
+     item.g === noteItem?.color.g &&
+     item.b === noteItem?.color.b
+   )
+   setValue('color', colorMatch[0]?.name)
+   setColor(colorMatch[0])
+  }
+
+  handleColor()
+ }, [colorList, noteItem])
+
+ useEffect(() => {
+  // check color form change?
+  if (!dirtyFields.color) return
+
+  // handle change color
+  const colorMatch = colorList?.filter((color) => color.name === colorForm)
+  setColor(colorMatch[0])
+ }, [colorForm])
 
  const settings = {
   dots: false,
@@ -139,9 +173,17 @@ const FormEdit = () => {
   ),
  }
 
+ const onSubmit = (data) => {
+  console.log(data)
+ }
+
  return (
   <div className='p-2 bg-[#3A3F42] rounded-lg flex flex-col flex-grow-1'>
-   <form className='flex flex-col flex-grow-1 gap-3' action=''>
+   <form
+    onSubmit={handleSubmit(onSubmit)}
+    className='flex flex-col flex-grow-1 gap-3'
+    action=''
+   >
     <div className='row row-cols-3 text-white'>
      <div className='col'>
       <div className='mb-3'>
@@ -151,7 +193,7 @@ const FormEdit = () => {
         size='small'
         type='text'
         disabled={true}
-        value={'text'}
+        {...register('type')}
        />
       </div>
 
@@ -161,6 +203,7 @@ const FormEdit = () => {
         className='w-full bg-white rounded-1 '
         size='small'
         type='password'
+        {...register('lock')}
        />
       </div>
 
@@ -170,7 +213,13 @@ const FormEdit = () => {
        </InputLabel>
 
        <FormControl className=' bg-white rounded-1 w-full'>
-        <Select value={'red'} labelId='select-color-form' size='small'>
+        <Select
+         value={colorForm}
+         style={{ background: `rgb(${color?.r}, ${color?.g}, ${color?.b})` }}
+         {...register('color')}
+         labelId='select-color-form'
+         size='small'
+        >
          {colorList?.map((colorOption) => (
           <MenuItem
            className='capitalize'
@@ -184,7 +233,7 @@ const FormEdit = () => {
              width: '20px',
              border: '1px solid black',
              marginLeft: '3px',
-             background: `rgba(${colorOption.r}, ${colorOption.g}, ${colorOption.b})`,
+             background: `rgb(${colorOption.r}, ${colorOption.g}, ${colorOption.b})`,
             }}
            ></span>
           </MenuItem>
@@ -212,14 +261,17 @@ const FormEdit = () => {
 
        <FormControl className=' bg-white rounded-1 w-full'>
         <Select
+         value={folderForm}
          {...register('idFolder')}
-         value={1}
          labelId='select-public-form'
          size='small'
+         className='capitalize'
         >
-         <MenuItem value='1'>Public</MenuItem>
-
-         <MenuItem value='0'>Private</MenuItem>
+         {folderList?.map(({ id, nameFolder }) => (
+          <MenuItem key={id} value={id} className='capitalize'>
+           {nameFolder}
+          </MenuItem>
+         ))}
         </Select>
        </FormControl>
       </div>
@@ -230,15 +282,9 @@ const FormEdit = () => {
        </InputLabel>
 
        <FormControl className=' bg-white rounded-1 w-full'>
-        <Select
-         {...register('nodePublic')}
-         value={1}
-         labelId='select-public-form'
-         size='small'
-        >
-         <MenuItem value='0'>Public</MenuItem>
-
-         <MenuItem value='1'>Private</MenuItem>
+        <Select value={notePublicForm} {...register('notePublic')} size='small'>
+         <MenuItem value={1}>Public</MenuItem>
+         <MenuItem value={0}>Private</MenuItem>
         </Select>
        </FormControl>
       </div>
@@ -256,7 +302,9 @@ const FormEdit = () => {
       </div>
 
       <div className='text-right'>
-       <button className='btn btn-primary uppercase'>Save</button>
+       <button type='submit' className='btn btn-primary uppercase'>
+        Save
+       </button>
       </div>
      </div>
     </div>
@@ -286,29 +334,26 @@ const FormEdit = () => {
      </div>
     </div>
 
-    <div>
+    <div className='flex justify-start items-center'>
      <FormControlLabel
-      className='w-full text-white rounded-1'
+      className=' text-white rounded-1'
       label='Pinned'
-      control={
-       <Checkbox
-        className='text-white'
-        // checked={false}
-        // onChange={(e) => setPinned(e.target.checked)}
-       />
-      }
+      control={<Checkbox className='text-white' {...register('pinned')} />}
      />
+
+     <div>
+      <button className='btn btn-primary w-max'>Share Note</button>
+     </div>
     </div>
 
     <div className='mx-auto w-full flex flex-grow-1'>
      <Editor
       apiKey='c9fpvuqin9s9m9702haau5pyi6k0t0zj29nelhczdvjdbt3y'
-      //   value={dataText}
+      value={dataForm}
       init={{
        width: '100%',
        height: '100%',
        menubar: true,
-       // menubar: false,
        statusbar: false,
        plugins: [
         'advlist autolink lists link charmap print preview anchor',
@@ -326,7 +371,10 @@ const FormEdit = () => {
           alignleft aligncenter alignright alignjustify | \
           bullist numlist outdent indent | removeformat|',
       }}
-      //   onEditorChange={(content) => setDataText(content)}
+      onEditorChange={(value, editor) => {
+       setValue('data', value)
+       // editor.getContent({ format: 'text' })
+      }}
      />
     </div>
    </form>

@@ -10,3 +10,15 @@ export const fetchNotsList = async (userID) => {
   console.error(error)
  }
 }
+
+export const fetchAllFolder = async (userID) => {
+ try {
+  const response = await axios.get(
+   `https://samnote.mangasocial.online/folder/${userID}`
+  )
+
+  return response.data.folder
+ } catch (error) {
+  console.error(error)
+ }
+}
