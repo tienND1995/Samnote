@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
+import createTheme from "@mui/material/styles/createTheme";
 
 import { Alert, Snackbar } from '@mui/material'
 import { Navigate, Route, Routes } from 'react-router-dom'
@@ -21,6 +22,7 @@ import RootLayout from './layout/RootLayout'
 import Group from './pages/Group/Group'
 import Demo from './pages/Demo/Demo'
 import Photo from './pages/Photo/Photo'
+import EditNote from './pages/EditNote/EditNote'
 
 const AppSnackbar = () => {
  const appContext = useContext(AppContext)
@@ -68,14 +70,14 @@ function App() {
      <Route path='/user/sketch' element={<UserSketch />} />
      <Route path='/user/group' element={<UserGroup />} />
      <Route path='/user/dustbin' element={<UserDustbin />} />
-     <Route path='/user/photo' element={<UserPhoto />} />
 
      <Route path='/user/create-note' element={<CreateNote />} />
      <Route path='/user/profile/:id' element={<UserProfile />} />
      <Route path='/user/incognito' element={<Incognito />} />
      {/* ................................ */}
-     <Route path='/photo' element={<Photo />} />
+     <Route path='/user/photo' element={<Photo />} />
      <Route path='/group' element={<Group />} />
+     <Route path='/editnote/:id' element={<EditNote />} />
      <Route path='/demo' element={<Demo />} />
     </Route>
    </Routes>
