@@ -6,6 +6,7 @@ import "./App.css";
 import { AppContext } from "./context";
 import CreateNote from "./pages/CreateNote";
 import Home from "./pages/Home";
+import AnonymousMessage from "./pages/AnonymousMess/AnonymousMessage";
 import Incognito from "./pages/incognito";
 import Login from "./pages/Login";
 import OtherUser from "./pages/OtherUser";
@@ -77,7 +78,7 @@ function App() {
           <Route path="/user/photo" element={<UserPhoto />} />
           <Route path="/user/create-note" element={<CreateNote />} />
           <Route path="/user/profile/:id" element={<UserProfile />} />
-          <Route path="/user/incognito" element={<Incognito />} />
+          <Route path="/user/incognito" element={<AnonymousMessage />} />
           <Route path="/group" element={<Group />} />
           <Route path="/demo" element={<Demo />} />
         </Route>
