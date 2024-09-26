@@ -144,9 +144,7 @@ function GiphySearch({ onGifSelect }) {
     </div>
   );
 }
-function InputMessage(data) {
-  if (!data.idRoom && !data.idReceive) return;
-  console.log("Data truyền vào", data);
+function InputMessage({ data }) {
   const appContext = useContext(AppContext);
   const { user } = appContext;
   const [payLoadData, setPayLoadData] = useState({
@@ -158,20 +156,54 @@ function InputMessage(data) {
     type: "",
   });
 
-  console.log("payload data", payLoadData);
+  if (!data.idRoom && !data.idReceive) return;
+  console.log("Data truyền vào", data);
+
+  const sendMesage = async () => {
+    const { idReceive, idRoom, gif, type, img, content } = payLoadData;
+
+    const formData = new FormData();
+    formData.append("idReceive", idReceive);
+    formData.append("idRoom", idRoom);
+    formData.append("gif", gif);
+    formData.append("type", type);
+    formData.append("img", img);
+    formData.append("content", content);
+    try {
+      const response = await fetch(
+        `https://samnote.mangasocial.online/message/chat-unknown-image2/${user.id}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      console.log("gửi thành công", response);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Dữ liệu trả về:", data);
+    } catch (err) {
+      console.error("Lỗi khi gửi tin nhắn:", err);
+    }
+
+    //
+  };
+
   const handleGifSelect = (gif) => {
-    // Cập nhật giá trị của gif trong payLoadData khi chọn GIF
     setPayLoadData((prevData) => ({
       ...prevData,
       idReceive: user.id == data.idReceive ? data.idReceive : data.idSend,
       idRoom: data.idRoom,
       gif: gif.images.fixed_height.url,
-      type: "gif", // Lưu URL của GIF
+      type: "gif",
     }));
+    sendMesage();
   };
   console.log("payload data", payLoadData);
   return (
-    <div>
+    <div className="h-[300px] bg-black">
       <GiphySearch onGifSelect={handleGifSelect} />
       {/* {payLoadData.gif && (
         <div>
