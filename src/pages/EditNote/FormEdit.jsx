@@ -1,28 +1,25 @@
-import { useEffect, useState, useContext } from 'react'
 import axios from 'axios'
-import { useParams } from 'react-router-dom'
+import { useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useParams, useNavigate } from 'react-router-dom'
 
 import { joiResolver } from '@hookform/resolvers/joi'
-import { schemaNoteEdit } from '../../utils/schema/schema'
 import { Editor } from '@tinymce/tinymce-react'
-import Slider from 'react-slick'
+import moment from 'moment'
+import { schemaNoteEdit } from '../../utils/schema/schema'
 
-import { fetchNotsList, fetchAllFolder } from './fetchApiNote'
 import { AppContext } from '../../context'
+import { fetchAllFolder, fetchNotsList } from './fetchApiNote'
 import FormEditImages from './FormEditImages'
 
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
-
 import {
+ Checkbox,
  FormControl,
+ FormControlLabel,
  InputLabel,
  MenuItem,
  Select,
  TextField,
- FormControlLabel,
- Checkbox,
 } from '@mui/material'
 
 import configs from '../../configs/configs.json'
@@ -30,8 +27,9 @@ const { API_SERVER_URL } = configs
 
 const FormEdit = () => {
  const appContext = useContext(AppContext)
- const { user } = appContext
+ const { user, setSnackbar } = appContext
  const { id } = useParams()
+ const navigate = useNavigate()
 
  const [noteItem, setNoteItem] = useState({})
 
@@ -54,13 +52,13 @@ const FormEdit = () => {
   unregister,
   formState: { errors, dirtyFields },
  } = useForm({
-  // resolver: joiResolver(schemaNoteEdit),
+  resolver: joiResolver(schemaNoteEdit),
   defaultValues: {
    notePublic: 1,
    data: '',
    pinned: false,
    title: '',
-   remindAt: null,
+   dueAt: null,
    lock: '',
    color: '',
    type: '',
@@ -72,24 +70,10 @@ const FormEdit = () => {
  const folderForm = watch('idFolder')
  const dataForm = watch('data')
 
- //  const data = {
- //   type: 'text',
- //   data: 'hello cac tinh yeu',
- //   title: 'giang sinh an lanh',
- //   color: {
- //    r: 255,
- //    g: 255,
- //    b: 255,
- //    a: 1,
- //   },
- //   idFolder: 45,
- //   remindAt: '01/01/2024 07:00 AM +07:00',
- //   nodePublic: 0,
- //   dueAt: '01/01/2024 07:00 AM +07:00',
- //   lock: '123456',
- //   pinned: false,
- //   linkNoteShare: '',
- //  }
+ const [deleteImages, setDeleteImages] = useState([])
+ const handleChangeDeleteImages = (idList) => setDeleteImages(idList)
+
+ const convertTime = (time) => moment(`${time}+0700`).format('YYYY-MM-DD')
 
  useEffect(() => {
   const fetchAllColor = async () => {
@@ -103,20 +87,20 @@ const FormEdit = () => {
   const getDataNoteId = async () => {
    const noteList = await fetchNotsList(user?.id)
    const noteId = noteList.filter((note) => note.idNote === Number.parseInt(id))
-   if (!noteId || noteId.length === 0) return null
+   if (!noteId || noteId.length === 0) return navigate('/')
 
    setNoteItem(noteId[0])
-   //  setContentEditor(noteId[0].data)
 
    // set values form default
    setValue('title', noteId[0].title)
    setValue('data', noteId[0].data)
    setValue('pinned', noteId[0].pinned)
    setValue('type', noteId[0].type)
-   setValue('remindAt', noteId[0].remindAt)
+   setValue('dueAt', convertTime(noteId[0].dueAt))
    setValue('notePublic', noteId[0].notePublic)
    setValue('idFolder', noteId[0].idFolder)
   }
+
   const getFolders = async () => {
    const folders = await fetchAllFolder(user?.id)
    setFolderList(folders)
@@ -156,9 +140,46 @@ const FormEdit = () => {
   setColor(colorMatch[0])
  }, [colorForm])
 
- const onSubmit = (data) => {
-  console.log(data)
+ const pacthNote = async (noteId, data) => {
+  try {
+   const response = await axios.patch(`${API_SERVER_URL}/notes/${noteId}`, data)
+
+   setSnackbar({
+    isOpen: true,
+    message: `Update note complete!`,
+    severity: 'success',
+   })
+  } catch (error) {
+   console.error(error)
+  }
  }
+
+ const onSubmit = async (data) => {
+  if (color.name !== data.color || !noteItem.idNote) return
+
+  // *** convert time to api
+  const newDueAt = `${moment(new Date()).format('DD/MM/YYYY, h:m A')} +07:00`
+  // const newDueAt = '19/02/2024 11:22 AM +07:00'
+
+  const newColor = {
+   r: color.r,
+   b: color.b,
+   g: color.g,
+   a: 1,
+  }
+
+  const dataDefault = {
+   ...data,
+   color: newColor,
+   dueAt: newDueAt,
+   //  remindAt: convertTime(noteItem.remindAt),
+  }
+
+  console.log(dataDefault)
+  pacthNote(noteItem.idNote, dataDefault)
+ }
+
+ console.log(moment(new Date()).format('DD MM YY, hh:mm A'))
 
  return (
   <div className='p-2 bg-[#3A3F42] rounded-lg flex flex-col flex-grow-1'>
@@ -223,6 +244,12 @@ const FormEdit = () => {
          ))}
         </Select>
        </FormControl>
+
+       {errors.color && (
+        <p style={{ borderBottom: '1px solid red' }} className='text-red-600'>
+         {errors.color.message}
+        </p>
+       )}
       </div>
      </div>
 
@@ -235,6 +262,12 @@ const FormEdit = () => {
         type='text'
         {...register('title')}
        />
+
+       {errors.title && (
+        <p style={{ borderBottom: '1px solid red' }} className='text-red-600'>
+         {errors.title.message}
+        </p>
+       )}
       </div>
 
       <div className='mb-3'>
@@ -257,6 +290,12 @@ const FormEdit = () => {
          ))}
         </Select>
        </FormControl>
+
+       {errors.idFolder && (
+        <p style={{ borderBottom: '1px solid red' }} className='text-red-600'>
+         {errors.idFolder.message}
+        </p>
+       )}
       </div>
 
       <div>
@@ -280,9 +319,15 @@ const FormEdit = () => {
         className='w-full bg-white rounded-1 '
         size='small'
         type='date'
-        {...register('remindAt')}
+        {...register('dueAt')}
        />
       </div>
+
+      {errors.dueAt && (
+       <p style={{ borderBottom: '1px solid red' }} className='text-red-600'>
+        {errors.dueAt.message}
+       </p>
+      )}
 
       <div className='text-right'>
        <button type='submit' className='btn btn-primary uppercase'>
@@ -292,7 +337,10 @@ const FormEdit = () => {
      </div>
     </div>
 
-    <FormEditImages images={noteItem?.image} />
+    <FormEditImages
+     onChangeDeleteImages={handleChangeDeleteImages}
+     images={noteItem?.image}
+    />
 
     <div className='flex justify-start items-center'>
      <FormControlLabel
@@ -333,6 +381,7 @@ const FormEdit = () => {
       }}
       onEditorChange={(value, editor) => {
        setValue('data', value)
+
        // editor.getContent({ format: 'text' })
       }}
      />

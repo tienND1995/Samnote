@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 
 import NoteItem from './NoteItem'
 import { fetchNotsList } from './fetchApiNote'
@@ -16,6 +16,9 @@ const NoteList = () => {
 
  const { id } = useParams()
 
+ let [searchParams, setSearchParams] = useSearchParams()
+ console.log(searchParams)
+
  //  .................................
 
  useEffect(() => {
@@ -26,6 +29,8 @@ const NoteList = () => {
 
   user?.id && getNoteList(user.id)
  }, [user, id])
+
+ console.log('noteList', noteList)
 
  return (
   <div className='p-2 bg-[#3A3F42] rounded-lg flex flex-col flex-grow-1'>
@@ -94,10 +99,10 @@ const NoteList = () => {
       <h6 className='text-2xl'>Name</h6>
      </div>
      <div className='col-6'>
-      <h6 className='text-2xl'>Content</h6>
+      <h6 className='text-2xl text-center'>Content</h6>
      </div>
      <div className='col'>
-      <h6 className='text-2xl'>Date</h6>
+      <h6 className='text-2xl text-right'>Date</h6>
      </div>
     </div>
 

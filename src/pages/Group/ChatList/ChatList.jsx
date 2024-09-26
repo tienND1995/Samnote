@@ -282,7 +282,6 @@ const ChatList = (props) => {
   e.target.value = null
  }
 
-
  return (
   <div
    style={{ boxShadow: '4px -4px 10px 0px #00000040' }}
@@ -591,9 +590,9 @@ const ChatList = (props) => {
            <p
             style={{ maxWidth: '200px' }}
             className={
-             message.is_seen === 0
-              ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis font-[600] text-lg'
-              : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
+             message.is_seen === 1 || message.idSend === userID
+              ? 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg'
+              : 'p-0 m-0 whitespace-nowrap overflow-hidden text-ellipsis text-lg font-[600]'
             }
            >
             {convertLastText(message.last_text, message.idSend)}
@@ -603,17 +602,17 @@ const ChatList = (props) => {
 
          <div
           className={
-           message.is_seen === 0
-            ? 'text-[#ff0404] text-[16px] me-2'
-            : 'text-[#00ff73] text-[16px] me-2'
+           message.is_seen === 1 || message.idSend === userID
+            ? 'text-[#00ff73] text-[16px] me-2'
+            : 'text-[#ff0404] text-[16px] me-2'
           }
          >
-          {message.is_seen === 0 ? (
+          {message.is_seen === 1 || message.idSend === userID ? (
+           <CheckIcon />
+          ) : (
            <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
             1
            </p>
-          ) : (
-           <CheckIcon />
           )}
          </div>
         </li>
@@ -668,21 +667,23 @@ const ChatList = (props) => {
           </div>
          </div>
 
-         <div
-          className={
-           isReadMessageGroup(message.listUserReaded, userID)
-            ? 'text-[#00ff73] text-[16px] me-2'
-            : 'text-[#ff0404] text-[16px] me-2'
-          }
-         >
-          {isReadMessageGroup(message.listUserReaded, userID) ? (
-           <CheckIcon />
-          ) : (
-           <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
-            1
-           </p>
-          )}
-         </div>
+         {message.text_lastest_message_in_group && (
+          <div
+           className={
+            isReadMessageGroup(message.listUserReaded, userID)
+             ? 'text-[#00ff73] text-[16px] me-2'
+             : 'text-[#ff0404] text-[16px] me-2'
+           }
+          >
+           {isReadMessageGroup(message.listUserReaded, userID) ? (
+            <CheckIcon />
+           ) : (
+            <p className='bg-[#dfdfdf] w-[20px] h-[20px] rounded-full flex items-center justify-center'>
+             1
+            </p>
+           )}
+          </div>
+         )}
         </li>
        )
       }

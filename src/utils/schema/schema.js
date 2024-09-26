@@ -49,25 +49,28 @@ export const schemaNoteEdit = Joi.object({
   'string.empty': 'Not title yet!',
  }),
 
- notePublic: Joi.array().min(1).required().messages({
-  'array.min': 'At least 1 member!',
+ type: Joi.string().required().messages({
+  'string.empty': 'Not type yet!',
+ }),
+
+ color: Joi.string().required().messages({
+  'string.empty': 'Not color yet!',
+ }),
+
+ notePublic: Joi.number().integer().required().messages({
+  'string.empty': 'Not note ublic yet!',
  }),
 
  idFolder: Joi.number().integer().required().messages({
   'string.empty': 'Not folder yet!',
  }),
 
+ pinned: Joi.boolean().allow('').allow(null),
+
  lock: Joi.string().allow('').allow(null),
 
- remindAt: Joi.date().min('now').required().messages({
-  'string.empty': 'Not remindAt yet!',
- }),
-
- color: Joi.object().required().messages({
-  'string.empty': 'Not color yet!',
- }),
-
- pinned: Joi.boolean().required().messages({
-  'string.empty': 'Not pinned yet!',
+ dueAt: Joi.date().max('now').required().messages({
+  'date.empty': 'Not remindAt yet!',
+  'date.max': 'Current maximum date',
  }),
 })
