@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const fetchNotsList = async (userID) => {
+export const fetchNoteList = async (userID) => {
  try {
   const response = await axios.get(
    `https://samnote.mangasocial.online/notes/${userID}`

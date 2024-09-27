@@ -6,10 +6,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { joiResolver } from '@hookform/resolvers/joi'
 import { Editor } from '@tinymce/tinymce-react'
 import moment from 'moment'
-import { schemaNoteEdit } from '../../utils/schema/schema'
+import { schemaNoteEdit } from '../../../utils/schema/schema'
 
-import { AppContext } from '../../context'
-import { fetchAllFolder, fetchNotsList } from './fetchApiNote'
+import { AppContext } from '../../../context'
+import { fetchAllFolder, fetchNoteList } from '../fetchApiEditNote'
 import FormEditImages from './FormEditImages'
 
 import {
@@ -22,7 +22,7 @@ import {
  TextField,
 } from '@mui/material'
 
-import configs from '../../configs/configs.json'
+import configs from '../../../configs/configs.json'
 const { API_SERVER_URL } = configs
 
 const FormEdit = ({ onDispatchName }) => {
@@ -82,7 +82,7 @@ const FormEdit = ({ onDispatchName }) => {
    }
   }
   const getDataNoteId = async () => {
-   const noteList = await fetchNotsList(user?.id)
+   const noteList = await fetchNoteList(user?.id)
    const noteId = noteList.filter((note) => note.idNote === Number.parseInt(id))
    if (!noteId || noteId.length === 0) return navigate('/')
 
@@ -152,9 +152,9 @@ const FormEdit = ({ onDispatchName }) => {
  }
 
  const onSubmit = async (data) => {
-  // if (color.name !== data.color || !noteItem.idNote) return
-  // if (Object.keys(dirtyFields).length === 0 && data.data === noteItem.data)
-  //  return
+  if (color.name !== data.color || !noteItem.idNote) return
+  if (Object.keys(dirtyFields).length === 0 && data.data === noteItem.data)
+   return
 
   // *** convert time and color to api
   const newDueAt = `${moment(data.dueAt).format('DD/MM/YYYY hh:mm A')} +07:00`
@@ -165,15 +165,15 @@ const FormEdit = ({ onDispatchName }) => {
    a: 1,
   }
 
+  //convert base64 to url
+  const newDataContent = data.data.split('data:image/png;base64,').join('')
+
   const dataForm = {
    ...data,
    color: newColor,
    dueAt: newDueAt,
   }
-
-  console.log('data form', dataForm)
-
-  // pacthNote(noteItem.idNote, dataForm)
+  pacthNote(noteItem.idNote, dataForm)
  }
 
  return (
@@ -367,43 +367,38 @@ const FormEdit = ({ onDispatchName }) => {
           bullist numlist outdent indent | removeformat|',
 
        file_picker_types: 'image',
-       file_picker_callback: (cb, value, meta) => {
-        const input = document.createElement('input')
-        input.setAttribute('type', 'file')
-        input.setAttribute('accept', 'image/*')
+       //  file_picker_callback: (cb, value, meta) => {
+       //   const input = document.createElement('input')
+       //   input.setAttribute('type', 'file')
+       //   input.setAttribute('accept', 'image/*')
 
-        input.addEventListener('change', (e) => {
-         const file = e.target.files[0]
-         const imageUrl = URL.createObjectURL(e.target.files[0])
+       //   input.addEventListener('change', (e) => {
+       //    const file = e.target.files[0]
+       //    const blobUrl = URL.createObjectURL(e.target.files[0])
 
-         const reader = new FileReader()
-         reader.addEventListener('load', async () => {
-          const id = 'blobid' + new Date().getTime()
-          const blobCache = tinymce.activeEditor.editorUpload.blobCache
+       //    const reader = new FileReader()
+       //    reader.addEventListener('load', async () => {
+       //     const id = 'blobid' + new Date().getTime()
+       //     const blobCache = tinymce.activeEditor.editorUpload.blobCache
 
-          const base64 = reader.result.split(',')[1]
-          const blobInfo = blobCache.create(id, file, imageUrl)
-          blobCache.add(blobInfo)
+       //     const base64 = reader.result.split(',')[1]
+       //     const blobInfo = blobCache.create(id, file, blobUrl)
+       //     blobCache.add(blobInfo)
 
-          /* call the callback and populate the Title field with the file name */
-          cb(blobInfo.blobUri(), { title: file.name })
-          console.log('blob', blobInfo.blob())
-          console.log('name', blobInfo.name())
-          console.log('blobUri', blobInfo.blobUri())
-          console.log('base64', blobInfo.base64())
-          // console.log('blobInfo abc', blobInfo.base64())
-         })
+       //     /* call the callback and populate the Title field with the file name */
+       //     cb(blobInfo.blobUri(), { title: file.name })
 
-         reader.readAsDataURL(file)
-        })
+       //    })
 
-        input.click()
-       },
+       //    reader.readAsDataURL(file)
+       //   })
+
+       //   input.click()
+       //  },
       }}
       onEditorChange={(value, editor) => {
        setValue('data', value)
-
-       // editor.getContent({ format: 'text' })
+       //  console.log('text:', editor.getContent({ format: 'text' }))
       }}
      />
     </div>

@@ -5,9 +5,10 @@ import TextTruncate from 'react-text-truncate'
 import Slider from 'react-slick'
 import moment from 'moment'
 import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 
-import deleteNote from '../../assets/delete-note.png'
+import deleteNote from '../../../assets/delete-note.png'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
@@ -33,10 +34,11 @@ const NoteItem = ({ note }) => {
   ),
  }
 
+ //  const markdown = `![img upload](http://samnote.mangasocial.online/get-image/127/127_note_612976.jpg)`
+ const markdown = `<img src="http://samnote.mangasocial.online/get-image/127/127_note_612976.jpg" alt="img upload" style="width: 100px; height: 100px;">`
+
  const convertTime = (time) =>
   moment(`${time}+0700`).subtract(10, 'days').calendar()
-
- const content = `<p><span style="background-color: #e03e2d;">danh sach</span></p>`
  if (Object.keys(note).length === 0) return
  return (
   <li
@@ -50,16 +52,19 @@ const NoteItem = ({ note }) => {
    className='row row-cols-4 justify-between rounded-lg mx-0 p-2 position-relative cursor-pointer'
   >
    <h6 className='col font-semibold'>{note.title}</h6>
+
    <div className='col-6 px-0'>
-    {typeof note.data == 'string' && (
-     <TextTruncate
-      line={3}
-      element='p'
-      truncateText='…'
-      text={<Markdown rehypePlugins={[rehypeRaw]}>{note.data}</Markdown>}
-      containerClassName='text-center'
-     />
-    )}
+    <div>
+     {typeof note.data == 'string' && (
+      <TextTruncate
+       line={3}
+       element='p'
+       truncateText='…'
+       text={<Markdown rehypePlugins={[rehypeRaw]}>{note.data}</Markdown>}
+       containerClassName='text-center'
+      />
+     )}
+    </div>
 
     {note?.image?.length > 0 ? (
      <ul className='mt-2'>

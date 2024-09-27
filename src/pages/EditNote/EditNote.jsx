@@ -2,11 +2,11 @@ import { useContext, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { AppContext } from '../../context'
-import { fetchNotsList } from './fetchApiNote'
+import { fetchNoteList } from './fetchApiEditNote'
 
-import NoteList from './NoteList.jsx'
+import NoteList from './components/NoteList.jsx'
 import './EditNote.css'
-import FormEdit from './FormEdit.jsx'
+import FormEdit from './components/FormEdit.jsx'
 
 const EditNote = () => {
  const appContext = useContext(AppContext)
@@ -19,9 +19,10 @@ const EditNote = () => {
  //  .................................
 
  const disPatchNameEvent = (name) => setNameEvent(name)
+ const handleChangeNoteList = (newNoteList) => setNoteList(newNoteList)
 
  const getNoteList = async () => {
-  const data = await fetchNotsList(user?.id)
+  const data = await fetchNoteList(user?.id)
   setNoteList(data)
   setNameEvent(null)
  }
@@ -31,7 +32,6 @@ const EditNote = () => {
    getNoteList()
   }
  }, [user, id, nameEvent])
-
 
  return (
   <div className='bg-[#181A1B] px-4 gap-4 pt-4 pb-2 flex flex-col w-full'>
@@ -56,7 +56,7 @@ const EditNote = () => {
 
    <div className='row row-cols-2 flex-grow-1'>
     <div className='col flex flex-col'>
-     <NoteList noteList={noteList} />
+     <NoteList noteList={noteList} onChangeNoteList={handleChangeNoteList} userID = {user?.id} />
     </div>
     <div className='col flex'>
      <FormEdit onDispatchName={disPatchNameEvent} />

@@ -8,7 +8,7 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import CloseIcon from '@mui/icons-material/Close'
 
-import configs from '../../configs/configs.json'
+import configs from '../../../configs/configs.json'
 const { API_SERVER_URL } = configs
 
 const FormEditImages = ({ images, userId, noteId, onDispatchName }) => {

@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react'
-import createTheme from "@mui/material/styles/createTheme";
 
 import { Alert, Snackbar } from '@mui/material'
 import { Navigate, Route, Routes } from 'react-router-dom'
@@ -77,6 +76,7 @@ function App() {
      {/* ................................ */}
      <Route path='/user/photo' element={<Photo />} />
      <Route path='/group' element={<Group />} />
+
      <Route path='/editnote/:id' element={<EditNote />} />
      <Route path='/demo' element={<Demo />} />
     </Route>
