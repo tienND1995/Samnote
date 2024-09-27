@@ -1,37 +1,15 @@
 import { useContext, useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
+import { AppContext } from '../../context'
 import NoteItem from './NoteItem'
 import { fetchNotsList } from './fetchApiNote'
-import { AppContext } from '../../context'
 
 import SearchIcon from '@mui/icons-material/Search'
 import SkipNextIcon from '@mui/icons-material/SkipNext'
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious'
 
-const NoteList = () => {
- const appContext = useContext(AppContext)
- const { user } = appContext
- const [noteList, setNoteList] = useState([])
-
- const { id } = useParams()
-
- let [searchParams, setSearchParams] = useSearchParams()
- console.log(searchParams)
-
- //  .................................
-
- useEffect(() => {
-  const getNoteList = async (userID) => {
-   const data = await fetchNotsList(userID)
-   setNoteList(data)
-  }
-
-  user?.id && getNoteList(user.id)
- }, [user, id])
-
- console.log('noteList', noteList)
-
+const NoteList = ({ noteList }) => {
  return (
   <div className='p-2 bg-[#3A3F42] rounded-lg flex flex-col flex-grow-1'>
    <div className='flex items-center justify-between'>

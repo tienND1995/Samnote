@@ -37,7 +37,7 @@ const NoteItem = ({ note }) => {
   moment(`${time}+0700`).subtract(10, 'days').calendar()
 
  const content = `<p><span style="background-color: #e03e2d;">danh sach</span></p>`
-
+ if (Object.keys(note).length === 0) return
  return (
   <li
    key={note.idNote}
@@ -56,7 +56,7 @@ const NoteItem = ({ note }) => {
       line={3}
       element='p'
       truncateText='…'
-      text={<Markdown rehypePlugins={[rehypeRaw]}>{note.title}</Markdown>}
+      text={<Markdown rehypePlugins={[rehypeRaw]}>{note.data}</Markdown>}
       containerClassName='text-center'
      />
     )}

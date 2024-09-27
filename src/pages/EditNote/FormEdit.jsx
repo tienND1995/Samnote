@@ -25,7 +25,7 @@ import {
 import configs from '../../configs/configs.json'
 const { API_SERVER_URL } = configs
 
-const FormEdit = () => {
+const FormEdit = ({ onDispatchName }) => {
  const appContext = useContext(AppContext)
  const { user, setSnackbar } = appContext
  const { id } = useParams()
@@ -61,17 +61,14 @@ const FormEdit = () => {
    dueAt: null,
    lock: '',
    color: '',
-   type: '',
-   idFolder: '',
+   type: 'text',
+   idFolder: null,
   },
  })
  const notePublicForm = watch('notePublic')
  const colorForm = watch('color')
  const folderForm = watch('idFolder')
  const dataForm = watch('data')
-
- const [deleteImages, setDeleteImages] = useState([])
- const handleChangeDeleteImages = (idList) => setDeleteImages(idList)
 
  const convertTime = (time) => moment(`${time}+0700`).format('YYYY-MM-DD')
 
@@ -143,7 +140,7 @@ const FormEdit = () => {
  const pacthNote = async (noteId, data) => {
   try {
    const response = await axios.patch(`${API_SERVER_URL}/notes/${noteId}`, data)
-
+   onDispatchName('patch note')
    setSnackbar({
     isOpen: true,
     message: `Update note complete!`,
@@ -156,11 +153,11 @@ const FormEdit = () => {
 
  const onSubmit = async (data) => {
   if (color.name !== data.color || !noteItem.idNote) return
+  if (Object.keys(dirtyFields).length === 0 && data.data === noteItem.data)
+   return
 
-  // *** convert time to api
-  const newDueAt = `${moment(new Date()).format('DD/MM/YYYY, h:m A')} +07:00`
-  // const newDueAt = '19/02/2024 11:22 AM +07:00'
-
+  // *** convert time and color to api
+  const newDueAt = `${moment(data.dueAt).format('DD/MM/YYYY hh:mm A')} +07:00`
   const newColor = {
    r: color.r,
    b: color.b,
@@ -168,18 +165,16 @@ const FormEdit = () => {
    a: 1,
   }
 
-  const dataDefault = {
+  const dataForm = {
    ...data,
    color: newColor,
    dueAt: newDueAt,
-   //  remindAt: convertTime(noteItem.remindAt),
   }
 
-  console.log(dataDefault)
-  pacthNote(noteItem.idNote, dataDefault)
- }
+  console.log(data)
 
- console.log(moment(new Date()).format('DD MM YY, hh:mm A'))
+  pacthNote(noteItem.idNote, dataForm)
+ }
 
  return (
   <div className='p-2 bg-[#3A3F42] rounded-lg flex flex-col flex-grow-1'>
@@ -244,12 +239,6 @@ const FormEdit = () => {
          ))}
         </Select>
        </FormControl>
-
-       {errors.color && (
-        <p style={{ borderBottom: '1px solid red' }} className='text-red-600'>
-         {errors.color.message}
-        </p>
-       )}
       </div>
      </div>
 
@@ -290,12 +279,6 @@ const FormEdit = () => {
          ))}
         </Select>
        </FormControl>
-
-       {errors.idFolder && (
-        <p style={{ borderBottom: '1px solid red' }} className='text-red-600'>
-         {errors.idFolder.message}
-        </p>
-       )}
       </div>
 
       <div>
@@ -338,8 +321,10 @@ const FormEdit = () => {
     </div>
 
     <FormEditImages
-     onChangeDeleteImages={handleChangeDeleteImages}
      images={noteItem?.image}
+     userId={user?.id}
+     noteId={noteItem.idNote}
+     onDispatchName={onDispatchName}
     />
 
     <div className='flex justify-start items-center'>
@@ -363,6 +348,8 @@ const FormEdit = () => {
        height: '100%',
        menubar: true,
        statusbar: false,
+       images_file_types: 'jpg,svg,webp',
+       automatic_uploads: true,
        plugins: [
         'advlist autolink lists link charmap print preview anchor',
         'searchreplace visualblocks code fullscreen',
@@ -375,9 +362,39 @@ const FormEdit = () => {
         { inline: 'b', remove: 'all' },
        ],
        toolbar:
-        'undo redo |formatselect | bold italic backcolor | \
+        'undo redo |formatselect | bold italic backcolor | link image | code| \
           alignleft aligncenter alignright alignjustify | \
           bullist numlist outdent indent | removeformat|',
+
+       file_picker_types: 'image',
+       file_picker_callback: (cb, value, meta) => {
+        const input = document.createElement('input')
+        input.setAttribute('type', 'file')
+        input.setAttribute('accept', 'image/*')
+
+        input.addEventListener('change', (e) => {
+         const file = e.target.files[0]
+         const imageUrl = URL.createObjectURL(e.target.files[0])
+
+         const reader = new FileReader()
+         reader.addEventListener('load', () => {
+          const id = 'blobid' + new Date().getTime()
+          const blobCache = tinymce.activeEditor.editorUpload.blobCache
+
+          const base64 = reader.result.split(',')[1]
+          const blobInfo = blobCache.create(id, file, imageUrl)
+          blobCache.add(blobInfo)
+
+          console.log('blobInfo', blobCache)
+
+          /* call the callback and populate the Title field with the file name */
+          cb(blobInfo.blobUri(), { title: file.name })
+         })
+         reader.readAsDataURL(file)
+        })
+
+        input.click()
+       },
       }}
       onEditorChange={(value, editor) => {
        setValue('data', value)
