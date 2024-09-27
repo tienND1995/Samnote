@@ -7,6 +7,8 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import GroupAddIcon from '@mui/icons-material/GroupAdd'
 import GroupIcon from '@mui/icons-material/Group';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import AppleIcon from '@mui/icons-material/Apple';
+import AndroidIcon from '@mui/icons-material/Android';
 import Tab from '@mui/material/Tab'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
@@ -15,12 +17,13 @@ import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import 'swiper/css'
-import SvgIcon from '@mui/material/SvgIcon'
 import Avatar from '@mui/material/Avatar'
-import '../UserProfile.css'
+import './UserProfile.css'
 import { io } from 'socket.io-client'
 import ModalChat from '../../components/ModalChat'
 import { getCurrentFormattedDateTime, getTimeDifference, getFormattedDate } from '../../helper'
+import { getLuminance } from '@mui/material/styles';
+
 
 const UserProfile = () => {
   const appContext = useContext(AppContext)
@@ -224,6 +227,11 @@ const UserProfile = () => {
     setPrivateNotesTabValue(newValue)
   }
 
+  const isLightColor = (color) => {
+    const luminance = getLuminance(`rgb(${color.r}, ${color.g}, ${color.b})`);
+    return luminance > 0.5;
+  };
+
   console.log(archivedNotes)
 
   return (
@@ -231,135 +239,142 @@ const UserProfile = () => {
       <Box className='w-full bg-[#4A4B51] h-auto'>
         {userInfomations ? (
           <>
-            <div className='cover-photo-container relative'>
-              <img
-                src={userInfomations.AvtProfile}
-                alt=''
-                className='w-full h-[500px] object-fit-cover cover-photo'
-              />
-              <Box className="position-absolute flex flex-column p-3"
-                style={{
-                  top: '20%', left: '70%',
-                }}>
-                <Box className="flex align-items-center">
-                  <Box className="infomation text-white mr-5">
-                    <Typography variant="h5" className="font-bold">
-                      Hello {userInfomations.name} !
-                    </Typography>
-                    <Typography className="text-xl">
-                      {getFormattedDate(new Date())}
-                    </Typography>
-                  </Box>
+            <div className='intro-user w-full h-auto'>
+              <div className='cover-photo-container relative'>
+                <img
+                  src={userInfomations.AvtProfile}
+                  alt=''
+                  className='w-full h-[500px] object-fit-cover cover-photo'
+                  style={{ filter: 'brightness(0.9)' }}
+
+                />
+                <Box className="position-absolute flex flex-column p-3"
+                  style={{
+                    top: '20%', left: '70%',
+                  }}>
                   <Box className="flex align-items-center">
                     <div
-                      className="flex align-items-center rounded-circle p-2 me-2"
-                      style={{ cursor: 'pointer', height: '39px' }}
+                      className="infomation text-white mr-5"
+                      style={{ textShadow: '2px 2px 5px rgba(0, 0, 0, 0.5)' }}
                     >
-                      <svg
-                        width="28"
-                        height="28"
-                        fill="#fff"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 448 512"
-                      >
-                        <path d="M128 0c17.7 0 32 14.3 32 32l0 32 128 0 0-32c0-17.7 14.3-32 32-32s32 14.3 32 32l0 32 48 0c26.5 0 48 21.5 48 48l0 48L0 160l0-48C0 85.5 21.5 64 48 64l48 0 0-32c0-17.7 14.3-32 32-32zM0 192l448 0 0 272c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 192zm64 80l0 32c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l0-32c0-8.8-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16zm128 0l0 32c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l0-32c0-8.8-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16l0 32c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l0-32c0-8.8-7.2-16-16-16l-32 0zM64 400l0 32c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l0-32c0-8.8-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16l0 32c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l0-32c0-8.8-7.2-16-16-16l-32 0zm112 16l0 32c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l0-32c0-8.8-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16z" />
-                      </svg>
+                      <Typography variant="h5" className="font-bold">
+                        Hello {userInfomations.name} !
+                      </Typography>
+                      <Typography className="text-xl">
+                        {getFormattedDate(new Date())}
+                      </Typography>
                     </div>
-                    <div className="position-relative">
+                    <Box className="flex align-items-center">
                       <div
-                        className="d-flex align-items-center p-2 cursor-pointer rounded-circle"
-                        onClick={handleMess}
-                        style={{ height: '39px' }}
+                        className="flex align-items-center rounded-circle p-2 me-2"
+                        style={{ cursor: 'pointer', height: '39px' }}
                       >
                         <svg
                           width="28"
                           height="28"
-                          viewBox="0 0 48 48"
-                          fill='none'
+                          fill="#fff"
                           xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 448 512"
                         >
-                          <g clipPath="url(#clip0_295_3410)">
-                            <path
-                              d="M0.00198132 23.278C0.00198132 9.898 10.482 0 24.002 0C37.522 0 48 9.9 48 23.278C48 36.656 37.52 46.554 24 46.554C21.58 46.554 19.24 46.234 17.06 45.634C16.6345 45.5195 16.1825 45.5548 15.78 45.734L11 47.834C10.7118 47.9623 10.3965 48.0176 10.0819 47.995C9.76732 47.9724 9.46312 47.8727 9.19622 47.7047C8.92931 47.5366 8.70791 47.3054 8.5516 47.0315C8.39528 46.7575 8.30887 46.4493 8.29998 46.134L8.15998 41.854C8.14913 41.5961 8.08694 41.343 7.97704 41.1095C7.86715 40.876 7.71176 40.6667 7.51998 40.494C5.11521 38.324 3.20093 35.6661 1.90487 32.6977C0.608801 29.7293 -0.0392407 26.5187 0.00398132 23.28L0.00198132 23.278ZM16.642 18.898L9.60198 30.098C8.90198 31.158 10.242 32.376 11.242 31.598L18.822 25.858C19.342 25.458 20.022 25.458 20.562 25.858L26.162 30.058C27.842 31.318 30.242 30.858 31.362 29.098L38.402 17.898C39.102 16.838 37.762 15.638 36.762 16.398L29.182 22.138C28.682 22.538 27.982 22.538 27.462 22.138L21.862 17.938C21.4637 17.6372 21.0073 17.4224 20.5216 17.3074C20.036 17.1924 19.5317 17.1796 19.0408 17.2698C18.55 17.3601 18.0832 17.5515 17.6703 17.8318C17.2573 18.1121 16.9071 18.4752 16.642 18.898Z"
-                              fill="#fff"
-                            />
-                          </g>
-                          <defs>
-                            <clipPath id="clip0_295_3410">
-                              <rect width="48" height="48" fill="white" />
-                            </clipPath>
-                          </defs>
+                          <path d="M128 0c17.7 0 32 14.3 32 32l0 32 128 0 0-32c0-17.7 14.3-32 32-32s32 14.3 32 32l0 32 48 0c26.5 0 48 21.5 48 48l0 48L0 160l0-48C0 85.5 21.5 64 48 64l48 0 0-32c0-17.7 14.3-32 32-32zM0 192l448 0 0 272c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 192zm64 80l0 32c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l0-32c0-8.8-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16zm128 0l0 32c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l0-32c0-8.8-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16l0 32c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l0-32c0-8.8-7.2-16-16-16l-32 0zM64 400l0 32c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l0-32c0-8.8-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16l0 32c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l0-32c0-8.8-7.2-16-16-16l-32 0zm112 16l0 32c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l0-32c0-8.8-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16z" />
                         </svg>
                       </div>
+                      <div className="position-relative">
+                        <div
+                          className="d-flex align-items-center p-2 cursor-pointer rounded-circle"
+                          onClick={handleMess}
+                          style={{ height: '39px' }}
+                        >
+                          <svg
+                            width="28"
+                            height="28"
+                            viewBox="0 0 48 48"
+                            fill='none'
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <g clipPath="url(#clip0_295_3410)">
+                              <path
+                                d="M0.00198132 23.278C0.00198132 9.898 10.482 0 24.002 0C37.522 0 48 9.9 48 23.278C48 36.656 37.52 46.554 24 46.554C21.58 46.554 19.24 46.234 17.06 45.634C16.6345 45.5195 16.1825 45.5548 15.78 45.734L11 47.834C10.7118 47.9623 10.3965 48.0176 10.0819 47.995C9.76732 47.9724 9.46312 47.8727 9.19622 47.7047C8.92931 47.5366 8.70791 47.3054 8.5516 47.0315C8.39528 46.7575 8.30887 46.4493 8.29998 46.134L8.15998 41.854C8.14913 41.5961 8.08694 41.343 7.97704 41.1095C7.86715 40.876 7.71176 40.6667 7.51998 40.494C5.11521 38.324 3.20093 35.6661 1.90487 32.6977C0.608801 29.7293 -0.0392407 26.5187 0.00398132 23.28L0.00198132 23.278ZM16.642 18.898L9.60198 30.098C8.90198 31.158 10.242 32.376 11.242 31.598L18.822 25.858C19.342 25.458 20.022 25.458 20.562 25.858L26.162 30.058C27.842 31.318 30.242 30.858 31.362 29.098L38.402 17.898C39.102 16.838 37.762 15.638 36.762 16.398L29.182 22.138C28.682 22.538 27.982 22.538 27.462 22.138L21.862 17.938C21.4637 17.6372 21.0073 17.4224 20.5216 17.3074C20.036 17.1924 19.5317 17.1796 19.0408 17.2698C18.55 17.3601 18.0832 17.5515 17.6703 17.8318C17.2573 18.1121 16.9071 18.4752 16.642 18.898Z"
+                                fill="#fff"
+                              />
+                            </g>
+                            <defs>
+                              <clipPath id="clip0_295_3410">
+                                <rect width="48" height="48" fill="white" />
+                              </clipPath>
+                            </defs>
+                          </svg>
+                        </div>
+                        <div
+                          className="position-absolute translate-middle badge rounded-pill bg-danger"
+                          style={{ top: '15%', left: '85%' }}
+                        >
+                          {dataMess.filter((mess) => mess.is_seen === 0).length !== 0
+                            ? dataMess.filter((mess) => mess.is_seen === 0).length
+                            : 0}
+                        </div>
+                        {isModalMess && <ModalChat dataMess={dataMess} />}
+                      </div>
+                    </Box>
+                  </Box>
+                </Box>
+              </div>
+              <div className='info-user-container flex items-center justify-between px-12 py-8 relative'>
+                <div className='info-user flex items-center gap-8'>
+                  <div className='avartar-user relative'>
+                    <img
+                      src={userInfomations.Avarta}
+                      alt=''
+                      className='w-28 h-28 rounded-full hidden lg:block object-cover'
+                    />
+                    <div className='absolute bottom-1 right-1 bg-green-500 w-7 h-7 rounded-full'></div>
+                  </div>
+                  <Box className='text-white'>
+                    <Typography
+                      variant='h4'
+                      className='name-user font-bold hidden lg:block mb-1'
+                    >
+                      {userInfomations.name}
+                    </Typography>
+                    <Typography className='date-joined text-xl hidden lg:block'>
+                      Join at {getFormattedDate(userInfomations.createAccount)}
+                    </Typography>
+                  </Box>
+                </div>
+
+                <div className='actions-user flex gap-2 mt-2'>
+                  <Button variant="contained" color="primary" style={{ textTransform: 'none' }}>
+                    <GroupAddIcon className='mr-2' />
+                    Add to your group
+                  </Button>
+                  <Button variant="contained" color="primary" style={{ textTransform: 'none' }}>
+                    <div className='icon-messenger mr-3 relative'>
+                      <svg
+                        className=''
+                        width='20'
+                        height='20'
+                        fill='#fff'
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 512 512">
+                        <path d="M256.6 8C116.5 8 8 110.3 8 248.6c0 72.3 29.7 134.8 78.1 177.9 8.4 7.5 6.6 11.9 8.1 58.2A19.9 19.9 0 0 0 122 502.3c52.9-23.3 53.6-25.1 62.6-22.7C337.9 521.8 504 423.7 504 248.6 504 110.3 396.6 8 256.6 8zm149.2 185.1l-73 115.6a37.4 37.4 0 0 1 -53.9 9.9l-58.1-43.5a15 15 0 0 0 -18 0l-78.4 59.4c-10.5 7.9-24.2-4.6-17.1-15.7l73-115.6a37.4 37.4 0 0 1 53.9-9.9l58.1 43.5a15 15 0 0 0 18 0l78.4-59.4c10.4-8 24.1 4.5 17.1 15.6z" />
+                      </svg>
                       <div
-                        className="position-absolute translate-middle badge rounded-pill bg-danger"
-                        style={{ top: '15%', left: '85%' }}
+                        className="absolute translate-middle badge rounded-pill bg-danger flex items-center justify-center"
+                        style={{ top: '15%', left: '95%', width: '1rem', height: '1rem' }}
                       >
                         {dataMess.filter((mess) => mess.is_seen === 0).length !== 0
                           ? dataMess.filter((mess) => mess.is_seen === 0).length
                           : 0}
                       </div>
-                      {isModalMess && <ModalChat dataMess={dataMess} />}
                     </div>
-                  </Box>
-                </Box>
-              </Box>
-            </div>
-            <div className='info-user-container flex items-center justify-between px-12 py-8 relative'>
-              <div className='info-user flex items-center gap-8'>
-                <div className='avartar-user relative'>
-                  <img
-                    src={userInfomations.Avarta}
-                    alt=''
-                    className='w-28 h-28 rounded-full hidden lg:block object-cover'
-                  />
-                  <div className='absolute bottom-1 right-1 bg-green-500 w-7 h-7 rounded-full'></div>
+                    Messenger
+                    <ExpandMoreIcon className='ml-2' />
+                  </Button>
+                  <Button variant="contained" color="primary" style={{ textTransform: 'none' }}>
+                    <GroupIcon className='mr-2' />
+                    Create group
+                  </Button>
                 </div>
-                <Box className='text-white'>
-                  <Typography
-                    variant='h4'
-                    className='name-user font-bold hidden lg:block mb-1'
-                  >
-                    {userInfomations.name}
-                  </Typography>
-                  <Typography className='date-joined text-xl hidden lg:block'>
-                    Join at {getFormattedDate(userInfomations.createAccount)}
-                  </Typography>
-                </Box>
-              </div>
-
-              <div className='actions-user flex gap-2 mt-2'>
-                <Button variant="contained" color="primary" style={{ textTransform: 'none' }}>
-                  <GroupAddIcon className='mr-2' />
-                  Add to your group
-                </Button>
-                <Button variant="contained" color="primary" style={{ textTransform: 'none' }}>
-                  <div className='icon-messenger mr-3 relative'>
-                    <svg
-                      className=''
-                      width='20'
-                      height='20'
-                      fill='#fff'
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 512 512">
-                      <path d="M256.6 8C116.5 8 8 110.3 8 248.6c0 72.3 29.7 134.8 78.1 177.9 8.4 7.5 6.6 11.9 8.1 58.2A19.9 19.9 0 0 0 122 502.3c52.9-23.3 53.6-25.1 62.6-22.7C337.9 521.8 504 423.7 504 248.6 504 110.3 396.6 8 256.6 8zm149.2 185.1l-73 115.6a37.4 37.4 0 0 1 -53.9 9.9l-58.1-43.5a15 15 0 0 0 -18 0l-78.4 59.4c-10.5 7.9-24.2-4.6-17.1-15.7l73-115.6a37.4 37.4 0 0 1 53.9-9.9l58.1 43.5a15 15 0 0 0 18 0l78.4-59.4c10.4-8 24.1 4.5 17.1 15.6z" />
-                    </svg>
-                    <div
-                      className="absolute translate-middle badge rounded-pill bg-danger flex items-center justify-center"
-                      style={{ top: '15%', left: '95%', width: '1rem', height: '1rem' }}
-                    >
-                      {dataMess.filter((mess) => mess.is_seen === 0).length !== 0
-                        ? dataMess.filter((mess) => mess.is_seen === 0).length
-                        : 0}
-                    </div>
-                  </div>
-                  Messenger
-                  <ExpandMoreIcon className='ml-2' />
-                </Button>
-                <Button variant="contained" color="primary" style={{ textTransform: 'none' }}>
-                  <GroupIcon className='mr-2' />
-                  Create group
-                </Button>
               </div>
             </div>
             <div className='container-content row m-auto'>
@@ -404,24 +419,25 @@ const UserProfile = () => {
 
                           <TabPanel
                             value='1'
-                            className='lg:w-[1000px] w-auto'
-                            sx={{ maxWidth: '1000px', padding: 0 }}
+                            className='w-full p-0'
                           >
                             <Swiper
                               direction='vertical'
                               spaceBetween={20}
                               slidesPerView={2.5}
-                              style={{ height: '900px' }}
+                              style={{ height: '900px', width: '100%' }}
                               navigation={{ prevEl: '.swiper-button-prev', nextEl: '.swiper-button-next' }}
                               onSlideChange={() => console.log('slide change')}
                               onSwiper={(swiper) => console.log(swiper)}
-                              className='overflow-y-auto'
+                              className='swiper-publicNotes overflow-y-auto'
                             >
                               {publicNotes &&
                                 publicNotes.map((info, index) => (
                                   <SwiperSlide
                                     key={index}
-                                    className='p-2 border-[1px] rounded-xl border-black border-solid'
+                                    className={`p-2 border-[1px] rounded-xl border-black border-solid mr-1
+                                                ${isLightColor(info.color) ? 'text-black' : 'text-white'}
+                                    `}
                                     style={{
                                       backgroundColor: `rgba(${info.color.r}, ${info.color.g}, ${info.color.b}, ${info.color.a})`,
                                     }}
@@ -466,6 +482,7 @@ const UserProfile = () => {
                                           className='shareNote cursor-pointer opacity-70 hover:opacity-100'
                                           width='24'
                                           height='24'
+                                          fill={isLightColor(info.color) ? 'black' : 'white'}
                                           xmlns="http://www.w3.org/2000/svg"
                                           viewBox="0 0 512 512"
                                         >
@@ -475,6 +492,7 @@ const UserProfile = () => {
                                           className='deleteNote cursor-pointer opacity-70 hover:opacity-100'
                                           width='24'
                                           height='24'
+                                          fill={isLightColor(info.color) ? 'black' : 'white'}
                                           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"
                                           onClick={() => deleteNote(info.idNote)}
                                         >
@@ -513,12 +531,11 @@ const UserProfile = () => {
                                     <Box
                                       component='div'
                                       sx={{
-                                        color: 'text.secondary',
                                         textAlign: 'end',
                                         padding: '0 10px 0 0',
                                       }}
                                     >
-                                      <p style={{ margin: 0 }}>
+                                      <p style={{ margin: 0, opacity: 0.8 }}>
                                         Last edit at {convertUpdate(info.updateAt)}
                                       </p>
                                     </Box>
@@ -527,6 +544,7 @@ const UserProfile = () => {
                                         <svg
                                           width='1rem'
                                           height='1rem'
+                                          fill={isLightColor(info.color) ? 'black' : 'white'}
                                           xmlns="http://www.w3.org/2000/svg"
                                           viewBox="0 0 512 512">
                                           <path d="M323.8 34.8c-38.2-10.9-78.1 11.2-89 49.4l-5.7 20c-3.7 13-10.4 25-19.5 35l-51.3 56.4c-8.9 9.8-8.2 25 1.6 33.9s25 8.2 33.9-1.6l51.3-56.4c14.1-15.5 24.4-34 30.1-54.1l5.7-20c3.6-12.7 16.9-20.1 29.7-16.5s20.1 16.9 16.5 29.7l-5.7 20c-5.7 19.9-14.7 38.7-26.6 55.5c-5.2 7.3-5.8 16.9-1.7 24.9s12.3 13 21.3 13L448 224c8.8 0 16 7.2 16 16c0 6.8-4.3 12.7-10.4 15c-7.4 2.8-13 9-14.9 16.7s.1 15.8 5.3 21.7c2.5 2.8 4 6.5 4 10.6c0 7.8-5.6 14.3-13 15.7c-8.2 1.6-15.1 7.3-18 15.2s-1.6 16.7 3.6 23.3c2.1 2.7 3.4 6.1 3.4 9.9c0 6.7-4.2 12.6-10.2 14.9c-11.5 4.5-17.7 16.9-14.4 28.8c.4 1.3 .6 2.8 .6 4.3c0 8.8-7.2 16-16 16l-97.5 0c-12.6 0-25-3.7-35.5-10.7l-61.7-41.1c-11-7.4-25.9-4.4-33.3 6.7s-4.4 25.9 6.7 33.3l61.7 41.1c18.4 12.3 40 18.8 62.1 18.8l97.5 0c34.7 0 62.9-27.6 64-62c14.6-11.7 24-29.7 24-50c0-4.5-.5-8.8-1.3-13c15.4-11.7 25.3-30.2 25.3-51c0-6.5-1-12.8-2.8-18.7C504.8 273.7 512 257.7 512 240c0-35.3-28.6-64-64-64l-92.3 0c4.7-10.4 8.7-21.2 11.8-32.2l5.7-20c10.9-38.2-11.2-78.1-49.4-89zM32 192c-17.7 0-32 14.3-32 32L0 448c0 17.7 14.3 32 32 32l64 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32l-64 0z" />
@@ -537,6 +555,7 @@ const UserProfile = () => {
                                         <svg
                                           width='1rem'
                                           height='1rem'
+                                          fill={isLightColor(info.color) ? 'black' : 'white'}
                                           xmlns="http://www.w3.org/2000/svg"
                                           viewBox="0 0 512 512"
                                         >
@@ -548,6 +567,7 @@ const UserProfile = () => {
                                         <svg
                                           width='1rem'
                                           height='1rem'
+                                          fill={isLightColor(info.color) ? 'black' : 'white'}
                                           xmlns="http://www.w3.org/2000/svg"
                                           viewBox="0 0 512 512">
                                           <path d="M168.2 384.9c-15-5.4-31.7-3.1-44.6 6.4c-8.2 6-22.3 14.8-39.4 22.7c5.6-14.7 9.9-31.3 11.3-49.4c1-12.9-3.3-25.7-11.8-35.5C60.4 302.8 48 272 48 240c0-79.5 83.3-160 208-160s208 80.5 208 160s-83.3 160-208 160c-31.6 0-61.3-5.5-87.8-15.1zM26.3 423.8c-1.6 2.7-3.3 5.4-5.1 8.1l-.3 .5c-1.6 2.3-3.2 4.6-4.8 6.9c-3.5 4.7-7.3 9.3-11.3 13.5c-4.6 4.6-5.9 11.4-3.4 17.4c2.5 6 8.3 9.9 14.8 9.9c5.1 0 10.2-.3 15.3-.8l.7-.1c4.4-.5 8.8-1.1 13.2-1.9c.8-.1 1.6-.3 2.4-.5c17.8-3.5 34.9-9.5 50.1-16.1c22.9-10 42.4-21.9 54.3-30.6c31.8 11.5 67 17.9 104.1 17.9c141.4 0 256-93.1 256-208S397.4 32 256 32S0 125.1 0 240c0 45.1 17.7 86.8 47.7 120.9c-1.9 24.5-11.4 46.3-21.4 62.9zM144 272a32 32 0 1 0 0-64 32 32 0 1 0 0 64zm144-32a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm80 32a32 32 0 1 0 0-64 32 32 0 1 0 0 64z" />
@@ -613,8 +633,7 @@ const UserProfile = () => {
 
                           <TabPanel
                             value='1'
-                            className='lg:w-[1000px] w-auto'
-                            sx={{ maxWidth: '1000px', padding: 0 }}
+                            className='w-full p-0'
                           >
                             <Swiper
                               spaceBetween={20}
@@ -622,13 +641,14 @@ const UserProfile = () => {
                               navigation={{ prevEl: '.swiper-button-prev', nextEl: '.swiper-button-next' }}
                               onSlideChange={() => console.log('slide change')}
                               onSwiper={(swiper) => console.log(swiper)}
-                              className='overflow-x-auto'
+                              className='swiper-privateNotes overflow-x-auto'
                             >
                               {archivedNotes &&
                                 archivedNotes.map((info, index) => (
                                   <SwiperSlide
                                     key={index}
-                                    className='p-2 border-[1px] rounded-xl border-black border-solid mb-1'
+                                    className={`p-2 border-[1px] rounded-xl border-black border-solid mb-1
+                                                ${isLightColor(info.color) ? 'bg-white' : 'bg-black'}`}
                                     style={{
                                       backgroundColor: `rgba(${info.color.r}, ${info.color.g}, ${info.color.b}, ${info.color.a})`,
                                     }}
@@ -673,6 +693,7 @@ const UserProfile = () => {
                                           className='shareNote cursor-pointer opacity-70 hover:opacity-100'
                                           width='24'
                                           height='24'
+                                          fill={isLightColor(info.color) ? 'black' : 'white'}
                                           xmlns="http://www.w3.org/2000/svg"
                                           viewBox="0 0 512 512"
                                         >
@@ -682,6 +703,7 @@ const UserProfile = () => {
                                           className='deleteNote cursor-pointer opacity-70 hover:opacity-100'
                                           width='24'
                                           height='24'
+                                          fill={isLightColor(info.color) ? 'black' : 'white'}
                                           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"
                                           onClick={() => deleteNote(info.idNote)}
                                         >
@@ -734,6 +756,7 @@ const UserProfile = () => {
                                         <svg
                                           width='1rem'
                                           height='1rem'
+                                          fill={isLightColor(info.color) ? 'black' : 'white'}
                                           xmlns="http://www.w3.org/2000/svg"
                                           viewBox="0 0 512 512">
                                           <path d="M323.8 34.8c-38.2-10.9-78.1 11.2-89 49.4l-5.7 20c-3.7 13-10.4 25-19.5 35l-51.3 56.4c-8.9 9.8-8.2 25 1.6 33.9s25 8.2 33.9-1.6l51.3-56.4c14.1-15.5 24.4-34 30.1-54.1l5.7-20c3.6-12.7 16.9-20.1 29.7-16.5s20.1 16.9 16.5 29.7l-5.7 20c-5.7 19.9-14.7 38.7-26.6 55.5c-5.2 7.3-5.8 16.9-1.7 24.9s12.3 13 21.3 13L448 224c8.8 0 16 7.2 16 16c0 6.8-4.3 12.7-10.4 15c-7.4 2.8-13 9-14.9 16.7s.1 15.8 5.3 21.7c2.5 2.8 4 6.5 4 10.6c0 7.8-5.6 14.3-13 15.7c-8.2 1.6-15.1 7.3-18 15.2s-1.6 16.7 3.6 23.3c2.1 2.7 3.4 6.1 3.4 9.9c0 6.7-4.2 12.6-10.2 14.9c-11.5 4.5-17.7 16.9-14.4 28.8c.4 1.3 .6 2.8 .6 4.3c0 8.8-7.2 16-16 16l-97.5 0c-12.6 0-25-3.7-35.5-10.7l-61.7-41.1c-11-7.4-25.9-4.4-33.3 6.7s-4.4 25.9 6.7 33.3l61.7 41.1c18.4 12.3 40 18.8 62.1 18.8l97.5 0c34.7 0 62.9-27.6 64-62c14.6-11.7 24-29.7 24-50c0-4.5-.5-8.8-1.3-13c15.4-11.7 25.3-30.2 25.3-51c0-6.5-1-12.8-2.8-18.7C504.8 273.7 512 257.7 512 240c0-35.3-28.6-64-64-64l-92.3 0c4.7-10.4 8.7-21.2 11.8-32.2l5.7-20c10.9-38.2-11.2-78.1-49.4-89zM32 192c-17.7 0-32 14.3-32 32L0 448c0 17.7 14.3 32 32 32l64 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32l-64 0z" />
@@ -744,6 +767,7 @@ const UserProfile = () => {
                                         <svg
                                           width='1rem'
                                           height='1rem'
+                                          fill={isLightColor(info.color) ? 'black' : 'white'}
                                           xmlns="http://www.w3.org/2000/svg"
                                           viewBox="0 0 512 512"
                                         >
@@ -755,6 +779,7 @@ const UserProfile = () => {
                                         <svg
                                           width='1rem'
                                           height='1rem'
+                                          fill={isLightColor(info.color) ? 'black' : 'white'}
                                           xmlns="http://www.w3.org/2000/svg"
                                           viewBox="0 0 512 512">
                                           <path d="M168.2 384.9c-15-5.4-31.7-3.1-44.6 6.4c-8.2 6-22.3 14.8-39.4 22.7c5.6-14.7 9.9-31.3 11.3-49.4c1-12.9-3.3-25.7-11.8-35.5C60.4 302.8 48 272 48 240c0-79.5 83.3-160 208-160s208 80.5 208 160s-83.3 160-208 160c-31.6 0-61.3-5.5-87.8-15.1zM26.3 423.8c-1.6 2.7-3.3 5.4-5.1 8.1l-.3 .5c-1.6 2.3-3.2 4.6-4.8 6.9c-3.5 4.7-7.3 9.3-11.3 13.5c-4.6 4.6-5.9 11.4-3.4 17.4c2.5 6 8.3 9.9 14.8 9.9c5.1 0 10.2-.3 15.3-.8l.7-.1c4.4-.5 8.8-1.1 13.2-1.9c.8-.1 1.6-.3 2.4-.5c17.8-3.5 34.9-9.5 50.1-16.1c22.9-10 42.4-21.9 54.3-30.6c31.8 11.5 67 17.9 104.1 17.9c141.4 0 256-93.1 256-208S397.4 32 256 32S0 125.1 0 240c0 45.1 17.7 86.8 47.7 120.9c-1.9 24.5-11.4 46.3-21.4 62.9zM144 272a32 32 0 1 0 0-64 32 32 0 1 0 0 64zm144-32a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm80 32a32 32 0 1 0 0-64 32 32 0 1 0 0 64z" />
@@ -876,10 +901,26 @@ const UserProfile = () => {
               <p className='text-white text-center text-xl font-[700]'>
                 Now available on IOS and Android platform. Download now!
               </p>
+              <div className='dowload-app-icons flex items-center gap-2 ml-4'>
+                <AppleIcon
+                  sx={{ color: 'white', fontSize: '1.8rem' }}
+                  className='cursor-pointer hover:opacity-80'
+                  onClick={() => {
+                    window.open('https://apps.apple.com/us/app/sam-note-sticky-remind-color/id6445824669', '_blank')
+                  }}
+                />
+                <AndroidIcon
+                  sx={{ color: 'white', fontSize: '1.8rem' }}
+                  className='cursor-pointer hover:opacity-80'
+                  onClick={() => {
+                    window.open('https://play.google.com/store/apps/details?id=com.thinkdiffai.cloud_note&amp;fbclid=IwY2xjawE_8sBleHRuA2FlbQIxMAABHYHaE1EWM6Iw4ZzcIta8_d6hLRUNJapdVbYO_a18uKUB20nuk851Tb-QEg_aem_ECePGLD4eDM--aBNYVTGoQ', '_blank')
+                  }}
+                />
+              </div>
             </div>
           </>
         ) : (
-          <h1>Not found</h1>
+          <h1 className='text-center text-2xl font-bold'>Not found</h1>
         )}
       </Box>
     </Box>
