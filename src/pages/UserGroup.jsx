@@ -7,7 +7,7 @@ import { AppContext } from '../context'
 import { joiResolver } from '@hookform/resolvers/joi'
 import moment from 'moment'
 import { useForm } from 'react-hook-form'
-import { schemaGroup } from '../utils/schema/schema'
+import { schemaGroup } from '../utils/schema'
 
 import {
  Accordion,

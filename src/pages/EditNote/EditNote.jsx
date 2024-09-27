@@ -56,7 +56,12 @@ const EditNote = () => {
 
    <div className='row row-cols-2 flex-grow-1'>
     <div className='col flex flex-col'>
-     <NoteList noteList={noteList} onChangeNoteList={handleChangeNoteList} userID = {user?.id} />
+     <NoteList
+      noteList={noteList}
+      onChangeNoteList={handleChangeNoteList}
+      userID={user?.id}
+      onDispatchEventName= {disPatchNameEvent}
+     />
     </div>
     <div className='col flex'>
      <FormEdit onDispatchName={disPatchNameEvent} />

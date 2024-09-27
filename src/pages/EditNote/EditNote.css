@@ -22,13 +22,13 @@
  transform: translateX(2px);
 }
 
-.editnote-btn-slick > .slick-arrow.slick-prev {
+/* .editnote-btn-slick > .slick-arrow.slick-prev {
  left: 0;
 }
 
 .editnote-btn-slick > .slick-arrow.slick-next {
  right: 0;
-}
+} */
 
 .editnote-notelist::-webkit-scrollbar {
  width: 10px;
@@ -39,4 +39,8 @@
 .editnote-notelist::-webkit-scrollbar-thumb {
  background-color: white;
  border-radius: 10px;
+}
+
+.editnote-notelist > li > a.active {
+ border: 1px solid red;
 }

@@ -11,7 +11,13 @@ import CloseIcon from '@mui/icons-material/Close'
 import configs from '../../../configs/configs.json'
 const { API_SERVER_URL } = configs
 
-const FormEditImages = ({ images, userId, noteId, onDispatchName }) => {
+const FormEditImages = ({
+ images,
+ userId,
+ noteId,
+ onDispatchName,
+ onGetNoteId,
+}) => {
  const { handleCheck, isCheckedAll, checkedItems, setCheckedItems } =
   useChecklist(images, {
    key: 'id',
@@ -50,7 +56,7 @@ const FormEditImages = ({ images, userId, noteId, onDispatchName }) => {
    })
 
    onDispatchName('delete image')
-   console.log(response)
+   onGetNoteId()
   } catch (error) {
    console.error(error)
   }
@@ -82,12 +88,49 @@ const FormEditImages = ({ images, userId, noteId, onDispatchName }) => {
   })
  }
 
- console.log(selectedImages)
+ const deleteImageList = async (idImage) => {
+  const formData = new FormData()
+  formData.append('id_user', userId)
+  formData.append('id_note', noteId)
+  formData.append('id_images', idImage)
 
- const handleDeleteImageList = () => {
-  selectedImages.forEach((id) => {
-   const data = { id_user: userId, id_note: noteId, id_images: id }
-   deleteImage(data)
+  try {
+   const response = await fetch(`${API_SERVER_URL}/delete_image_note`, {
+    method: 'delete',
+    body: formData,
+   })
+  } catch (error) {
+   console.error(error)
+  }
+ }
+
+ const handleDeleteImageList = async () => {
+  Swal.fire({
+   title: 'Are you sure?',
+   text: "You won't be able to revert this!",
+   icon: 'warning',
+   showCancelButton: true,
+   confirmButtonColor: '#3085d6',
+   cancelButtonColor: '#d33',
+   confirmButtonText: 'Yes, delete it!',
+  }).then((result) => {
+   if (result.isConfirmed) {
+    selectedImages.forEach(async (id, idx) => {
+     await deleteImageList(id)
+
+     if (idx === selectedImages.length - 1) {
+      onDispatchName('delete image')
+      onGetNoteId()
+      setCheckedItems(new Set())
+     }
+    })
+
+    Swal.fire({
+     title: 'Deleted!',
+     text: 'Your imagelist has been deleted.',
+     icon: 'success',
+    })
+   }
   })
  }
 
