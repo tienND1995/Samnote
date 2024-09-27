@@ -18,3 +18,44 @@ export const schemaGroup = Joi.object({
   'string.empty': 'Not avatar yet!',
  }),
 })
+
+const data = {
+ type: 'text',
+ data: 'hello cac tinh yeu',
+ title: 'giang sinh an lanh',
+ color: {
+  r: 255,
+  g: 255,
+  b: 255,
+  a: 1,
+ },
+ idFolder: 45,
+ remindAt: '01/01/2024 07:00 AM +07:00',
+ nodePublic: 0,
+ dueAt: '01/01/2024 07:00 AM +07:00',
+ lock: '123456',
+ pinned: false,
+ linkNoteShare: '',
+}
+
+export const schemaNoteEdit = Joi.object({
+ data: Joi.string().min(5).max(1000).required().messages({
+  'string.min': 'At least 5 character!',
+  'string.empty': 'Not content yet!',
+ }),
+ title: Joi.string().min(5).max(100).required().messages({
+  'string.min': 'At least 5 character!',
+  'string.empty': 'Not title yet!',
+ }),
+ dueAt: Joi.date().max('now').required().messages({
+  'date.empty': 'Not remindAt yet!',
+  'date.max': 'Current maximum date',
+ }),
+
+ idFolder: Joi.number().integer().allow(null),
+ type: Joi.string().allow('').allow(null),
+ color: Joi.string().allow('').allow(null),
+ notePublic: Joi.number().integer().allow('').allow(null),
+ pinned: Joi.boolean().allow('').allow(null),
+ lock: Joi.string().allow('').allow(null),
+})

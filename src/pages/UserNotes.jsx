@@ -191,6 +191,7 @@ export default function UserNotes() {
     getUserFolder();
   }, [user?.id, reload]);
 
+
   const handleSelectForDeletion = (file) => {
     setSelectedForDeletion((prevSelection) =>
       prevSelection.includes(file)

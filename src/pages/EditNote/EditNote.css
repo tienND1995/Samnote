@@ -1,0 +1,42 @@
+/* edit btn slick */
+
+.editnote-btn-slick > .slick-arrow::before {
+ content: '';
+}
+
+.editnote-btn-slick > .slick-arrow {
+ color: black;
+ background-color: #d9d9d9;
+ border-radius: 100%;
+
+ display: flex !important;
+ align-items: center;
+ justify-content: center;
+}
+
+.editnote-btn-slick > .slick-arrow > svg {
+ font-size: 12px;
+}
+
+.editnote-btn-slick > .slick-arrow.slick-prev > svg {
+ transform: translateX(2px);
+}
+
+/* .editnote-btn-slick > .slick-arrow.slick-prev {
+ left: 0;
+}
+
+.editnote-btn-slick > .slick-arrow.slick-next {
+ right: 0;
+} */
+
+.editnote-notelist::-webkit-scrollbar {
+ width: 10px;
+ border-radius: 10px;
+ background-color: black;
+}
+
+.editnote-notelist::-webkit-scrollbar-thumb {
+ background-color: white;
+ border-radius: 10px;
+}
