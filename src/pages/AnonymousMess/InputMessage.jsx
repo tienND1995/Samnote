@@ -144,36 +144,73 @@ function GiphySearch({ onGifSelect }) {
   </div>
  )
 }
-
 function InputMessage({ data }) {
  const appContext = useContext(AppContext)
  const { user } = appContext
  const [payLoadData, setPayLoadData] = useState({
   idRoom: null,
   idReceive: null,
-  content: '',
+  content: 'halelugia 1995',
   img: '',
   gif: '',
   type: '',
  })
 
  if (!data.idRoom && !data.idReceive) return
+ //  console.log('Data truyền vào', data)
 
- console.log('Data truyền vào', data)
+ const sendMesage = async () => {
+  const { idReceive, idRoom, gif, type, img, content } = payLoadData
+
+  const formData = new FormData()
+  formData.append('idReceive', idReceive)
+  formData.append('idRoom', idRoom)
+  formData.append('gif', gif)
+  formData.append('type', type)
+  formData.append('img', img)
+  formData.append('content', content)
+  try {
+   const response = await fetch(
+    `https://samnote.mangasocial.online/message/chat-unknown-image2/${user.id}`,
+    {
+     method: 'POST',
+     body: formData,
+    }
+   )
+   console.log('gửi thành công', response)
+
+   if (!response.ok) {
+    throw new Error(`HTTP error! Status: ${response.status}`)
+   }
+   const data = await response.json()
+   console.log('Dữ liệu trả về:', data)
+  } catch (err) {
+   console.error('Lỗi khi gửi tin nhắn:', err)
+  }
+ }
+
+ const [fileUploadImage, setFileUploadImage] = useState(null)
+
+ const newfile = new File([""], "filename")
 
  const handleGifSelect = (gif) => {
-  // Cập nhật giá trị của gif trong payLoadData khi chọn GIF
   setPayLoadData((prevData) => ({
    ...prevData,
    idReceive: user.id == data.idReceive ? data.idReceive : data.idSend,
    idRoom: data.idRoom,
    gif: gif.images.fixed_height.url,
-   type: 'gif', // Lưu URL của GIF
+   type: 'text',
+  //  img: newfile,
   }))
+  // sendMesage()
  }
 
+ console.log('payload data', payLoadData)
+
+ const inputFileRef = useRef()
+
  return (
-  <div>
+  <div className='h-[300px] bg-black'>
    <GiphySearch onGifSelect={handleGifSelect} />
    {/* {payLoadData.gif && (
         <div>
@@ -181,6 +218,14 @@ function InputMessage({ data }) {
           <img src={payLoadData.gif} alt="Selected GIF" />
         </div>
       )} */}
+
+   <div>
+    <input type='file' ref={inputFileRef} />
+
+    <button className='btn btn-danger' onClick={sendMesage}>
+     Send
+    </button>
+   </div>
   </div>
  )
 }

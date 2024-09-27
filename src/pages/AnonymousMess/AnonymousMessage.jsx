@@ -13,7 +13,7 @@ const AnonymousMessage = () => {
  const { user } = appContext
  const [listChatUnknow, setListChatUnknow] = useState([])
  const [activeTab, setActiveTab] = useState('all')
- 
+
  const [showChatBox, setShowChatBox] = useState({ info: [], message: [] })
 
  const handleGetMessage = async (data) => {
@@ -62,7 +62,7 @@ const AnonymousMessage = () => {
   return listChatUnknow // Nếu tab là "all", trả về tất cả tin nhắn
  }
 
- console.log(showChatBox.info)
+ console.log('showChatBox:', showChatBox)
 
  return (
   <Box className='text-white lg:flex bg-[#DFFFFE] w-full'>
@@ -134,7 +134,6 @@ const AnonymousMessage = () => {
         className={({ isActive, isPending }) =>
          isPending ? 'pending' : isActive ? 'active' : ''
         }
-
         style={{
          display: 'flex',
          alignItems: 'center',
