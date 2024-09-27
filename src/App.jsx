@@ -68,7 +68,7 @@ function App() {
         <Route path="*" element={<Navigate replace to="/" />} />
 
         <Route element={<RootLayout />}>
-          <Route path="/other-user/:id" element={<OtherUser />} />
+          <Route path="/profile-other-user/:id" element={<UserProfile />} />
           <Route path="/user/note/:id" element={<UserNotes />} />
           <Route path="/user/setting" element={<UserSetting />} />
           <Route path="/user/sketch" element={<UserSketch />} />

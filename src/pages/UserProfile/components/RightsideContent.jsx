@@ -5,6 +5,7 @@ import { getTimeDifference } from '../../../helper'
 import { AppContext } from '../../../context'
 import api from '../../../api'
 import { getCurrentFormattedDateTime } from '../../../helper'
+
 const RightsideContent = ({ lastUsers, allNotePublic, setReload }) => {
     const [payloadData, setPayloadData] = useState('')
     const appContext = useContext(AppContext)
@@ -76,7 +77,7 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload }) => {
                                 {lastUsers.slice(0, 7).map(({ id, linkAvatar, user_name, createAt }) => (
                                     <li key={`${id}`}>
                                         <Link
-                                            to={`/other-user/${id}`}
+                                            to={`/profile-other-user/${id}`}
                                             className='w-full h-[15%] flex justify-between items-center my-1 ml-2 link-dark text-decoration-none'
                                         >
                                             <img
