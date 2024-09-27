@@ -1,0 +1,47 @@
+.hide-scroll {
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Edge */
+}
+
+.radius-quicknotes {
+  border-radius: 12px;
+}
+
+.truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hide-quick {
+  display: none;
+}
+
+.borderNone:hover {
+  border: none;
+}
+
+.swiper-publicNotes::-webkit-scrollbar,
+.swiper-privateNotes::-webkit-scrollbar {
+  background-color: gray;
+  border-radius: 0.6rem;
+}
+
+.swiper-publicNotes::-webkit-scrollbar-thumb,
+.swiper-privateNotes::-webkit-scrollbar-thumb {
+  background-color: white;
+  border-radius: 0.6rem;
+}
+
+.swiper-publicNotes::-webkit-scrollbar {
+  width: 0.6rem;
+}
+
+.swiper-privateNotes::-webkit-scrollbar {
+  height: 0.6rem;
+}

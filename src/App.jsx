@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 
 import { Alert, Snackbar } from '@mui/material'
 import { Navigate, Route, Routes } from 'react-router-dom'
@@ -6,24 +6,24 @@ import './App.css'
 import { AppContext } from './context'
 import CreateNote from './pages/CreateNote'
 import Home from './pages/Home'
+
 import AnonymousMessage from './pages/AnonymousMess/AnonymousMessage'
 
+import Incognito from './pages/Incognito'
 import Login from './pages/Login'
 import OtherUser from './pages/OtherUser'
 import UserDustbin from './pages/UserDustbin'
 import UserGroup from './pages/UserGroup'
 import UserNotes from './pages/UserNotes'
-import UserPhoto from './pages/UserPhoto'
-import UserProfile from './pages/UserProfile'
+import UserProfile from './pages/UserProfile/UserProfile'
 import UserSetting from './pages/UserSetting'
 import UserSketch from './pages/UserSketch'
-import Incognito from './pages/Incognito'
 
 import RootLayout from './layout/RootLayout'
-import Group from './pages/Group/Group'
 import Demo from './pages/Demo/Demo'
-import Photo from './pages/Photo/Photo'
 import EditNote from './pages/EditNote/EditNote'
+import Group from './pages/Group/Group'
+import Photo from './pages/Photo/Photo'
 
 const AppSnackbar = () => {
  const appContext = useContext(AppContext)
@@ -74,7 +74,7 @@ function App() {
 
      <Route path='/user/create-note' element={<CreateNote />} />
      <Route path='/user/profile/:id' element={<UserProfile />} />
-     <Route path='/user/incognito' element={<Incognito />} />
+     <Route path='/user/incognito' element={<AnonymousMessage />} />
      {/* ................................ */}
 
      <Route path='/user/photo' element={<Photo />} />
