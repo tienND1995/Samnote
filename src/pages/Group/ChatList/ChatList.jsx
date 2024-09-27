@@ -12,7 +12,7 @@ import Modal from 'react-bootstrap/Modal'
 
 import { joiResolver } from '@hookform/resolvers/joi'
 import { useForm } from 'react-hook-form'
-import { schemaGroup } from '../../../utils/schema/schema'
+import { schemaGroup } from '../../../utils/schema'
 import configs from '../../../configs/configs.json'
 const { API_SERVER_URL, BASE64_URL } = configs
 

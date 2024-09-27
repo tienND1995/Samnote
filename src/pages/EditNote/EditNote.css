@@ -40,3 +40,7 @@
  background-color: white;
  border-radius: 10px;
 }
+
+.editnote-notelist > li > a.active {
+ border: 1px solid red;
+}

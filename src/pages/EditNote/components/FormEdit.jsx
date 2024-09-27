@@ -1,16 +1,16 @@
 import axios from 'axios'
 import { useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { joiResolver } from '@hookform/resolvers/joi'
 import { Editor } from '@tinymce/tinymce-react'
 import moment from 'moment'
-import { schemaNoteEdit } from '../../../utils/schema/schema'
+import { schemaNoteEdit } from '../../../utils/schema'
 
 import { AppContext } from '../../../context'
 import { fetchAllFolder, fetchNoteList } from '../fetchApiEditNote'
-import FormEditImages from './FormEditImages'
+import FormEditImages from './EditImages'
 
 import {
  Checkbox,
@@ -36,10 +36,10 @@ const FormEdit = ({ onDispatchName }) => {
  const [colorList, setColorList] = useState([])
  const [folderList, setFolderList] = useState([])
  const [color, setColor] = useState({
-  r: '255',
-  g: '0',
-  b: '0',
-  name: 'red',
+  b: 250,
+  g: 250,
+  r: 255,
+  name: 'snow',
  })
 
  // Declare variables for the form
@@ -48,8 +48,6 @@ const FormEdit = ({ onDispatchName }) => {
   handleSubmit,
   setValue,
   watch,
-  reset,
-  unregister,
   formState: { errors, dirtyFields },
  } = useForm({
   resolver: joiResolver(schemaNoteEdit),
@@ -65,12 +63,32 @@ const FormEdit = ({ onDispatchName }) => {
    idFolder: null,
   },
  })
+
  const notePublicForm = watch('notePublic')
  const colorForm = watch('color')
  const folderForm = watch('idFolder')
  const dataForm = watch('data')
 
  const convertTime = (time) => moment(`${time}+0700`).format('YYYY-MM-DD')
+
+ const getDataNoteId = async () => {
+  const noteList = await fetchNoteList(user?.id)
+  const noteId = noteList.filter((note) => note.idNote === Number.parseInt(id))
+  if (!noteId || noteId.length === 0) return navigate('/')
+
+  console.log('re-render', noteList)
+
+  setNoteItem(noteId[0])
+
+  // set values form default
+  setValue('title', noteId[0].title)
+  setValue('data', noteId[0].data)
+  setValue('pinned', noteId[0].pinned)
+  setValue('type', noteId[0].type)
+  setValue('dueAt', convertTime(noteId[0].dueAt))
+  setValue('notePublic', noteId[0].notePublic)
+  setValue('idFolder', noteId[0].idFolder)
+ }
 
  useEffect(() => {
   const fetchAllColor = async () => {
@@ -80,22 +98,6 @@ const FormEdit = ({ onDispatchName }) => {
    } catch (error) {
     console.error(error)
    }
-  }
-  const getDataNoteId = async () => {
-   const noteList = await fetchNoteList(user?.id)
-   const noteId = noteList.filter((note) => note.idNote === Number.parseInt(id))
-   if (!noteId || noteId.length === 0) return navigate('/')
-
-   setNoteItem(noteId[0])
-
-   // set values form default
-   setValue('title', noteId[0].title)
-   setValue('data', noteId[0].data)
-   setValue('pinned', noteId[0].pinned)
-   setValue('type', noteId[0].type)
-   setValue('dueAt', convertTime(noteId[0].dueAt))
-   setValue('notePublic', noteId[0].notePublic)
-   setValue('idFolder', noteId[0].idFolder)
   }
 
   const getFolders = async () => {
@@ -108,7 +110,7 @@ const FormEdit = ({ onDispatchName }) => {
   getDataNoteId()
   getFolders()
   fetchAllColor()
- }, [user?.id])
+ }, [user?.id, id])
 
  useEffect(() => {
   // render color when component mounted
@@ -126,7 +128,7 @@ const FormEdit = ({ onDispatchName }) => {
   }
 
   handleColor()
- }, [colorList, noteItem])
+ }, [colorList, noteItem, id])
 
  useEffect(() => {
   // check color form change?
@@ -325,6 +327,7 @@ const FormEdit = ({ onDispatchName }) => {
      userId={user?.id}
      noteId={noteItem.idNote}
      onDispatchName={onDispatchName}
+     onGetNoteId={getDataNoteId}
     />
 
     <div className='flex justify-start items-center'>
@@ -339,7 +342,16 @@ const FormEdit = ({ onDispatchName }) => {
      </div>
     </div>
 
-    <div className='mx-auto w-full flex flex-grow-1'>
+    <div className='mx-auto w-full flex flex-col flex-grow-1 gap-2'>
+     {errors.data && (
+      <p
+       style={{ borderBottom: '1px solid red' }}
+       className='text-red-600 w-max'
+      >
+       {errors.data.message}
+      </p>
+     )}
+
      <Editor
       apiKey='c9fpvuqin9s9m9702haau5pyi6k0t0zj29nelhczdvjdbt3y'
       value={dataForm}
