@@ -191,7 +191,7 @@ function InputMessage({ data }) {
 
  const [fileUploadImage, setFileUploadImage] = useState(null)
 
- const newfile = new File([""], "filename")
+ const newfile = new File([''], 'filename')
 
  const handleGifSelect = (gif) => {
   setPayLoadData((prevData) => ({
@@ -200,17 +200,23 @@ function InputMessage({ data }) {
    idRoom: data.idRoom,
    gif: gif.images.fixed_height.url,
    type: 'text',
-  //  img: newfile,
+   //  img: newfile,
   }))
+
   // sendMesage()
  }
 
- console.log('payload data', payLoadData)
+ console.log('payLoadData', payLoadData)
 
  const inputFileRef = useRef()
 
  return (
   <div className='h-[300px] bg-black'>
+   <div>
+    <label htmlFor=''>upload file</label>
+    <input type='file' onChange={(e) => console.log(e.target.files[0])} />
+   </div>
+
    <GiphySearch onGifSelect={handleGifSelect} />
    {/* {payLoadData.gif && (
         <div>
