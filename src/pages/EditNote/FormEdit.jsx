@@ -152,9 +152,9 @@ const FormEdit = ({ onDispatchName }) => {
  }
 
  const onSubmit = async (data) => {
-  if (color.name !== data.color || !noteItem.idNote) return
-  if (Object.keys(dirtyFields).length === 0 && data.data === noteItem.data)
-   return
+  // if (color.name !== data.color || !noteItem.idNote) return
+  // if (Object.keys(dirtyFields).length === 0 && data.data === noteItem.data)
+  //  return
 
   // *** convert time and color to api
   const newDueAt = `${moment(data.dueAt).format('DD/MM/YYYY hh:mm A')} +07:00`
@@ -171,9 +171,9 @@ const FormEdit = ({ onDispatchName }) => {
    dueAt: newDueAt,
   }
 
-  console.log(data)
+  console.log('data form', dataForm)
 
-  pacthNote(noteItem.idNote, dataForm)
+  // pacthNote(noteItem.idNote, dataForm)
  }
 
  return (
@@ -377,7 +377,7 @@ const FormEdit = ({ onDispatchName }) => {
          const imageUrl = URL.createObjectURL(e.target.files[0])
 
          const reader = new FileReader()
-         reader.addEventListener('load', () => {
+         reader.addEventListener('load', async () => {
           const id = 'blobid' + new Date().getTime()
           const blobCache = tinymce.activeEditor.editorUpload.blobCache
 
@@ -385,11 +385,15 @@ const FormEdit = ({ onDispatchName }) => {
           const blobInfo = blobCache.create(id, file, imageUrl)
           blobCache.add(blobInfo)
 
-          console.log('blobInfo', blobCache)
-
           /* call the callback and populate the Title field with the file name */
           cb(blobInfo.blobUri(), { title: file.name })
+          console.log('blob', blobInfo.blob())
+          console.log('name', blobInfo.name())
+          console.log('blobUri', blobInfo.blobUri())
+          console.log('base64', blobInfo.base64())
+          // console.log('blobInfo abc', blobInfo.base64())
          })
+
          reader.readAsDataURL(file)
         })
 

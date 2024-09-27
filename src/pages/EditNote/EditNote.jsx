@@ -32,7 +32,6 @@ const EditNote = () => {
   }
  }, [user, id, nameEvent])
 
- console.log('noteList', noteList)
 
  return (
   <div className='bg-[#181A1B] px-4 gap-4 pt-4 pb-2 flex flex-col w-full'>
