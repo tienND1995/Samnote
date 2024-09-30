@@ -3,7 +3,6 @@ import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../context";
 import { NavLink } from "react-router-dom";
 import api from "../../api";
-
 import bg_chat from "../../assets/img-chat-an-danh.jpg";
 import SearchUnknowMessage from "./SearchUnknowMessage.jsx";
 import InputMessage from "./InputMessage";
@@ -13,6 +12,7 @@ const AnonymousMessage = () => {
   const { user } = appContext;
   const [listChatUnknow, setListChatUnknow] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
+  const [reload, setReload] = useState(0);
   const [showChatBox, setShowChatBox] = useState({ info: [], message: [] });
   console.log("showChatBox", showChatBox);
 
@@ -26,11 +26,32 @@ const AnonymousMessage = () => {
         ...prevState,
         message: res.data.data,
       }));
+
       console.log("res.data.data", res.data.data);
       console.log("check state", showChatBox.message);
     } catch (err) {
       console.log(err);
+    } finally {
+      scrollToBottom();
     }
+  };
+
+  const handleReload = (payLoadData) => {
+    setReload((prev) => prev + 1);
+    setShowChatBox((prev) => ({
+      ...prev, // Giữ nguyên các giá trị khác của showChatBox
+      message: [...prev.message, payLoadData], // Nối dữ liệu mới vào mảng message
+    }));
+    scrollToBottom();
+  };
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      const element = document.getElementById("lastmessage");
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 300); // Thời gian trễ là 100ms (có thể điều chỉnh tùy ý)
   };
 
   useEffect(() => {
@@ -51,7 +72,7 @@ const AnonymousMessage = () => {
       // Reset danh sách nếu không có user
       setListChatUnknow([]);
     }
-  }, [user]);
+  }, [user, reload]);
 
   // Hàm lọc danh sách dựa trên tab hiện tại
   const filteredChatList = () => {
@@ -251,7 +272,7 @@ const AnonymousMessage = () => {
                   sx={{
                     marginLeft: "10px",
                     display: "flex",
-                    alignItems: "                    flex-end",
+                    alignItems: "flex-end",
                     color: "#000",
                     justifyContent:
                       info.idReceive !== user.id ? "flex-end" : "flex-start",
@@ -286,13 +307,13 @@ const AnonymousMessage = () => {
                         <img
                           src={info.img}
                           alt="image"
-                          className="w-[30wh] h-[40vh] m-2"
+                          className="w-[200px] h-[auto] m-2"
                         />
                       ) : info.type === "gif" ? (
                         <img
                           src={info.gif}
                           alt="GIF"
-                          className="max-w-[30wh] max-h-[40vh] m-2"
+                          className="w-[200px] h-[auto] m-2"
                         />
                       ) : null}
                     </>
@@ -316,13 +337,13 @@ const AnonymousMessage = () => {
                         <img
                           src={info.img}
                           alt="image"
-                          className="w-[30wh] h-[40vh] m-2"
+                          className="w-[200px] h-[auto] m-2"
                         />
                       ) : info.type === "gif" ? (
                         <img
                           src={info.gif}
                           alt="GIF"
-                          className="max-w-[30wh] max-h-[40vh] m-2"
+                          className="w-[200px] h-[auto] m-2"
                         />
                       ) : (
                         ""
@@ -335,7 +356,7 @@ const AnonymousMessage = () => {
           </div>
           <div className="w-full relative">
             {" "}
-            <InputMessage data={showChatBox.info} />
+            <InputMessage data={showChatBox.info} onReload={handleReload} />
           </div>
         </div>
       )}

@@ -11,10 +11,11 @@ import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import GifIcon from "../../assets/gifIcon.jsx";
 import SendIcon from "@mui/icons-material/Send";
-import ImageLogo from "../../assets/imagelogo.jsx"; // Giả định bạn có một component ImageLogo
-import api from "../../api"; // Giả định bạn đang sử dụng axios cho API
+import ImageLogo from "../../assets/imagelogo.jsx";
+import api from "../../api";
+import createEmptyImageFile from "../../components/CreateEmptyImageFile"; // Giả định bạn có một component ImageLogo
 
-function GiphySearch({ onGifSelect }) {
+const GiphySearch = ({ onGifSelect }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [state, setState] = useState({
     gifs: [],
@@ -160,48 +161,43 @@ function GiphySearch({ onGifSelect }) {
       </div>
     </div>
   );
-}
+};
 
 const ImageUploader = ({ onImageSelect, onImageRemove }) => {
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result;
-        setSelectedImage(result);
-        if (onImageSelect) {
-          onImageSelect(result);
-        }
-      };
-      reader.readAsDataURL(file);
+      setSelectedImageFile(file); // Lưu file gốc vào state
+      if (onImageSelect) {
+        onImageSelect(file); // Gọi hàm onImageSelect với file gốc
+      }
     }
   };
 
   const handleIconClick = () => {
-    fileInputRef.current.click(); // Mở ô chọn file
+    fileInputRef.current.click();
   };
 
   const handleRemoveImage = () => {
-    setSelectedImage(null); // Xóa ảnh đã chọn
+    setSelectedImageFile(null); // Xóa file đã chọn
     if (onImageSelect) {
-      onImageSelect(null); // Thông báo cho component cha rằng ảnh đã bị xóa
+      onImageSelect(null); // Gọi hàm onImageSelect với null
     }
     if (onImageRemove) {
-      onImageRemove(); // Gọi hàm xóa ảnh từ component cha
+      onImageRemove(); // Gọi hàm onImageRemove nếu có
     }
   };
 
   return (
     <>
       <div className="absolute mx-2 px-2 top-0 transform -translate-y-[101%] bg-white left-0 right-0 w-full">
-        {selectedImage && (
-          <div>
+        {selectedImageFile && (
+          <div className="relative w-fit">
             <img
-              src={selectedImage}
+              src={URL.createObjectURL(selectedImageFile)} // Tạo URL từ file
               alt="Selected"
               style={{
                 marginTop: "10px",
@@ -213,17 +209,23 @@ const ImageUploader = ({ onImageSelect, onImageRemove }) => {
             <button
               onClick={handleRemoveImage}
               style={{
-                display: "block",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "absolute",
                 marginTop: "10px",
-                padding: "5px 10px",
-                backgroundColor: "#ff4d4d",
+                height: "35px",
+                top: -10,
+                right: -13,
+                width: "35px",
+                borderRadius: "50%",
+                backgroundColor: "#000",
                 color: "white",
                 border: "none",
-                borderRadius: "5px",
                 cursor: "pointer",
               }}
             >
-              Xóa ảnh
+              <CloseIcon />
             </button>
           </div>
         )}
@@ -245,39 +247,60 @@ const ImageUploader = ({ onImageSelect, onImageRemove }) => {
   );
 };
 
-function InputMessage({ data }) {
+const InputMessage = ({ data, onReload }) => {
   const appContext = useContext(AppContext);
   const { user } = appContext;
+
   const [componentVisibility, setComponentVisibility] = useState({
     giphySearch: false,
     OpenSelectImage: false,
   });
-  const { giphySearch, OpenSelectImage } = componentVisibility; //track ra để dùng
+  const { giphySearch, OpenSelectImage } = componentVisibility;
+
   const [payLoadData, setPayLoadData] = useState({
-    idRoom: null,
-    idReceive: null,
+    idRoom: data.idRoom,
+    idReceive: data.idReceive,
     content: "",
-    img: "",
+    img: null,
     gif: "",
     type: "",
   });
+
+  const handleReload = (data) => {
+    onReload(data);
+  };
+
   const handleImageRemove = () => {
     setComponentVisibility((prev) => ({
       ...prev,
-      OpenSelectImage: false, // Đặt OpenSelectImage về false khi ảnh bị xóa
+      OpenSelectImage: false,
+    }));
+  };
+
+  const handleInputChange = (event) => {
+    const { value } = event.target;
+    setPayLoadData((prevData) => ({
+      ...prevData,
+      content: value,
+      type: "text",
     }));
   };
 
   const sendMesage = async () => {
     const { idReceive, idRoom, gif, type, img, content } = payLoadData;
-
+    const [num1, num2] = idRoom.split("#").map(Number);
+    setPayLoadData((prevData) => ({
+      ...prevData,
+      idReceive: user.id != num1 ? num1 : num2,
+    }));
     const formData = new FormData();
     formData.append("idReceive", idReceive);
     formData.append("idRoom", idRoom);
     formData.append("gif", gif);
     formData.append("type", type);
-    formData.append("img", img);
+    formData.append("img", img === null ? createEmptyImageFile() : img); // Nếu img là null, tạo file rỗng
     formData.append("content", content);
+
     try {
       const response = await fetch(
         `https://samnote.mangasocial.online/message/chat-unknown-image2/${user.id}`,
@@ -286,53 +309,65 @@ function InputMessage({ data }) {
           body: formData,
         }
       );
-      // console.log("gửi thành công", response);
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      // console.log("Dữ liệu trả về:", data);
+      handleReload(data.message);
+      setPayLoadData((prevData) => ({
+        ...prevData,
+        content: "",
+        img: null,
+        gif: "",
+      }));
+      setComponentVisibility((prevData) => ({
+        ...prevData,
+        giphySearch: false,
+      }));
+      handleImageRemove();
+
+      console.log("Gửi thành công:", data.message);
     } catch (err) {
       console.error("Lỗi khi gửi tin nhắn:", err);
     }
-
-    //
   };
+  console.log("trạng thái ", giphySearch, OpenSelectImage);
 
   const handleGifSelect = (gif) => {
+    const [num1, num2] = data.idRoom.split("#").map(Number);
     setPayLoadData((prevData) => ({
       ...prevData,
-      idReceive: user.id == data.idReceive ? data.idReceive : data.idSend,
+      idReceive: user.id != num1 ? num1 : num2,
       idRoom: data.idRoom,
       gif: gif.images.fixed_height.url,
       type: "gif",
+      content: null,
     }));
   };
+
   const handleImageSelect = (image) => {
-    console.log("Image selected:", image);
+    const [num1, num2] = data.idRoom.split("#").map(Number);
     setPayLoadData((prevData) => ({
       ...prevData,
-      idReceive: user.id == data.idReceive ? data.idReceive : data.idSend,
+      idReceive: user.id != num1 ? num1 : num2,
       idRoom: data.idRoom,
-      img: image,
+      img: image, // Gán hình ảnh được chọn vào payload
       type: "image",
+      content: null,
     }));
     setComponentVisibility((prev) => ({
       ...prev,
       OpenSelectImage: true,
     }));
   };
-  console.log("payload data", payLoadData);
-  //mở các component
 
   const handleToggle = (componentName) => {
     setComponentVisibility((prevState) => ({
       ...prevState,
-      [componentName]: !prevState[componentName], // Chỉ toggle component được click
+      [componentName]: !prevState[componentName],
     }));
   };
-  console.log("trạng thái ", giphySearch, OpenSelectImage);
 
   return (
     <div className="relative">
@@ -353,32 +388,35 @@ function InputMessage({ data }) {
               setComponentVisibility((prevState) => ({
                 ...prevState,
                 giphySearch: false,
-                OpenSelectImage: true, // Đảm bảo GiphySearch ẩn đi khi mở OpenSelectImage
               }));
             }}
           >
             <ImageUploader
               onImageSelect={handleImageSelect}
-              onImageRemove={handleImageRemove} // Truyền hàm xóa ảnh vào
+              onImageRemove={handleImageRemove}
             />
           </div>
 
           <IconButton
             sx={{ p: "5px" }}
             onClick={() => {
-              handleToggle("giphySearch"); // Toggle trạng thái hiển thị GiphySearch
+              handleToggle("giphySearch");
+              handleImageRemove();
             }}
           >
             <GifIcon width={32} height={35} />
           </IconButton>
 
           <InputBase
-            disabled={giphySearch || OpenSelectImage} // Sử dụng giphySearch để điều kiện
+            disabled={giphySearch || OpenSelectImage}
             sx={{ ml: 1, flex: 1, width: "90%" }}
             placeholder="Type your message..."
+            value={payLoadData.content} // Gán giá trị cho input
+            onChange={handleInputChange}
           />
         </Box>
         <SendIcon
+          onClick={sendMesage}
           sx={{
             cursor: "pointer",
             color: "#0095FF",
@@ -389,6 +427,5 @@ function InputMessage({ data }) {
       </Box>
     </div>
   );
-}
-
+};
 export default InputMessage;
