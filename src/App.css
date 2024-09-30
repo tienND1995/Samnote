@@ -49,8 +49,28 @@ li {
  display: block !important;
 }
 
-/* style text editor */
+/* * style text editor */
 .ql-container.ql-snow {
  border: none !important;
  aspect-ratio: 4/2 auto;
+}
+
+.ql-container.ql-snow > .ql-editor {
+ line-height: 1.2;
+}
+
+.ql-container.ql-snow > .ql-editor::-webkit-scrollbar {
+ width: 10px;
+ border-radius: 8px;
+ background-color: black;
+}
+
+.ql-container.ql-snow > .ql-editor::-webkit-scrollbar-thumb {
+ background-color: #dedede;
+ border-radius: 8px;
+}
+
+.ql-container.ql-snow > .ql-editor::-webkit-scrollbar-track-piece {
+ background-color: black;
+ border-radius: 8px;
 }
