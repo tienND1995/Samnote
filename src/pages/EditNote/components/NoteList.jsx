@@ -1,9 +1,7 @@
-import { useContext, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 
-import { AppContext } from '../../../context'
-import NoteItem from './NoteItem'
 import { fetchNoteList } from '../fetchApiEditNote'
+import NoteItem from './NoteItem'
 
 import SearchIcon from '@mui/icons-material/Search'
 import SkipNextIcon from '@mui/icons-material/SkipNext'
@@ -22,31 +20,31 @@ const NoteList = ({ noteList, onDispatchEventName, userID }) => {
   userID && getNoteListInitial(userID)
  }, [userID])
 
- //  const handleChangeSearchNote = async (e) => {
- //   const textSearch = e.target.value
- //   if (textSearch.trim() === '') {
- //    return onChangeNoteList(noteListInitial)
- //   }
+  const handleChangeSearchNote = async (e) => {
+   const textSearch = e.target.value
+//    if (textSearch.trim() === '') {
+//     return onChangeNoteList(noteListInitial)
+//    }
 
- //   console.log('noteListInitial', noteListInitial)
+//    console.log('noteListInitial', noteListInitial)
 
- //   try {
- //    const response = await axios.get(
- //     `https://samnote.mangasocial.online/notes_search?key=${textSearch}`
- //    )
+   try {
+    const response = await axios.get(
+     `https://samnote.mangasocial.online/notes_search?key=${textSearch}`
+    )
 
- //    const data = response.data.search_note
- //    //    const filterNoteList = noteListInitial.filter((note) =>
- //    //     data.some((item) => note.idNote === item.idNote)
- //    //    )
+    const data = response.data.search_note
+    //    const filterNoteList = noteListInitial.filter((note) =>
+    //     data.some((item) => note.idNote === item.idNote)
+    //    )
 
- //    console.log('filterNoteList', data)
+    console.log('filterNoteList', data)
 
- //    //   onChangeNoteList(filterNoteList)
- //   } catch (error) {
- //    console.error(error)
- //   }
- //  }
+    //   onChangeNoteList(filterNoteList)
+   } catch (error) {
+    console.error(error)
+   }
+  }
 
  return (
   <div className='p-2 bg-[#3A3F42] rounded-lg flex flex-col flex-grow-1'>
@@ -57,7 +55,7 @@ const NoteList = ({ noteList, onDispatchEventName, userID }) => {
     >
      <SearchIcon className='text-3xl' />
      <input
-      //   onChange={handleChangeSearchNote}
+        onChange={handleChangeSearchNote}
       className='w-full'
       type='text'
       placeholder='Search note'
@@ -127,18 +125,20 @@ const NoteList = ({ noteList, onDispatchEventName, userID }) => {
      </div>
     </div>
 
-    {noteList.length > 0 ? (
-     <ul className='bg-[#dedede] flex flex-col flex-grow-1 gap-3 rounded-lg overflow-y-auto h-[60vh] p-2 editnote-notelist'>
-      {noteList.map((note) => (
+    <ul className='bg-[#dedede] flex flex-col flex-grow-1 gap-3 rounded-lg overflow-y-auto h-[60vh] p-2 editnote-notelist'>
+     {noteList.length > 0 ? (
+      noteList.map((note) => (
        <NoteItem
         note={note}
         noteList={noteList}
         key={note.idNote}
         onDispatchEventName={onDispatchEventName}
        />
-      ))}
-     </ul>
-    ) : null}
+      ))
+     ) : (
+      <h3>There are no notes!</h3>
+     )}
+    </ul>
    </div>
   </div>
  )

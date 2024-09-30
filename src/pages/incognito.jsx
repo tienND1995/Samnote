@@ -9,7 +9,6 @@ import {
  InputBase,
  Avatar,
 } from '@mui/material'
-import ClearIcon from '@mui/icons-material/Clear'
 import ImageLogo from '../assets/imagelogo.jsx'
 import GifIcon from '../assets/gifIcon.jsx'
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace'
@@ -45,13 +44,6 @@ const Incognito = () => {
  const inputRef = useRef(null)
  const [showGiphySearch, setShowGiphySearch] = useState(false)
  const [page, setPage] = useState(1)
- const [isOpen, setIsOpen] = useState(false)
- console.log('userInfomations', userInfomations)
- console.log('user', user)
-
- const toggleMenu = () => {
-  setIsOpen(!isOpen)
- }
  //----------------------------------------------------------------
  function GiphySearch() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -296,16 +288,24 @@ const Incognito = () => {
   }
  }
  useEffect(() => {
+<<<<<<< HEAD
   console.log('user check', user)
 
   // Kiểm tra userInfo và user.id đều khác null
   if (userInfo !== null && user !== null && user.id != null) {
+=======
+  if (userInfo !== null) {
+>>>>>>> page/editnote
    getMess({
     idReceive: userInfo.id,
     idRoom: `${user.id}#${userInfo.id}`,
    })
   }
+<<<<<<< HEAD
  }, [userInfo, user])
+=======
+ }, [userInfo])
+>>>>>>> page/editnote
 
  const scrollToBottom = () => {
   setTimeout(() => {
@@ -345,6 +345,7 @@ const Incognito = () => {
  }
 
  const SendMessage = async () => {
+<<<<<<< HEAD
   const [part1, part2] = nowRoom ? nowRoom.split('#') : []
 
   setIdReceive(part1 != user.id ? part1 : part2)
@@ -390,6 +391,33 @@ const Incognito = () => {
    scrollToBottom()
   } catch (err) {
    console.error('Lỗi khi gửi tin nhắn:', err)
+=======
+  const sendAt = getCurrentFormattedDateTime()
+  const [part1, part2] = nowRoom ? nowRoom.split('#') : []
+
+  setIdReceive(part1 !== user.id ? part1 : part2)
+
+  const senmess = {
+   content: sendMess,
+   idReceive:
+    userInfo !== null ? userInfo.id : part1 != user.id ? part1 : part2,
+   idRoom: nowRoom ? nowRoom : `${user.id}#${userInfo.id}`,
+   img: null,
+   gif: null,
+   type: 'text',
+  }
+
+  try {
+   await api.post(`/message/chat-unknown/${user.id}`, senmess)
+   console.log('tin nhăns gửi ', senmess)
+
+   setMess((prev) => (Array.isArray(prev) ? [...prev, senmess] : [senmess]))
+   setSendMess('')
+   setReload((prev) => prev + 1)
+   scrollToBottom()
+  } catch (err) {
+   console.error(err)
+>>>>>>> page/editnote
   }
  }
 
@@ -406,14 +434,22 @@ const Incognito = () => {
    type: 'image',
   }
   const formData = new FormData()
+<<<<<<< HEAD
   formData.append('content', '')
+=======
+  formData.append('content', null)
+>>>>>>> page/editnote
   formData.append(
    'idReceive',
    userInfo != null ? userInfo.id : part1 != user.id ? part1 : part2
   )
   formData.append('idRoom', nowRoom ? nowRoom : `${user.id}#${userInfo.id}`)
   formData.append('img', selectedImage.file) // Gửi trực tiếp tệp ảnh
+<<<<<<< HEAD
   formData.append('gif', '')
+=======
+  formData.append('gif', null)
+>>>>>>> page/editnote
   formData.append('type', 'image')
   console.log('senmess', senmess)
 
@@ -488,6 +524,7 @@ const Incognito = () => {
  }
 
  useEffect(() => {
+<<<<<<< HEAD
   if (user) {
    // Kiểm tra xem user có tồn tại hay không
    const getUserChat = async () => {
@@ -510,6 +547,28 @@ const Incognito = () => {
   <Box className='text-white lg:flex bg-[#DFFFFE] w-full sm:grid sm:grid-cols-[400px_1fr]'>
    <Box
     className='sm:w-[400px]'
+=======
+  const getUserChat = async () => {
+   try {
+    const res = await api.get(
+     // `/message/list_user_unknown/77`
+     `https://samnote.mangasocial.online/message/list_user_unknown/${user.id}`
+    )
+    console.log(res.data.data)
+    setUserChat(res.data.data)
+   } catch (err) {
+    console.log(err)
+   }
+  }
+
+  getUserChat()
+ }, [user.id, reload])
+
+ return (
+  <Box className='text-white lg:flex bg-[#DFFFFE] sm:grid sm:grid-cols-[300px_1fr]'>
+   <Box
+    className='sm:w-[300px]'
+>>>>>>> page/editnote
     sx={{
      display: 'flex',
      flexDirection: 'column',
@@ -517,12 +576,20 @@ const Incognito = () => {
      alignItems: 'center',
     }}
    >
+<<<<<<< HEAD
     <Box className='bg-[#B6F6FF] h-[140px] uppercase text-black w-full pt-[50px] text-center text-4xl font-bold'>
+=======
+    <Box className='bg-[#B6F6FF] uppercase text-black w-full py-3 text-center font-bold'>
+>>>>>>> page/editnote
      chat
     </Box>
 
     <Box
+<<<<<<< HEAD
      className='relative w-[90%]'
+=======
+     className='relative'
+>>>>>>> page/editnote
      style={{
       margin: '0 10px',
       boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.1)',
@@ -645,7 +712,11 @@ const Incognito = () => {
      )}
     </Box>
 
+<<<<<<< HEAD
     <Box className='max-h-[47vh] w-full lg:max-h-[50vh] overflow-auto scrollbar-none text-black font-bold'>
+=======
+    <Box className='max-h-[47vh] w-[90%] lg:max-h-[50vh] sm:w-[99%] overflow-auto scrollbar-none text-black'>
+>>>>>>> page/editnote
      {' '}
      {userChat.length > 0 ? (
       userChat.map((item, idx) => (
@@ -657,7 +728,10 @@ const Incognito = () => {
          borderRadius: '30px',
          margin: '5px 10px',
          // padding: "5px",
+<<<<<<< HEAD
          height: '70px',
+=======
+>>>>>>> page/editnote
          backgroundColor: '#fff',
          justifyContent: 'space-between',
         }}
@@ -668,6 +742,7 @@ const Incognito = () => {
          setNowChat(item)
         }}
        >
+<<<<<<< HEAD
         <Box
          sx={{
           display: 'flex',
@@ -676,11 +751,17 @@ const Incognito = () => {
         >
          <Avatar
           sx={{ width: '60px', height: '60px' }}
+=======
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+         <Avatar
+          sx={{ width: '40px', height: '40px' }}
+>>>>>>> page/editnote
           src={item.user.avatar}
          />
 
          <Box sx={{ marginLeft: '10px', fontWeight: '700' }}>
           {item.user === 'Unknow' ? (
+<<<<<<< HEAD
            <span style={{ fontWeight: '700', fontSize: '40px' }}>
             User name
            </span>
@@ -689,6 +770,13 @@ const Incognito = () => {
             variant='body1'
             sx={{ fontWeight: '700', fontSize: '24px' }}
            >
+=======
+           <Typography variant='body1' sx={{ fontWeight: '700' }}>
+            User name
+           </Typography>
+          ) : (
+           <Typography variant='body1' sx={{ fontWeight: '700' }}>
+>>>>>>> page/editnote
             {item.user.username}
            </Typography>
           )}
@@ -696,7 +784,10 @@ const Incognito = () => {
            sx={{
             overflow: 'hidden',
             width: '140px',
+<<<<<<< HEAD
             fontSize: '20px',
+=======
+>>>>>>> page/editnote
             whiteSpace: 'nowrap',
             textOverflow: 'ellipsis',
            }}
@@ -707,7 +798,11 @@ const Incognito = () => {
          </Box>
         </Box>
         <DeleteIcon
+<<<<<<< HEAD
          className='cursor-pointer mr-3 text-4xl'
+=======
+         className='cursor-pointer mr-3'
+>>>>>>> page/editnote
          onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
@@ -734,7 +829,11 @@ const Incognito = () => {
        backgroundColor: '#DFFFFE',
        boxShadow: '0 4px 4px rgba(0, 0, 0, 0.3)',
        justifyContent: 'space-between',
+<<<<<<< HEAD
        height: '140px',
+=======
+       height: '50px',
+>>>>>>> page/editnote
        position: 'relative',
        zIndex: 100,
       }}
@@ -758,8 +857,13 @@ const Incognito = () => {
         <>
          <Avatar
           sx={{
+<<<<<<< HEAD
            width: '90px',
            height: '90px',
+=======
+           width: '40px',
+           height: '40px',
+>>>>>>> page/editnote
            marginRight: '5px',
           }}
           src={userInfomations.Avarta}
@@ -770,15 +874,24 @@ const Incognito = () => {
         <>
          <Avatar
           sx={{
+<<<<<<< HEAD
            width: '90px',
            height: '90px',
+=======
+           width: '40px',
+           height: '40px',
+>>>>>>> page/editnote
            marginRight: '5px',
           }}
           src={nowChat.user.avatar}
          />
+<<<<<<< HEAD
          <Typography variant='body1' className='text-[40px]'>
           {nowChat.user.username}
          </Typography>
+=======
+         <Typography variant='body1'>{nowChat.user.username}</Typography>
+>>>>>>> page/editnote
         </>
        ) : (
         <>
@@ -802,6 +915,7 @@ const Incognito = () => {
         </>
        )}
       </Box>
+<<<<<<< HEAD
       <div className='relative'>
        <div onClick={toggleMenu}>
         {isOpen ? (
@@ -843,6 +957,9 @@ const Incognito = () => {
         </ul>
        )}
       </div>
+=======
+      <MoreHorizIcon />
+>>>>>>> page/editnote
      </Box>
      <Box
       className='h-[74vh] lg:h-[79vh]'
@@ -856,6 +973,7 @@ const Incognito = () => {
        backgroundRepeat: 'no-repeat',
       }}
      >
+<<<<<<< HEAD
       {Array.isArray(messenger) &&
        messenger?.map((info, index) => (
         <Box
@@ -934,6 +1052,83 @@ const Incognito = () => {
         </Box>
        ))}
        
+=======
+      {messenger?.map((info, index) => (
+       <Box
+        key={index}
+        sx={{
+         marginLeft: '10px',
+         display: 'flex',
+         alignItems: 'center',
+         color: '#000',
+         justifyContent: info.idReceive !== user.id ? 'flex-end' : 'flex-start',
+        }}
+        onClick={() => {
+         getSendMess(info)
+        }}
+       >
+        {info.idReceive === user.id ? (
+         <>
+          <Avatar
+           sx={{
+            width: '40px',
+            height: '40px',
+            margin: '5px',
+           }}
+           src={nowChat.user.avatar}
+          />
+          {info.type === 'text' ? (
+           <Box
+            sx={{
+             backgroundColor: '#fff',
+             borderRadius: '10px',
+             padding: '5px',
+             maxWidth: '70%',
+            }}
+           >
+            {info.content}
+           </Box>
+          ) : info.type === 'image' ? (
+           <img src={info.img} alt='image' className='w-[30wh] h-[40vh] m-2' />
+          ) : info.type === 'gif' ? (
+           <img
+            src={info.gif}
+            alt='GIF'
+            className='max-w-[30wh] max-h-[40vh] m-2'
+           />
+          ) : null}
+         </>
+        ) : (
+         <>
+          {' '}
+          {info.type === 'text' ? (
+           <Box
+            sx={{
+             backgroundColor: '#1EC0F2',
+             borderRadius: '10px',
+             padding: '5px',
+             margin: '5px 10px',
+             maxWidth: '70%',
+            }}
+           >
+            {info.content}
+           </Box>
+          ) : info.type === 'image' ? (
+           <img src={info.img} alt='image' className='w-[30wh] h-[40vh] m-2' />
+          ) : info.type === 'gif' ? (
+           <img
+            src={info.gif}
+            alt='GIF'
+            className='max-w-[30wh] max-h-[40vh] m-2'
+           />
+          ) : (
+           ''
+          )}
+         </>
+        )}
+       </Box>
+      ))}
+>>>>>>> page/editnote
       <div id='lastmessage' />
      </Box>
 

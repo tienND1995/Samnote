@@ -46,6 +46,11 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
     `https://samnote.mangasocial.online/notes/${id}`
    )
 
+   if (noteList.length === 1) navigate(`/editnote`)
+
+   if (indexNoteNext === noteList.length - 1)
+    return navigate(`/editnote/${noteList[indexNoteNext - 1].idNote}`)
+
    navigate(`/editnote/${noteList[indexNoteNext + 1].idNote}`)
    //    onDispatchEventName('Delete note')
   } catch (error) {

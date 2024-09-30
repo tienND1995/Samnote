@@ -1,5 +1,6 @@
 import { useChecklist } from 'react-checklist'
 import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import axios from 'axios'
 import Slider from 'react-slick'
 import Swal from 'sweetalert2'
@@ -24,6 +25,8 @@ const FormEditImages = ({
    keyType: 'number',
   })
 
+ const { id } = useParams()
+
  const settings = {
   dots: false,
   infinite: false,
@@ -32,16 +35,20 @@ const FormEditImages = ({
   slidesToScroll: 1,
   className: 'editnote-btn-slick',
   nextArrow: (
-   <button>
+   <button type='button'>
     <ArrowForwardIosIcon />
    </button>
   ),
   prevArrow: (
-   <button>
+   <button type='button'>
     <ArrowBackIosIcon />
    </button>
   ),
  }
+
+ // checklist image
+
+ const selectedImages = [...checkedItems]
 
  const deleteImage = async (idImage) => {
   const formData = new FormData()
@@ -61,10 +68,6 @@ const FormEditImages = ({
    console.error(error)
   }
  }
-
- // checklist image
-
- const selectedImages = [...checkedItems]
 
  const handleDeleteImage = async (id) => {
   Swal.fire({
@@ -134,7 +137,8 @@ const FormEditImages = ({
   })
  }
 
- if (images?.length === 0) return
+ if (!images?.length || !id) return
+
  return (
   <div className='bg-white px-3 pt-2  rounded-md'>
    <div className='flex justify-end gap-2 mb-2'>
@@ -145,7 +149,6 @@ const FormEditImages = ({
       checked={isCheckedAll}
       type='checkbox'
       hidden
-      //   disabled={images.length === 0}
      />
      <label className='btn btn-primary' htmlFor='checked-list'>
       {isCheckedAll ? 'Cancel' : 'Select All'}

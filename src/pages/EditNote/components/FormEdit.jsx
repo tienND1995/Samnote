@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 
 import { joiResolver } from '@hookform/resolvers/joi'
 import { Editor } from '@tinymce/tinymce-react'
@@ -29,7 +29,6 @@ const FormEdit = ({ onDispatchName }) => {
  const appContext = useContext(AppContext)
  const { user, setSnackbar } = appContext
  const { id } = useParams()
- const navigate = useNavigate()
 
  const [noteItem, setNoteItem] = useState({})
 
@@ -48,6 +47,7 @@ const FormEdit = ({ onDispatchName }) => {
   handleSubmit,
   setValue,
   watch,
+  reset,
   formState: { errors, dirtyFields },
  } = useForm({
   resolver: joiResolver(schemaNoteEdit),
@@ -74,9 +74,8 @@ const FormEdit = ({ onDispatchName }) => {
  const getDataNoteId = async () => {
   const noteList = await fetchNoteList(user?.id)
   const noteId = noteList.filter((note) => note.idNote === Number.parseInt(id))
-  if (!noteId || noteId.length === 0) return navigate('/')
 
-  console.log('re-render', noteList)
+  if (!noteId || noteId.length === 0 || !id) return reset()
 
   setNoteItem(noteId[0])
 
@@ -154,7 +153,7 @@ const FormEdit = ({ onDispatchName }) => {
  }
 
  const onSubmit = async (data) => {
-  if (color.name !== data.color || !noteItem.idNote) return
+  if (color.name !== data.color || !noteItem.idNote || !id) return
   if (Object.keys(dirtyFields).length === 0 && data.data === noteItem.data)
    return
 
@@ -315,7 +314,11 @@ const FormEdit = ({ onDispatchName }) => {
       )}
 
       <div className='text-right'>
-       <button type='submit' className='btn btn-primary uppercase'>
+       <button
+        disabled={!id}
+        type='submit'
+        className='btn btn-primary uppercase'
+       >
         Save
        </button>
       </div>
@@ -379,34 +382,33 @@ const FormEdit = ({ onDispatchName }) => {
           bullist numlist outdent indent | removeformat|',
 
        file_picker_types: 'image',
-       //  file_picker_callback: (cb, value, meta) => {
-       //   const input = document.createElement('input')
-       //   input.setAttribute('type', 'file')
-       //   input.setAttribute('accept', 'image/*')
+       file_picker_callback: (cb, value, meta) => {
+        const input = document.createElement('input')
+        input.setAttribute('type', 'file')
+        input.setAttribute('accept', 'image/*')
 
-       //   input.addEventListener('change', (e) => {
-       //    const file = e.target.files[0]
-       //    const blobUrl = URL.createObjectURL(e.target.files[0])
+        input.addEventListener('change', (e) => {
+         const file = e.target.files[0]
+         const blobUrl = URL.createObjectURL(e.target.files[0])
 
-       //    const reader = new FileReader()
-       //    reader.addEventListener('load', async () => {
-       //     const id = 'blobid' + new Date().getTime()
-       //     const blobCache = tinymce.activeEditor.editorUpload.blobCache
+         const reader = new FileReader()
+         reader.addEventListener('load', async () => {
+          const id = 'blobid' + new Date().getTime()
+          const blobCache = tinymce.activeEditor.editorUpload.blobCache
 
-       //     const base64 = reader.result.split(',')[1]
-       //     const blobInfo = blobCache.create(id, file, blobUrl)
-       //     blobCache.add(blobInfo)
+          const base64 = reader.result.split(',')[1]
+          const blobInfo = blobCache.create(id, file, blobUrl)
+          blobCache.add(blobInfo)
 
-       //     /* call the callback and populate the Title field with the file name */
-       //     cb(blobInfo.blobUri(), { title: file.name })
+          /* call the callback and populate the Title field with the file name */
+          cb(blobInfo.blobUri(), { title: file.name })
+         })
 
-       //    })
+         reader.readAsDataURL(file)
+        })
 
-       //    reader.readAsDataURL(file)
-       //   })
-
-       //   input.click()
-       //  },
+        input.click()
+       },
       }}
       onEditorChange={(value, editor) => {
        setValue('data', value)
