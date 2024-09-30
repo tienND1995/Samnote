@@ -17,15 +17,12 @@ import api from '../api'
 import { AppContext } from '../context'
 import { handleLogOut } from '../helper'
 
-import axios from 'axios'
-
 const UserPanel = () => {
  const appContext = useContext(AppContext)
  const { user, setUser } = appContext
  const [userInfomations, setUserInformations] = useState(null)
  const navigate = useNavigate()
 
- const [idNoteFirst, setIdNoteFirst] = useState(null)
 
  const navbarItems = [
   {
@@ -41,7 +38,7 @@ const UserPanel = () => {
   {
    name: 'Note',
    icon: <EventNoteIcon sx={{ fontSize: 40 }} />,
-   url: `/editnote/${idNoteFirst}`,
+   url: `/editnote`,
   },
   {
    name: 'Group',
@@ -87,20 +84,6 @@ const UserPanel = () => {
   }
 
   user && getUserInformation(user.id)
-
-  // get idNote first
-  const fetchNotsList = async (userID) => {
-   try {
-    const response = await axios.get(
-     `https://samnote.mangasocial.online/notes/${userID}`
-    )
-    setIdNoteFirst(response.data.notes[0].idNote)
-   } catch (error) {
-    console.error(error)
-   }
-  }
-
-  user?.id && fetchNotsList(user?.id)
 
   return () => {
    ignore = true

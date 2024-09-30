@@ -6,7 +6,7 @@ import './App.css'
 import { AppContext } from './context'
 import CreateNote from './pages/CreateNote'
 import Home from './pages/Home'
-import Incognito from './pages/incognito'
+import Incognito from './pages/Incognito'
 import Login from './pages/Login'
 import OtherUser from './pages/OtherUser'
 import UserDustbin from './pages/UserDustbin'
@@ -78,6 +78,7 @@ function App() {
      <Route path='/group' element={<Group />} />
 
      <Route path='/editnote/:id' element={<EditNote />} />
+     <Route path='/editnote' element={<EditNote />} />
      <Route path='/demo' element={<Demo />} />
     </Route>
    </Routes>
