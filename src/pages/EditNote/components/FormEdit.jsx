@@ -1,10 +1,10 @@
 import axios from 'axios'
 import { useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 import { joiResolver } from '@hookform/resolvers/joi'
-import { Editor } from '@tinymce/tinymce-react'
+
 import moment from 'moment'
 import { schemaNoteEdit } from '../../../utils/schema'
 
@@ -22,6 +22,7 @@ import {
  TextField,
 } from '@mui/material'
 
+import TextEditor from '../../../components/TextEditor'
 import configs from '../../../configs/configs.json'
 const { API_SERVER_URL } = configs
 
@@ -166,15 +167,14 @@ const FormEdit = ({ onDispatchName }) => {
    a: 1,
   }
 
-  //convert base64 to url
-  const newDataContent = data.data.split('data:image/png;base64,').join('')
-
   const dataForm = {
    ...data,
    color: newColor,
    dueAt: newDueAt,
   }
+
   pacthNote(noteItem.idNote, dataForm)
+  console.log('dataForm', dataForm)
  }
 
  return (
@@ -355,66 +355,7 @@ const FormEdit = ({ onDispatchName }) => {
       </p>
      )}
 
-     <Editor
-      apiKey='c9fpvuqin9s9m9702haau5pyi6k0t0zj29nelhczdvjdbt3y'
-      value={dataForm}
-      init={{
-       width: '100%',
-       height: '100%',
-       menubar: true,
-       statusbar: false,
-       images_file_types: 'jpg,svg,webp',
-       automatic_uploads: true,
-       plugins: [
-        'advlist autolink lists link charmap print preview anchor',
-        'searchreplace visualblocks code fullscreen',
-        'insertdatetime media table paste code help wordcount',
-        'image',
-       ],
-       bold: [
-        { inline: 'strong', remove: 'all' },
-        { inline: 'p', styles: { fontWeight: 'bold' } },
-        { inline: 'b', remove: 'all' },
-       ],
-       toolbar:
-        'undo redo |formatselect | bold italic backcolor | link image | code| \
-          alignleft aligncenter alignright alignjustify | \
-          bullist numlist outdent indent | removeformat|',
-
-       file_picker_types: 'image',
-       file_picker_callback: (cb, value, meta) => {
-        const input = document.createElement('input')
-        input.setAttribute('type', 'file')
-        input.setAttribute('accept', 'image/*')
-
-        input.addEventListener('change', (e) => {
-         const file = e.target.files[0]
-         const blobUrl = URL.createObjectURL(e.target.files[0])
-
-         const reader = new FileReader()
-         reader.addEventListener('load', async () => {
-          const id = 'blobid' + new Date().getTime()
-          const blobCache = tinymce.activeEditor.editorUpload.blobCache
-
-          const base64 = reader.result.split(',')[1]
-          const blobInfo = blobCache.create(id, file, blobUrl)
-          blobCache.add(blobInfo)
-
-          /* call the callback and populate the Title field with the file name */
-          cb(blobInfo.blobUri(), { title: file.name })
-         })
-
-         reader.readAsDataURL(file)
-        })
-
-        input.click()
-       },
-      }}
-      onEditorChange={(value, editor) => {
-       setValue('data', value)
-       //  console.log('text:', editor.getContent({ format: 'text' }))
-      }}
-     />
+     <TextEditor setValue={setValue} value={dataForm} />
     </div>
    </form>
   </div>

@@ -47,12 +47,11 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
    )
 
    if (noteList.length === 1) navigate(`/editnote`)
-
    if (indexNoteNext === noteList.length - 1)
     return navigate(`/editnote/${noteList[indexNoteNext - 1].idNote}`)
-
    navigate(`/editnote/${noteList[indexNoteNext + 1].idNote}`)
-   //    onDispatchEventName('Delete note')
+
+   onDispatchEventName('Delete note')
   } catch (error) {
    console.error(error)
   }
