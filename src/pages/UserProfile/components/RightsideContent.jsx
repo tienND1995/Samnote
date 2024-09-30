@@ -6,7 +6,7 @@ import { AppContext } from '../../../context'
 import api from '../../../api'
 import { getCurrentFormattedDateTime } from '../../../helper'
 
-const RightsideContent = ({ lastUsers, allNotePublic, setReload }) => {
+const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
     const [payloadData, setPayloadData] = useState('')
     const appContext = useContext(AppContext)
     const { setSnackbar, user } = appContext
@@ -52,7 +52,12 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload }) => {
             <div className='create-note-container w-[100%] h-[450px] bg-[#FFF4BA] rounded-xl p-3'>
                 <div className='flex justify-between w-full'>
                     <span className='font-[700] text-[#888888] text-3xl'>Quick notes</span>
-                    <Button className='' variant='contained' onClick={handleCreateNote}>
+                    <Button
+                        className='btn-create-quickNotes'
+                        disabled={user.id != userID}
+                        variant='contained'
+                        onClick={handleCreateNote}
+                    >
                         Create
                     </Button>
                 </div>
@@ -135,9 +140,8 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload }) => {
                         <p className='text-center'>Not found new notes</p>
                     )}
                 </div>
-
             </div>
-        </div>
+        </div >
     )
 }
 
