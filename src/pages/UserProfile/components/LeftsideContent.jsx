@@ -9,6 +9,7 @@ import { getLuminance } from '@mui/material/styles';
 import { AppContext } from '../../../context'
 import api from '../../../api'
 import Checklist from './CheckList'
+import Swal from 'sweetalert2'
 
 const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload }) => {
     const appContext = useContext(AppContext)
@@ -47,6 +48,27 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                 severity: 'error',
             })
         }
+    }
+
+    const handleDeleteNote = async (index) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                deleteNote(index)
+                Swal.fire({
+                    title: "Deleted!",
+                    text: "Your file has been deleted.",
+                    icon: "success"
+                });
+            }
+        });
     }
 
     function convertUpdate(dateStr) {
@@ -182,7 +204,7 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                         viewBox="0 0 48 48"
                                                         fill={isLightColor(info.color) ? 'black' : 'white'}
                                                         xmlns="http://www.w3.org/2000/svg"
-                                                        onClick={() => deleteNote(info.idNote)}
+                                                        onClick={() => handleDeleteNote(info.idNote)}
                                                     >
                                                         <path d="M32.38 4.5H15.62C8.34 4.5 4 8.84 4 16.12V32.86C4 40.16 8.34 44.5 15.62 44.5H32.36C39.64 44.5 43.98 40.16 43.98 32.88V16.12C44 8.84 39.66 4.5 32.38 4.5ZM31.52 32.02C31.4 33.72 31.26 35.84 27.42 35.84H20.58C16.76 35.84 16.6 33.72 16.48 32.02L15.86 24.1C15.8411 23.8463 15.8739 23.5914 15.9564 23.3508C16.0389 23.1101 16.1694 22.8887 16.34 22.7C16.5104 22.5151 16.7177 22.3679 16.9485 22.268C17.1793 22.1681 17.4285 22.1177 17.68 22.12H30.32C30.82 22.12 31.32 22.34 31.66 22.7C32 23.08 32.18 23.58 32.14 24.08L31.52 32.02ZM33.6 20.14H33.48C31.4 19.94 29.5 19.8 27.68 19.72C25.2355 19.5899 22.7863 19.5699 20.34 19.66C19.14 19.72 17.92 19.8 16.72 19.92L14.54 20.14H14.4C13.7 20.14 13.1 19.62 13.04 18.9C12.96 18.16 13.52 17.48 14.26 17.42L16.44 17.2C17.3 17.12 18.14 17.06 19 17.02L19.16 16.08C19.32 15.08 19.62 13.16 22.62 13.16H25.4C28.42 13.16 28.72 15.14 28.86 16.1L29.02 17.06C30.52 17.14 32.06 17.26 33.74 17.42C34.5 17.5 35.04 18.16 34.98 18.92C34.9 19.62 34.3 20.14 33.6 20.14Z" />
                                                     </svg>
@@ -393,7 +415,7 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                         viewBox="0 0 48 48"
                                                         fill={isLightColor(info.color) ? 'black' : 'white'}
                                                         xmlns="http://www.w3.org/2000/svg"
-                                                        onClick={() => deleteNote(info.idNote)}
+                                                        onClick={() => handleDeleteNote(info.idNote)}
                                                     >
                                                         <path d="M32.38 4.5H15.62C8.34 4.5 4 8.84 4 16.12V32.86C4 40.16 8.34 44.5 15.62 44.5H32.36C39.64 44.5 43.98 40.16 43.98 32.88V16.12C44 8.84 39.66 4.5 32.38 4.5ZM31.52 32.02C31.4 33.72 31.26 35.84 27.42 35.84H20.58C16.76 35.84 16.6 33.72 16.48 32.02L15.86 24.1C15.8411 23.8463 15.8739 23.5914 15.9564 23.3508C16.0389 23.1101 16.1694 22.8887 16.34 22.7C16.5104 22.5151 16.7177 22.3679 16.9485 22.268C17.1793 22.1681 17.4285 22.1177 17.68 22.12H30.32C30.82 22.12 31.32 22.34 31.66 22.7C32 23.08 32.18 23.58 32.14 24.08L31.52 32.02ZM33.6 20.14H33.48C31.4 19.94 29.5 19.8 27.68 19.72C25.2355 19.5899 22.7863 19.5699 20.34 19.66C19.14 19.72 17.92 19.8 16.72 19.92L14.54 20.14H14.4C13.7 20.14 13.1 19.62 13.04 18.9C12.96 18.16 13.52 17.48 14.26 17.42L16.44 17.2C17.3 17.12 18.14 17.06 19 17.02L19.16 16.08C19.32 15.08 19.62 13.16 22.62 13.16H25.4C28.42 13.16 28.72 15.14 28.86 16.1L29.02 17.06C30.52 17.14 32.06 17.26 33.74 17.42C34.5 17.5 35.04 18.16 34.98 18.92C34.9 19.62 34.3 20.14 33.6 20.14Z" />
                                                     </svg>
