@@ -218,7 +218,7 @@ const AnonymousMessage = () => {
         </Box>
       </Box>
       {showChatBox.info.length !== 0 && (
-        <div className="w-full">
+        <div className="w-[100%] h-[100vh]">
           {" "}
           <div className="w-full h-[140px] ">
             <div className="w-full h-[140px] items-center flex">
@@ -232,13 +232,14 @@ const AnonymousMessage = () => {
             </div>
           </div>
           <div
-            className="h-[74vh] lg:h-[75vh]"
+            className=""
             style={{
               width: "100%",
               backgroundImage: `url(${bg_chat})`,
               overflow: "auto",
+              height: `calc(100% - 220px)`,
               scrollbarWidth: "none",
-              backgroundPosition: "center center",
+              backgroundPosition: "bottom center",
               backgroundSize: "200%",
               backgroundRepeat: "no-repeat",
             }}
@@ -250,7 +251,7 @@ const AnonymousMessage = () => {
                   sx={{
                     marginLeft: "10px",
                     display: "flex",
-                    alignItems: "center",
+                    alignItems: "                    flex-end",
                     color: "#000",
                     justifyContent:
                       info.idReceive !== user.id ? "flex-end" : "flex-start",
@@ -332,7 +333,10 @@ const AnonymousMessage = () => {
               ))}
             <div id="lastmessage" />
           </div>
-          <InputMessage data={showChatBox.info} />
+          <div className="w-full relative">
+            {" "}
+            <InputMessage data={showChatBox.info} />
+          </div>
         </div>
       )}
     </Box>
