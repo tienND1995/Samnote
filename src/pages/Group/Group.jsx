@@ -491,7 +491,6 @@ const Group = () => {
   onClickUserItem: handleClickUserItem,
   onClickGroupItem: handleClickGroupItem,
   onShowModalSearch: handleShowModalSearch,
-  setSnackbar,
  }
 
  const propsSettingGroup = {

@@ -8,7 +8,12 @@ import SkipNextIcon from '@mui/icons-material/SkipNext'
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious'
 import axios from 'axios'
 
-const NoteList = ({ noteList, onDispatchEventName, userID }) => {
+const NoteList = ({
+ noteList,
+ onDispatchEventName,
+ userID,
+ onChangeNoteList,
+}) => {
  const [noteListInitial, setNoteListInitial] = useState([])
 
  useEffect(() => {
@@ -20,31 +25,27 @@ const NoteList = ({ noteList, onDispatchEventName, userID }) => {
   userID && getNoteListInitial(userID)
  }, [userID])
 
-  const handleChangeSearchNote = async (e) => {
-   const textSearch = e.target.value
-//    if (textSearch.trim() === '') {
-//     return onChangeNoteList(noteListInitial)
-//    }
-
-//    console.log('noteListInitial', noteListInitial)
-
-   try {
-    const response = await axios.get(
-     `https://samnote.mangasocial.online/notes_search?key=${textSearch}`
-    )
-
-    const data = response.data.search_note
-    //    const filterNoteList = noteListInitial.filter((note) =>
-    //     data.some((item) => note.idNote === item.idNote)
-    //    )
-
-    console.log('filterNoteList', data)
-
-    //   onChangeNoteList(filterNoteList)
-   } catch (error) {
-    console.error(error)
-   }
+ const handleChangeSearchNote = async (e) => {
+  const textSearch = e.target.value
+  if (textSearch.trim() === '') {
+   return onChangeNoteList(noteListInitial)
   }
+
+  try {
+   const response = await axios.get(
+    `https://samnote.mangasocial.online/notes_search_user/${userID}/${textSearch}`
+   )
+
+   const data = response.data.search_note
+   const filterNoteList = noteListInitial.filter((note) =>
+    data.some((item) => note.idNote === item.idNote)
+   )
+
+   onChangeNoteList(filterNoteList)
+  } catch (error) {
+   console.error(error)
+  }
+ }
 
  return (
   <div className='p-2 bg-[#3A3F42] rounded-lg flex flex-col flex-grow-1'>
@@ -55,7 +56,7 @@ const NoteList = ({ noteList, onDispatchEventName, userID }) => {
     >
      <SearchIcon className='text-3xl' />
      <input
-        onChange={handleChangeSearchNote}
+      onChange={handleChangeSearchNote}
       className='w-full'
       type='text'
       placeholder='Search note'

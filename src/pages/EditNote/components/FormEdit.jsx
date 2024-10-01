@@ -1,10 +1,10 @@
 import axios from 'axios'
 import { useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 import { joiResolver } from '@hookform/resolvers/joi'
-import { Editor } from '@tinymce/tinymce-react'
+
 import moment from 'moment'
 import { schemaNoteEdit } from '../../../utils/schema'
 
@@ -22,6 +22,7 @@ import {
  TextField,
 } from '@mui/material'
 
+import TextEditor from '../../../components/TextEditor'
 import configs from '../../../configs/configs.json'
 const { API_SERVER_URL } = configs
 
@@ -41,13 +42,19 @@ const FormEdit = ({ onDispatchName }) => {
   name: 'snow',
  })
 
+ const [textEditor, setTextEditor] = useState('')
+
+ const handleChangeTextEditor = (text) => setTextEditor(text)
+
  // Declare variables for the form
  const {
   register,
   handleSubmit,
   setValue,
+  getValues,
   watch,
   reset,
+
   formState: { errors, dirtyFields },
  } = useForm({
   resolver: joiResolver(schemaNoteEdit),
@@ -67,7 +74,7 @@ const FormEdit = ({ onDispatchName }) => {
  const notePublicForm = watch('notePublic')
  const colorForm = watch('color')
  const folderForm = watch('idFolder')
- const dataForm = watch('data')
+ const contentEditor = watch('data')
 
  const convertTime = (time) => moment(`${time}+0700`).format('YYYY-MM-DD')
 
@@ -154,8 +161,6 @@ const FormEdit = ({ onDispatchName }) => {
 
  const onSubmit = async (data) => {
   if (color.name !== data.color || !noteItem.idNote || !id) return
-  if (Object.keys(dirtyFields).length === 0 && data.data === noteItem.data)
-   return
 
   // *** convert time and color to api
   const newDueAt = `${moment(data.dueAt).format('DD/MM/YYYY hh:mm A')} +07:00`
@@ -166,15 +171,27 @@ const FormEdit = ({ onDispatchName }) => {
    a: 1,
   }
 
-  //convert base64 to url
-  const newDataContent = data.data.split('data:image/png;base64,').join('')
-
   const dataForm = {
    ...data,
    color: newColor,
    dueAt: newDueAt,
+   type: 'text',
   }
+
   pacthNote(noteItem.idNote, dataForm)
+ }
+
+ // disable btn
+ const disableBtnSubmit = () => {
+  const isChangeForm =
+   Object.keys(dirtyFields).length === 0 &&
+   (textEditor?.trim() == '' ||
+    noteItem.data === contentEditor ||
+    textEditor?.trim() === noteItem.data?.trim())
+
+  const isNoteIdEdit = !id
+
+  return isChangeForm || isNoteIdEdit
  }
 
  return (
@@ -315,7 +332,7 @@ const FormEdit = ({ onDispatchName }) => {
 
       <div className='text-right'>
        <button
-        disabled={!id}
+        disabled={disableBtnSubmit()}
         type='submit'
         className='btn btn-primary uppercase'
        >
@@ -355,65 +372,10 @@ const FormEdit = ({ onDispatchName }) => {
       </p>
      )}
 
-     <Editor
-      apiKey='c9fpvuqin9s9m9702haau5pyi6k0t0zj29nelhczdvjdbt3y'
-      value={dataForm}
-      init={{
-       width: '100%',
-       height: '100%',
-       menubar: true,
-       statusbar: false,
-       images_file_types: 'jpg,svg,webp',
-       automatic_uploads: true,
-       plugins: [
-        'advlist autolink lists link charmap print preview anchor',
-        'searchreplace visualblocks code fullscreen',
-        'insertdatetime media table paste code help wordcount',
-        'image',
-       ],
-       bold: [
-        { inline: 'strong', remove: 'all' },
-        { inline: 'p', styles: { fontWeight: 'bold' } },
-        { inline: 'b', remove: 'all' },
-       ],
-       toolbar:
-        'undo redo |formatselect | bold italic backcolor | link image | code| \
-          alignleft aligncenter alignright alignjustify | \
-          bullist numlist outdent indent | removeformat|',
-
-       file_picker_types: 'image',
-       file_picker_callback: (cb, value, meta) => {
-        const input = document.createElement('input')
-        input.setAttribute('type', 'file')
-        input.setAttribute('accept', 'image/*')
-
-        input.addEventListener('change', (e) => {
-         const file = e.target.files[0]
-         const blobUrl = URL.createObjectURL(e.target.files[0])
-
-         const reader = new FileReader()
-         reader.addEventListener('load', async () => {
-          const id = 'blobid' + new Date().getTime()
-          const blobCache = tinymce.activeEditor.editorUpload.blobCache
-
-          const base64 = reader.result.split(',')[1]
-          const blobInfo = blobCache.create(id, file, blobUrl)
-          blobCache.add(blobInfo)
-
-          /* call the callback and populate the Title field with the file name */
-          cb(blobInfo.blobUri(), { title: file.name })
-         })
-
-         reader.readAsDataURL(file)
-        })
-
-        input.click()
-       },
-      }}
-      onEditorChange={(value, editor) => {
-       setValue('data', value)
-       //  console.log('text:', editor.getContent({ format: 'text' }))
-      }}
+     <TextEditor
+      setValue={setValue}
+      value={contentEditor}
+      onChangeTextEditor={handleChangeTextEditor}
      />
     </div>
    </form>

@@ -1,18 +1,16 @@
 import { useContext, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
 
 import { AppContext } from '../../context'
 import { fetchNoteList } from './fetchApiEditNote'
 
+import FormEdit from './components/FormEdit.jsx'
 import NoteList from './components/NoteList.jsx'
 import './EditNote.css'
-import FormEdit from './components/FormEdit.jsx'
 
 const EditNote = () => {
  const appContext = useContext(AppContext)
  const { user } = appContext
  const [noteList, setNoteList] = useState([])
- const { id } = useParams()
 
  const [nameEvent, setNameEvent] = useState(null)
 
@@ -31,7 +29,7 @@ const EditNote = () => {
   if (user?.id || nameEvent !== null) {
    getNoteList()
   }
- }, [user, id, nameEvent])
+ }, [user, nameEvent])
 
  return (
   <div className='bg-[#181A1B] px-4 gap-4 pt-4 pb-2 flex flex-col w-full'>
@@ -60,7 +58,7 @@ const EditNote = () => {
       noteList={noteList}
       onChangeNoteList={handleChangeNoteList}
       userID={user?.id}
-      onDispatchEventName= {disPatchNameEvent}
+      onDispatchEventName={disPatchNameEvent}
      />
     </div>
     <div className='col flex'>

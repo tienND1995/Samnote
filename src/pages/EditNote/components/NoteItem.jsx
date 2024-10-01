@@ -8,7 +8,6 @@ import TextTruncate from 'react-text-truncate'
 import rehypeRaw from 'rehype-raw'
 
 import deleteNote from '../../../assets/delete-note.png'
-import { confirmDelete } from '../../../utils/share'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
@@ -47,12 +46,11 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
    )
 
    if (noteList.length === 1) navigate(`/editnote`)
-
    if (indexNoteNext === noteList.length - 1)
     return navigate(`/editnote/${noteList[indexNoteNext - 1].idNote}`)
-
    navigate(`/editnote/${noteList[indexNoteNext + 1].idNote}`)
-   //    onDispatchEventName('Delete note')
+
+   onDispatchEventName('Delete note')
   } catch (error) {
    console.error(error)
   }
@@ -101,7 +99,7 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
     <h6 className='col font-semibold'>{note.title}</h6>
 
     <div className='col-6 px-0'>
-     <div>
+     <div className='max-h-[100px] overflow-y-auto style-scrollbar'>
       {typeof note.data == 'string' && (
        <TextTruncate
         line={3}
@@ -116,15 +114,17 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
      {note?.image?.length > 0 ? (
       <ul className='mt-2'>
        <Slider {...settings}>
-        {note.image.map(({ id, link }) => (
-         <li key={id} className='p-1  border-none outline-none'>
-          <img
-           className='object-cover aspect-[3/2] w-full rounded-lg'
-           src={link}
-           alt='img-editnote'
-          />
-         </li>
-        ))}
+        {note.image
+         .sort((a, b) => b.id - a.id)
+         .map(({ id, link }) => (
+          <li key={id} className='p-1  border-none outline-none'>
+           <img
+            className='object-cover aspect-[3/2] w-full rounded-lg'
+            src={link}
+            alt='img-editnote'
+           />
+          </li>
+         ))}
        </Slider>
       </ul>
      ) : null}

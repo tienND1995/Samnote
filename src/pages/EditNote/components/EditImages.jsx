@@ -139,6 +139,8 @@ const FormEditImages = ({
 
  if (!images?.length || !id) return
 
+const imageSort = images.sort((a, b) => a.id - b.id)
+
  return (
   <div className='bg-white px-3 pt-2  rounded-md'>
    <div className='flex justify-end gap-2 mb-2'>
@@ -168,7 +170,7 @@ const FormEditImages = ({
 
    <div className='max-w-[35vw] mx-auto'>
     <Slider {...settings}>
-     {images?.map(({ id, link }) => (
+     {imageSort.sort((a, b) => b.id - a.id)?.map(({ id, link }) => (
       <li key={id} className='p-1 position-relative noteEdit-imageItem'>
        <div className='position-absolute right-0 left-0 top-0 px-1 flex justify-between w-full items-center'>
         <div>
