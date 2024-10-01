@@ -12,6 +12,9 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
     const { setSnackbar, user } = appContext
 
     const handleCreateNote = async () => {
+        if (payloadData.trim() === '') {
+            return
+        }
         const payload = {
             type: 'text',
             data: payloadData,

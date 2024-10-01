@@ -223,22 +223,22 @@ const Home = () => {
             style={
               mdScreen
                 ? {
-                    display: isOpen ? "block" : "none",
-                    flexDirection: "column",
-                    position: "absolute",
-                    zIndex: "50",
-                    top: "70px",
-                    borderRadius: "10px",
-                    right: "10px",
-                    backgroundColor: "#323436",
-                    padding: "20px 30px",
-                  }
+                  display: isOpen ? "block" : "none",
+                  flexDirection: "column",
+                  position: "absolute",
+                  zIndex: "50",
+                  top: "70px",
+                  borderRadius: "10px",
+                  right: "10px",
+                  backgroundColor: "#323436",
+                  padding: "20px 30px",
+                }
                 : {
-                    display: "flex",
-                    marginBottom: "0px",
-                    alignItems: "center",
-                    color: "#fff",
-                  }
+                  display: "flex",
+                  marginBottom: "0px",
+                  alignItems: "center",
+                  color: "#fff",
+                }
             }
           >
             <li
@@ -246,11 +246,11 @@ const Home = () => {
                 mdScreen
                   ? { color: "#fff", padding: "10px 0px", cursor: "pointer" }
                   : {
-                      whiteSpace: "nowrap",
-                      fontSize: "14px",
-                      fontWeight: "500",
-                      cursor: "pointer",
-                    }
+                    whiteSpace: "nowrap",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                  }
               }
               onClick={() => navigate(`/user/note/${firstNote.idNote}`)}
             >
@@ -261,12 +261,12 @@ const Home = () => {
                 mdScreen
                   ? { color: "#fff", padding: "10px 0px", cursor: "pointer" }
                   : {
-                      whiteSpace: "nowrap",
-                      margin: "0 10px",
-                      fontSize: "14px",
-                      cursor: "pointer",
-                      fontWeight: "500",
-                    }
+                    whiteSpace: "nowrap",
+                    margin: "0 10px",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                    fontWeight: "500",
+                  }
               }
               onClick={() => navigate(`/user/photo`)}
             >
@@ -277,12 +277,12 @@ const Home = () => {
                 mdScreen
                   ? { color: "#fff", cursor: "pointer", padding: "10px 0px" }
                   : {
-                      whiteSpace: "nowrap",
-                      margin: "0 10px",
-                      fontSize: "14px",
-                      cursor: "pointer",
-                      fontWeight: "500",
-                    }
+                    whiteSpace: "nowrap",
+                    margin: "0 10px",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                    fontWeight: "500",
+                  }
               }
               onClick={() => navigate(`/group`)}
             >
@@ -293,12 +293,12 @@ const Home = () => {
                 mdScreen
                   ? { color: "#fff", cursor: "pointer", padding: "10px 0px" }
                   : {
-                      whiteSpace: "nowrap",
-                      margin: "0 10px",
-                      fontSize: "14px",
-                      cursor: "pointer",
-                      fontWeight: "500",
-                    }
+                    whiteSpace: "nowrap",
+                    margin: "0 10px",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                    fontWeight: "500",
+                  }
               }
               onClick={() => navigate(`/user/dustbin`)}
             >
@@ -309,12 +309,12 @@ const Home = () => {
                 mdScreen
                   ? { color: "#fff", cursor: "pointer", padding: "10px 0px" }
                   : {
-                      whiteSpace: "nowrap",
-                      margin: "0 10px",
-                      fontSize: "14px",
-                      cursor: "pointer",
-                      fontWeight: "500",
-                    }
+                    whiteSpace: "nowrap",
+                    margin: "0 10px",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                    fontWeight: "500",
+                  }
               }
               onClick={() => navigate(`/user/sketch`)}
             >
@@ -325,12 +325,12 @@ const Home = () => {
                 mdScreen
                   ? { color: "#fff", cursor: "pointer", padding: "10px 0px" }
                   : {
-                      whiteSpace: "nowrap",
-                      margin: "0 10px",
-                      fontSize: "14px",
-                      cursor: "pointer",
-                      fontWeight: "500",
-                    }
+                    whiteSpace: "nowrap",
+                    margin: "0 10px",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                    fontWeight: "500",
+                  }
               }
             >
               Contact Us
@@ -342,12 +342,12 @@ const Home = () => {
                   mdScreen
                     ? { color: "#fff", cursor: "pointer", padding: "10px 0px" }
                     : {
-                        whiteSpace: "nowrap",
-                        margin: "0 10px",
-                        fontSize: "14px",
-                        cursor: "pointer",
-                        fontWeight: "500",
-                      }
+                      whiteSpace: "nowrap",
+                      margin: "0 10px",
+                      fontSize: "14px",
+                      cursor: "pointer",
+                      fontWeight: "500",
+                    }
                 }
                 onClick={() => {
                   navigate(`/login`);
@@ -380,7 +380,7 @@ const Home = () => {
               <li
                 style={{ cursor: "pointer", marginLeft: "7px" }}
                 onClick={() => {
-                  navigate(`/user/profile/${user.id}`);
+                  navigate(`/profile/${user.id}`);
                 }}
               >
                 <Avatar
@@ -513,8 +513,8 @@ const Home = () => {
                 delay: 2500,
                 // disableOnInteraction: false,
               }}
-              // onSlideChange={() => console.log("slide change")}
-              // onSwiper={(swiper) => console.log(swiper)}
+            // onSlideChange={() => console.log("slide change")}
+            // onSwiper={(swiper) => console.log(swiper)}
             >
               <SwiperSlide
                 className={`rounded-xl bg-[url(/img-slider-1.png)] h-[350px] bg-center bg-no-repeat bg-cover`}
