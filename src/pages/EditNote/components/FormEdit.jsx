@@ -42,6 +42,10 @@ const FormEdit = ({ onDispatchName }) => {
   name: 'snow',
  })
 
+ const [textEditor, setTextEditor] = useState('')
+
+ const handleChangeTextEditor = (text) => setTextEditor(text)
+
  // Declare variables for the form
  const {
   register,
@@ -50,8 +54,8 @@ const FormEdit = ({ onDispatchName }) => {
   getValues,
   watch,
   reset,
-  
-  formState: { errors, dirtyFields, isDirty},
+
+  formState: { errors, dirtyFields },
  } = useForm({
   resolver: joiResolver(schemaNoteEdit),
   defaultValues: {
@@ -70,6 +74,7 @@ const FormEdit = ({ onDispatchName }) => {
  const notePublicForm = watch('notePublic')
  const colorForm = watch('color')
  const folderForm = watch('idFolder')
+ const contentEditor = watch('data')
 
  const convertTime = (time) => moment(`${time}+0700`).format('YYYY-MM-DD')
 
@@ -155,11 +160,7 @@ const FormEdit = ({ onDispatchName }) => {
  }
 
  const onSubmit = async (data) => {
-  
-  
   if (color.name !== data.color || !noteItem.idNote || !id) return
-  // if (Object.keys(dirtyFields).length === 0 && data.data === watch('data'))
-
 
   // *** convert time and color to api
   const newDueAt = `${moment(data.dueAt).format('DD/MM/YYYY hh:mm A')} +07:00`
@@ -170,16 +171,27 @@ const FormEdit = ({ onDispatchName }) => {
    a: 1,
   }
 
-  // *** remove image in data
+  const dataForm = {
+   ...data,
+   color: newColor,
+   dueAt: newDueAt,
+   type: 'text',
+  }
 
-  // const dataForm = {
-  //  ...data,
-  //  color: newColor,
-  //  dueAt: newDueAt,
-  // }
+  pacthNote(noteItem.idNote, dataForm)
+ }
 
-  console.log('data form:', data.data )
-  // pacthNote(noteItem.idNote, dataForm)
+ // disable btn
+ const disableBtnSubmit = () => {
+  const isChangeForm =
+   Object.keys(dirtyFields).length === 0 &&
+   (textEditor?.trim() == '' ||
+    noteItem.data === contentEditor ||
+    textEditor?.trim() === noteItem.data?.trim())
+
+  const isNoteIdEdit = !id
+
+  return isChangeForm || isNoteIdEdit
  }
 
  return (
@@ -320,7 +332,7 @@ const FormEdit = ({ onDispatchName }) => {
 
       <div className='text-right'>
        <button
-        disabled={!id}
+        disabled={disableBtnSubmit()}
         type='submit'
         className='btn btn-primary uppercase'
        >
@@ -360,7 +372,11 @@ const FormEdit = ({ onDispatchName }) => {
       </p>
      )}
 
-     <TextEditor setValue={setValue} value={noteItem?.data} />
+     <TextEditor
+      setValue={setValue}
+      value={contentEditor}
+      onChangeTextEditor={handleChangeTextEditor}
+     />
     </div>
    </form>
   </div>

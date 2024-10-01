@@ -8,7 +8,6 @@ import TextTruncate from 'react-text-truncate'
 import rehypeRaw from 'rehype-raw'
 
 import deleteNote from '../../../assets/delete-note.png'
-import { confirmDelete } from '../../../utils/share'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
@@ -100,7 +99,7 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
     <h6 className='col font-semibold'>{note.title}</h6>
 
     <div className='col-6 px-0'>
-     <div>
+     <div className='max-h-[100px] overflow-y-auto style-scrollbar'>
       {typeof note.data == 'string' && (
        <TextTruncate
         line={3}
