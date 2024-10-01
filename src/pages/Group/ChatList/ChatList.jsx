@@ -74,9 +74,7 @@ const ChatList = (props) => {
    className=' bg-[#dffffe] flex flex-col flex-grow-1 px-[20px]'
   >
    <CreateGroup
-    setAllMessageList={setAllMessageList}
-    socket={socket}
-    typeFilterChat={typeFilterChat}
+    data={{ setAllMessageList, socket, typeFilterChat }}
     showModal={showModalCreateGroup}
     setShowModal={setShowModalCreateGroup}
    />

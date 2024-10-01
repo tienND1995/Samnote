@@ -23,13 +23,13 @@ import avatarDefault from '../assets/avatar-default.png'
 const { API_SERVER_URL, BASE64_URL } = configs
 
 const CreateGroup = ({
- setAllMessageList,
- socket,
- typeFilterChat,
+ data,
 
  showModal,
  setShowModal,
 }) => {
+ const { setAllMessageList, socket, typeFilterChat } = data
+
  const appContext = useContext(AppContext)
  const { setSnackbar, user } = appContext
 
