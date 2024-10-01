@@ -477,12 +477,11 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                             <Box
                                                 component='div'
                                                 sx={{
-                                                    color: 'text.secondary',
                                                     textAlign: 'end',
                                                     padding: '0 10px 0 0',
                                                 }}
                                             >
-                                                <p style={{ margin: 0 }}>
+                                                <p style={{ margin: 0, opacity: '0.8' }}>
                                                     Last edit at {convertUpdate(info.updateAt)}
                                                 </p>
                                             </Box>

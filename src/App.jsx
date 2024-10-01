@@ -68,7 +68,6 @@ function App() {
         <Route path="*" element={<Navigate replace to="/" />} />
 
         <Route element={<RootLayout />}>
-          <Route path="/profile-other-user/:id" element={<UserProfile />} />
           <Route path="/user/note/:id" element={<UserNotes />} />
           <Route path="/user/setting" element={<UserSetting />} />
           <Route path="/user/sketch" element={<UserSketch />} />
@@ -76,7 +75,7 @@ function App() {
           <Route path="/user/dustbin" element={<UserDustbin />} />
           <Route path="/user/photo" element={<UserPhoto />} />
           <Route path="/user/create-note" element={<CreateNote />} />
-          <Route path="/user/profile/:id" element={<UserProfile />} />
+          <Route path="/profile/:id" element={<UserProfile />} />
           <Route path="/user/incognito" element={<Incognito />} />
           <Route path="/group" element={<Group />} />
           <Route path="/demo" element={<Demo />} />
