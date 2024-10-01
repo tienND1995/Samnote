@@ -9,6 +9,8 @@ import { getLuminance } from '@mui/material/styles';
 import { AppContext } from '../../../context'
 import api from '../../../api'
 import Checklist from './CheckList'
+import Swal from 'sweetalert2'
+import ModalComments from './ModalComments'
 
 const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload }) => {
     const appContext = useContext(AppContext)
@@ -16,6 +18,8 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
     //tabvalue
     const [publicNotesTabValue, setPublicNotesTabValue] = useState('1')
     const [privateNotesTabValue, setPrivateNotesTabValue] = useState('1')
+    const [isShowModalComments, setIsShowModalComments] = useState(false)
+    const [idNoteShowComments, setIdNoteShowComments] = useState('')
 
     const handlePublicNotesTabChange = (event, newValue) => {
         setPublicNotesTabValue(newValue)
@@ -49,6 +53,27 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
         }
     }
 
+    const handleDeleteNote = async (index) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                deleteNote(index)
+                Swal.fire({
+                    title: "Deleted!",
+                    text: "Your file has been deleted.",
+                    icon: "success"
+                });
+            }
+        });
+    }
+
     function convertUpdate(dateStr) {
         const dateObj = new Date(dateStr)
         const day = dateObj.getDate()
@@ -63,6 +88,19 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
         const [datePart] = dateStr.split(' ')
         const [year, month, day] = datePart.split('-')
         return `${day}-${month}-${year}`
+    }
+
+    const handleLikeNote = async (idNote, type) => {
+        try {
+            await api.post(`/notes/favorite/${idNote}`, { idUser: user.id, type })
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
+    const handleShowComments = (idNote) => {
+        setIdNoteShowComments(idNote)
+        setIsShowModalComments(true)
     }
 
     return (
@@ -108,18 +146,18 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                             value='1'
                             className='w-full p-0'
                         >
-                            <Swiper
-                                direction='vertical'
-                                spaceBetween={20}
-                                slidesPerView={2.5}
-                                style={{ height: '900px', width: '100%' }}
-                                navigation={{ prevEl: '.swiper-button-prev', nextEl: '.swiper-button-next' }}
-                                onSlideChange={() => console.log('slide change')}
-                                onSwiper={(swiper) => console.log(swiper)}
-                                className='swiper-publicNotes overflow-y-auto'
-                            >
-                                {publicNotes.length > 0 ? (
-                                    publicNotes.map((info, index) => (
+                            {publicNotes.length > 0 ? (
+                                <Swiper
+                                    direction='vertical'
+                                    spaceBetween={20}
+                                    slidesPerView={publicNotes.length > 2 ? 2.5 : publicNotes.length}
+                                    style={{ height: `${publicNotes.length > 2 ? 900 : publicNotes.length * 360}px`, width: '100%' }}
+                                    navigation={{ prevEl: '.swiper-button-prev', nextEl: '.swiper-button-next' }}
+                                    onSlideChange={() => console.log('slide change')}
+                                    onSwiper={(swiper) => console.log(swiper)}
+                                    className='swiper-publicNotes overflow-y-auto'
+                                >
+                                    {publicNotes.map((info, index) => (
                                         <SwiperSlide
                                             key={index}
                                             className={`p-2 border-[1px] rounded-xl border-black border-solid mr-1
@@ -177,13 +215,14 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                     </svg>
                                                     <svg
                                                         className='deleteNote cursor-pointer opacity-70 hover:opacity-100'
-                                                        width='24'
-                                                        height='24'
+                                                        width="2.4rem"
+                                                        height="2.4rem"
+                                                        viewBox="0 0 48 48"
                                                         fill={isLightColor(info.color) ? 'black' : 'white'}
-                                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"
-                                                        onClick={() => deleteNote(info.idNote)}
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        onClick={() => handleDeleteNote(info.idNote)}
                                                     >
-                                                        <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-320zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z" />
+                                                        <path d="M32.38 4.5H15.62C8.34 4.5 4 8.84 4 16.12V32.86C4 40.16 8.34 44.5 15.62 44.5H32.36C39.64 44.5 43.98 40.16 43.98 32.88V16.12C44 8.84 39.66 4.5 32.38 4.5ZM31.52 32.02C31.4 33.72 31.26 35.84 27.42 35.84H20.58C16.76 35.84 16.6 33.72 16.48 32.02L15.86 24.1C15.8411 23.8463 15.8739 23.5914 15.9564 23.3508C16.0389 23.1101 16.1694 22.8887 16.34 22.7C16.5104 22.5151 16.7177 22.3679 16.9485 22.268C17.1793 22.1681 17.4285 22.1177 17.68 22.12H30.32C30.82 22.12 31.32 22.34 31.66 22.7C32 23.08 32.18 23.58 32.14 24.08L31.52 32.02ZM33.6 20.14H33.48C31.4 19.94 29.5 19.8 27.68 19.72C25.2355 19.5899 22.7863 19.5699 20.34 19.66C19.14 19.72 17.92 19.8 16.72 19.92L14.54 20.14H14.4C13.7 20.14 13.1 19.62 13.04 18.9C12.96 18.16 13.52 17.48 14.26 17.42L16.44 17.2C17.3 17.12 18.14 17.06 19 17.02L19.16 16.08C19.32 15.08 19.62 13.16 22.62 13.16H25.4C28.42 13.16 28.72 15.14 28.86 16.1L29.02 17.06C30.52 17.14 32.06 17.26 33.74 17.42C34.5 17.5 35.04 18.16 34.98 18.92C34.9 19.62 34.3 20.14 33.6 20.14Z" />
                                                     </svg>
                                                 </div>
                                             </div>
@@ -227,7 +266,10 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                 </p>
                                             </Box>
                                             <div className='interacted-note flex justify-end items-center gap-3 pr-2 mt-2'>
-                                                <div className='like flex items-center gap-1'>
+                                                <div
+                                                    className='like flex items-center gap-1 cursor-pointer'
+                                                    onClick={() => handleLikeNote(info.idNote, 'like')}
+                                                >
                                                     <svg
                                                         width='1rem'
                                                         height='1rem'
@@ -238,7 +280,10 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                     </svg>
                                                     <span>10</span>
                                                 </div>
-                                                <div className='dislike flex items-center gap-1'>
+                                                <div
+                                                    className='dislike flex items-center gap-1 cursor-pointer'
+                                                    onClick={() => handleLikeNote(info.idNote, 'dislike')}
+                                                >
                                                     <svg
                                                         width='1rem'
                                                         height='1rem'
@@ -250,7 +295,10 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                     </svg>
                                                     <span>10</span>
                                                 </div>
-                                                <div className='comment flex items-center gap-1'>
+                                                <div
+                                                    className='comment flex items-center gap-1 cursor-pointer'
+                                                    onClick={() => handleShowComments(info.idNote)}
+                                                >
                                                     <svg
                                                         width='1rem'
                                                         height='1rem'
@@ -263,16 +311,16 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                 </div>
                                             </div>
                                         </SwiperSlide>
-                                    ))
-                                ) : (
-                                    <Box className='bg-white p-4 rounded-lg'>
-                                        <Typography variant='h5' className='font-semibold text-center'>
-                                            No notes to show
-                                        </Typography>
-                                    </Box>
-                                )}
+                                    ))}
+                                </Swiper>
+                            ) : (
+                                <Box className='bg-white p-4 rounded-lg'>
+                                    <Typography variant='h5' className='font-semibold text-center'>
+                                        No notes to show
+                                    </Typography>
+                                </Box>
+                            )}
 
-                            </Swiper>
                         </TabPanel>
                         <TabPanel value='2' sx={{ width: '100%', padding: 0 }}>
                             tab2
@@ -321,20 +369,20 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                             value='1'
                             className='w-full p-0'
                         >
-                            <Swiper
-                                spaceBetween={20}
-                                slidesPerView={2.5}
-                                navigation={{ prevEl: '.swiper-button-prev', nextEl: '.swiper-button-next' }}
-                                onSlideChange={() => console.log('slide change')}
-                                onSwiper={(swiper) => console.log(swiper)}
-                                className='swiper-privateNotes overflow-x-auto'
-                            >
-                                {privateNotes.length > 0 ? (
-                                    privateNotes.map((info, index) => (
+                            {privateNotes.length > 0 ? (
+                                <Swiper
+                                    spaceBetween={20}
+                                    slidesPerView={2.5}
+                                    navigation={{ prevEl: '.swiper-button-prev', nextEl: '.swiper-button-next' }}
+                                    onSlideChange={() => console.log('slide change')}
+                                    onSwiper={(swiper) => console.log(swiper)}
+                                    className='swiper-privateNotes overflow-x-auto'
+                                >
+                                    {privateNotes.map((info, index) => (
                                         <SwiperSlide
                                             key={index}
                                             className={`p-2 border-[1px] rounded-xl border-black border-solid mb-1
-                                                ${isLightColor(info.color) ? 'bg-white' : 'bg-black'}`}
+                                                ${isLightColor(info.color) ? 'text-black' : 'text-white'}`}
                                             style={{
                                                 backgroundColor: `rgba(${info.color.r}, ${info.color.g}, ${info.color.b}, ${info.color.a})`,
                                             }}
@@ -387,13 +435,14 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                     </svg>
                                                     <svg
                                                         className='deleteNote cursor-pointer opacity-70 hover:opacity-100'
-                                                        width='24'
-                                                        height='24'
+                                                        width="2.4rem"
+                                                        height="2.4rem"
+                                                        viewBox="0 0 48 48"
                                                         fill={isLightColor(info.color) ? 'black' : 'white'}
-                                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"
-                                                        onClick={() => deleteNote(info.idNote)}
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        onClick={() => handleDeleteNote(info.idNote)}
                                                     >
-                                                        <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-320zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z" />
+                                                        <path d="M32.38 4.5H15.62C8.34 4.5 4 8.84 4 16.12V32.86C4 40.16 8.34 44.5 15.62 44.5H32.36C39.64 44.5 43.98 40.16 43.98 32.88V16.12C44 8.84 39.66 4.5 32.38 4.5ZM31.52 32.02C31.4 33.72 31.26 35.84 27.42 35.84H20.58C16.76 35.84 16.6 33.72 16.48 32.02L15.86 24.1C15.8411 23.8463 15.8739 23.5914 15.9564 23.3508C16.0389 23.1101 16.1694 22.8887 16.34 22.7C16.5104 22.5151 16.7177 22.3679 16.9485 22.268C17.1793 22.1681 17.4285 22.1177 17.68 22.12H30.32C30.82 22.12 31.32 22.34 31.66 22.7C32 23.08 32.18 23.58 32.14 24.08L31.52 32.02ZM33.6 20.14H33.48C31.4 19.94 29.5 19.8 27.68 19.72C25.2355 19.5899 22.7863 19.5699 20.34 19.66C19.14 19.72 17.92 19.8 16.72 19.92L14.54 20.14H14.4C13.7 20.14 13.1 19.62 13.04 18.9C12.96 18.16 13.52 17.48 14.26 17.42L16.44 17.2C17.3 17.12 18.14 17.06 19 17.02L19.16 16.08C19.32 15.08 19.62 13.16 22.62 13.16H25.4C28.42 13.16 28.72 15.14 28.86 16.1L29.02 17.06C30.52 17.14 32.06 17.26 33.74 17.42C34.5 17.5 35.04 18.16 34.98 18.92C34.9 19.62 34.3 20.14 33.6 20.14Z" />
                                                     </svg>
                                                 </div>
                                             </div>
@@ -428,17 +477,16 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                             <Box
                                                 component='div'
                                                 sx={{
-                                                    color: 'text.secondary',
                                                     textAlign: 'end',
                                                     padding: '0 10px 0 0',
                                                 }}
                                             >
-                                                <p style={{ margin: 0 }}>
+                                                <p style={{ margin: 0, opacity: '0.8' }}>
                                                     Last edit at {convertUpdate(info.updateAt)}
                                                 </p>
                                             </Box>
                                             <div className='interacted-note flex justify-end items-center gap-3 pr-2 mt-2'>
-                                                <div className='like flex items-center gap-1'>
+                                                <div className='like flex items-center gap-1 cursor-pointer'>
                                                     <svg
                                                         width='1rem'
                                                         height='1rem'
@@ -449,7 +497,7 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                     </svg>
                                                     <span>10</span>
                                                 </div>
-                                                <div className='dislike flex items-center gap-1'>
+                                                <div className='dislike flex items-center gap-1 cursor-pointer'>
                                                     <svg
                                                         width='1rem'
                                                         height='1rem'
@@ -461,7 +509,10 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                     </svg>
                                                     <span>10</span>
                                                 </div>
-                                                <div className='comment flex items-center gap-1'>
+                                                <div
+                                                    className='comment flex items-center gap-1 cursor-pointer'
+                                                    onClick={() => handleShowComments(info.idNote)}
+                                                >
                                                     <svg
                                                         width='1rem'
                                                         height='1rem'
@@ -474,15 +525,16 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                 </div>
                                             </div>
                                         </SwiperSlide>
-                                    ))
-                                ) : (
-                                    <Box className='bg-white p-4 rounded-lg'>
-                                        <Typography variant='h5' className='font-semibold text-center'>
-                                            No notes to show
-                                        </Typography>
-                                    </Box>
-                                )}
-                            </Swiper>
+                                    ))}
+                                </Swiper>
+                            ) : (
+                                <Box className='bg-white p-4 rounded-lg'>
+                                    <Typography variant='h5' className='font-semibold text-center'>
+                                        No notes to show
+                                    </Typography>
+                                </Box>
+                            )}
+
                         </TabPanel>
                         <TabPanel value='2' sx={{ width: '100%', padding: 0 }}>
                             tab2
@@ -490,6 +542,12 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                     </TabContext>
                 </Box>
             </Box>
+            {isShowModalComments &&
+                <ModalComments
+                    idNote={idNoteShowComments}
+                    setIsShowModalComments={setIsShowModalComments}
+                />
+            }
         </div>
     )
 }

@@ -5,12 +5,16 @@ import { getTimeDifference } from '../../../helper'
 import { AppContext } from '../../../context'
 import api from '../../../api'
 import { getCurrentFormattedDateTime } from '../../../helper'
-const RightsideContent = ({ lastUsers, allNotePublic, setReload }) => {
+
+const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
  const [payloadData, setPayloadData] = useState('')
  const appContext = useContext(AppContext)
  const { setSnackbar, user } = appContext
 
  const handleCreateNote = async () => {
+  if (payloadData.trim() === '') {
+   return
+  }
   const payload = {
    type: 'text',
    data: payloadData,
@@ -51,7 +55,12 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload }) => {
    <div className='create-note-container w-[100%] h-[450px] bg-[#FFF4BA] rounded-xl p-3'>
     <div className='flex justify-between w-full'>
      <span className='font-[700] text-[#888888] text-3xl'>Quick notes</span>
-     <Button className='' variant='contained' onClick={handleCreateNote}>
+     <Button
+      className='btn-create-quickNotes'
+      disabled={user.id != userID}
+      variant='contained'
+      onClick={handleCreateNote}
+     >
       Create
      </Button>
     </div>
@@ -78,7 +87,7 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload }) => {
          .map(({ id, linkAvatar, user_name, createAt }) => (
           <li key={`${id}`}>
            <Link
-            to={`/other-user/${id}`}
+            to={`/profile-other-user/${id}`}
             className='w-full h-[15%] flex justify-between items-center my-1 ml-2 link-dark text-decoration-none'
            >
             <img

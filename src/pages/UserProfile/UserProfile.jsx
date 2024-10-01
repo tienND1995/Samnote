@@ -90,6 +90,7 @@ const UserProfile = () => {
         lastUsers={lastUsers}
         allNotePublic={allNotePublic}
         setReload={setReload}
+        userID={userID}
        />
       </div>
       <Footer />
