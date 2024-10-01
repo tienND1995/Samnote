@@ -1,3 +1,4 @@
+import axios from 'axios'
 import Swal from 'sweetalert2'
 
 export const confirmDelete = (nameItem, idItem, callApiFn) => {
@@ -20,4 +21,26 @@ export const confirmDelete = (nameItem, idItem, callApiFn) => {
    })
   }
  })
+}
+
+export const uploadImage = async (userID, noteID, imageFile) => {
+ if (!userID || !noteID || !imageFile) return
+ const data = new FormData()
+
+ data.append('id_user', userID)
+ data.append('id_note', noteID)
+ data.append('image_note', imageFile)
+
+ try {
+  const response = await axios.post(
+   `https://samnote.mangasocial.online/add_image_note`,
+   data
+  )
+
+  const imageList = response.data.data.list_image
+
+  return imageList[imageList.length - 1].link
+ } catch (error) {
+  console.error(error)
+ }
 }

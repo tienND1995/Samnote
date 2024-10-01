@@ -47,9 +47,11 @@ const FormEdit = ({ onDispatchName }) => {
   register,
   handleSubmit,
   setValue,
+  getValues,
   watch,
   reset,
-  formState: { errors, dirtyFields },
+  
+  formState: { errors, dirtyFields, isDirty},
  } = useForm({
   resolver: joiResolver(schemaNoteEdit),
   defaultValues: {
@@ -68,7 +70,6 @@ const FormEdit = ({ onDispatchName }) => {
  const notePublicForm = watch('notePublic')
  const colorForm = watch('color')
  const folderForm = watch('idFolder')
- const dataForm = watch('data')
 
  const convertTime = (time) => moment(`${time}+0700`).format('YYYY-MM-DD')
 
@@ -154,9 +155,11 @@ const FormEdit = ({ onDispatchName }) => {
  }
 
  const onSubmit = async (data) => {
+  
+  
   if (color.name !== data.color || !noteItem.idNote || !id) return
-  if (Object.keys(dirtyFields).length === 0 && data.data === noteItem.data)
-   return
+  // if (Object.keys(dirtyFields).length === 0 && data.data === watch('data'))
+
 
   // *** convert time and color to api
   const newDueAt = `${moment(data.dueAt).format('DD/MM/YYYY hh:mm A')} +07:00`
@@ -167,14 +170,16 @@ const FormEdit = ({ onDispatchName }) => {
    a: 1,
   }
 
-  const dataForm = {
-   ...data,
-   color: newColor,
-   dueAt: newDueAt,
-  }
+  // *** remove image in data
 
-  pacthNote(noteItem.idNote, dataForm)
-  console.log('dataForm', dataForm)
+  // const dataForm = {
+  //  ...data,
+  //  color: newColor,
+  //  dueAt: newDueAt,
+  // }
+
+  console.log('data form:', data.data )
+  // pacthNote(noteItem.idNote, dataForm)
  }
 
  return (
@@ -355,7 +360,7 @@ const FormEdit = ({ onDispatchName }) => {
       </p>
      )}
 
-     <TextEditor setValue={setValue} value={dataForm} />
+     <TextEditor setValue={setValue} value={noteItem?.data} />
     </div>
    </form>
   </div>

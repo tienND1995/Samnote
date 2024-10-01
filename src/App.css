@@ -52,11 +52,19 @@ li {
 /* * style text editor */
 .ql-container.ql-snow {
  border: none !important;
- aspect-ratio: 4/2 auto;
+ 
 }
 
 .ql-container.ql-snow > .ql-editor {
  line-height: 1.2;
+ overflow: auto;
+ overflow-wrap: break-word;
+ white-space: break-spaces;
+ /* inline-size: 600px; */
+ hyphens: manual;
+ aspect-ratio: 5 auto ;
+ padding: 15px;
+ max-width: 100%;
 }
 
 .ql-container.ql-snow > .ql-editor::-webkit-scrollbar {
