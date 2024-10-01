@@ -45,3 +45,29 @@
 .swiper-privateNotes::-webkit-scrollbar {
   height: 0.6rem;
 }
+
+.curved-line {
+  position: relative;
+  width: 32px;
+  height: 15px;
+  margin-right: 4px;
+}
+
+.curved-line::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -2px;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #e5e7eb;
+  border-top: none;
+  border-right: none;
+  border-radius: 0 0 0 16px;
+}
+
+.create-reply-comment .curved-line::before {
+  top: -22px;
+  width: 120%;
+  height: 200%;
+}
