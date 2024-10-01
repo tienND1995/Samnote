@@ -70,7 +70,7 @@ const UserProfile = () => {
  console.log(archivedNotes)
 
  return (
-  <Box className='w-full bg-[#4A4B51] h-auto'>
+  <Box className='w-full bg-[#4A4B51] h-auto overflow-y-auto'>
    <Box className='w-full bg-[#4A4B51] h-auto'>
     {userInfomations ? (
      <>
