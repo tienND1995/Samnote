@@ -39,3 +39,33 @@ export const schemaNoteEdit = Joi.object({
  pinned: Joi.boolean().allow('').allow(null),
  lock: Joi.string().allow('').allow(null),
 })
+
+export const schemaNoteCreate = Joi.object({
+ data: Joi.string().min(5).required().messages({
+  'string.min': 'At least 5 character!',
+  'string.empty': 'Not content yet!',
+ }),
+
+ title: Joi.string().min(5).max(100).required().messages({
+  'string.min': 'At least 5 character!',
+  'string.empty': 'Not title yet!',
+ }),
+
+ dueAt: Joi.date().max('now').required().messages({
+  'date.max': 'Current maximum date',
+
+  'date.empty': 'Not content yet!',
+ }),
+
+ // no require  .....................
+
+ remindAt: Joi.date().max('now').allow(null).messages({
+  'date.max': 'Current maximum date',
+ }),
+
+ idFolder: Joi.number().integer().allow(null),
+ color: Joi.string().allow('').allow(null),
+ notePublic: Joi.number().integer().allow('').allow(null),
+ pinned: Joi.boolean().allow('').allow(null),
+ lock: Joi.string().allow('').allow(null),
+})

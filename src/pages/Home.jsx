@@ -259,7 +259,7 @@ const Home = () => {
             fontWeight: '500',
            }
        }
-       onClick={() => navigate(`/user/photo`)}
+       onClick={() => navigate(`/photo`)}
       >
        Photos
       </li>
@@ -705,7 +705,7 @@ const Home = () => {
        marginBottom: '30px',
       }}
       variant='contained'
-      onClick={() => navigate(`/user/create-note`)}
+      onClick={() => navigate(`/create-note`)}
      >
       Create Public Notes
      </Button>
