@@ -10,7 +10,7 @@ import { schemaNoteEdit } from '../../../utils/schema'
 
 import { AppContext } from '../../../context'
 import { fetchAllFolder, fetchNoteList } from '../fetchApiEditNote'
-import FormEditImages from './EditImages'
+import DeleteImages from './DeleteImages'
 
 import {
  Checkbox,
@@ -24,6 +24,7 @@ import {
 
 import TextEditor from '../../../components/TextEditor'
 import configs from '../../../configs/configs.json'
+import AddImages from './AddImages'
 const { API_SERVER_URL } = configs
 
 const FormEdit = ({ onDispatchName }) => {
@@ -342,7 +343,7 @@ const FormEdit = ({ onDispatchName }) => {
      </div>
     </div>
 
-    <FormEditImages
+    <DeleteImages
      images={noteItem?.image}
      userId={user?.id}
      noteId={noteItem.idNote}
@@ -360,6 +361,8 @@ const FormEdit = ({ onDispatchName }) => {
      <div>
       <button className='btn btn-primary w-max'>Share Note</button>
      </div>
+
+     <AddImages userId={user?.id} noteId={id} onDispatchName={onDispatchName} onGetNoteId={getDataNoteId} />
     </div>
 
     <div className='mx-auto w-full flex flex-col flex-grow-1 gap-2'>

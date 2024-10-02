@@ -1,7 +1,5 @@
 import { useChecklist } from 'react-checklist'
-import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import axios from 'axios'
 import Slider from 'react-slick'
 import Swal from 'sweetalert2'
 
@@ -12,7 +10,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import configs from '../../../configs/configs.json'
 const { API_SERVER_URL } = configs
 
-const FormEditImages = ({
+const DeleteImages = ({
  images,
  userId,
  noteId,
@@ -202,4 +200,4 @@ const imageSort = images.sort((a, b) => a.id - b.id)
  )
 }
 
-export default FormEditImages
+export default DeleteImages

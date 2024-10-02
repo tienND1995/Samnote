@@ -30,28 +30,6 @@
  right: 0;
 } */
 
-.editnote-notelist::-webkit-scrollbar {
- width: 10px;
- border-radius: 10px;
- background-color: black;
-}
-
-.editnote-notelist::-webkit-scrollbar-thumb {
- background-color: white;
- border-radius: 10px;
-}
-
 .editnote-notelist > li > a.active {
  border: 1px solid red;
-}
-
-.style-scrollbar::-webkit-scrollbar {
- width: 6px;
- border-radius: 6px;
- background-color: black;
-}
-
-.style-scrollbar::-webkit-scrollbar-thumb {
- background-color: white;
- border-radius: 6px;
 }
