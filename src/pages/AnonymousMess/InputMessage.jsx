@@ -5,15 +5,19 @@ import {
   CircularProgress,
   InputBase,
   Box,
+  Button,
 } from "@mui/material";
+import "./AnonymousMess.css";
 import { AppContext } from "../../context";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import GifIcon from "../../assets/gifIcon.jsx";
 import SendIcon from "@mui/icons-material/Send";
+import AddIcon from "@mui/icons-material/Add";
 import ImageLogo from "../../assets/imagelogo.jsx";
 import api from "../../api";
 import createEmptyImageFile from "../../components/CreateEmptyImageFile"; // Giả định bạn có một component ImageLogo
+import AnonymousMessage from "./AnonymousMessage";
 
 const GiphySearch = ({ onGifSelect }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,7 +42,7 @@ const GiphySearch = ({ onGifSelect }) => {
       const response = await fetch(
         `https://api.giphy.com/v1/gifs/${
           query ? "search" : "trending"
-        }?api_key=${API_KEY}&q=${query || ""}&limit=10`
+        }?api_key=${API_KEY}&q=${query || ""}&limit=6`
       );
       const data = await response.json();
       setState({
@@ -58,7 +62,7 @@ const GiphySearch = ({ onGifSelect }) => {
   };
 
   const handleSearch = () => {
-    fetchGifs(searchTerm.trim());
+    fetchGifs(searchTerm.trim()); // Chỉ tìm kiếm khi nhấn nút
   };
 
   useEffect(() => {
@@ -72,11 +76,37 @@ const GiphySearch = ({ onGifSelect }) => {
     }
   };
 
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value); // Cập nhật giá trị searchTerm nhưng không gọi fetchGifs
+  };
+
   const { gifs, selectedGif, loading, error } = state;
 
   return (
-    <div className="bg-white w-full absolute top-0 transform -translate-y-[100%]">
-      <div className="flex flex-row w-full items-center justify-center">
+    <div className="bg-white w-[600px] left-[1%] absolute top-0 transform -translate-y-[101%] h-[500px] rounded-[5px] shadow-[0_0_15px_rgba(0,0,0,0.8)]">
+      <div className="flex flex-row w-full items-center justify-center relative">
+        <button
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "absolute",
+            marginTop: "10px",
+            height: "35px",
+            top: 0,
+            right: 13,
+            width: "35px",
+            borderRadius: "50%",
+            backgroundColor: "#000",
+            color: "white",
+            border: "none",
+            cursor: "pointer",
+          }}
+          onClick={() => setState({ ...state, selectedGif: null })} // Đóng GIF
+        >
+          <CloseIcon />
+        </button>
         <div
           style={{
             display: "flex",
@@ -95,7 +125,7 @@ const GiphySearch = ({ onGifSelect }) => {
             value={searchTerm}
             id="standard-basic"
             variant="standard"
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleInputChange} // Chỉ cập nhật searchTerm
             placeholder="Search for GIFs"
             sx={{
               width: "90%",
@@ -108,22 +138,19 @@ const GiphySearch = ({ onGifSelect }) => {
             {loading ? (
               <CircularProgress size={24} className="mr-1 my-1" />
             ) : (
-              <SearchIcon className="mr-1 my-1" onClick={handleSearch} />
+              <SearchIcon className="mr-1 my-1" onClick={handleSearch} /> // Gọi fetch khi nhấn nút
             )}
           </IconButton>
         </div>
       </div>
       <div className="">
         {error ? (
-          // Hiển thị thông báo lỗi nếu có lỗi
           <p className="text-center w-full text-red-500">{error}</p>
         ) : loading ? (
-          // Hiển thị trạng thái loading nếu đang tải GIF
           <p className="text-left text-black mb-[50px] ml-[40px] text-[30px]">
             Loading GIFs...
           </p>
         ) : selectedGif ? (
-          // Hiển thị GIF đã được chọn nếu có
           <img
             key={selectedGif.id}
             src={selectedGif.images.fixed_height.url}
@@ -138,39 +165,33 @@ const GiphySearch = ({ onGifSelect }) => {
             }}
           />
         ) : gifs.length > 0 ? (
-          // Hiển thị danh sách các GIF nếu có dữ liệu
-          gifs.map((gif) => (
-            <img
-              key={gif.id}
-              src={gif.images.fixed_height.url}
-              alt={gif.title}
-              onClick={() => handleGifClick(gif)}
-              style={{
-                cursor: "pointer",
-                margin: "10px",
-                borderRadius: "4px",
-                width: "200px",
-                height: "auto",
-              }}
-            />
-          ))
+          <div className="grid-container">
+            {gifs.map((gif) => (
+              <div key={gif.id} className="grid-item">
+                <img
+                  src={gif.images.fixed_height.url}
+                  alt={gif.title}
+                  onClick={() => handleGifClick(gif)}
+                />
+              </div>
+            ))}
+          </div>
         ) : (
-          // Trường hợp không có GIF nào được tìm thấy
-          <p className="text-center">No GIFs found.</p>
+          <p className="text-center text-[#000]">No GIFs found.</p>
         )}
       </div>
     </div>
   );
 };
 
-const ImageUploader = ({ onImageSelect, onImageRemove }) => {
+const ImageUploader = ({ onImageSelect, onImageRemove, OpenSelectImage }) => {
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedImageFile(file); // Lưu file gốc vào state
+      setSelectedImageFile(file);
       if (onImageSelect) {
         onImageSelect(file); // Gọi hàm onImageSelect với file gốc
       }
@@ -178,7 +199,7 @@ const ImageUploader = ({ onImageSelect, onImageRemove }) => {
   };
 
   const handleIconClick = () => {
-    fileInputRef.current.click();
+    fileInputRef.current.click(); // Kích hoạt input file khi click vào icon
   };
 
   const handleRemoveImage = () => {
@@ -189,15 +210,32 @@ const ImageUploader = ({ onImageSelect, onImageRemove }) => {
     if (onImageRemove) {
       onImageRemove(); // Gọi hàm onImageRemove nếu có
     }
+    // Reset input file value
+    fileInputRef.current.value = null; // Đặt lại giá trị của input file
   };
 
   return (
     <>
-      <div className="absolute mx-2 px-2 top-0 transform -translate-y-[101%] bg-white left-0 right-0 w-full">
-        {selectedImageFile && (
-          <div className="relative w-fit">
+      {OpenSelectImage && selectedImageFile && (
+        <div className="absolute m-auto px-4 py-4 top-0 transform -translate-y-[101%] bg-white left-0 right-0 w-[95%] rounded-md">
+          <div className="relative w-fit flex pl-6 items-center">
+            {/* <div className="mr-6">
+              <button
+                className="bg-[#000] text-[#fff] rounded-md w-[25px] h-[25px] flex p-3 items-center justify-center"
+                onClick={handleIconClick}
+              >
+                <AddIcon sx={{ fontSize: "30px" }} />
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+            </div> */}
             <img
-              src={URL.createObjectURL(selectedImageFile)} // Tạo URL từ file
+              src={URL.createObjectURL(selectedImageFile)}
               alt="Selected"
               style={{
                 marginTop: "10px",
@@ -228,13 +266,12 @@ const ImageUploader = ({ onImageSelect, onImageRemove }) => {
               <CloseIcon />
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
       <div>
         <IconButton sx={{ p: "5px" }} onClick={handleIconClick}>
           <ImageLogo width={30} height={30} />
         </IconButton>
-
         <input
           type="file"
           ref={fileInputRef}
@@ -286,20 +323,40 @@ const InputMessage = ({ data, onReload }) => {
     }));
   };
 
-  const sendMesage = async () => {
+  const handleSendMessage = () => {
+    if (payLoadData.content || payLoadData.gif || payLoadData.img) {
+      sendMessage();
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault(); // Ngăn không cho Enter xuống dòng
+      handleSendMessage();
+    }
+  };
+
+  const sendMessage = async () => {
     const { idReceive, idRoom, gif, type, img, content } = payLoadData;
     const [num1, num2] = idRoom.split("#").map(Number);
-    setPayLoadData((prevData) => ({
-      ...prevData,
-      idReceive: user.id != num1 ? num1 : num2,
-    }));
+
+    // Cập nhật idReceive
+    const newIdReceive = user.id != num1 ? num1 : num2;
+
     const formData = new FormData();
-    formData.append("idReceive", idReceive);
+    formData.append("idReceive", newIdReceive);
     formData.append("idRoom", idRoom);
     formData.append("gif", gif);
     formData.append("type", type);
-    formData.append("img", img === null ? createEmptyImageFile() : img); // Nếu img là null, tạo file rỗng
+    formData.append(
+      "img",
+      img === "" || img === null ? createEmptyImageFile() : img
+    );
     formData.append("content", content);
+    console.log("giá trị gửi đi ");
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
 
     try {
       const response = await fetch(
@@ -313,26 +370,30 @@ const InputMessage = ({ data, onReload }) => {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
+
       const data = await response.json();
       handleReload(data.message);
+
+      // Reset payload data
       setPayLoadData((prevData) => ({
         ...prevData,
-        content: "",
-        img: null,
+        img: "",
+        content: "", // Chỉ đặt lại content
         gif: "",
+        // Không reset img ở đây
       }));
+
       setComponentVisibility((prevData) => ({
         ...prevData,
         giphySearch: false,
+        OpenSelectImage: false,
       }));
-      handleImageRemove();
 
       console.log("Gửi thành công:", data.message);
     } catch (err) {
       console.error("Lỗi khi gửi tin nhắn:", err);
     }
   };
-  console.log("trạng thái ", giphySearch, OpenSelectImage);
 
   const handleGifSelect = (gif) => {
     const [num1, num2] = data.idRoom.split("#").map(Number);
@@ -342,8 +403,14 @@ const InputMessage = ({ data, onReload }) => {
       idRoom: data.idRoom,
       gif: gif.images.fixed_height.url,
       type: "gif",
-      content: null,
+      content: "",
     }));
+
+    // Đóng ImageUploader khi chọn GIF
+    setComponentVisibility({
+      giphySearch: true,
+      OpenSelectImage: false,
+    });
   };
 
   const handleImageSelect = (image) => {
@@ -356,16 +423,22 @@ const InputMessage = ({ data, onReload }) => {
       type: "image",
       content: null,
     }));
-    setComponentVisibility((prev) => ({
-      ...prev,
+
+    // Đóng GIF khi chọn hình ảnh
+    setComponentVisibility({
+      giphySearch: false, // Đóng GIF
       OpenSelectImage: true,
-    }));
+    });
   };
 
   const handleToggle = (componentName) => {
     setComponentVisibility((prevState) => ({
-      ...prevState,
-      [componentName]: !prevState[componentName],
+      giphySearch:
+        componentName === "giphySearch" ? !prevState.giphySearch : false,
+      OpenSelectImage:
+        componentName === "OpenSelectImage"
+          ? !prevState.OpenSelectImage
+          : false,
     }));
   };
 
@@ -394,17 +467,40 @@ const InputMessage = ({ data, onReload }) => {
             <ImageUploader
               onImageSelect={handleImageSelect}
               onImageRemove={handleImageRemove}
+              OpenSelectImage={OpenSelectImage}
             />
           </div>
 
           <IconButton
-            sx={{ p: "5px" }}
+            sx={{
+              p: "5px",
+              color: !giphySearch ? "#000" : "inherit",
+            }}
             onClick={() => {
               handleToggle("giphySearch");
               handleImageRemove();
             }}
           >
-            <GifIcon width={32} height={35} />
+            {giphySearch ? (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "30px",
+                  width: "33px",
+                  borderRadius: "3px",
+                  backgroundColor: "#000",
+                  color: "white",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <CloseIcon />
+              </div>
+            ) : (
+              <GifIcon width={32} height={35} />
+            )}{" "}
           </IconButton>
 
           <InputBase
@@ -412,14 +508,23 @@ const InputMessage = ({ data, onReload }) => {
             sx={{ ml: 1, flex: 1, width: "90%" }}
             placeholder="Type your message..."
             value={payLoadData.content} // Gán giá trị cho input
+            onKeyDown={handleKeyDown}
             onChange={handleInputChange}
           />
         </Box>
         <SendIcon
-          onClick={sendMesage}
+          onClick={() => {
+            handleSendMessage();
+          }}
           sx={{
-            cursor: "pointer",
-            color: "#0095FF",
+            cursor:
+              payLoadData.content || payLoadData.gif || payLoadData.img
+                ? "pointer"
+                : "not-allowed",
+            color:
+              payLoadData.content || payLoadData.gif || payLoadData.img
+                ? "#0095FF"
+                : "#999",
             fontSize: "40px",
             width: "6%",
           }}
@@ -428,4 +533,5 @@ const InputMessage = ({ data, onReload }) => {
     </div>
   );
 };
+
 export default InputMessage;

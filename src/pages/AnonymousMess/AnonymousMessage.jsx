@@ -6,6 +6,7 @@ import api from "../../api";
 import bg_chat from "../../assets/img-chat-an-danh.jpg";
 import SearchUnknowMessage from "./SearchUnknowMessage.jsx";
 import InputMessage from "./InputMessage";
+import "./AnonymousMess.css";
 
 const AnonymousMessage = () => {
   const appContext = useContext(AppContext);
@@ -14,7 +15,8 @@ const AnonymousMessage = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [reload, setReload] = useState(0);
   const [showChatBox, setShowChatBox] = useState({ info: [], message: [] });
-  console.log("showChatBox", showChatBox);
+  const [activeIndex, setActiveIndex] = useState(null);
+  // console.log("showChatBox", showChatBox);
 
   const handleGetMessage = async (data) => {
     const payload = {
@@ -22,17 +24,16 @@ const AnonymousMessage = () => {
     };
     try {
       const res = await api.post(`/message/chat-unknown-id?page=1`, payload);
+      scrollToBottom();
       setShowChatBox((prevState) => ({
         ...prevState,
         message: res.data.data,
       }));
 
-      console.log("res.data.data", res.data.data);
-      console.log("check state", showChatBox.message);
+      // console.log("res.data.data", res.data.data);
+      // console.log("check state", showChatBox.message);
     } catch (err) {
       console.log(err);
-    } finally {
-      scrollToBottom();
     }
   };
 
@@ -51,7 +52,7 @@ const AnonymousMessage = () => {
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "start" });
       }
-    }, 300); // Thời gian trễ là 100ms (có thể điều chỉnh tùy ý)
+    }, 100); // Thời gian trễ là 100ms (có thể điều chỉnh tùy ý)
   };
 
   useEffect(() => {
@@ -61,7 +62,7 @@ const AnonymousMessage = () => {
         try {
           const res = await api.get(`/message/list_user_unknown/${user.id}`);
           setListChatUnknow(res.data.data);
-          console.log("data", res.data.data);
+          // console.log("data", res.data.data);
         } catch (err) {
           console.error("Error fetching chat list:", err);
         }
@@ -73,6 +74,10 @@ const AnonymousMessage = () => {
       setListChatUnknow([]);
     }
   }, [user, reload]);
+
+  const convertLastText = (lastText, idSend) => {
+    return idSend === user.id ? `Bạn: ${lastText}` : `${lastText}`;
+  };
 
   // Hàm lọc danh sách dựa trên tab hiện tại
   const filteredChatList = () => {
@@ -100,7 +105,7 @@ const AnonymousMessage = () => {
         </Box>
 
         <Box
-          className="relative w-[90%]"
+          className="w-[90%]"
           style={{
             margin: "0 10px",
             boxShadow: "0 -2px 4px rgba(0, 0, 0, 0.1)",
@@ -152,7 +157,11 @@ const AnonymousMessage = () => {
                 to={`/user/incognito`}
                 key={item.idMessage}
                 className={({ isActive, isPending }) =>
-                  isPending ? "pending" : isActive ? "active" : ""
+                  isPending
+                    ? "pending"
+                    : activeIndex === item.idMessage
+                    ? "active"
+                    : ""
                 }
                 style={{
                   display: "flex",
@@ -160,6 +169,7 @@ const AnonymousMessage = () => {
                   borderRadius: "30px",
                   margin: "5px 10px",
                   height: "70px",
+                  width: "95%",
                   color: "black",
                   textDecoration: "none",
                   backgroundColor: "#fff",
@@ -170,6 +180,7 @@ const AnonymousMessage = () => {
                     ...prevState,
                     info: item,
                   }));
+                  setActiveIndex(item.idMessage);
                   handleGetMessage(item);
                 }}
               >
@@ -177,13 +188,20 @@ const AnonymousMessage = () => {
                   sx={{
                     display: "flex",
                     alignItems: "center",
+                    width: "85%",
                   }}
                 >
                   <Avatar
-                    sx={{ width: "60px", height: "60px" }}
+                    sx={{ width: "60px", height: "60px", marginLeft: "4px" }}
                     src={item.user.avatar}
                   />
-                  <Box sx={{ marginLeft: "10px", fontWeight: "700" }}>
+                  <Box
+                    sx={{
+                      marginLeft: "10px",
+                      fontWeight: "700",
+                      width: "100%",
+                    }}
+                  >
                     {item.user === "Unknow" ? (
                       <span style={{ fontWeight: "700", fontSize: "40px" }}>
                         User name
@@ -191,45 +209,151 @@ const AnonymousMessage = () => {
                     ) : (
                       <Typography
                         variant="body1"
-                        sx={{ fontWeight: "700", fontSize: "24px" }}
+                        sx={{
+                          fontWeight: "700",
+                          fontSize: "24px",
+                          textTransform: "capitalize",
+                        }}
                       >
                         {item.user.username}
                       </Typography>
                     )}
                     <Typography
-                      sx={{
-                        overflow: "hidden",
-                        width: "140px",
-                        fontSize: "20px",
-                        whiteSpace: "nowrap",
-                        textOverflow: "ellipsis",
-                      }}
+                      sx={
+                        item.unReadCount > 0
+                          ? {
+                              overflow: "hidden",
+                              width: "90%",
+                              fontSize: "20px",
+                              whiteSpace: "nowrap",
+                              textOverflow: "ellipsis",
+                              fontWeight: "700",
+                            }
+                          : {
+                              overflow: "hidden",
+                              width: "90%",
+                              fontSize: "20px",
+                              whiteSpace: "nowrap",
+                              textOverflow: "ellipsis",
+                              fontWeight: "400",
+                            }
+                      }
                       variant="body2"
                     >
-                      {item.last_text}
+                      {convertLastText(item.last_text, item.idSend)}
                     </Typography>
                   </Box>
                 </Box>
-                {item.unReadCount > 0 ? (
-                  <span className="w-[35px] h-[35px] mr-2 rounded-[100%] bg-[#D9D9D9] flex items-center justify-center text-[#FF0404] text-[20px]">
-                    {item.unReadCount}
-                  </span>
-                ) : (
-                  <svg
-                    className="w-[30px] h-[30px] mr-2"
-                    width="19"
-                    height="14"
-                    viewBox="0 0 19 14"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M6.03809 11.0455L1.53383 6.69202L0 8.16406L6.03809 14L19 1.47204L17.477 0L6.03809 11.0455Z"
-                      fill="#00FF73"
-                    />
-                  </svg>
-                )}
+                <p className="">
+                  {" "}
+                  {item.unReadCount > 0 ? (
+                    <span className="w-[35px] h-[35px] mr-2 rounded-[100%] bg-[#D9D9D9] flex items-center justify-center text-[#FF0404] text-[20px]">
+                      {item.unReadCount}
+                    </span>
+                  ) : (
+                    <svg
+                      className="w-[30px] h-[30px] mr-2"
+                      width="19"
+                      height="14"
+                      viewBox="0 0 19 14"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M6.03809 11.0455L1.53383 6.69202L0 8.16406L6.03809 14L19 1.47204L17.477 0L6.03809 11.0455Z"
+                        fill="#00FF73"
+                      />
+                    </svg>
+                  )}
+                </p>
               </NavLink>
+              // <NavLink
+              //   to={`/user/incognito`}
+              //   key={item.idMessage}
+              //   className={({ isActive, isPending }) =>
+              //     isPending
+              //       ? "pending"
+              //       : activeIndex === item.idMessage
+              //       ? "active"
+              //       : ""
+              //   }
+              //   style={{
+              //     display: "flex",
+              //     alignItems: "center",
+              //     borderRadius: "30px",
+              //     margin: "5px 10px",
+              //     height: "70px",
+              //     color: "black",
+              //     textDecoration: "none",
+              //     backgroundColor: "#fff",
+              //     justifyContent: "space-between",
+              //   }}
+              //   onClick={() => {
+              //     handleGetMessage(item);
+              //     setActiveIndex(item.idMessage); // Cập nhật chỉ số của phần tử đang được kích hoạt
+              //   }}
+              // >
+              //   <Box
+              //     sx={{
+              //       display: "flex",
+              //       alignItems: "center",
+              //     }}
+              //   >
+              //     <Avatar
+              //       sx={{ width: "60px", height: "60px" }}
+              //       src={item.user.avatar}
+              //     />
+              //     <Box sx={{ marginLeft: "10px", fontWeight: "700" }}>
+              //       {item.user === "Unknow" ? (
+              //         <span style={{ fontWeight: "700", fontSize: "40px" }}>
+              //           User name
+              //         </span>
+              //       ) : (
+              //         <Typography
+              //           variant="body1"
+              //           sx={{
+              //             fontWeight: "700",
+              //             fontSize: "24px",
+              //             textTransform: "capitalize",
+              //           }}
+              //         >
+              //           {item.user.username}
+              //         </Typography>
+              //       )}
+              //       <Typography
+              //         sx={{
+              //           overflow: "hidden",
+              //           width: "140px",
+              //           fontSize: "20px",
+              //           whiteSpace: "nowrap",
+              //           textOverflow: "ellipsis",
+              //         }}
+              //         variant="body2"
+              //       >
+              //         {item.last_text}
+              //       </Typography>
+              //     </Box>
+              //   </Box>
+              //   {item.unReadCount > 0 ? (
+              //     <span className="w-[35px] h-[35px] mr-2 rounded-[100%] bg-[#D9D9D9] flex items-center justify-center text-[#FF0404] text-[20px]">
+              //       {item.unReadCount}
+              //     </span>
+              //   ) : (
+              //     <svg
+              //       className="w-[30px] h-[30px] mr-2"
+              //       width="19"
+              //       height="14"
+              //       viewBox="0 0 19 14"
+              //       fill="none"
+              //       xmlns="http://www.w3.org/2000/svg"
+              //     >
+              //       <path
+              //         d="M6.03809 11.0455L1.53383 6.69202L0 8.16406L6.03809 14L19 1.47204L17.477 0L6.03809 11.0455Z"
+              //         fill="#00FF73"
+              //       />
+              //     </svg>
+              //   )}
+              // </NavLink>
             ))
           ) : (
             <Typography variant="body2" sx={{ marginTop: "20px" }}>
@@ -239,27 +363,28 @@ const AnonymousMessage = () => {
         </Box>
       </Box>
       {showChatBox.info.length !== 0 && (
-        <div className="w-[100%] h-[100vh]">
+        <div className="w-[100%] h-[100vh] shadow-[0_0_10px_rgba(0,0,0,0.4)]">
           {" "}
-          <div className="w-full h-[140px] ">
-            <div className="w-full h-[140px] items-center flex">
+          <div className="w-full h-[140px] shadow-[0_0_10px_rgba(0,0,0,0.4)]">
+            <div className="w-full h-[140px] items-center flex ">
               <Avatar
-                sx={{ width: "90px", height: "90px" }}
+                sx={{ width: "90px", height: "90px", margin: "0 10px" }}
                 src={showChatBox.info?.user.avatar}
               />
-              <p className="text-black text-[40px] font-bold">
+              <p className="text-black text-[40px] font-bold capitalize">
                 {showChatBox.info?.user.username}
               </p>
             </div>
           </div>
           <div
-            className=""
+            className="scrollbar shadow-[0_0_10px_rgba(0,0,0,0.8)]"
             style={{
               width: "100%",
               backgroundImage: `url(${bg_chat})`,
               overflow: "auto",
+
               height: `calc(100% - 220px)`,
-              scrollbarWidth: "none",
+              // scrollbarWidth: "none",
               backgroundPosition: "bottom center",
               backgroundSize: "200%",
               backgroundRepeat: "no-repeat",
@@ -299,6 +424,7 @@ const AnonymousMessage = () => {
                             padding: "5px",
                             fontSize: "20px",
                             maxWidth: "70%",
+                            marginBottom: "5px",
                           }}
                         >
                           {info.content}
@@ -307,13 +433,13 @@ const AnonymousMessage = () => {
                         <img
                           src={info.img}
                           alt="image"
-                          className="w-[200px] h-[auto] m-2"
+                          className="w-[200px] h-[auto] m-2 rounded-md"
                         />
                       ) : info.type === "gif" ? (
                         <img
                           src={info.gif}
                           alt="GIF"
-                          className="w-[200px] h-[auto] m-2"
+                          className="w-[200px] h-[auto] m-2 rounded-md"
                         />
                       ) : null}
                     </>
@@ -337,13 +463,13 @@ const AnonymousMessage = () => {
                         <img
                           src={info.img}
                           alt="image"
-                          className="w-[200px] h-[auto] m-2"
+                          className="w-[200px] h-[auto] m-2 rounded-md"
                         />
                       ) : info.type === "gif" ? (
                         <img
                           src={info.gif}
                           alt="GIF"
-                          className="w-[200px] h-[auto] m-2"
+                          className="w-[200px] h-[auto] m-2 rounded-md"
                         />
                       ) : (
                         ""
@@ -354,7 +480,7 @@ const AnonymousMessage = () => {
               ))}
             <div id="lastmessage" />
           </div>
-          <div className="w-full relative">
+          <div className="w-full relative shadow-[0_0_15px_rgba(0,0,0,0.8)]">
             {" "}
             <InputMessage data={showChatBox.info} onReload={handleReload} />
           </div>
