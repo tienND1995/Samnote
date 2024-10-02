@@ -15,6 +15,8 @@ const Photo = () => {
  const [photoList, setPhotoList] = useState([])
  const [imagesSlected, setImagesSlected] = useState([])
 
+ console.log(photoList)
+
  useEffect(() => {
   const fetchData = async (userID) => {
    try {

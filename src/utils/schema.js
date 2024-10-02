@@ -19,7 +19,6 @@ export const schemaGroup = Joi.object({
  }),
 })
 
-
 export const schemaNoteEdit = Joi.object({
  data: Joi.string().min(5).required().messages({
   'string.min': 'At least 5 character!',
@@ -29,8 +28,7 @@ export const schemaNoteEdit = Joi.object({
   'string.min': 'At least 5 character!',
   'string.empty': 'Not title yet!',
  }),
- dueAt: Joi.date().max('now').required().messages({
-  'date.empty': 'Not remindAt yet!',
+ dueAt: Joi.date().max('now').allow('').allow(null).messages({
   'date.max': 'Current maximum date',
  }),
 

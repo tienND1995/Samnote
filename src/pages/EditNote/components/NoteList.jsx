@@ -126,7 +126,7 @@ const NoteList = ({
      </div>
     </div>
 
-    <ul className='bg-[#dedede] flex flex-col flex-grow-1 gap-3 rounded-lg overflow-y-auto h-[60vh] p-2 editnote-notelist'>
+    <ul className='bg-[#dedede] flex flex-col flex-grow-1 gap-3 rounded-lg overflow-y-auto h-[60vh] p-2 editnote-notelist style-scrollbar-y style-scrollbar-y-sm'>
      {noteList.length > 0 ? (
       noteList.map((note) => (
        <NoteItem

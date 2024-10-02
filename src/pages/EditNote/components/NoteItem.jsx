@@ -99,7 +99,7 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
     <h6 className='col font-semibold'>{note.title}</h6>
 
     <div className='col-6 px-0'>
-     <div className='max-h-[100px] overflow-y-auto style-scrollbar'>
+     <div className='max-h-[100px] overflow-y-auto style-scrollbar-y style-scrollbar-y-sm'>
       {typeof note.data == 'string' && (
        <TextTruncate
         line={3}

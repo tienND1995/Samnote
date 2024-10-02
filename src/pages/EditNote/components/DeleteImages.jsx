@@ -12,7 +12,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import configs from '../../../configs/configs.json'
 const { API_SERVER_URL } = configs
 
-const FormEditImages = ({
+const DeleteImages = ({
  images,
  userId,
  noteId,
@@ -202,4 +202,4 @@ const imageSort = images.sort((a, b) => a.id - b.id)
  )
 }
 
-export default FormEditImages
+export default DeleteImages

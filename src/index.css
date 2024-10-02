@@ -47,3 +47,45 @@ ul {
 li {
  list-style-type: none;
 }
+
+/* _______________________ */
+.style-scrollbar-y::-webkit-scrollbar {
+ border-radius: 6px;
+ background-color: black;
+ width: 10px;
+}
+
+.style-scrollbar-y::-webkit-scrollbar-thumb {
+ background-color: white;
+ border-radius: 6px;
+ cursor: pointer;
+}
+
+.style-scrollbar-y-sm::-webkit-scrollbar {
+ width: 6px;
+}
+
+.style-scrollbar-y-md::-webkit-scrollbar {
+ width: 10px;
+}
+
+/* _____________________ */
+.style-scrollbar-x::-webkit-scrollbar {
+ border-radius: 6px;
+ background-color: black;
+ width: 10px;
+}
+
+.style-scrollbar-x::-webkit-scrollbar-thumb {
+ background-color: red;
+ border-radius: 6px;
+ cursor: pointer;
+}
+
+.style-scrollbar-x-sm::-webkit-scrollbar {
+ height: 6px;
+}
+
+.style-scrollbar-x-md::-webkit-scrollbar {
+ height: 10px;
+}

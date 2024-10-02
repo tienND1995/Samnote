@@ -60,7 +60,6 @@ li {
  overflow: auto;
  overflow-wrap: break-word;
  white-space: break-spaces;
- /* inline-size: 600px; */
  hyphens: manual;
  aspect-ratio: 5 auto ;
  padding: 15px;
