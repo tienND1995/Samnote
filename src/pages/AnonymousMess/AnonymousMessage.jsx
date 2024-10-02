@@ -14,9 +14,15 @@ const AnonymousMessage = () => {
   const [listChatUnknow, setListChatUnknow] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
   const [reload, setReload] = useState(0);
-  const [showChatBox, setShowChatBox] = useState({ info: [], message: [] });
+  const [showChatBox, setShowChatBox] = useState({
+    info: [],
+    message: [],
+    avatar: null,
+    username: "",
+  });
   const [activeIndex, setActiveIndex] = useState(null);
-  // console.log("showChatBox", showChatBox);
+  const { avatar, username, info, message } = showChatBox;
+  // const username = showChatBox.info?.user?.username;
 
   const handleGetMessage = async (data) => {
     const payload = {
@@ -31,8 +37,12 @@ const AnonymousMessage = () => {
       }));
 
       // console.log("res.data.data", res.data.data);
-      // console.log("check state", showChatBox.message);
+      console.log("check state", showChatBox.message);
     } catch (err) {
+      setShowChatBox((prevState) => ({
+        ...prevState,
+        message: [],
+      }));
       console.log(err);
     }
   };
@@ -88,6 +98,40 @@ const AnonymousMessage = () => {
     }
     return listChatUnknow; // Nếu tab là "all", trả về tất cả tin nhắn
   };
+  // const handleUserSelect = (infoUser) => {
+  //   console.log("thông tin ", infoUser);
+
+  //   setShowChatBox((prev) => ({
+  //     ...prev, // Giữ nguyên các giá trị khác của showChatBox
+  //     avatar: infoUser.linkAvatar,
+  //     username: infoUser.userName,
+  //   }));
+
+  //   console.log(
+  //     "Selected user trong tìm kiếm:avatar,username",
+  //     avatar,
+  //     username
+  //   );
+  // };
+  const handleUserSelect = (infoUser) => {
+    const data = {
+      idRoom: `${user.id}#${infoUser.idUser}`, // gán giá trị cho idRoom
+      // Thêm các thuộc tính khác nếu cần
+    };
+    setShowChatBox((prev) => {
+      const updatedShowChatBox = {
+        ...prev,
+        avatar: infoUser.linkAvatar,
+        username: infoUser.userName,
+        info: infoUser,
+      };
+      return updatedShowChatBox;
+    });
+    console.log("handleUserSelect truyền id room", data);
+
+    setReload((prev) => prev + 1);
+    handleGetMessage(data);
+  };
 
   return (
     <Box className="text-white lg:flex bg-[#DFFFFE] w-full">
@@ -111,7 +155,7 @@ const AnonymousMessage = () => {
             boxShadow: "0 -2px 4px rgba(0, 0, 0, 0.1)",
           }}
         >
-          <SearchUnknowMessage />
+          <SearchUnknowMessage onUserSelect={handleUserSelect} />
         </Box>
 
         {/* Tabs for filtering */}
@@ -179,6 +223,8 @@ const AnonymousMessage = () => {
                   setShowChatBox((prevState) => ({
                     ...prevState,
                     info: item,
+                    avatar: item.user.avatar,
+                    username: item.user.username,
                   }));
                   setActiveIndex(item.idMessage);
                   handleGetMessage(item);
@@ -267,93 +313,6 @@ const AnonymousMessage = () => {
                   )}
                 </p>
               </NavLink>
-              // <NavLink
-              //   to={`/user/incognito`}
-              //   key={item.idMessage}
-              //   className={({ isActive, isPending }) =>
-              //     isPending
-              //       ? "pending"
-              //       : activeIndex === item.idMessage
-              //       ? "active"
-              //       : ""
-              //   }
-              //   style={{
-              //     display: "flex",
-              //     alignItems: "center",
-              //     borderRadius: "30px",
-              //     margin: "5px 10px",
-              //     height: "70px",
-              //     color: "black",
-              //     textDecoration: "none",
-              //     backgroundColor: "#fff",
-              //     justifyContent: "space-between",
-              //   }}
-              //   onClick={() => {
-              //     handleGetMessage(item);
-              //     setActiveIndex(item.idMessage); // Cập nhật chỉ số của phần tử đang được kích hoạt
-              //   }}
-              // >
-              //   <Box
-              //     sx={{
-              //       display: "flex",
-              //       alignItems: "center",
-              //     }}
-              //   >
-              //     <Avatar
-              //       sx={{ width: "60px", height: "60px" }}
-              //       src={item.user.avatar}
-              //     />
-              //     <Box sx={{ marginLeft: "10px", fontWeight: "700" }}>
-              //       {item.user === "Unknow" ? (
-              //         <span style={{ fontWeight: "700", fontSize: "40px" }}>
-              //           User name
-              //         </span>
-              //       ) : (
-              //         <Typography
-              //           variant="body1"
-              //           sx={{
-              //             fontWeight: "700",
-              //             fontSize: "24px",
-              //             textTransform: "capitalize",
-              //           }}
-              //         >
-              //           {item.user.username}
-              //         </Typography>
-              //       )}
-              //       <Typography
-              //         sx={{
-              //           overflow: "hidden",
-              //           width: "140px",
-              //           fontSize: "20px",
-              //           whiteSpace: "nowrap",
-              //           textOverflow: "ellipsis",
-              //         }}
-              //         variant="body2"
-              //       >
-              //         {item.last_text}
-              //       </Typography>
-              //     </Box>
-              //   </Box>
-              //   {item.unReadCount > 0 ? (
-              //     <span className="w-[35px] h-[35px] mr-2 rounded-[100%] bg-[#D9D9D9] flex items-center justify-center text-[#FF0404] text-[20px]">
-              //       {item.unReadCount}
-              //     </span>
-              //   ) : (
-              //     <svg
-              //       className="w-[30px] h-[30px] mr-2"
-              //       width="19"
-              //       height="14"
-              //       viewBox="0 0 19 14"
-              //       fill="none"
-              //       xmlns="http://www.w3.org/2000/svg"
-              //     >
-              //       <path
-              //         d="M6.03809 11.0455L1.53383 6.69202L0 8.16406L6.03809 14L19 1.47204L17.477 0L6.03809 11.0455Z"
-              //         fill="#00FF73"
-              //       />
-              //     </svg>
-              //   )}
-              // </NavLink>
             ))
           ) : (
             <Typography variant="body2" sx={{ marginTop: "20px" }}>
@@ -362,17 +321,17 @@ const AnonymousMessage = () => {
           )}
         </Box>
       </Box>
-      {showChatBox.info.length !== 0 && (
+      {info.length !== 0 && (
         <div className="w-[100%] h-[100vh] shadow-[0_0_10px_rgba(0,0,0,0.4)]">
           {" "}
           <div className="w-full h-[140px] shadow-[0_0_10px_rgba(0,0,0,0.4)]">
             <div className="w-full h-[140px] items-center flex ">
               <Avatar
                 sx={{ width: "90px", height: "90px", margin: "0 10px" }}
-                src={showChatBox.info?.user.avatar}
+                src={avatar}
               />
               <p className="text-black text-[40px] font-bold capitalize">
-                {showChatBox.info?.user.username}
+                {username}
               </p>
             </div>
           </div>
@@ -390,20 +349,20 @@ const AnonymousMessage = () => {
               backgroundRepeat: "no-repeat",
             }}
           >
-            {Array.isArray(showChatBox.message) &&
-              showChatBox.message?.map((info, index) => (
+            {Array.isArray(message) &&
+              message?.map((item) => (
                 <Box
-                  key={index}
+                  key={item.id}
                   sx={{
                     marginLeft: "10px",
                     display: "flex",
                     alignItems: "flex-end",
                     color: "#000",
                     justifyContent:
-                      info.idReceive !== user.id ? "flex-end" : "flex-start",
+                      item.idReceive !== user.id ? "flex-end" : "flex-start",
                   }}
                 >
-                  {info.idReceive === user.id ? (
+                  {item.idReceive === user.id ? (
                     <>
                       <div className="flex items-end h-full">
                         {" "}
@@ -413,10 +372,10 @@ const AnonymousMessage = () => {
                             height: "50px",
                             margin: "5px",
                           }}
-                          src={showChatBox.info?.user?.avatar}
+                          src={avatar}
                         />
                       </div>
-                      {info.type === "text" ? (
+                      {item.type === "text" ? (
                         <Box
                           sx={{
                             backgroundColor: "#fff",
@@ -427,17 +386,17 @@ const AnonymousMessage = () => {
                             marginBottom: "5px",
                           }}
                         >
-                          {info.content}
+                          {item.content}
                         </Box>
-                      ) : info.type === "image" ? (
+                      ) : item.type === "image" ? (
                         <img
-                          src={info.img}
+                          src={item.img}
                           alt="image"
                           className="w-[200px] h-[auto] m-2 rounded-md"
                         />
-                      ) : info.type === "gif" ? (
+                      ) : item.type === "gif" ? (
                         <img
-                          src={info.gif}
+                          src={item.gif}
                           alt="GIF"
                           className="w-[200px] h-[auto] m-2 rounded-md"
                         />
@@ -446,7 +405,7 @@ const AnonymousMessage = () => {
                   ) : (
                     <>
                       {" "}
-                      {info.type === "text" ? (
+                      {item.type === "text" ? (
                         <Box
                           sx={{
                             backgroundColor: "#1EC0F2",
@@ -457,17 +416,17 @@ const AnonymousMessage = () => {
                             maxWidth: "70%",
                           }}
                         >
-                          {info.content}
+                          {item.content}
                         </Box>
-                      ) : info.type === "image" ? (
+                      ) : item.type === "image" ? (
                         <img
-                          src={info.img}
+                          src={item.img}
                           alt="image"
                           className="w-[200px] h-[auto] m-2 rounded-md"
                         />
-                      ) : info.type === "gif" ? (
+                      ) : item.type === "gif" ? (
                         <img
-                          src={info.gif}
+                          src={item.gif}
                           alt="GIF"
                           className="w-[200px] h-[auto] m-2 rounded-md"
                         />
@@ -482,7 +441,7 @@ const AnonymousMessage = () => {
           </div>
           <div className="w-full relative shadow-[0_0_15px_rgba(0,0,0,0.8)]">
             {" "}
-            <InputMessage data={showChatBox.info} onReload={handleReload} />
+            <InputMessage data={info} onReload={handleReload} />
           </div>
         </div>
       )}

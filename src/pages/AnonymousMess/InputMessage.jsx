@@ -287,7 +287,7 @@ const ImageUploader = ({ onImageSelect, onImageRemove, OpenSelectImage }) => {
 const InputMessage = ({ data, onReload }) => {
   const appContext = useContext(AppContext);
   const { user } = appContext;
-
+  console.log("info truyền vào thanh input để gửi tin nhắn", data);
   const [componentVisibility, setComponentVisibility] = useState({
     giphySearch: false,
     OpenSelectImage: false,
@@ -295,14 +295,29 @@ const InputMessage = ({ data, onReload }) => {
   const { giphySearch, OpenSelectImage } = componentVisibility;
 
   const [payLoadData, setPayLoadData] = useState({
-    idRoom: data.idRoom,
-    idReceive: data.idReceive,
+    idRoom: null, // Khởi tạo giá trị mặc định
+    idReceive: null,
     content: "",
     img: null,
     gif: "",
     type: "",
   });
 
+  useEffect(() => {
+    // Cập nhật payloadData khi data thay đổi
+    setPayLoadData((prev) => ({
+      ...prev,
+      idRoom:
+        data.idRoom === undefined ? `${user.id}#${data.idUser}` : data.idRoom,
+      idReceive: data.idReceive === undefined ? data.idUser : data.idReceive,
+    }));
+
+    handleReload({});
+  }, [data, user.id]);
+  console.log(
+    "info truyền vào thanh inptut để gửi tin nhắn",
+    payLoadData.idRoom
+  );
   const handleReload = (data) => {
     onReload(data);
   };
