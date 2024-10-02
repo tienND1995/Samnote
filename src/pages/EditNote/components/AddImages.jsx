@@ -93,8 +93,15 @@ const AddImages = ({ userId, noteId, onDispatchName, onGetNoteId }) => {
 
  return (
   <div>
-   <button onClick={handleShowModal} type='button' className='ms-2'>
-    <ImageIcon className='text-white text-[40px]' />
+   <button
+    disabled={!noteId}
+    onClick={handleShowModal}
+    type='button'
+    className='ms-2'
+   >
+    <ImageIcon
+     className={`text-[40px] ${noteId ? 'text-white' : 'text-gray-400'}`}
+    />
    </button>
 
    <Modal centered={true} show={showModal} onHide={handleHideModal}>
