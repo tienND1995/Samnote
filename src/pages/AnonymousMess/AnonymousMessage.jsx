@@ -7,7 +7,7 @@ import bg_chat from "../../assets/img-chat-an-danh.jpg";
 import MenuSelect from "../../assets/menuselect.jsx";
 import SearchUnknowMessage from "./SearchUnknowMessage.jsx";
 import InputMessage from "./InputMessage";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import DeleteIcon from "@mui/icons-material/Delete";
 import "./AnonymousMess.css";
 
 const AnonymousMessage = () => {
@@ -24,6 +24,7 @@ const AnonymousMessage = () => {
   });
   const [activeIndex, setActiveIndex] = useState(null);
   const { avatar, username, info, message } = showChatBox;
+
   // const username = showChatBox.info?.user?.username;
   const [status, setStatus] = useState({ showSelectMenu: false });
 
@@ -111,6 +112,7 @@ const AnonymousMessage = () => {
   };
 
   const deleteChatUnknown = async (data) => {
+    console.log("data để xóa showChatBox", data);
     const payload = {
       idRoom: data.idRoom,
     };
@@ -125,6 +127,17 @@ const AnonymousMessage = () => {
       console.log("payload", payload);
       console.log("thành công");
       setReload((prev) => prev + 1);
+      setShowChatBox((prev) => ({
+        ...prev,
+        info: [],
+        message: [],
+        avatar: null,
+        username: "",
+      }));
+      setStatus((prev) => ({
+        ...prev,
+        showSelectMenu: false,
+      }));
     } catch (err) {
       console.log("lỗi");
       console.log(err);
@@ -361,9 +374,12 @@ const AnonymousMessage = () => {
               {status.showSelectMenu && (
                 <div className="dropdown-menu-anonimuos">
                   <ul>
-                    <li>Option 1</li>
-                    <li>Option 2</li>
-                    <li>Option 3</li>
+                    <li>
+                      <button onClick={() => deleteChatUnknown(info)}>
+                        <DeleteIcon />
+                        Delete Chat
+                      </button>
+                    </li>
                   </ul>
                 </div>
               )}
