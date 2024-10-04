@@ -73,8 +73,8 @@ function App() {
      <Route path='/user/dustbin' element={<UserDustbin />} />
 
      <Route path='/user/create-note' element={<CreateNote />} />
-     <Route path='/user/profile/:id' element={<UserProfile />} />
-     <Route path='/profile-other-user/:id' element={<UserProfile />} />
+
+     <Route path='/profile/:id' element={<UserProfile />} />
      <Route path='/user/incognito' element={<AnonymousMessage />} />
 
      {/* ................................ */}
