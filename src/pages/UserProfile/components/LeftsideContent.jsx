@@ -418,7 +418,7 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                         onError={handleErrorAvatar}
                                                     />
                                                     <Box sx={{ color: 'text.main' }}>
-                                                        <p style={{ margin: 0, fontSize: '1.2rem' }}>
+                                                        <p style={{ margin: 0, fontSize: '1.2rem', maxWidth: '10rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                             <strong>{userInfomations.name}</strong>
                                                         </p>
                                                         <p style={{ margin: 0, opacity: '0.8' }}>
