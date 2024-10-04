@@ -86,27 +86,6 @@ const GiphySearch = ({ onGifSelect }) => {
   return (
     <div className="bg-white w-[600px] left-[1%] absolute top-0 transform -translate-y-[101%] h-[500px] rounded-[5px] shadow-[0_0_15px_rgba(0,0,0,0.8)]">
       <div className="flex flex-row w-full items-center justify-center relative">
-        <button
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "absolute",
-            marginTop: "10px",
-            height: "35px",
-            top: 0,
-            right: 13,
-            width: "35px",
-            borderRadius: "50%",
-            backgroundColor: "#000",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-          }}
-          onClick={() => setState({ ...state, selectedGif: null })} // Đóng GIF
-        >
-          <CloseIcon />
-        </button>
         <div
           style={{
             display: "flex",
@@ -219,28 +198,29 @@ const ImageUploader = ({ onImageSelect, onImageRemove, OpenSelectImage }) => {
       {OpenSelectImage && selectedImageFile && (
         <div className="absolute m-auto px-4 py-4 top-0 transform -translate-y-[101%] bg-white left-0 right-0 w-[95%] rounded-md">
           <div className="relative w-fit flex pl-6 items-center">
-            {/* <div className="mr-6">
+            <div className="mr-6">
               <button
                 className="bg-[#000] text-[#fff] rounded-md w-[25px] h-[25px] flex p-3 items-center justify-center"
                 onClick={handleIconClick}
               >
                 <AddIcon sx={{ fontSize: "30px" }} />
               </button>
-              <input
+              {/* <input
                 type="file"
                 ref={fileInputRef}
                 style={{ display: "none" }}
                 accept="image/*"
                 onChange={handleImageChange}
-              />
-            </div> */}
+              /> */}
+            </div>
             <img
               src={URL.createObjectURL(selectedImageFile)}
               alt="Selected"
               style={{
                 marginTop: "10px",
                 width: "200px",
-                height: "auto",
+                height: "150px",
+                objectFit: "cover",
                 borderRadius: "8px",
               }}
             />
@@ -288,11 +268,12 @@ const InputMessage = ({ data, onReload }) => {
   const appContext = useContext(AppContext);
   const { user } = appContext;
   console.log("info truyền vào thanh input để gửi tin nhắn", data);
-  const [componentVisibility, setComponentVisibility] = useState({
+  const [status, setStatus] = useState({
     giphySearch: false,
     OpenSelectImage: false,
+    sending: false,
   });
-  const { giphySearch, OpenSelectImage } = componentVisibility;
+  const { giphySearch, OpenSelectImage, sending } = status;
 
   const [payLoadData, setPayLoadData] = useState({
     idRoom: null, // Khởi tạo giá trị mặc định
@@ -308,8 +289,8 @@ const InputMessage = ({ data, onReload }) => {
     setPayLoadData((prev) => ({
       ...prev,
       idRoom:
-        data.idRoom === undefined ? `${user.id}#${data.idUser}` : data.idRoom,
-      idReceive: data.idReceive === undefined ? data.idUser : data.idReceive,
+        data.idRoom == undefined ? `${user.id}#${data.idUser}` : data.idRoom,
+      idReceive: data.idReceive == undefined ? data.idUser : data.idReceive,
     }));
 
     handleReload({});
@@ -323,7 +304,7 @@ const InputMessage = ({ data, onReload }) => {
   };
 
   const handleImageRemove = () => {
-    setComponentVisibility((prev) => ({
+    setStatus((prev) => ({
       ...prev,
       OpenSelectImage: false,
     }));
@@ -339,6 +320,15 @@ const InputMessage = ({ data, onReload }) => {
   };
 
   const handleSendMessage = () => {
+    console.log(
+      "điều kiện để gửi tin nhắn: payLoadData.content" +
+        payLoadData.content +
+        "gif" +
+        payLoadData.gif +
+        "img" +
+        payLoadData.img
+    );
+
     if (payLoadData.content || payLoadData.gif || payLoadData.img) {
       sendMessage();
     }
@@ -368,12 +358,12 @@ const InputMessage = ({ data, onReload }) => {
       img === "" || img === null ? createEmptyImageFile() : img
     );
     formData.append("content", content);
-    console.log("giá trị gửi đi ");
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
 
     try {
+      setStatus((prevData) => ({
+        ...prevData,
+        sending: true,
+      }));
       const response = await fetch(
         `https://samnote.mangasocial.online/message/chat-unknown-image2/${user.id}`,
         {
@@ -398,7 +388,7 @@ const InputMessage = ({ data, onReload }) => {
         // Không reset img ở đây
       }));
 
-      setComponentVisibility((prevData) => ({
+      setStatus((prevData) => ({
         ...prevData,
         giphySearch: false,
         OpenSelectImage: false,
@@ -407,47 +397,86 @@ const InputMessage = ({ data, onReload }) => {
       console.log("Gửi thành công:", data.message);
     } catch (err) {
       console.error("Lỗi khi gửi tin nhắn:", err);
+    } finally {
+      setStatus((prevData) => ({
+        ...prevData,
+        sending: false,
+      }));
     }
   };
 
   const handleGifSelect = (gif) => {
-    const [num1, num2] = data.idRoom.split("#").map(Number);
-    setPayLoadData((prevData) => ({
-      ...prevData,
-      idReceive: user.id != num1 ? num1 : num2,
-      idRoom: data.idRoom,
-      gif: gif.images.fixed_height.url,
-      type: "gif",
-      content: "",
-    }));
+    console.log("gif trả về ", data);
+    if (data?.idRoom) {
+      const [num1, num2] = data.idRoom.split("#").map(Number);
+
+      setPayLoadData((prevData) => ({
+        ...prevData,
+        idReceive: user.id !== num1 ? num1 : num2,
+        idRoom: data.idRoom,
+        gif: gif.images.fixed_height.url,
+        type: "gif",
+        content: "",
+      }));
+    } else {
+      setPayLoadData((prevData) => ({
+        ...prevData,
+        idReceive: data?.idUser,
+        idRoom: `${user.id}#${data?.idUser}`,
+        gif: gif.images.fixed_height.url,
+        type: "gif",
+        content: "",
+      }));
+    }
 
     // Đóng ImageUploader khi chọn GIF
-    setComponentVisibility({
+    setStatus((prevStatus) => ({
+      ...prevStatus,
       giphySearch: true,
       OpenSelectImage: false,
-    });
+    }));
   };
 
+  // useEffect để gọi sendMessage sau khi payLoadData được cập nhật
+  useEffect(() => {
+    if (payLoadData.gif && payLoadData.type == "gif") {
+      sendMessage();
+    }
+  }, [payLoadData.gif]);
+
   const handleImageSelect = (image) => {
-    const [num1, num2] = data.idRoom.split("#").map(Number);
-    setPayLoadData((prevData) => ({
-      ...prevData,
-      idReceive: user.id != num1 ? num1 : num2,
-      idRoom: data.idRoom,
-      img: image, // Gán hình ảnh được chọn vào payload
-      type: "image",
-      content: null,
-    }));
+    if (data?.idRoom) {
+      const [num1, num2] = data.idRoom.split("#").map(Number);
+      setPayLoadData((prevData) => ({
+        ...prevData,
+        idReceive: user.id != num1 ? num1 : num2,
+        idRoom: data.idRoom,
+        img: image,
+        type: "image",
+        content: null,
+      }));
+    } else {
+      setPayLoadData((prevData) => ({
+        ...prevData,
+        idReceive: data?.idUser,
+        idRoom: `${user.id}#${data?.idUser}`,
+        img: image, // Gán hình ảnh được chọn vào payload
+        type: "image",
+        content: null,
+      }));
+    }
 
     // Đóng GIF khi chọn hình ảnh
-    setComponentVisibility({
+    setStatus((prevStatus) => ({
+      ...prevStatus,
       giphySearch: false, // Đóng GIF
       OpenSelectImage: true,
-    });
+    }));
   };
 
   const handleToggle = (componentName) => {
-    setComponentVisibility((prevState) => ({
+    setStatus((prevState) => ({
+      ...prevState,
       giphySearch:
         componentName === "giphySearch" ? !prevState.giphySearch : false,
       OpenSelectImage:
@@ -473,7 +502,7 @@ const InputMessage = ({ data, onReload }) => {
         <Box className="w-[95%] flex items-center">
           <div
             onClick={() => {
-              setComponentVisibility((prevState) => ({
+              setStatus((prevState) => ({
                 ...prevState,
                 giphySearch: false,
               }));
@@ -527,23 +556,29 @@ const InputMessage = ({ data, onReload }) => {
             onChange={handleInputChange}
           />
         </Box>
-        <SendIcon
-          onClick={() => {
-            handleSendMessage();
-          }}
-          sx={{
-            cursor:
-              payLoadData.content || payLoadData.gif || payLoadData.img
-                ? "pointer"
-                : "not-allowed",
-            color:
-              payLoadData.content || payLoadData.gif || payLoadData.img
-                ? "#0095FF"
-                : "#999",
-            fontSize: "40px",
-            width: "6%",
-          }}
-        />
+        <div className="w-[50px]">
+          {" "}
+          {sending ? (
+            <CircularProgress size={24} />
+          ) : (
+            <SendIcon
+              onClick={() => {
+                handleSendMessage();
+              }}
+              sx={{
+                cursor:
+                  payLoadData.content || payLoadData.gif || payLoadData.img
+                    ? "pointer"
+                    : "not-allowed",
+                color:
+                  payLoadData.content || payLoadData.gif || payLoadData.img
+                    ? "#0095FF"
+                    : "#999",
+                fontSize: "40px",
+              }}
+            />
+          )}
+        </div>
       </Box>
     </div>
   );

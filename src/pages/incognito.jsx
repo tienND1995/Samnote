@@ -984,24 +984,6 @@ const Incognito = () => {
               </div>
             )}
 
-            {/* {selectedImage && (
-              <div className="absolute bg-white w-[97%] h-[120px] top-0 -translate-y-[105%] rounded overflow-hidden flex">
-                <div className="relative m-2">
-                  <img
-                    src={selectedImage.url}
-                    alt="Selected"
-                    className="w-[150px] h-[100%] object-cover rounded"
-                  />
-                  <div
-                    onClick={handleRemoveImage}
-                    className="text-black rounded-[50%] absolute w-[30px] h-[30px] right-[3px] top-[3px] text-center bg-white cursor-pointer"
-                  >
-                    <CloseIcon />
-                  </div>
-                </div>
-              </div>
-            )} */}
-
             <IconButton sx={{ p: "5px" }} onClick={handleButtonClick}>
               {selectedImage === null ? (
                 <ImageLogo width={20} height={20} />

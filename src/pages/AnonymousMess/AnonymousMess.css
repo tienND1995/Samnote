@@ -64,18 +64,18 @@
 }
 
 .scrollbar::-webkit-scrollbar-track {
-  background: #f1f1f1; /* Màu nền cho track của thanh cuộn */
-  border-radius: 10px; /* Bo tròn các góc của track */
+  background: #b6f6ff; /* Màu nền cho track của thanh cuộn */
 }
 
 .scrollbar::-webkit-scrollbar-thumb {
-  background: #888; /* Màu của thanh cuộn */
-  border-radius: 10px; /* Bo tròn các góc của thanh cuộn */
+  background: #999; /* Màu của thanh cuộn */
 }
 
 .scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #555; /* Màu khi hover lên thanh cuộn */
+  background: #888;
+
+  /* Màu khi hover lên thanh cuộn */
 }
-.active {
-  background: #b6f6ff !important;
+.anonimous-active {
+  background: #b6f6ff;
 }
