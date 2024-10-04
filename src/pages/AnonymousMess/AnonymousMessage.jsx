@@ -4,8 +4,10 @@ import { AppContext } from "../../context";
 import { NavLink } from "react-router-dom";
 import api from "../../api";
 import bg_chat from "../../assets/img-chat-an-danh.jpg";
+import MenuSelect from "../../assets/menuselect.jsx";
 import SearchUnknowMessage from "./SearchUnknowMessage.jsx";
 import InputMessage from "./InputMessage";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import "./AnonymousMess.css";
 
 const AnonymousMessage = () => {
@@ -23,6 +25,15 @@ const AnonymousMessage = () => {
   const [activeIndex, setActiveIndex] = useState(null);
   const { avatar, username, info, message } = showChatBox;
   // const username = showChatBox.info?.user?.username;
+  const [status, setStatus] = useState({ showSelectMenu: false });
+
+  const selectMenu = () => {
+    setStatus((prev) => ({
+      ...prev,
+      showSelectMenu: !prev.showSelectMenu, // Cập nhật showSelectMenu đúng cách
+    }));
+    console.log("đã click", status.showSelectMenu);
+  };
 
   const handleGetMessage = async (data) => {
     const payload = {
@@ -333,15 +344,29 @@ const AnonymousMessage = () => {
       {info.length !== 0 && (
         <div className="w-[100%] h-[100vh] shadow-[0_0_10px_rgba(0,0,0,0.2)]">
           {" "}
-          <div className="w-full h-[140px] shadow-[0_0_10px_rgba(0,0,0,0.2)]">
-            <div className="w-full h-[140px] items-center flex ">
-              <Avatar
-                sx={{ width: "90px", height: "90px", margin: "0 10px" }}
-                src={avatar}
-              />
+          <div className="w-full h-[140px] shadow-[0_0_10px_rgba(0,0,0,0.2)] items-center flex justify-between px-4">
+            <div className="w-full h-[140px] items-center flex">
+              <Avatar sx={{ width: "90px", height: "90px" }} src={avatar} />
               <p className="text-black text-[40px] font-bold capitalize">
                 {username}
               </p>
+            </div>
+            <div className="relative">
+              {/* Khi click vào MenuSelect sẽ bật/tắt menu */}
+              <div onClick={selectMenu}>
+                <MenuSelect className="cursor-pointer" />
+              </div>
+
+              {/* Menu sẽ hiển thị nếu showMenu là true */}
+              {status.showSelectMenu && (
+                <div className="dropdown-menu-anonimuos">
+                  <ul>
+                    <li>Option 1</li>
+                    <li>Option 2</li>
+                    <li>Option 3</li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
           <div
