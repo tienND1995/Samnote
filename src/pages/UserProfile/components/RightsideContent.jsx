@@ -61,7 +61,7 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
                 <div className='flex justify-between w-full'>
                     <h2 className='font-bold text-gray-700 text-3xl'>Quick Note</h2>
                     <Button
-                        className='btn-create-quickNotes'
+                        className={`btn-create-quickNotes ${user.id != userID ? 'text-white bg-blue-300' : ''}`}
                         disabled={user.id != userID}
                         onClick={handleCreateNote}
                     >
@@ -87,7 +87,7 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
                             {lastUsers.slice(0, visibleMoreUsers).map(({ id, linkAvatar, user_name, createAt }) => (
                                 <li key={`${id}`} className="mb-2">
                                     <Link
-                                        to={`/profile-other-user/${id}`}
+                                        to={`/profile/${id}`}
                                         className='w-full flex justify-around items-center my-1 link-dark text-decoration-none'
                                     >
                                         <img
