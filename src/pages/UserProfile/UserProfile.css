@@ -46,6 +46,25 @@
   height: 0.6rem;
 }
 
+.quick-note-input .MuiInputBase-root {
+  scrollbar-width: thin;
+  scrollbar-color: gray #fff4ba;
+}
+
+Button.btn-create-quickNotes {
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  transition: all 0.3s ease-in-out;
+}
+
+Button.btn-create-quickNotes:hover {
+  background-color: #2563eb;
+  transform: scale(1.05);
+}
+
 .curved-line {
   position: relative;
   width: 32px;
