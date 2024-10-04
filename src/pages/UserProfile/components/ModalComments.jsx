@@ -120,8 +120,8 @@ const ModalComments = ({ idNote, setIsShowModalComments }) => {
                                                         </div>
                                                         <div className="comment-actions d-flex align-items-center mt-1 ml-2 relative">
                                                             <div className='amount-like-dislike flex flex-row gap-1'>
-                                                                <p className="text-sm mr-5">Like: {comment.like || 0}</p>
-                                                                <p className="text-sm mr-5">Dislike: {comment.dislike || 0}</p>
+                                                                <p className="text-sm mr-5 mb-0">Like: {comment.like || 0}</p>
+                                                                <p className="text-sm mr-5 mb-0">Dislike: {comment.dislike || 0}</p>
                                                             </div>
                                                             <div className='interacted-comment flex justify-end items-center gap-2 opacity-80
                                                                             absolute top-[-100%] right-[7%]'>
@@ -199,8 +199,8 @@ const ModalComments = ({ idNote, setIsShowModalComments }) => {
                                                                                 </div>
                                                                                 <div className="reply-actions d-flex align-items-center mt-1 ml-2 relative">
                                                                                     <div className='amount-like-dislike flex flex-row gap-1'>
-                                                                                        <p className="text-sm mr-5">Like: {comment.like || 0}</p>
-                                                                                        <p className="text-sm mr-5">Dislike: {comment.dislike || 0}</p>
+                                                                                        <p className="text-sm mr-5 mb-0">Like: {comment.like || 0}</p>
+                                                                                        <p className="text-sm mr-5 mb-0">Dislike: {comment.dislike || 0}</p>
                                                                                     </div>
                                                                                     <div className='interacted-rely flex justify-end items-center gap-2 opacity-80
                                                                                                 absolute top-[-100%] right-[7%]'>
