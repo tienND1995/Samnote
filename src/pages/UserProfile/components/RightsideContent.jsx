@@ -13,8 +13,8 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
     const [visibleMoreNotes, setVisibleMoreNotes] = useState(7)
 
     const handleSeeMore = (setter) => () => {
-        setter(prevVisible => prevVisible + 7);
-    };
+        setter((prevVisible) => prevVisible + 7)
+    }
 
     const handleCreateNote = async () => {
         if (payloadData.trim() === '') {
