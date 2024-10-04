@@ -87,7 +87,7 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
                             {lastUsers.slice(0, visibleMoreUsers).map(({ id, linkAvatar, user_name, createAt }) => (
                                 <li key={`${id}`} className="mb-2">
                                     <Link
-                                        to={`/user/profile/${id}`}
+                                        to={`/profile/${id}`}
                                         className='w-full flex justify-around items-center my-1 link-dark text-decoration-none'
                                     >
                                         <img
