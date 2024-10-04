@@ -1,11 +1,14 @@
 import { useState } from 'react'
 
+import uniqid from 'uniqid'
+
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions'
 import EmojiPicker, { EmojiStyle } from 'emoji-picker-react'
 
 import CancelIcon from '@mui/icons-material/Cancel'
 import ImageIcon from '@mui/icons-material/Image'
 import SendIcon from '@mui/icons-material/Send'
+import AddBoxIcon from '@mui/icons-material/AddBox'
 
 import configs from '../../../configs/configs.json'
 const { BASE64_URL } = configs
@@ -20,12 +23,12 @@ const FormMessage = ({
 }) => {
  const [messageForm, setMessageForm] = useState({
   content: '',
-  image: null,
+  images: [],
   emoji: null,
   showEmoji: false,
  })
 
- const { content, image, emoji, showEmoji } = messageForm
+ const { content, images, emoji, showEmoji } = messageForm
 
  const handleChangeValueMsg = (e) => {
   setMessageForm({
@@ -43,7 +46,7 @@ const FormMessage = ({
    const imageBase64 = reader.result.split(',')[1]
    setMessageForm({
     ...messageForm,
-    image: imageBase64,
+    images: [...images, imageBase64],
    })
   }
 
@@ -76,7 +79,7 @@ const FormMessage = ({
 
     setMessageForm({
      content: '',
-     image: null,
+     images: [],
      emoji: null,
      showEmoji: false,
     })
@@ -92,12 +95,11 @@ const FormMessage = ({
 
     setMessageForm({
      content: '',
-     image: null,
+     images: [],
      emoji: null,
      showEmoji: false,
     })
 
-    
     return
    }
   } else {
@@ -123,12 +125,22 @@ const FormMessage = ({
     content: content,
    }
 
-   if (image) {
-    dataForm.type = 'image'
+   if (images.length > 1) {
+    dataForm.type = 'muti-image'
     dataForm.content = emoji ? '' : content
-    dataForm.data = image
+    dataForm.data = images[0]
 
     sendMessage(roomID, dataForm)
+    return
+   }
+
+   if (images.length === 1) {
+    dataForm.type = 'image'
+    dataForm.content = emoji ? '' : content
+    dataForm.data = images[0]
+
+    sendMessage(roomID, dataForm)
+    console.log('submit')
     return
    }
 
@@ -156,13 +168,21 @@ const FormMessage = ({
     type: 'text',
    }
 
-   if (image) {
+   if (images.length >= 1) {
     dataForm.type = 'image'
-    dataForm.metaData = image
+    dataForm.metaData = images[0]
 
     sendMessage(roomID, dataForm)
     return
    }
+
+//    if (images.length > 1) {
+//     dataForm.type = 'image'
+//     dataForm.metaData = images[0]
+
+//     sendMessage(roomID, dataForm)
+//     return
+//    }
 
    if (emoji) {
     dataForm.type = 'icon-image'
@@ -197,75 +217,112 @@ const FormMessage = ({
   idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
 
  return (
-  <form
-   onSubmit={handleSubmitMessage}
-   className='flex items-end bg-white mx-5 border rounded-[54px] p-3 mb-5 gap-1 position-relative form-message'
-  >
-   <button type='button' onClick={handleToggleEmoji}>
-    <EmojiEmotionsIcon className='text-[40px] text-[#0095ff]' />
-   </button>
+  <div className='form-message'>
+   {images.length > 0 ? (
+    <ul className='my-2 row row-cols-5 mx-0 overflow-hidden'>
+     <li className='position-relative'>
+      <input
+       type='file'
+       className='hidden'
+       id='add-image-form'
+       onChange={handleChangeImageMsg}
+      />
 
-   {showEmoji && (
-    <div className='position-absolute bottom-[100%] left-0'>
-     <EmojiPicker
-      width='20em'
-      onEmojiClick={handleClickEmoji}
-      emojiStyle={EmojiStyle.FACEBOOK}
-      lazyLoadEmojis={true}
+      <label
+       style={{
+        position: 'absolute',
+        right: '10%',
+        top: '50%',
+        transform: 'translateY(-50%)',
+       }}
+       htmlFor='add-image-form'
+      >
+       <AddBoxIcon className='text-[40px] cursor-pointer' />
+      </label>
+     </li>
+
+     {images?.map((image, index) => {
+      if (index >= 3) return
+      return (
+       <li key={uniqid()} className='col p-2 position-relative'>
+        <button
+         className='delete-image -top-1 right-0 absolute'
+         onClick={() =>
+          setMessageForm({
+           ...messageForm,
+           images: images.filter((image, idx) => idx !== index),
+          })
+         }
+        >
+         <CancelIcon />
+        </button>
+
+        {images.length > 3 && index === 2 && (
+         <div
+          style={{ fontSize: '-webkit-xxx-large' }}
+          className='position-absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold'
+         >
+          +{images.length - (index + 1)}
+         </div>
+        )}
+
+        <img
+         src={`${BASE64_URL}${image}`}
+         alt='anh message'
+         className='rounded-[8px] object-cover aspect-[3/2] w-full'
+        />
+       </li>
+      )
+     })}
+    </ul>
+   ) : null}
+   <form
+    className='flex items-center gap-[30px] flex-grow-1 position-relative'
+    onSubmit={handleSubmitMessage}
+   >
+    <div className='w-100'>
+     <input
+      onChange={handleChangeValueMsg}
+      type='text'
+      className='w-100 h-[80px] bg-white rounded-[54px] px-[22px]'
+      placeholder='Enter chat content...'
+      value={content}
+      ref={inputMessageFormRef}
      />
     </div>
-   )}
 
-   <div>
-    <input
-     onChange={handleChangeImageMsg}
-     id='file'
-     type='file'
-     className='hidden m-0'
-    />
-    <label htmlFor='file'>
-     <ImageIcon className='text-[40px] text-[#0095ff]' />
-    </label>
-   </div>
+    <button type='submit'>
+     <SendIcon className='text-[40px] text-[#0095ff]' />
+    </button>
 
-   <div className='w-100'>
-    {image && (
-     <div style={{ width: 'max-content' }} className='mb-1 position-relative'>
-      <button
-       className='delete-image'
-       onClick={() =>
-        setMessageForm({
-         ...messageForm,
-         image: null,
-        })
-       }
-      >
-       <CancelIcon />
-      </button>
+    <div>
+     <input
+      onChange={handleChangeImageMsg}
+      id='file-message-form'
+      type='file'
+      className='hidden m-0'
+     />
+     <label htmlFor='file-message-form'>
+      <ImageIcon className='text-[40px] text-[#0095ff]' />
+     </label>
+    </div>
 
-      <img
-       style={{ width: '80px', height: '50px', objectFit: 'cover' }}
-       src={`${BASE64_URL}${image}`}
-       alt='anh message'
-       className='rounded'
+    <button type='button' onClick={handleToggleEmoji}>
+     <EmojiEmotionsIcon className='text-[40px] text-[#0095ff]' />
+    </button>
+
+    {showEmoji && (
+     <div className='position-absolute bottom-[100%] left-0'>
+      <EmojiPicker
+       width='20em'
+       onEmojiClick={handleClickEmoji}
+       emojiStyle={EmojiStyle.FACEBOOK}
+       lazyLoadEmojis={true}
       />
      </div>
     )}
-
-    <input
-     onChange={handleChangeValueMsg}
-     type='text'
-     className='w-100 h-100 mb-1'
-     placeholder='Type your message...'
-     value={content}
-     ref={inputMessageFormRef}
-    />
-   </div>
-
-   <button type='submit'>
-    <SendIcon className='text-[40px] text-[#0095ff]' />
-   </button>
-  </form>
+   </form>
+  </div>
  )
 }
 

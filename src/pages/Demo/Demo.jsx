@@ -1,31 +1,39 @@
-import React, { useEffect, useState } from 'react'
-import './Demo.css'
+import React from 'react'
+import Slider from 'react-slick'
 
-import io from 'socket.io-client'
-const Demo = () => {
- const demo = {
-  "a": 0.99,
-  "b": 255,
-  "r": 255,
-  "g": 255,
-  
-  "idOwner": 127,
+import avatarDefault from '../../assets/avatar-default.png'
 
-  "createAt": '2024-09-20 05:40:11',
-  "describe": 'Bắc Ninh quê tôi',
-  
-  "members": [{"gmail": "linhclon1@gmail.com", "id": 79, "role": 'member'}],
-  "name": 'Hội lim',
-  
+function Demo() {
+ var settings = {
+  dots: false,
+  infinite: true,
+  speed: 500,
+  slidesToShow: 3,
+  slidesToScroll: 1,
  }
- return (
-  <div className='container-fluid flex'>
-   <div className='w-[200px] bg-blue-400'>sidebar</div>
 
-   <div className='w-full bg-orange-200 flex flex-grow-1'>
-    <div className='col-3 bg-red-500'>content1</div>
-    <div className='col-9 bg-pink-500'>content2</div>
-   </div>
+ return (
+  <div className='w-full text-center'>
+   <Slider {...settings}>
+    <div>
+     <img className='mx-auto' src={avatarDefault} alt='' />
+    </div>
+    <div>
+     <img className='mx-auto' src={avatarDefault} alt='' />
+    </div>
+    <div>
+     <img className='mx-auto' src={avatarDefault} alt='' />
+    </div>
+    <div>
+     <img className='mx-auto' src={avatarDefault} alt='' />
+    </div>
+    <div>
+     <img className='mx-auto' src={avatarDefault} alt='' />
+    </div>
+    <div>
+     <img className='mx-auto' src={avatarDefault} alt='' />
+    </div>
+   </Slider>
   </div>
  )
 }

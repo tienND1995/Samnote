@@ -49,63 +49,35 @@ li {
  display: block !important;
 }
 
-/* todo new code */
-/* style message form  */
+/* * style text editor */
+.ql-container.ql-snow {
+ border: none !important;
+ 
+}
 
-.form-message {
- display: flex;
- margin: 0 10px;
+.ql-container.ql-snow > .ql-editor {
+ line-height: 1.2;
+ overflow: auto;
+ overflow-wrap: break-word;
+ white-space: break-spaces;
+ hyphens: manual;
+ aspect-ratio: 5 auto ;
  padding: 15px;
- background: #f4f4f4;
- border-radius: 20px;
- align-items: flex-end;
- gap: 10px;
+ max-width: 100%;
 }
 
-.form-message input {
- width: 100%;
- background: transparent;
- border: none;
- outline: none;
- font-size: 14px;
+.ql-container.ql-snow > .ql-editor::-webkit-scrollbar {
+ width: 10px;
+ border-radius: 8px;
+ background-color: black;
 }
 
-.form-message button {
- background: transparent;
- border: none;
+.ql-container.ql-snow > .ql-editor::-webkit-scrollbar-thumb {
+ background-color: #dedede;
+ border-radius: 8px;
 }
 
-.form-message input::placeholder {
- color: gray;
-}
-
-.form-message .delete-image {
- position: absolute;
- top: -10px;
- right: -10px;
-}
-
-.form-message .delete-image > svg {
- font-size: 20px;
-}
-
-button, input {
- outline: none;
- border: none;
- background: transparent;
-}
-
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
- margin-bottom: 0 !important;
-}
-
-ul {
- margin-bottom: 0 !important;
- padding-left: 0 !important;
+.ql-container.ql-snow > .ql-editor::-webkit-scrollbar-track-piece {
+ background-color: black;
+ border-radius: 8px;
 }
