@@ -11,6 +11,7 @@ import api from '../../../api'
 import Checklist from './CheckList'
 import Swal from 'sweetalert2'
 import ModalComments from './ModalComments'
+import { handleErrorAvatar } from '../../../helper'
 
 const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload }) => {
     const appContext = useContext(AppContext)
@@ -87,7 +88,7 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
     function convertCreate(dateStr) {
         const [datePart] = dateStr.split(' ')
         const [year, month, day] = datePart.split('-')
-        return `${day}-${month}-${year}`
+        return `${day}/${month}/${year}`
     }
 
     const handleLikeNote = async (idNote, type) => {
@@ -190,8 +191,9 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                             marginRight: '10px',
                                                             objectFit: 'cover',
                                                         }}
-                                                        src={userInfomations.Avarta}
+                                                        src={userInfomations.Avarta ? userInfomations.Avarta : '/src/assets/avatar-default.png'}
                                                         alt=''
+                                                        onError={handleErrorAvatar}
                                                     />
                                                     <Box sx={{ color: 'text.main' }}>
                                                         <p style={{ margin: 0, fontSize: '1.2rem' }}>
@@ -410,8 +412,9 @@ const LeftsideContent = ({ userInfomations, publicNotes, privateNotes, setReload
                                                             marginRight: '10px',
                                                             objectFit: 'cover',
                                                         }}
-                                                        src={userInfomations.Avarta}
+                                                        src={userInfomations.Avarta ? userInfomations.Avarta : '/src/assets/avatar-default.png'}
                                                         alt=''
+                                                        onError={handleErrorAvatar}
                                                     />
                                                     <Box sx={{ color: 'text.main' }}>
                                                         <p style={{ margin: 0, fontSize: '1.2rem' }}>

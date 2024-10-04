@@ -6,56 +6,6 @@ export const handleLogOut = () => {
   window.location.href = "/";
 };
 
-export const getCurrentFormattedDateTime = () => {
-  const date = new Date()
-
-  // Lấy các thành phần của ngày và giờ
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0') // Tháng tính từ 0-11, cần +1
-  const year = date.getFullYear()
-
-  let hours = date.getHours()
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-
-  // Xác định AM/PM
-  const ampm = hours >= 12 ? 'PM' : 'AM'
-  hours = hours % 12
-  hours = hours ? hours : 12 // Giờ 0 thành 12
-  const formattedHours = String(hours).padStart(2, '0')
-
-  // Lấy múi giờ
-  const timeZoneOffset = -date.getTimezoneOffset()
-  const offsetSign = timeZoneOffset >= 0 ? '+' : '-'
-  const offsetHours = String(
-    Math.floor(Math.abs(timeZoneOffset) / 60)
-  ).padStart(2, '0')
-  const offsetMinutes = String(Math.abs(timeZoneOffset) % 60).padStart(2, '0')
-
-  // Tạo chuỗi thời gian định dạng
-  const formattedDateTime = `${day}/${month}/${year} ${formattedHours}:${minutes} ${ampm} ${offsetSign}${offsetHours}:${offsetMinutes}`
-
-  return formattedDateTime
-}
-
-export const getTimeDifference = (time1, time2) => {
-  const realTime = time1 + '+0700'
-  const diffInMs = new Date(time2).getTime() - new Date(realTime).getTime()
-  const diffInSeconds = Math.floor(diffInMs / 1000)
-  const diffInMinutes = Math.floor(diffInSeconds / 60)
-  const diffInHours = Math.floor(diffInMinutes / 60)
-  const diffInDays = Math.floor(diffInHours / 24)
-
-  if (diffInHours < 1) {
-    return `${diffInMinutes} min`
-  } else if (diffInDays < 1) {
-    return `${diffInHours} hours`
-  } else if (diffInDays < 30) {
-    return `${diffInDays} day`
-  } else {
-    return `more 30 day`
-  }
-}
-
 export const getFormattedDate = (datetime) => {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -106,3 +56,10 @@ export const formatTimeAgo = (dateString) => {
   if (diffInMinutes > 0) return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
   return 'Just now';
 };
+
+export const handleErrorAvatar = (e) => {
+  if (e.target instanceof HTMLImageElement) {
+    e.target.src = '/src/assets/avatar-default.png';
+  }
+}
+

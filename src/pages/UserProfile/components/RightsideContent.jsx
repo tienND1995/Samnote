@@ -1,10 +1,9 @@
 import React, { useState, useContext } from 'react'
 import { Button, TextField } from '@mui/material'
 import { Link } from 'react-router-dom'
-import { getTimeDifference } from '../../../helper'
+import { handleErrorAvatar, formatTimeAgo } from '../../../helper'
 import { AppContext } from '../../../context'
 import api from '../../../api'
-import { getCurrentFormattedDateTime } from '../../../helper'
 
 const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
     const [payloadData, setPayloadData] = useState('')
@@ -21,7 +20,7 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
             title: 'Quick notes',
             color: { r: 255, g: 255, b: 255, a: 1 },
             idFolder: null,
-            dueAt: getCurrentFormattedDateTime(),
+            dueAt: null,
             pinned: false,
             lock: '',
             remindAt: null,
@@ -90,11 +89,12 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
                                         >
                                             <img
                                                 className='w-[40px] h-[40px] rounded-xl object-cover mt-2'
-                                                src={linkAvatar}
+                                                src={linkAvatar ? linkAvatar : '/src/assets/avatar-default.png'}
                                                 alt='image'
+                                                onError={handleErrorAvatar}
                                             />
                                             <span className='truncate-text w-[50%] mr-2'>{user_name}</span>
-                                            <span className='mr-3'>
+                                            <span className='mr-3 text-sm'>
                                                 {createAt.split(' ').slice(1, 4).join(' ')}
                                             </span>
                                         </Link>
@@ -131,8 +131,8 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
                                         <span className='w-[55%] break-words'>
                                             Create a new public note
                                         </span>
-                                        <span className='text-xs break-words w-[12%] whitespace-nowrap'>
-                                            {getTimeDifference(item.update_at, new Date())}
+                                        <span className='text-xs break-words w-[15%] whitespace-nowrap'>
+                                            {formatTimeAgo(item.update_at)}
                                         </span>
                                     </div>
                                 ))}

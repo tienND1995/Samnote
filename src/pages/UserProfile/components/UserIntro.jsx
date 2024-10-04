@@ -6,7 +6,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ModalChat from '../../../components/ModalChat'
 import { io } from 'socket.io-client'
 import api from '../../../api'
-import { getFormattedDate } from '../../../helper'
+import { getFormattedDate, handleErrorAvatar } from '../../../helper'
 
 const UserIntro = ({ userInfomations, user, userID }) => {
     const [isModalMess, setIsModalMessage] = useState(false)
@@ -138,9 +138,10 @@ const UserIntro = ({ userInfomations, user, userID }) => {
                 <div className='info-user flex items-center gap-8 lg:w-auto sm:w-full'>
                     <div className='avartar-user relative'>
                         <img
-                            src={userInfomations.Avarta}
+                            src={userInfomations.Avarta ? userInfomations.Avarta : '/src/assets/avatar-default.png'}
                             alt=''
                             className='w-28 h-28 rounded-full object-cover'
+                            onError={handleErrorAvatar}
                         />
                         <div className='absolute bottom-1 right-1 bg-green-500 w-7 h-7 rounded-full'></div>
                     </div>
