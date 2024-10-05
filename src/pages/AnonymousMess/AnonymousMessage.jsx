@@ -92,9 +92,6 @@ const AnonymousMessage = () => {
       };
 
       getListChatUnknow();
-    } else {
-      // Reset danh sách nếu không có user
-      setListChatUnknow([]);
     }
   }, [user, reload]);
 
