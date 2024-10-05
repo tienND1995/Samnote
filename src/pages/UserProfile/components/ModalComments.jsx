@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import api from '../../../api'
 import { AppContext } from '../../../context'
 import SendIcon from '@mui/icons-material/Send'
-import { formatTimeAgo } from '../../../helper'
+import { formatTimeAgo } from '../../../utils/utils'
 
 const ModalComments = ({ idNote, setIsShowModalComments }) => {
  const [dataComments, setDataComments] = useState([])
