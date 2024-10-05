@@ -94,7 +94,7 @@ const UserPanel = () => {
    <Box className='flex items-center justify-between'>
     <Box
      className='flex gap-3 items-center cursor-pointer'
-     onClick={() => navigate(`/profile/${user.id}`)}
+     onClick={() => navigate(`/user/profile/${user.id}`)}
     >
      <img
       src={userInfomations.Avarta}

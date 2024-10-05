@@ -1,9 +1,14 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+
+import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
 
 const CreateNote = () => {
-  return (
-    <div>CreateNote</div>
-  )
+ useEffect(() => {
+  fetchApiSamenote('get', '/notes/127').then((data) => {
+   console.log(data)
+  })
+ }, [])
+ return <div>CreateNote</div>
 }
 
 export default CreateNote

@@ -5,7 +5,7 @@ import GroupIcon from '@mui/icons-material/Group'
 import ModalChat from '../../../share/ModalChat'
 import { io } from 'socket.io-client'
 import api from '../../../api'
-import { getFormattedDate, handleErrorAvatar } from '../../../helper'
+import { getFormattedDate, handleErrorAvatar } from '../../../utils/utils'
 
 const UserIntro = ({ userInfomations, user, userID }) => {
  const [isModalMess, setIsModalMessage] = useState(false)

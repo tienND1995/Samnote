@@ -17,7 +17,7 @@ import {
 import ClearIcon from '@mui/icons-material/Clear'
 import PasswordField from '../share/PasswordField'
 import { AppContext } from '../context'
-import { TOKEN, USER } from '../constant'
+import { TOKEN, USER } from '../utils/constant'
 import api from '../api'
 
 const styleModal = {

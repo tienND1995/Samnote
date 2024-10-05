@@ -9,7 +9,6 @@ const RootLayout = () => {
    <div className='w-[100px] flex '>
     <UserPanel />
    </div>
-
    <div
     style={{ maxWidth: 'calc(100% - 100px)' }}
     className='w-full flex flex-grow-1'
