@@ -16,8 +16,26 @@ const AnonymousMessage = () => {
   const { user } = appContext;
   const [listChatUnknow, setListChatUnknow] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
+  const [reload, setReload] = useState(0);
+  const [showChatBox, setShowChatBox] = useState({
+    info: [],
+    message: [],
+    avatar: null,
+    username: "",
+  });
+  const [activeIndex, setActiveIndex] = useState(null);
+  const { avatar, username, info, message } = showChatBox;
 
-  const [showChatBox, setShowChatBox] = useState({ info: [], message: [] });
+  // const username = showChatBox.info?.user?.username;
+  const [status, setStatus] = useState({ showSelectMenu: false });
+
+  const selectMenu = () => {
+    setStatus((prev) => ({
+      ...prev,
+      showSelectMenu: !prev.showSelectMenu, // Cập nhật showSelectMenu đúng cách
+    }));
+    console.log("đã click", status.showSelectMenu);
+  };
 
   const handleGetMessage = async (data) => {
     const payload = {
@@ -25,15 +43,39 @@ const AnonymousMessage = () => {
     };
     try {
       const res = await api.post(`/message/chat-unknown-id?page=1`, payload);
+      scrollToBottom();
       setShowChatBox((prevState) => ({
         ...prevState,
         message: res.data.data,
       }));
-      console.log("res.data.data", res.data.data);
+
+      // console.log("res.data.data", res.data.data);
       console.log("check state", showChatBox.message);
     } catch (err) {
+      setShowChatBox((prevState) => ({
+        ...prevState,
+        message: [],
+      }));
       console.log(err);
     }
+  };
+
+  const handleReload = (payLoadData) => {
+    setReload((prev) => prev + 1);
+    setShowChatBox((prev) => ({
+      ...prev, // Giữ nguyên các giá trị khác của showChatBox
+      message: [...prev.message, payLoadData], // Nối dữ liệu mới vào mảng message
+    }));
+    scrollToBottom();
+  };
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      const element = document.getElementById("lastmessage");
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100); // Thời gian trễ là 100ms (có thể điều chỉnh tùy ý)
   };
 
   useEffect(() => {
@@ -43,6 +85,7 @@ const AnonymousMessage = () => {
         try {
           const res = await api.get(`/message/list_user_unknown/${user.id}`);
           setListChatUnknow(res.data.data);
+          // console.log("data", res.data.data);
         } catch (err) {
           console.error("Error fetching chat list:", err);
         }
@@ -323,7 +366,7 @@ const AnonymousMessage = () => {
               ))
             ) : (
               <Typography
-                variant="body2"
+                variant="body1"
                 sx={{ marginTop: "20px", textAlign: "center" }}
               >
                 No chat messages.
