@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
-import axios from 'axios'
 import { AppContext } from '../../context'
 
-import PhotoIcon from '@mui/icons-material/Photo'
 import DeleteIcon from '@mui/icons-material/Delete'
+import PhotoIcon from '@mui/icons-material/Photo'
+
+import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
 
 import uniqid from 'uniqid'
 
@@ -15,28 +16,14 @@ const Photo = () => {
  const [photoList, setPhotoList] = useState([])
  const [imagesSlected, setImagesSlected] = useState([])
 
- console.log(photoList)
-
  useEffect(() => {
-  const fetchData = async (userID) => {
-   try {
-    const res = await axios.get(
-     `https://samnote.mangasocial.online/profile/image_history/${userID}`
-    )
-    setPhotoList(res.data)
-   } catch (err) {
-    console.log(err)
-   }
-  }
+  if (!user?.id) return
 
-  user?.id && fetchData(user.id)
+  fetchApiSamenote('get', `/profile/image_history/${user.id}`).then((data) =>
+   setPhotoList(data)
+  )
  }, [user])
 
- const deleteImageNote = async () => {
-  const response = await axios.post(
-   `https://samnote.mangasocial.online/delete_image_note`
-  )
- }
 
  console.log(photoList)
 
