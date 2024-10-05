@@ -713,6 +713,7 @@ const Incognito = () => {
     </Box>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     <Box className='max-h-[47vh] w-full lg:max-h-[50vh] overflow-auto scrollbar-none text-black font-bold'>
 =======
     <Box className='max-h-[47vh] w-[90%] lg:max-h-[50vh] sm:w-[99%] overflow-auto scrollbar-none text-black'>
@@ -1195,6 +1196,27 @@ const Incognito = () => {
       <IconButton sx={{ p: '5px' }} onClick={handleGifButtonClick}>
        <GifIcon width={23} height={23} />
       </IconButton>
+=======
+            <IconButton sx={{ p: "5px" }} onClick={handleButtonClick}>
+              {selectedImage === null ? (
+                <ImageLogo width={20} height={20} />
+              ) : (
+                <div className="w-[20px] h-[20px] rounded bg-black text-white flex items-center justify-center">
+                  +
+                </div>
+              )}
+            </IconButton>
+            <input
+              type="file"
+              ref={inputRef}
+              style={{ display: "none" }}
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+            <IconButton sx={{ p: "5px" }} onClick={handleGifButtonClick}>
+              <GifIcon width={23} height={23} />
+            </IconButton>
+>>>>>>> lvd
 
       {selectedImage ? (
        <>

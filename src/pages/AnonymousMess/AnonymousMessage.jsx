@@ -1,337 +1,584 @@
-import { Box, Avatar, Typography, Button } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useState, useEffect, useRef, useContext } from 'react'
+import {
+ TextField,
+ IconButton,
+ CircularProgress,
+ InputBase,
+ Box,
+ Button,
+} from '@mui/material'
+import './AnonymousMess.css'
 import { AppContext } from '../../context'
-import { NavLink } from 'react-router-dom'
+import SearchIcon from '@mui/icons-material/Search'
+import CloseIcon from '@mui/icons-material/Close'
+import GifIcon from '../../assets/gifIcon.jsx'
+import SendIcon from '@mui/icons-material/Send'
+import AddIcon from '@mui/icons-material/Add'
+import ImageLogo from '../../assets/imagelogo.jsx'
 import api from '../../api'
+import createEmptyImageFile from '../../components/CreateEmptyImageFile' // Giả định bạn có một component ImageLogo
+import AnonymousMessage from './AnonymousMessage'
 
-import bg_chat from '../../assets/img-chat-an-danh.jpg'
-import SearchUnknowMessage from './SearchUnknowMessage.jsx'
-import InputMessage from './InputMessage'
+const GiphySearch = ({ onGifSelect }) => {
+ const [searchTerm, setSearchTerm] = useState('')
+ const [state, setState] = useState({
+  gifs: [],
+  selectedGif: null,
+  loading: false,
+  error: null,
+ })
 
-const AnonymousMessage = () => {
- const appContext = useContext(AppContext)
- const { user } = appContext
- const [listChatUnknow, setListChatUnknow] = useState([])
- const [activeTab, setActiveTab] = useState('all')
+ const API_KEY = '3f9X5UA8I0bbK3h9fwysbiEbluBM6JrC'
 
- const [showChatBox, setShowChatBox] = useState({ info: [], message: [] })
+ const fetchGifs = async (query) => {
+  setState({
+   gifs: [],
+   selectedGif: null,
+   loading: true,
+   error: null,
+  })
 
- const handleGetMessage = async (data) => {
-  const payload = {
-   idRoom: `${data.idRoom}`,
-  }
   try {
-   const res = await api.post(`/message/chat-unknown-id?page=1`, payload)
-   setShowChatBox((prevState) => ({
-    ...prevState,
-    message: res.data.data,
+   const response = await fetch(
+    `https://api.giphy.com/v1/gifs/${
+     query ? 'search' : 'trending'
+    }?api_key=${API_KEY}&q=${query || ''}&limit=6`
+   )
+   const data = await response.json()
+   setState({
+    gifs: data.data,
+    selectedGif: null,
+    loading: false,
+    error: null,
+   })
+  } catch (error) {
+   console.error('Error fetching GIFs:', error)
+   setState((prev) => ({
+    ...prev,
+    error: 'Failed to load GIFs. Please try again later.',
+    loading: false,
    }))
-   console.log('res.data.data', res.data.data)
-   console.log('check state', showChatBox.message)
-  } catch (err) {
-   console.log(err)
   }
+ }
+
+ const handleSearch = () => {
+  fetchGifs(searchTerm.trim()) // Chỉ tìm kiếm khi nhấn nút
  }
 
  useEffect(() => {
-  // Kiểm tra xem user có tồn tại và id có hợp lệ hay không
-  if (user && user.id) {
-   const getListChatUnknow = async () => {
-    try {
-     const res = await api.get(`/message/list_user_unknown/${user.id}`)
-     setListChatUnknow(res.data.data)
-    } catch (err) {
-     console.error('Error fetching chat list:', err)
-    }
-   }
+  fetchGifs() // Load trending GIFs initially
+ }, [])
 
-   getListChatUnknow()
-  } else {
-   // Reset danh sách nếu không có user
-   setListChatUnknow([])
+ const handleGifClick = (gif) => {
+  setState((prev) => ({ ...prev, selectedGif: gif }))
+  if (onGifSelect) {
+   onGifSelect(gif) // Gọi hàm từ parent component để cập nhật payLoadData
   }
- }, [user])
-
- // Hàm lọc danh sách dựa trên tab hiện tại
- const filteredChatList = () => {
-  if (activeTab === 'unread') {
-   return listChatUnknow.filter((item) => item.unReadCount > 0)
-  } else if (activeTab === 'read') {
-   return listChatUnknow.filter((item) => item.unReadCount === 0)
-  }
-  return listChatUnknow // Nếu tab là "all", trả về tất cả tin nhắn
  }
 
- console.log('showChatBox:', showChatBox)
+ const handleInputChange = (e) => {
+  const value = e.target.value
+  setSearchTerm(value) // Cập nhật giá trị searchTerm nhưng không gọi fetchGifs
+ }
+
+ const { gifs, selectedGif, loading, error } = state
 
  return (
-  <Box className='text-white lg:flex bg-[#DFFFFE] w-full'>
-   <Box
-    className='w-[400px]'
-    sx={{
-     display: 'flex',
-     flexDirection: 'column',
-     boxShadow: '2px 0 4px rgba(0, 0, 0, 0.1)',
-     alignItems: 'center',
-    }}
-   >
-    <Box className='bg-[#B6F6FF] h-[140px] uppercase text-black w-full pt-[50px] text-center text-4xl font-bold'>
-     Chat
-    </Box>
-
-    <Box
-     className='relative w-[90%]'
+  <div className='bg-white w-[600px] left-[1%] absolute top-0 transform -translate-y-[101%] h-[500px] rounded-[5px] shadow-[0_0_15px_rgba(0,0,0,0.8)]'>
+   <div className='flex flex-row w-full items-center justify-center relative'>
+    <div
      style={{
-      margin: '0 10px',
-      boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.1)',
+      display: 'flex',
+      alignItems: 'center',
+      background: '#D9D9D9',
+      borderRadius: '30px',
+      height: '40px',
+      margin: '10px 0',
+      width: '70%',
+      justifyContent: 'center',
+      paddingLeft: '10px',
      }}
     >
-     <SearchUnknowMessage />
-    </Box>
-
-    {/* Tabs for filtering */}
-    <Box className='max-h-[47vh] w-[400px] lg:max-h-[50vh] overflow-auto scrollbar-none text-black font-bold'>
-     <div className='flex gap-[10px] justify-evenly my-4'>
-      <Button
-       className={`${
-        activeTab === 'all'
-         ? 'bg-black text-white font-bold text-[16px]'
-         : 'text-black font-bold text-[16px]'
-       }`}
-       onClick={() => setActiveTab('all')}
-      >
-       All
-      </Button>
-
-      <Button
-       className={
-        activeTab === 'unread'
-         ? 'bg-black text-white font-bold text-[16px]'
-         : 'text-black font-bold text-[16px]'
-       }
-       onClick={() => setActiveTab('unread')}
-      >
-       Unread
-      </Button>
-      <Button
-       className={
-        activeTab === 'read'
-         ? 'bg-black text-white font-bold text-[16px]'
-         : 'text-black font-bold text-[16px]'
-       }
-       onClick={() => setActiveTab('read')}
-      >
-       Read
-      </Button>
-     </div>
-
-     {/* Render filtered chat list */}
-     {filteredChatList()?.length > 0 ? (
-      filteredChatList().map((item) => (
-       <NavLink
-        to={`/user/incognito`}
-        key={item.idMessage}
-        className={({ isActive, isPending }) =>
-         isPending ? 'pending' : isActive ? 'active' : ''
-        }
-        style={{
-         display: 'flex',
-         alignItems: 'center',
-         borderRadius: '30px',
-         margin: '5px 10px',
-         height: '70px',
-         color: 'black',
-         textDecoration: 'none',
-         backgroundColor: '#fff',
-         justifyContent: 'space-between',
-        }}
-        onClick={() => {
-         setShowChatBox((prevState) => ({
-          ...prevState,
-          info: item,
-         }))
-
-         handleGetMessage(item)
-        }}
-       >
-        <Box
-         sx={{
-          display: 'flex',
-          alignItems: 'center',
-         }}
-        >
-         <Avatar
-          sx={{ width: '60px', height: '60px' }}
-          src={item.user.avatar}
-         />
-         <Box sx={{ marginLeft: '10px', fontWeight: '700' }}>
-          {item.user === 'Unknow' ? (
-           <span style={{ fontWeight: '700', fontSize: '40px' }}>
-            User name
-           </span>
-          ) : (
-           <Typography
-            variant='body1'
-            sx={{ fontWeight: '700', fontSize: '24px' }}
-           >
-            {item.user.username}
-           </Typography>
-          )}
-          <Typography
-           sx={{
-            overflow: 'hidden',
-            width: '140px',
-            fontSize: '20px',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
-           }}
-           variant='body2'
-          >
-           {item.last_text}
-          </Typography>
-         </Box>
-        </Box>
-        {item.unReadCount > 0 ? (
-         <span className='w-[35px] h-[35px] mr-2 rounded-[100%] bg-[#D9D9D9] flex items-center justify-center text-[#FF0404] text-[20px]'>
-          {item.unReadCount}
-         </span>
-        ) : (
-         <svg
-          className='w-[30px] h-[30px] mr-2'
-          width='19'
-          height='14'
-          viewBox='0 0 19 14'
-          fill='none'
-          xmlns='http://www.w3.org/2000/svg'
-         >
-          <path
-           d='M6.03809 11.0455L1.53383 6.69202L0 8.16406L6.03809 14L19 1.47204L17.477 0L6.03809 11.0455Z'
-           fill='#00FF73'
-          />
-         </svg>
-        )}
-       </NavLink>
-      ))
-     ) : (
-      <Typography variant='body2' sx={{ marginTop: '20px' }}>
-       No chat messages available.
-      </Typography>
-     )}
-    </Box>
-   </Box>
-
-   {showChatBox.info.length !== 0 && (
-    <div className='w-full'>
-     <div className='w-full h-[140px] '>
-      <div className='w-full h-[140px] items-center flex'>
-       <Avatar
-        sx={{ width: '90px', height: '90px' }}
-        src={showChatBox.info?.user.avatar}
-       />
-       <p className='text-black text-[40px] font-bold'>
-        {showChatBox.info?.user.username}
-       </p>
-      </div>
-     </div>
-     <div
-      className='h-[74vh] lg:h-[75vh]'
-      style={{
-       width: '100%',
-       backgroundImage: `url(${bg_chat})`,
-       overflow: 'auto',
-       scrollbarWidth: 'none',
-       backgroundPosition: 'center center',
-       backgroundSize: '200%',
-       backgroundRepeat: 'no-repeat',
+     <TextField
+      type='text'
+      value={searchTerm}
+      id='standard-basic'
+      variant='standard'
+      onChange={handleInputChange} // Chỉ cập nhật searchTerm
+      placeholder='Search for GIFs'
+      sx={{
+       width: '90%',
+       border: 'none',
+       margin: '0 0 0px 10px',
+       input: { color: '#000' },
       }}
-     >
-      {Array.isArray(showChatBox.message) &&
-       showChatBox.message?.map((info, index) => (
-        <Box
-         key={index}
-         sx={{
-          marginLeft: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          color: '#000',
-          justifyContent:
-           info.idReceive !== user.id ? 'flex-end' : 'flex-start',
-         }}
-        >
-         {info.idReceive === user.id ? (
-          <>
-           <div className='flex items-end h-full'>
-            {' '}
-            <Avatar
-             sx={{
-              width: '50px',
-              height: '50px',
-              margin: '5px',
-             }}
-             src={showChatBox.info?.user?.avatar}
-            />
-           </div>
-           {info.type === 'text' ? (
-            <Box
-             sx={{
-              backgroundColor: '#fff',
-              borderRadius: '10px',
-              padding: '5px',
-              fontSize: '20px',
-              maxWidth: '70%',
-             }}
-            >
-             {info.content}
-            </Box>
-           ) : info.type === 'image' ? (
-            <img src={info.img} alt='image' className='w-[30wh] h-[40vh] m-2' />
-           ) : info.type === 'gif' ? (
-            <img
-             src={info.gif}
-             alt='GIF'
-             className='max-w-[30wh] max-h-[40vh] m-2'
-            />
-           ) : null}
-          </>
-         ) : (
-          <>
-           {' '}
-           {info.type === 'text' ? (
-            <Box
-             sx={{
-              backgroundColor: '#1EC0F2',
-              borderRadius: '10px',
-              fontSize: '20px',
-              padding: '5px',
-              margin: '5px 10px',
-              maxWidth: '70%',
-             }}
-            >
-             {info.content}
-            </Box>
-           ) : info.type === 'image' ? (
-            <img src={info.img} alt='image' className='w-[30wh] h-[40vh] m-2' />
-           ) : info.type === 'gif' ? (
-            <img
-             src={info.gif}
-             alt='GIF'
-             className='max-w-[30wh] max-h-[40vh] m-2'
-            />
-           ) : (
-            ''
-           )}
-          </>
-         )}
-        </Box>
-       ))}
-      <div id='lastmessage' />
-     </div>
-
-     <InputMessage data={showChatBox.info} />
+     />
+     <IconButton disabled={loading}>
+      {loading ? (
+       <CircularProgress size={24} className='mr-1 my-1' />
+      ) : (
+       <SearchIcon className='mr-1 my-1' onClick={handleSearch} /> // Gọi fetch khi nhấn nút
+      )}
+     </IconButton>
     </div>
-   )}
-  </Box>
+   </div>
+   <div className=''>
+    {error ? (
+     <p className='text-center w-full text-red-500'>{error}</p>
+    ) : loading ? (
+     <p className='text-left text-black mb-[50px] ml-[40px] text-[30px]'>
+      Loading GIFs...
+     </p>
+    ) : selectedGif ? (
+     <img
+      key={selectedGif.id}
+      src={selectedGif.images.fixed_height.url}
+      alt={selectedGif.title}
+      onClick={() => handleGifClick(selectedGif)}
+      style={{
+       cursor: 'pointer',
+       margin: '10px',
+       borderRadius: '4px',
+       width: '200px',
+       height: 'auto',
+      }}
+     />
+    ) : gifs.length > 0 ? (
+     <div className='grid-container'>
+      {gifs.map((gif) => (
+       <div key={gif.id} className='grid-item'>
+        <img
+         src={gif.images.fixed_height.url}
+         alt={gif.title}
+         onClick={() => handleGifClick(gif)}
+        />
+       </div>
+      ))}
+     </div>
+    ) : (
+     <p className='text-center text-[#000]'>No GIFs found.</p>
+    )}
+   </div>
+  </div>
  )
 }
 
-export default AnonymousMessage
+const ImageUploader = ({ onImageSelect, onImageRemove, OpenSelectImage }) => {
+ const [selectedImageFile, setSelectedImageFile] = useState(null)
+ const fileInputRef = useRef(null)
+
+ const handleImageChange = (e) => {
+  const file = e.target.files[0]
+  if (file) {
+   setSelectedImageFile(file)
+   if (onImageSelect) {
+    onImageSelect(file) // Gọi hàm onImageSelect với file gốc
+   }
+  }
+ }
+
+ const handleIconClick = () => {
+  fileInputRef.current.click() // Kích hoạt input file khi click vào icon
+ }
+
+ const handleRemoveImage = () => {
+  setSelectedImageFile(null) // Xóa file đã chọn
+  if (onImageSelect) {
+   onImageSelect(null) // Gọi hàm onImageSelect với null
+  }
+  if (onImageRemove) {
+   onImageRemove() // Gọi hàm onImageRemove nếu có
+  }
+  // Reset input file value
+  fileInputRef.current.value = null // Đặt lại giá trị của input file
+ }
+
+ return (
+  <>
+   {OpenSelectImage && selectedImageFile && (
+    <div className='absolute m-auto px-4 py-4 top-0 transform -translate-y-[101%] bg-white left-0 right-0 w-[95%] rounded-md'>
+     <div className='relative w-fit flex pl-6 items-center'>
+      <div className='mr-6'>
+       <button
+        className='bg-[#000] text-[#fff] rounded-md w-[25px] h-[25px] flex p-3 items-center justify-center'
+        onClick={handleIconClick}
+       >
+        <AddIcon sx={{ fontSize: '30px' }} />
+       </button>
+       {/* <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                accept="image/*"
+                onChange={handleImageChange}
+              /> */}
+      </div>
+      <img
+       src={URL.createObjectURL(selectedImageFile)}
+       alt='Selected'
+       style={{
+        marginTop: '10px',
+        width: '200px',
+        height: '150px',
+        objectFit: 'cover',
+        borderRadius: '8px',
+       }}
+      />
+      <button
+       onClick={handleRemoveImage}
+       style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'absolute',
+        marginTop: '10px',
+        height: '35px',
+        top: -10,
+        right: -13,
+        width: '35px',
+        borderRadius: '50%',
+        backgroundColor: '#000',
+        color: 'white',
+        border: 'none',
+        cursor: 'pointer',
+       }}
+      >
+       <CloseIcon />
+      </button>
+     </div>
+    </div>
+   )}
+   <div>
+    <IconButton sx={{ p: '5px' }} onClick={handleIconClick}>
+     <ImageLogo width={30} height={30} />
+    </IconButton>
+    <input
+     type='file'
+     ref={fileInputRef}
+     style={{ display: 'none' }}
+     accept='image/*'
+     onChange={handleImageChange}
+    />
+   </div>
+  </>
+ )
+}
+
+const InputMessage = ({ data, onReload }) => {
+ const appContext = useContext(AppContext)
+ const { user } = appContext
+ console.log('info truyền vào thanh input để gửi tin nhắn', user)
+ const [status, setStatus] = useState({
+  giphySearch: false,
+  OpenSelectImage: false,
+  sending: false,
+ })
+ const { giphySearch, OpenSelectImage, sending } = status
+
+ const [payLoadData, setPayLoadData] = useState({
+  idRoom: null, // Khởi tạo giá trị mặc định
+  idReceive: null,
+  content: '',
+  img: null,
+  gif: '',
+  type: '',
+ })
+
+ useEffect(() => {
+  // Cập nhật payloadData khi data thay đổi
+
+  if (!user?.id) return
+
+  setPayLoadData((prev) => ({
+   ...prev,
+   idRoom: data.idRoom == undefined ? `${user.id}#${data.idUser}` : data.idRoom,
+   idReceive: data.idReceive == undefined ? data.idUser : data.idReceive,
+  }))
+
+  handleReload({})
+ }, [data, user?.id])
+ console.log('info truyền vào thanh inptut để gửi tin nhắn', payLoadData.idRoom)
+ const handleReload = (data) => {
+  onReload(data)
+ }
+
+ const handleImageRemove = () => {
+  setStatus((prev) => ({
+   ...prev,
+   OpenSelectImage: false,
+  }))
+ }
+
+ const handleInputChange = (event) => {
+  const { value } = event.target
+  setPayLoadData((prevData) => ({
+   ...prevData,
+   content: value,
+   type: 'text',
+  }))
+ }
+
+ const handleSendMessage = () => {
+  console.log(
+   'điều kiện để gửi tin nhắn: payLoadData.content' +
+    payLoadData.content +
+    'gif' +
+    payLoadData.gif +
+    'img' +
+    payLoadData.img
+  )
+
+  if (payLoadData.content || payLoadData.gif || payLoadData.img) {
+   sendMessage()
+  }
+ }
+
+ const handleKeyDown = (event) => {
+  if (event.key === 'Enter') {
+   event.preventDefault() // Ngăn không cho Enter xuống dòng
+   handleSendMessage()
+  }
+ }
+
+ const sendMessage = async () => {
+  const { idReceive, idRoom, gif, type, img, content } = payLoadData
+  const [num1, num2] = idRoom.split('#').map(Number)
+
+  // Cập nhật idReceive
+  const newIdReceive = user.id != num1 ? num1 : num2
+
+  const formData = new FormData()
+  formData.append('idReceive', newIdReceive)
+  formData.append('idRoom', idRoom)
+  formData.append('gif', gif)
+  formData.append('type', type)
+  formData.append(
+   'img',
+   img === '' || img === null ? createEmptyImageFile() : img
+  )
+  formData.append('content', content)
+
+  try {
+   setStatus((prevData) => ({
+    ...prevData,
+    sending: true,
+   }))
+   const response = await fetch(
+    `https://samnote.mangasocial.online/message/chat-unknown-image2/${user.id}`,
+    {
+     method: 'POST',
+     body: formData,
+    }
+   )
+
+   if (!response.ok) {
+    throw new Error(`HTTP error! Status: ${response.status}`)
+   }
+
+   const data = await response.json()
+   handleReload(data.message)
+
+   // Reset payload data
+   setPayLoadData((prevData) => ({
+    ...prevData,
+    img: '',
+    content: '', // Chỉ đặt lại content
+    gif: '',
+    // Không reset img ở đây
+   }))
+
+   setStatus((prevData) => ({
+    ...prevData,
+    giphySearch: false,
+    OpenSelectImage: false,
+   }))
+
+   console.log('Gửi thành công:', data.message)
+  } catch (err) {
+   console.error('Lỗi khi gửi tin nhắn:', err)
+  } finally {
+   setStatus((prevData) => ({
+    ...prevData,
+    sending: false,
+   }))
+  }
+ }
+
+ const handleGifSelect = (gif) => {
+  console.log('gif trả về ', data)
+  if (data?.idRoom) {
+   const [num1, num2] = data.idRoom.split('#').map(Number)
+
+   setPayLoadData((prevData) => ({
+    ...prevData,
+    idReceive: user.id !== num1 ? num1 : num2,
+    idRoom: data.idRoom,
+    gif: gif.images.fixed_height.url,
+    type: 'gif',
+    content: '',
+   }))
+  } else {
+   setPayLoadData((prevData) => ({
+    ...prevData,
+    idReceive: data?.idUser,
+    idRoom: `${user.id}#${data?.idUser}`,
+    gif: gif.images.fixed_height.url,
+    type: 'gif',
+    content: '',
+   }))
+  }
+
+  // Đóng ImageUploader khi chọn GIF
+  setStatus((prevStatus) => ({
+   ...prevStatus,
+   giphySearch: true,
+   OpenSelectImage: false,
+  }))
+ }
+
+ // useEffect để gọi sendMessage sau khi payLoadData được cập nhật
+ useEffect(() => {
+  if (payLoadData.gif && payLoadData.type == 'gif') {
+   sendMessage()
+  }
+ }, [payLoadData.gif])
+
+ const handleImageSelect = (image) => {
+  if (data?.idRoom) {
+   const [num1, num2] = data.idRoom.split('#').map(Number)
+   setPayLoadData((prevData) => ({
+    ...prevData,
+    idReceive: user.id != num1 ? num1 : num2,
+    idRoom: data.idRoom,
+    img: image,
+    type: 'image',
+    content: null,
+   }))
+  } else {
+   setPayLoadData((prevData) => ({
+    ...prevData,
+    idReceive: data?.idUser,
+    idRoom: `${user.id}#${data?.idUser}`,
+    img: image, // Gán hình ảnh được chọn vào payload
+    type: 'image',
+    content: null,
+   }))
+  }
+
+  // Đóng GIF khi chọn hình ảnh
+  setStatus((prevStatus) => ({
+   ...prevStatus,
+   giphySearch: false, // Đóng GIF
+   OpenSelectImage: true,
+  }))
+ }
+
+ const handleToggle = (componentName) => {
+  setStatus((prevState) => ({
+   ...prevState,
+   giphySearch:
+    componentName === 'giphySearch' ? !prevState.giphySearch : false,
+   OpenSelectImage:
+    componentName === 'OpenSelectImage' ? !prevState.OpenSelectImage : false,
+  }))
+ }
+
+ return (
+  <div className='relative'>
+   {giphySearch && <GiphySearch onGifSelect={handleGifSelect} />}
+   <Box
+    sx={{
+     display: 'flex',
+     height: '80px',
+     justifyContent: 'space-between',
+     alignItems: 'center',
+     padding: '10px 10px 0 10px',
+     backgroundColor: '#F4F4F4',
+    }}
+   >
+    <Box className='w-[95%] flex items-center'>
+     <div
+      onClick={() => {
+       setStatus((prevState) => ({
+        ...prevState,
+        giphySearch: false,
+       }))
+      }}
+     >
+      <ImageUploader
+       onImageSelect={handleImageSelect}
+       onImageRemove={handleImageRemove}
+       OpenSelectImage={OpenSelectImage}
+      />
+     </div>
+
+     <IconButton
+      sx={{
+       p: '5px',
+       color: !giphySearch ? '#000' : 'inherit',
+      }}
+      onClick={() => {
+       handleToggle('giphySearch')
+       handleImageRemove()
+      }}
+     >
+      {giphySearch ? (
+       <div
+        style={{
+         display: 'flex',
+         alignItems: 'center',
+         justifyContent: 'center',
+         height: '30px',
+         width: '33px',
+         borderRadius: '3px',
+         backgroundColor: '#000',
+         color: 'white',
+         border: 'none',
+         cursor: 'pointer',
+        }}
+       >
+        <CloseIcon />
+       </div>
+      ) : (
+       <GifIcon width={32} height={35} />
+      )}{' '}
+     </IconButton>
+
+     <InputBase
+      disabled={giphySearch || OpenSelectImage}
+      sx={{ ml: 1, flex: 1, width: '90%' }}
+      placeholder='Type your message...'
+      value={payLoadData.content} // Gán giá trị cho input
+      onKeyDown={handleKeyDown}
+      onChange={handleInputChange}
+     />
+    </Box>
+    <div className='w-[50px]'>
+     {' '}
+     {sending ? (
+      <CircularProgress size={24} />
+     ) : (
+      <SendIcon
+       onClick={() => {
+        handleSendMessage()
+       }}
+       sx={{
+        cursor:
+         payLoadData.content || payLoadData.gif || payLoadData.img
+          ? 'pointer'
+          : 'not-allowed',
+        color:
+         payLoadData.content || payLoadData.gif || payLoadData.img
+          ? '#0095FF'
+          : '#999',
+        fontSize: '40px',
+       }}
+      />
+     )}
+    </div>
+   </Box>
+  </div>
+ )
+}
+
+export default InputMessage

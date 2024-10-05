@@ -53,7 +53,7 @@ const UserPanel = () => {
   {
    name: 'incognito',
    icon: <IconChatUnknow />,
-   url: '/user/incognito',
+   url: '/incognito',
    state: { userInfomations: null },
   },
   {

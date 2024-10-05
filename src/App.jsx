@@ -75,7 +75,7 @@ function App() {
      <Route path='/user/create-note' element={<CreateNote />} />
 
      <Route path='/profile/:id' element={<UserProfile />} />
-     <Route path='/user/incognito' element={<AnonymousMessage />} />
+     <Route path='/incognito' element={<AnonymousMessage />} />
 
      {/* ................................ */}
 

@@ -344,7 +344,7 @@ const UserProfile = () => {
                     height: "39px",
                   }}
                   onClick={() =>
-                    navigate("/user/incognito", {
+                    navigate("/incognito", {
                       state: { userInfomations: null },
                     })
                   }
