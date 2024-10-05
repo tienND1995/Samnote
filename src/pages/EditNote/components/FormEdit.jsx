@@ -22,7 +22,7 @@ import {
  TextField,
 } from '@mui/material'
 
-import TextEditor from '../../../components/TextEditor'
+import TextEditor from '../../../share/TextEditor'
 import configs from '../../../configs/configs.json'
 import AddImages from './AddImages'
 const { API_SERVER_URL } = configs
@@ -362,7 +362,12 @@ const FormEdit = ({ onDispatchName }) => {
       <button className='btn btn-primary w-max'>Share Note</button>
      </div>
 
-     <AddImages userId={user?.id} noteId={id} onDispatchName={onDispatchName} onGetNoteId={getDataNoteId} />
+     <AddImages
+      userId={user?.id}
+      noteId={id}
+      onDispatchName={onDispatchName}
+      onGetNoteId={getDataNoteId}
+     />
     </div>
 
     <div className='mx-auto w-full flex flex-col flex-grow-1 gap-2'>

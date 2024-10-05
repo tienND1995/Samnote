@@ -12,7 +12,7 @@ import CheckIcon from '@mui/icons-material/Check'
 import GroupAddIcon from '@mui/icons-material/GroupAdd'
 import SearchIcon from '@mui/icons-material/Search'
 
-import CreateGroup from '../../../components/CreateGroup'
+import CreateGroup from '../../../share/CreateGroup'
 
 const ChatList = (props) => {
  const {

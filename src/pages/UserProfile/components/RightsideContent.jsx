@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react'
 import { Button, TextField } from '@mui/material'
 import { Link } from 'react-router-dom'
-import { handleErrorAvatar, formatTimeAgo } from '../../../helper'
+import { handleErrorAvatar, formatTimeAgo } from '../../../utils/utils'
 import { AppContext } from '../../../context'
 import api from '../../../api'
 
