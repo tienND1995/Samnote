@@ -53,7 +53,6 @@ export const schemaNoteCreate = Joi.object({
 
  dueAt: Joi.date().max('now').required().messages({
   'date.max': 'Current maximum date',
-
   'date.empty': 'Not content yet!',
  }),
 

@@ -1,8 +1,5 @@
-import React, { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { useForm } from 'react-hook-form'
-import { joiResolver } from '@hookform/resolvers/joi'
-import { schemaNoteCreate } from '../../../utils/schema'
 
 import {
  FormControl,
@@ -12,7 +9,7 @@ import {
  TextField,
 } from '@mui/material'
 
-const FormCreateNote = () => {
+const FormCreateNote = ({ register, watch, errors, userID }) => {
  const [colorList, setColorList] = useState([])
  const [folderList, setFolderList] = useState([])
  const [color, setColor] = useState({
@@ -22,34 +19,26 @@ const FormCreateNote = () => {
   name: 'snow',
  })
 
- const {
-  register,
-  handleSubmit,
-  setValue,
-  getValues,
-  watch,
-  reset,
-
-  formState: { errors, dirtyFields },
- } = useForm({
-  //   resolver: joiResolver(schemaNoteCreate),
-  defaultValues: {
-   data: '',
-   title: '',
-   dueAt: null,
-
-   remindAt: null,
-   pinned: false,
-   notePublic: 1,
-   lock: '',
-   color: '',
-   idFolder: null,
-  },
- })
-
  const notePublicForm = watch('notePublic')
  const colorForm = watch('color')
  const folderForm = watch('idFolder')
+
+
+ useEffect(() => {
+  // render color when component mounted
+  //   const handleColor = () => {
+  //    if (colorList.length < 1 || !noteItem.color) return
+  //    const colorMatch = colorList?.filter(
+  //     (item) =>
+  //      item.r === noteItem?.color.r &&
+  //      item.g === noteItem?.color.g &&
+  //      item.b === noteItem?.color.b
+  //    )
+  //    setValue('color', colorMatch[0]?.name)
+  //    setColor(colorMatch[0])
+  //   }
+  //   handleColor()
+ }, [])
 
  return (
   <div className='row'>
@@ -151,7 +140,7 @@ const FormCreateNote = () => {
 
    <div className='w-max'>
     <div className='mb-3'>
-     <InputLabel className='text-white'>Remind At</InputLabel>
+     <InputLabel className='text-white'>Due At</InputLabel>
      <TextField
       className='w-full bg-white rounded-1 '
       size='small'

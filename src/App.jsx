@@ -13,7 +13,6 @@ import Login from './pages/Login'
 import OtherUser from './pages/OtherUser'
 import UserDustbin from './pages/UserDustbin'
 import UserGroup from './pages/UserGroup'
-import UserNotes from './pages/UserNotes'
 import UserProfile from './pages/UserProfile/UserProfile'
 import UserSetting from './pages/UserSetting'
 import UserSketch from './pages/UserSketch'
@@ -66,7 +65,6 @@ function App() {
 
     <Route element={<RootLayout />}>
      <Route path='/other-user/:id' element={<OtherUser />} />
-     <Route path='/user/note/:id' element={<UserNotes />} />
      <Route path='/user/setting' element={<UserSetting />} />
      <Route path='/user/sketch' element={<UserSketch />} />
      <Route path='/user/group' element={<UserGroup />} />
