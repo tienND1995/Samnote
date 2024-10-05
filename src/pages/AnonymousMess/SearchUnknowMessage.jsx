@@ -40,8 +40,16 @@ const SearchUnknowMessage = () => {
   };
 
   const clearSearch = () => {
-    setState({ ...state, dataSearch: null });
+    setState({ ...state, status: false, searchData: "", dataSearch: null });
   };
+
+  const handleClick = (event) => {
+    event.stopPropagation(); // Ngăn sự kiện click truyền lên cha
+  };
+
+  const { searchData, dataSearch, loading, status } = state;
+  // console.log("searchData", searchData);
+  // console.log("dataSearch", dataSearch);
 
   return (
     <Box>
