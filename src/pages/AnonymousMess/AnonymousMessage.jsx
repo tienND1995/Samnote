@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../context";
 import { NavLink } from "react-router-dom";
 import api from "../../api";
+import Swal from "sweetalert2";
 import bg_chat from "../../assets/img-chat-an-danh.jpg";
 import MenuSelect from "../../assets/menuselect.jsx";
 import SearchUnknowMessage from "./SearchUnknowMessage.jsx";
@@ -117,30 +118,48 @@ const AnonymousMessage = () => {
       idRoom: data.idRoom,
     };
 
-    try {
-      const res = await api.post(
-        `/message/delete_chat_unknown`,
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this chat?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes",
+    });
 
-        payload
-      );
+    if (result.isConfirmed) {
+      try {
+        const res = await api.post(`/message/delete_chat_unknown`, payload);
+        setReload((prev) => prev + 1);
+        // Reset chat box state
+        setShowChatBox((prev) => ({
+          ...prev,
+          info: [],
+          message: [],
+          avatar: null,
+          username: "",
+        }));
+        // Close the select menu
+        setStatus((prev) => ({
+          ...prev,
+          showSelectMenu: false,
+        }));
 
-      console.log("payload", payload);
-      console.log("thành công");
-      setReload((prev) => prev + 1);
-      setShowChatBox((prev) => ({
-        ...prev,
-        info: [],
-        message: [],
-        avatar: null,
-        username: "",
-      }));
-      setStatus((prev) => ({
-        ...prev,
-        showSelectMenu: false,
-      }));
-    } catch (err) {
-      console.log("lỗi");
-      console.log(err);
+        // Show success message
+        Swal.fire({
+          title: "Deleted!",
+          text: "Chat deleted successfully.",
+          icon: "success",
+        });
+      } catch (err) {
+        // Optional: Handle error case, show error message
+        Swal.fire({
+          title: "Error!",
+          text: "Something went wrong while deleting the chat.",
+          icon: "error",
+        });
+      }
     }
   };
 
@@ -174,7 +193,7 @@ const AnonymousMessage = () => {
           alignItems: "center",
         }}
       >
-        <Box className="bg-[#B6F6FF] h-[18vh] uppercase text-black w-full pt-[40px] text-center text-4xl font-bold">
+        <Box className="bg-[#B6F6FF] h-[180px] uppercase text-black w-full pt-[40px] text-center text-4xl font-bold">
           Chat
         </Box>
 
@@ -182,15 +201,14 @@ const AnonymousMessage = () => {
           className="w-[90%] h-[10vh]"
           style={{
             margin: "0 10px",
-            boxShadow: "0 -2px 4px rgba(0, 0, 0, 0.1)",
           }}
         >
           <SearchUnknowMessage onUserSelect={handleUserSelect} />
         </Box>
 
         {/* Tabs for filtering */}
-        <Box className="h-full w-[400px] overflow-hidden scrollbar-none text-black font-bold">
-          <div className="flex gap-[10px] justify-evenly p-4 h-[15%]">
+        <Box className="h-full w-[400px] overflow-hidden scrollbar-none text-black font-bold flex flex-col flex-grow-1">
+          <div className="flex gap-[10px] justify-evenly px-4 pb-3 pt-1 h-[60px]">
             <Button
               className={`${
                 activeTab === "all"
@@ -225,7 +243,7 @@ const AnonymousMessage = () => {
           </div>
 
           {/* Render filtered chat list */}
-          <div className="overflow-auto h-[85%] scrollbar">
+          <div className="overflow-y-auto overflow-x-hidden scrollbar">
             {" "}
             {filteredChatList()?.length > 0 ? (
               filteredChatList().map((item) => (
@@ -290,6 +308,9 @@ const AnonymousMessage = () => {
                           sx={{
                             fontWeight: "700",
                             fontSize: "24px",
+                            overflow: "hidden",
+                            width: "82%",
+                            textOverflow: "ellipsis",
                             textTransform: "capitalize",
                           }}
                         >
@@ -347,8 +368,11 @@ const AnonymousMessage = () => {
                 </NavLink>
               ))
             ) : (
-              <Typography variant="body2" sx={{ marginTop: "20px" }}>
-                No chat messages available.
+              <Typography
+                variant="body2"
+                sx={{ marginTop: "20px", textAlign: "center" }}
+              >
+                No chat messages.
               </Typography>
             )}
           </div>
@@ -360,7 +384,7 @@ const AnonymousMessage = () => {
           <div className="w-full h-[140px] shadow-[0_0_10px_rgba(0,0,0,0.2)] items-center flex justify-between px-4">
             <div className="w-full h-[140px] items-center flex">
               <Avatar sx={{ width: "90px", height: "90px" }} src={avatar} />
-              <p className="text-black text-[40px] font-bold capitalize">
+              <p className="text-black text-[40px] font-bold capitalize ml-2">
                 {username}
               </p>
             </div>
@@ -370,18 +394,28 @@ const AnonymousMessage = () => {
                 <MenuSelect className="cursor-pointer" />
               </div>
 
-              {/* Menu sẽ hiển thị nếu showMenu là true */}
               {status.showSelectMenu && (
-                <div className="dropdown-menu-anonimuos">
-                  <ul>
-                    <li>
-                      <button onClick={() => deleteChatUnknown(info)}>
-                        <DeleteIcon />
-                        Delete Chat
-                      </button>
-                    </li>
-                  </ul>
-                </div>
+                <>
+                  {/* Lớp phủ full màn hình */}
+                  <div
+                    className="anonimuos-overlay"
+                    onClick={() =>
+                      setStatus((prev) => ({ ...prev, showSelectMenu: false }))
+                    }
+                  ></div>
+
+                  {/* Dropdown menu */}
+                  <div className="dropdown-menu-anonimuos">
+                    <ul>
+                      <li>
+                        <button onClick={() => deleteChatUnknown(info)}>
+                          <DeleteIcon />
+                          Delete Chat
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </>
               )}
             </div>
           </div>

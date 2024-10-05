@@ -291,7 +291,7 @@ const SearchUnknowMessage = ({ onUserSelect }) => {
   };
 
   const clearSearch = () => {
-    setState({ ...state, status: false });
+    setState({ ...state, status: false, searchData: "", dataSearch: null });
   };
 
   const handleClick = (event) => {
