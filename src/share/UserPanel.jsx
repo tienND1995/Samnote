@@ -33,7 +33,7 @@ const UserPanel = () => {
   {
    name: 'Photos',
    icon: <PhotoLibraryIcon sx={{ fontSize: 40 }} />,
-   url: '/user/photo',
+   url: '/photo',
   },
   {
    name: 'Note',
@@ -112,7 +112,7 @@ const UserPanel = () => {
    <Button
     variant='contained'
     className='bg-[#198E39] rounded-full  mb-4 flex absolute top-[-45%] left-[47%] transform-translate-x-[-50%] w-[20px] lg:w-[95%] lg:h-[45px] lg:static'
-    onClick={() => navigate(`/user/create-note`)}
+    onClick={() => navigate(`/create-note`)}
    >
     <IconCreateNewNote />
     <Typography className='hidden lg:block pl-1'>new</Typography>
