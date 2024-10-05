@@ -4,8 +4,10 @@ import { AppContext } from "../../context";
 import { NavLink } from "react-router-dom";
 import api from "../../api";
 import bg_chat from "../../assets/img-chat-an-danh.jpg";
+import MenuSelect from "../../assets/menuselect.jsx";
 import SearchUnknowMessage from "./SearchUnknowMessage.jsx";
 import InputMessage from "./InputMessage";
+import DeleteIcon from "@mui/icons-material/Delete";
 import "./AnonymousMess.css";
 
 const AnonymousMessage = () => {
@@ -22,7 +24,17 @@ const AnonymousMessage = () => {
   });
   const [activeIndex, setActiveIndex] = useState(null);
   const { avatar, username, info, message } = showChatBox;
+
   // const username = showChatBox.info?.user?.username;
+  const [status, setStatus] = useState({ showSelectMenu: false });
+
+  const selectMenu = () => {
+    setStatus((prev) => ({
+      ...prev,
+      showSelectMenu: !prev.showSelectMenu, // Cập nhật showSelectMenu đúng cách
+    }));
+    console.log("đã click", status.showSelectMenu);
+  };
 
   const handleGetMessage = async (data) => {
     const payload = {
@@ -96,27 +108,45 @@ const AnonymousMessage = () => {
     } else if (activeTab === "read") {
       return listChatUnknow.filter((item) => item.unReadCount === 0);
     }
-    return listChatUnknow; // Nếu tab là "all", trả về tất cả tin nhắn
+    return listChatUnknow;
   };
-  // const handleUserSelect = (infoUser) => {
-  //   console.log("thông tin ", infoUser);
 
-  //   setShowChatBox((prev) => ({
-  //     ...prev, // Giữ nguyên các giá trị khác của showChatBox
-  //     avatar: infoUser.linkAvatar,
-  //     username: infoUser.userName,
-  //   }));
+  const deleteChatUnknown = async (data) => {
+    console.log("data để xóa showChatBox", data);
+    const payload = {
+      idRoom: data.idRoom,
+    };
 
-  //   console.log(
-  //     "Selected user trong tìm kiếm:avatar,username",
-  //     avatar,
-  //     username
-  //   );
-  // };
+    try {
+      const res = await api.post(
+        `/message/delete_chat_unknown`,
+
+        payload
+      );
+
+      console.log("payload", payload);
+      console.log("thành công");
+      setReload((prev) => prev + 1);
+      setShowChatBox((prev) => ({
+        ...prev,
+        info: [],
+        message: [],
+        avatar: null,
+        username: "",
+      }));
+      setStatus((prev) => ({
+        ...prev,
+        showSelectMenu: false,
+      }));
+    } catch (err) {
+      console.log("lỗi");
+      console.log(err);
+    }
+  };
+
   const handleUserSelect = (infoUser) => {
     const data = {
-      idRoom: `${user.id}#${infoUser.idUser}`, // gán giá trị cho idRoom
-      // Thêm các thuộc tính khác nếu cần
+      idRoom: `${user.id}#${infoUser.idUser}`,
     };
     setShowChatBox((prev) => {
       const updatedShowChatBox = {
@@ -134,7 +164,7 @@ const AnonymousMessage = () => {
   };
 
   return (
-    <Box className="text-white lg:flex bg-[#DFFFFE] w-full">
+    <Box className="text-white lg:flex bg-[#DFFFFE] w-full h-screen">
       <Box
         className="w-[400px]"
         sx={{
@@ -144,12 +174,12 @@ const AnonymousMessage = () => {
           alignItems: "center",
         }}
       >
-        <Box className="bg-[#B6F6FF] h-[140px] uppercase text-black w-full pt-[50px] text-center text-4xl font-bold">
+        <Box className="bg-[#B6F6FF] h-[18vh] uppercase text-black w-full pt-[40px] text-center text-4xl font-bold">
           Chat
         </Box>
 
         <Box
-          className="w-[90%]"
+          className="w-[90%] h-[10vh]"
           style={{
             margin: "0 10px",
             boxShadow: "0 -2px 4px rgba(0, 0, 0, 0.1)",
@@ -159,8 +189,8 @@ const AnonymousMessage = () => {
         </Box>
 
         {/* Tabs for filtering */}
-        <Box className="max-h-[47vh] w-[400px] lg:max-h-[50vh] overflow-auto scrollbar-none text-black font-bold">
-          <div className="flex gap-[10px] justify-evenly my-4">
+        <Box className="h-full w-[400px] overflow-hidden scrollbar-none text-black font-bold">
+          <div className="flex gap-[10px] justify-evenly p-4 h-[15%]">
             <Button
               className={`${
                 activeTab === "all"
@@ -195,148 +225,168 @@ const AnonymousMessage = () => {
           </div>
 
           {/* Render filtered chat list */}
-          {filteredChatList()?.length > 0 ? (
-            filteredChatList().map((item) => (
-              <NavLink
-                to={`/user/incognito`}
-                key={item.idMessage}
-                className={({ isActive, isPending }) =>
-                  isPending
-                    ? "pending"
-                    : activeIndex === item.idMessage
-                    ? "active"
-                    : ""
-                }
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  borderRadius: "30px",
-                  margin: "5px 10px",
-                  height: "70px",
-                  width: "95%",
-                  color: "black",
-                  textDecoration: "none",
-                  backgroundColor: "#fff",
-                  justifyContent: "space-between",
-                }}
-                onClick={() => {
-                  setShowChatBox((prevState) => ({
-                    ...prevState,
-                    info: item,
-                    avatar: item.user.avatar,
-                    username: item.user.username,
-                  }));
-                  setActiveIndex(item.idMessage);
-                  handleGetMessage(item);
-                }}
-              >
-                <Box
-                  sx={{
+          <div className="overflow-auto h-[85%] scrollbar">
+            {" "}
+            {filteredChatList()?.length > 0 ? (
+              filteredChatList().map((item) => (
+                <NavLink
+                  to={`/user/incognito`}
+                  key={item.idMessage}
+                  className={({ isActive, isPending }) =>
+                    isPending
+                      ? "anonimous-pending"
+                      : activeIndex === item.idMessage
+                      ? "anonimous-active"
+                      : ""
+                  }
+                  style={{
                     display: "flex",
                     alignItems: "center",
-                    width: "85%",
+                    borderRadius: "30px",
+                    margin: "5px 6px",
+                    height: "70px",
+                    width: "95%",
+                    color: "black",
+                    textDecoration: "none",
+                    backgroundColor: "#fff",
+                    justifyContent: "space-between",
+                  }}
+                  onClick={() => {
+                    setShowChatBox((prevState) => ({
+                      ...prevState,
+                      info: item,
+                      avatar: item.user.avatar,
+                      username: item.user.username,
+                    }));
+                    setActiveIndex(item.idMessage);
+                    handleGetMessage(item);
                   }}
                 >
-                  <Avatar
-                    sx={{ width: "60px", height: "60px", marginLeft: "4px" }}
-                    src={item.user.avatar}
-                  />
                   <Box
                     sx={{
-                      marginLeft: "10px",
-                      fontWeight: "700",
-                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      width: "85%",
                     }}
                   >
-                    {item.user === "Unknow" ? (
-                      <span style={{ fontWeight: "700", fontSize: "40px" }}>
-                        User name
+                    <Avatar
+                      sx={{ width: "60px", height: "60px", marginLeft: "4px" }}
+                      src={item.user.avatar}
+                    />
+                    <Box
+                      sx={{
+                        marginLeft: "10px",
+                        fontWeight: "700",
+                        width: "100%",
+                      }}
+                    >
+                      {item.user === "Unknow" ? (
+                        <span style={{ fontWeight: "700", fontSize: "40px" }}>
+                          User name
+                        </span>
+                      ) : (
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            fontWeight: "700",
+                            fontSize: "24px",
+                            textTransform: "capitalize",
+                          }}
+                        >
+                          {item.user.username}
+                        </Typography>
+                      )}
+                      <Typography
+                        sx={
+                          item.unReadCount > 0
+                            ? {
+                                overflow: "hidden",
+                                width: "90%",
+                                fontSize: "20px",
+                                whiteSpace: "nowrap",
+                                textOverflow: "ellipsis",
+                                fontWeight: "700",
+                              }
+                            : {
+                                overflow: "hidden",
+                                width: "90%",
+                                fontSize: "20px",
+                                whiteSpace: "nowrap",
+                                textOverflow: "ellipsis",
+                                fontWeight: "400",
+                              }
+                        }
+                        variant="body2"
+                      >
+                        {convertLastText(item.last_text, item.idSend)}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <p className="">
+                    {" "}
+                    {item.unReadCount > 0 ? (
+                      <span className="w-[35px] h-[35px] mr-2 rounded-[100%] bg-[#D9D9D9] flex items-center justify-center text-[#FF0404] text-[20px]">
+                        {item.unReadCount}
                       </span>
                     ) : (
-                      <Typography
-                        variant="body1"
-                        sx={{
-                          fontWeight: "700",
-                          fontSize: "24px",
-                          textTransform: "capitalize",
-                        }}
+                      <svg
+                        className="w-[30px] h-[30px] mr-2"
+                        width="19"
+                        height="14"
+                        viewBox="0 0 19 14"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        {item.user.username}
-                      </Typography>
+                        <path
+                          d="M6.03809 11.0455L1.53383 6.69202L0 8.16406L6.03809 14L19 1.47204L17.477 0L6.03809 11.0455Z"
+                          fill="#00FF73"
+                        />
+                      </svg>
                     )}
-                    <Typography
-                      sx={
-                        item.unReadCount > 0
-                          ? {
-                              overflow: "hidden",
-                              width: "90%",
-                              fontSize: "20px",
-                              whiteSpace: "nowrap",
-                              textOverflow: "ellipsis",
-                              fontWeight: "700",
-                            }
-                          : {
-                              overflow: "hidden",
-                              width: "90%",
-                              fontSize: "20px",
-                              whiteSpace: "nowrap",
-                              textOverflow: "ellipsis",
-                              fontWeight: "400",
-                            }
-                      }
-                      variant="body2"
-                    >
-                      {convertLastText(item.last_text, item.idSend)}
-                    </Typography>
-                  </Box>
-                </Box>
-                <p className="">
-                  {" "}
-                  {item.unReadCount > 0 ? (
-                    <span className="w-[35px] h-[35px] mr-2 rounded-[100%] bg-[#D9D9D9] flex items-center justify-center text-[#FF0404] text-[20px]">
-                      {item.unReadCount}
-                    </span>
-                  ) : (
-                    <svg
-                      className="w-[30px] h-[30px] mr-2"
-                      width="19"
-                      height="14"
-                      viewBox="0 0 19 14"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M6.03809 11.0455L1.53383 6.69202L0 8.16406L6.03809 14L19 1.47204L17.477 0L6.03809 11.0455Z"
-                        fill="#00FF73"
-                      />
-                    </svg>
-                  )}
-                </p>
-              </NavLink>
-            ))
-          ) : (
-            <Typography variant="body2" sx={{ marginTop: "20px" }}>
-              No chat messages available.
-            </Typography>
-          )}
+                  </p>
+                </NavLink>
+              ))
+            ) : (
+              <Typography variant="body2" sx={{ marginTop: "20px" }}>
+                No chat messages available.
+              </Typography>
+            )}
+          </div>
         </Box>
       </Box>
       {info.length !== 0 && (
-        <div className="w-[100%] h-[100vh] shadow-[0_0_10px_rgba(0,0,0,0.4)]">
+        <div className="w-[100%] h-[100vh] shadow-[0_0_10px_rgba(0,0,0,0.2)]">
           {" "}
-          <div className="w-full h-[140px] shadow-[0_0_10px_rgba(0,0,0,0.4)]">
-            <div className="w-full h-[140px] items-center flex ">
-              <Avatar
-                sx={{ width: "90px", height: "90px", margin: "0 10px" }}
-                src={avatar}
-              />
+          <div className="w-full h-[140px] shadow-[0_0_10px_rgba(0,0,0,0.2)] items-center flex justify-between px-4">
+            <div className="w-full h-[140px] items-center flex">
+              <Avatar sx={{ width: "90px", height: "90px" }} src={avatar} />
               <p className="text-black text-[40px] font-bold capitalize">
                 {username}
               </p>
             </div>
+            <div className="relative">
+              {/* Khi click vào MenuSelect sẽ bật/tắt menu */}
+              <div onClick={selectMenu}>
+                <MenuSelect className="cursor-pointer" />
+              </div>
+
+              {/* Menu sẽ hiển thị nếu showMenu là true */}
+              {status.showSelectMenu && (
+                <div className="dropdown-menu-anonimuos">
+                  <ul>
+                    <li>
+                      <button onClick={() => deleteChatUnknown(info)}>
+                        <DeleteIcon />
+                        Delete Chat
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
           <div
-            className="scrollbar shadow-[0_0_10px_rgba(0,0,0,0.8)]"
+            className="scrollbar shadow-[0_0_10px_rgba(0,0,0,0.2)]"
             style={{
               width: "100%",
               backgroundImage: `url(${bg_chat})`,
@@ -439,7 +489,7 @@ const AnonymousMessage = () => {
               ))}
             <div id="lastmessage" />
           </div>
-          <div className="w-full relative shadow-[0_0_15px_rgba(0,0,0,0.8)]">
+          <div className="w-full relative shadow-[0_0_15px_rgba(0,0,0,0.2)]">
             {" "}
             <InputMessage data={info} onReload={handleReload} />
           </div>
