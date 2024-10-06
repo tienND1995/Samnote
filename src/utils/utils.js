@@ -1,4 +1,5 @@
 import { TOKEN, USER } from './constant'
+import moment from 'moment'
 
 export const handleLogOut = () => {
  localStorage.removeItem(USER)
@@ -92,3 +93,9 @@ export const handleErrorAvatar = (e) => {
   e.target.src = '/src/assets/avatar-default.png'
  }
 }
+
+export const convertApiToTime = (time) =>
+ moment(`${time}+0700`).format('YYYY-MM-DD')
+
+export const convertTimeToApi = (time) =>
+ `${moment(time).format('DD/MM/YYYY hh:mm A')} +07:00`

@@ -48,6 +48,7 @@ const TextEditor = ({ setValue, value, onChangeTextEditor }) => {
     value={value}
     onChange={(newValue) => {
      setValue('data', newValue)
+     console.log('value', newValue)
     }}
     placeholder='Start writting...'
    />
