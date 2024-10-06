@@ -53,7 +53,7 @@ const AddImages = ({ imageList, onChangeUploadImages }) => {
 
  return (
   <div className='bg-white px-3 pt-2  rounded-md'>
-   <div className='flex justify-end gap-2 mb-2 flex-col justify-around'>
+   <div className='flex justify-end gap-2 mb-2'>
     <div>
      <input
       id='checked-list'

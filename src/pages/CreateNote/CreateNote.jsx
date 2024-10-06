@@ -157,8 +157,8 @@ const CreateNote = () => {
     onSubmit={handleSubmit(onSubmit)}
     className='bg-[#3A3F42] rounded-t-[10px] grid grid-cols-2 flex-grow-1 '
    >
-    <div className='p-4'>
-     <div className='max-w-[600px] mx-auto'>
+    <div className='p-4 flex flex-col justify-around'>
+     <div className='max-w-[600px] mx-auto w-full'>
       <FormCreateNote
        userID={user?.id}
        register={register}
