@@ -155,57 +155,65 @@ const CreateNote = () => {
    </div>
    <form
     onSubmit={handleSubmit(onSubmit)}
-    className='bg-[#3A3F42] rounded-t-[10px] flex flex-col flex-grow-1 px-3 py-4'
+    className='bg-[#3A3F42] rounded-t-[10px] grid grid-cols-2 flex-grow-1 '
    >
-    <div className='w-[600px] mx-auto'>
-     <FormCreateNote
-      userID={user?.id}
-      register={register}
-      watch={watch}
-      errors={errors}
-      dirtyFields={dirtyFields}
-      onChangeColor={handleChangeColor}
-     />
+    <div className='p-4'>
+     <div className='max-w-[600px] mx-auto'>
+      <FormCreateNote
+       userID={user?.id}
+       register={register}
+       watch={watch}
+       errors={errors}
+       dirtyFields={dirtyFields}
+       onChangeColor={handleChangeColor}
+      />
 
-     <div className='flex justify-between'>
-      <div className='flex justify-start items-center gap-2'>
-       <FormControlLabel
-        className=' text-white rounded-1'
-        label='Pinned'
-        control={<Checkbox className='text-white' {...register('pinned')} />}
-       />
+      <div className='flex justify-between mt-4'>
+       <div className='flex justify-start items-center gap-3'>
+        <div>
+         <button type='button' className='btn btn-primary w-max'>
+          Share Note
+         </button>
+        </div>
 
-       <div>
-        <button type='button' className='btn btn-primary w-max'>
-         Share Note
-        </button>
-       </div>
+        <FormControlLabel
+         className=' text-white rounded-1 '
+         label='Pinned'
+         control={
+          <Checkbox
+           className='text-white w-max h-max'
 
-       <div>
-        <input
-         onChange={handleChangeImage}
-         id='upload-file-craete-note'
-         type='file'
-         className='hidden'
+           {...register('pinned')}
+          />
+         }
         />
-        <label htmlFor='upload-file-craete-note' className='flex'>
-         <ImageIcon className='text-[40px] text-white' />
-        </label>
-       </div>
-      </div>
 
-      <div>
-       <button className='btn btn-primary text-white uppercase'>Create</button>
+        <div>
+         <input
+          onChange={handleChangeImage}
+          id='upload-file-craete-note'
+          type='file'
+          className='hidden'
+         />
+         <label htmlFor='upload-file-craete-note' className='flex'>
+          <ImageIcon className='text-[40px] text-white' />
+         </label>
+        </div>
+       </div>
+
+       <div>
+        <button className='btn btn-primary text-white uppercase'>Create</button>
+       </div>
       </div>
      </div>
+
+     <AddImages
+      imageList={uploadImageList}
+      onChangeUploadImages={setUploadImageList}
+     />
     </div>
 
-    <AddImages
-     imageList={uploadImageList}
-     onChangeUploadImages={setUploadImageList}
-    />
-
-    <div>
+    <div className='flex'>
      {errors.data && (
       <p
        style={{ borderBottom: '1px solid red' }}
