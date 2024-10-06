@@ -176,7 +176,9 @@ const CreateNote = () => {
        />
 
        <div>
-        <button className='btn btn-primary w-max'>Share Note</button>
+        <button type='button' className='btn btn-primary w-max'>
+         Share Note
+        </button>
        </div>
 
        <div>
