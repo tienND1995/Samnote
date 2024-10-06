@@ -243,7 +243,7 @@ const Home = () => {
             cursor: 'pointer',
            }
        }
-       onClick={() => navigate(`/user/profile/${user?.id}`)}
+       onClick={() => navigate(`/profile/${user?.id}`)}
       >
        Manager My Note
       </li>
@@ -371,7 +371,7 @@ const Home = () => {
        <li
         style={{ cursor: 'pointer', marginLeft: '7px' }}
         onClick={() => {
-         navigate(`user/profile/${user.id}`)
+         navigate(`/profile/${user.id}`)
         }}
        >
         <Avatar src={user.Avarta} sx={{ width: '40px', height: '40px' }} />

@@ -12,7 +12,7 @@ import CheckIcon from '@mui/icons-material/Check'
 import GroupAddIcon from '@mui/icons-material/GroupAdd'
 import SearchIcon from '@mui/icons-material/Search'
 
-import CreateGroup from '../../../components/CreateGroup'
+import CreateGroup from '../../../share/CreateGroup'
 
 const ChatList = (props) => {
  const {
@@ -136,7 +136,7 @@ const ChatList = (props) => {
 
     <ul
      id='list-chat'
-     className='flex flex-col flex-grow-1 gap-4 overflow-y-auto pb-[30px] overflow-x-hidden list-chat'
+     className='flex flex-col flex-grow-1 gap-4 overflow-y-auto overflow-x-hidden list-chat'
      ref={chatListRef}
      style={{ height: `${heightChatList}px`, scrollbarWidth: 'none' }}
     >

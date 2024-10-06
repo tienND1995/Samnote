@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 
-
 import {
  FormControl,
  InputLabel,
@@ -8,8 +7,16 @@ import {
  Select,
  TextField,
 } from '@mui/material'
+import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
 
-const FormCreateNote = ({ register, watch, errors, userID }) => {
+const FormCreateNote = ({
+ register,
+ watch,
+ errors,
+ userID,
+ dirtyFields,
+ onChangeColor,
+}) => {
  const [colorList, setColorList] = useState([])
  const [folderList, setFolderList] = useState([])
  const [color, setColor] = useState({
@@ -23,26 +30,30 @@ const FormCreateNote = ({ register, watch, errors, userID }) => {
  const colorForm = watch('color')
  const folderForm = watch('idFolder')
 
+ useEffect(() => {
+  if (!userID) return
+
+  fetchApiSamenote('get', '/get_all_color').then((data) =>
+   setColorList(data.data)
+  )
+  fetchApiSamenote('get', `/folder/${userID}`).then((data) =>
+   setFolderList(data.folder)
+  )
+ }, [userID])
 
  useEffect(() => {
-  // render color when component mounted
-  //   const handleColor = () => {
-  //    if (colorList.length < 1 || !noteItem.color) return
-  //    const colorMatch = colorList?.filter(
-  //     (item) =>
-  //      item.r === noteItem?.color.r &&
-  //      item.g === noteItem?.color.g &&
-  //      item.b === noteItem?.color.b
-  //    )
-  //    setValue('color', colorMatch[0]?.name)
-  //    setColor(colorMatch[0])
-  //   }
-  //   handleColor()
- }, [])
+  // check color form change?
+  if (!dirtyFields.color) return
+
+  // handle change color
+  const colorMatch = colorList?.find((color) => color.name === colorForm)
+  setColor(colorMatch)
+  onChangeColor(colorMatch)
+ }, [colorForm])
 
  return (
-  <div className='row'>
-   <div className='col-12 mb-3'>
+  <div className='grid grid-cols-2 gap-3'>
+   <div className='col-span-2'>
     <InputLabel className='text-white'>Title</InputLabel>
     <TextField
      className='w-full bg-white rounded-1 '
@@ -52,13 +63,13 @@ const FormCreateNote = ({ register, watch, errors, userID }) => {
     />
 
     {errors.title && (
-     <p style={{ borderBottom: '1px solid red' }} className='text-red-600'>
+     <p className='text-red-600 border-b border-red-600'>
       {errors.title.message}
      </p>
     )}
    </div>
 
-   <div className='mb-3 col-6'>
+   <div>
     <InputLabel className='text-white'>Lock</InputLabel>
     <TextField
      className='w-full bg-white rounded-1 '
@@ -68,7 +79,7 @@ const FormCreateNote = ({ register, watch, errors, userID }) => {
     />
    </div>
 
-   <div className='mb-3 col-6'>
+   <div>
     <InputLabel className='text-white' id='select-public-form'>
      Folder
     </InputLabel>
@@ -90,7 +101,7 @@ const FormCreateNote = ({ register, watch, errors, userID }) => {
     </FormControl>
    </div>
 
-   <div className='col-6 mb-3'>
+   <div>
     <InputLabel className='text-white' id='select-color-form'>
      Background
     </InputLabel>
@@ -125,7 +136,7 @@ const FormCreateNote = ({ register, watch, errors, userID }) => {
     </FormControl>
    </div>
 
-   <div className='col-6 mb-3'>
+   <div>
     <InputLabel className='text-white' id='select-public-form'>
      Note Public
     </InputLabel>

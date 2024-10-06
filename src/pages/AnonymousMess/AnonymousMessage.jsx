@@ -129,7 +129,7 @@ const AnonymousMessage = () => {
      {filteredChatList()?.length > 0 ? (
       filteredChatList().map((item) => (
        <NavLink
-        to={`/user/incognito`}
+        to={`/incognito`}
         key={item.idMessage}
         className={({ isActive, isPending }) =>
          isPending ? 'pending' : isActive ? 'active' : ''

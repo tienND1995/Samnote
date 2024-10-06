@@ -22,7 +22,7 @@ import {
  TextField,
 } from '@mui/material'
 
-import TextEditor from '../../../components/TextEditor'
+import TextEditor from '../../../share/TextEditor'
 import configs from '../../../configs/configs.json'
 import AddImages from './AddImages'
 const { API_SERVER_URL } = configs
@@ -76,6 +76,7 @@ const FormEdit = ({ onDispatchName }) => {
  const colorForm = watch('color')
  const folderForm = watch('idFolder')
  const contentEditor = watch('data')
+ const pinnedForm = watch('pinned')
 
  const convertTime = (time) => moment(`${time}+0700`).format('YYYY-MM-DD')
 
@@ -355,14 +356,25 @@ const FormEdit = ({ onDispatchName }) => {
      <FormControlLabel
       className=' text-white rounded-1'
       label='Pinned'
-      control={<Checkbox className='text-white' {...register('pinned')} />}
+      control={
+       <Checkbox
+        className='text-white'
+        value={pinnedForm}
+        {...register('pinned')}
+       />
+      }
      />
 
      <div>
       <button className='btn btn-primary w-max'>Share Note</button>
      </div>
 
-     <AddImages userId={user?.id} noteId={id} onDispatchName={onDispatchName} onGetNoteId={getDataNoteId} />
+     <AddImages
+      userId={user?.id}
+      noteId={id}
+      onDispatchName={onDispatchName}
+      onGetNoteId={getDataNoteId}
+     />
     </div>
 
     <div className='mx-auto w-full flex flex-col flex-grow-1 gap-2'>

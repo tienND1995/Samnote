@@ -14,6 +14,9 @@ const EditNote = () => {
 
  const [nameEvent, setNameEvent] = useState(null)
 
+
+ console.log('noteList', noteList)
+
  //  .................................
 
  const disPatchNameEvent = (name) => setNameEvent(name)

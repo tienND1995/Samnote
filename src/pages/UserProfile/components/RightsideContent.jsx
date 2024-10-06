@@ -1,15 +1,20 @@
 import React, { useState, useContext } from 'react'
 import { Button, TextField } from '@mui/material'
 import { Link } from 'react-router-dom'
-import { getTimeDifference } from '../../../helper'
+import { handleErrorAvatar, formatTimeAgo } from '../../../utils/utils'
 import { AppContext } from '../../../context'
 import api from '../../../api'
-import { getCurrentFormattedDateTime } from '../../../helper'
 
 const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
  const [payloadData, setPayloadData] = useState('')
  const appContext = useContext(AppContext)
  const { setSnackbar, user } = appContext
+ const [visibleMoreUsers, setVisibleMoreUsers] = useState(7)
+ const [visibleMoreNotes, setVisibleMoreNotes] = useState(7)
+
+ const handleSeeMore = (setter) => () => {
+  setter((prevVisible) => prevVisible + 7)
+ }
 
  const handleCreateNote = async () => {
   if (payloadData.trim() === '') {
@@ -21,7 +26,7 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
    title: 'Quick notes',
    color: { r: 255, g: 255, b: 255, a: 1 },
    idFolder: null,
-   dueAt: getCurrentFormattedDateTime(),
+   dueAt: null,
    pinned: false,
    lock: '',
    remindAt: null,
@@ -52,96 +57,103 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
 
  return (
   <div className='rightside col-lg-4 flex flex-column mb-4'>
-   <div className='create-note-container w-[100%] h-[450px] bg-[#FFF4BA] rounded-xl p-3'>
+   <div className='quick-note-container w-[100%] h-[450px] bg-[#FFF4BA] rounded-xl p-4'>
     <div className='flex justify-between w-full'>
-     <span className='font-[700] text-[#888888] text-3xl'>Quick notes</span>
+     <h2 className='font-bold text-gray-700 text-3xl'>Quick Note</h2>
      <Button
-      className='btn-create-quickNotes'
+      className={`btn-create-quickNotes ${
+       user.id != userID ? 'text-white bg-blue-300' : ''
+      }`}
       disabled={user.id != userID}
-      variant='contained'
       onClick={handleCreateNote}
      >
       Create
      </Button>
     </div>
     <TextField
-     className='p-2 w-full'
+     className='quick-note-input p-2 w-full'
      id='standard-multiline-static'
-     placeholder='Content'
+     placeholder='Write your quick note here...'
      multiline
-     rows={16}
+     rows={15}
      variant='standard'
      value={payloadData}
      onChange={(event) => setPayloadData(event.target.value)}
     />
    </div>
-   <div className='new-users mt-3 w-[100%] h-[450px] bg-[#fff] rounded-xl'>
-    <div className='mx-2 my-2 w-[90%] h-[100%]'>
-     <span className='font-[700] text-[#888888] text-xl'>New Users</span>
-
-     {lastUsers.length > 0 ? (
-      <>
-       <ul className='mt-1 p-0 w-full overflow-hidden'>
-        {lastUsers
-         .slice(0, 7)
-         .map(({ id, linkAvatar, user_name, createAt }) => (
-          <li key={`${id}`}>
-           <Link
-            to={`/profile-other-user/${id}`}
-            className='w-full h-[15%] flex justify-between items-center my-1 ml-2 link-dark text-decoration-none'
-           >
-            <img
-             className='w-[40px] h-[40px] rounded-xl object-cover mt-2'
-             src={linkAvatar}
-             alt='image'
-            />
-            <span className='truncate-text w-[50%] mr-2'>{user_name}</span>
-            <span className='mr-3'>
-             {createAt.split(' ').slice(1, 4).join(' ')}
-            </span>
-           </Link>
-          </li>
-         ))}
-       </ul>
-       <p className='text-center'>See more</p>
-      </>
-     ) : (
-      <p className='text-center'>Not found new users</p>
-     )}
-    </div>
+   <div className='new-users w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3'>
+    <span className='font-[700] text-[#888888] text-xl mb-3 ml-2'>
+     New Users
+    </span>
+    {lastUsers.length > 0 ? (
+     <>
+      <ul className='w-full overflow-y-auto flex-grow'>
+       {lastUsers
+        .slice(0, visibleMoreUsers)
+        .map(({ id, linkAvatar, user_name, createAt }) => (
+         <li key={`${id}`} className='mb-2'>
+          <Link
+           to={`/profile/${id}`}
+           className='w-full flex justify-around items-center my-1 link-dark text-decoration-none'
+          >
+           <img
+            className='w-[40px] h-[40px] rounded-xl object-cover'
+            src={linkAvatar || '/src/assets/avatar-default.png'}
+            alt='avatar'
+            onError={handleErrorAvatar}
+           />
+           <span className='truncate-text w-[40%]'>{user_name}</span>
+           <span className='text-sm'>
+            {createAt.split(' ').slice(1, 4).join(' ')}
+           </span>
+          </Link>
+         </li>
+        ))}
+      </ul>
+      {visibleMoreUsers < lastUsers.length && (
+       <button
+        onClick={handleSeeMore(setVisibleMoreUsers)}
+        className='text-center text-blue-500 hover:text-blue-700 cursor-pointer mt-2'
+       >
+        See more
+       </button>
+      )}
+     </>
+    ) : (
+     <p className='text-center'>Not found new users</p>
+    )}
    </div>
-   <div className='new-notes mt-3 w-[100%] h-[450px] bg-[#fff] rounded-xl'>
-    <div className='mx-2 my-2 w-[95%] h-[100%]'>
-     <span className='font-[700] text-[#888888] text-xl'>New Notes</span>
-     {allNotePublic.length > 0 ? (
-      <>
-       <div className='mt-2 w-[95%] ml-2 overflow-hidden'>
-        {allNotePublic.slice(0, 8).map((item, index) => (
-         <div
-          key={`notePublic ${index}`}
-          className='w-full h-[15%] flex justify-evenly my-1 ml-2 items-center py-2'
-         >
-          {/* <img
-                                className='w-[40px] h-[40px] rounded-xl object-cover mt-2'
-                                src={linkAvatar}
-                                alt='image'
-                              /> */}
-          <span className=' w-[20%] h-[full] truncate-text border-l-4 border-black-200'>
-           {item.author}
-          </span>
+   <div className='new-notes w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3'>
+    <span className='font-[700] text-[#888888] text-xl mb-[1.4rem] ml-2'>
+     New Notes
+    </span>
+    {allNotePublic.length > 0 ? (
+     <>
+      <ul className='w-full overflow-y-auto flex-grow px-3'>
+       {allNotePublic.slice(0, visibleMoreNotes).map((item, index) => (
+        <li key={`notePublic ${index}`} className='mb-4'>
+         <div className='w-full flex justify-around items-center'>
+          <span className='w-[20%] truncate-text'>{item.author}</span>
           <span className='w-[55%] break-words'>Create a new public note</span>
-          <span className='text-xs break-words w-[12%] whitespace-nowrap'>
-           {getTimeDifference(item.update_at, new Date())}
+          <span className='text-xs w-[15%] whitespace-nowrap'>
+           {formatTimeAgo(item.update_at)}
           </span>
          </div>
-        ))}
-       </div>
-       <p className='text-center mt-2'>See more</p>
-      </>
-     ) : (
-      <p className='text-center'>Not found new notes</p>
-     )}
-    </div>
+        </li>
+       ))}
+      </ul>
+      {visibleMoreNotes < allNotePublic.length && (
+       <button
+        onClick={handleSeeMore(setVisibleMoreNotes)}
+        className='text-center text-blue-500 hover:text-blue-700 cursor-pointer mt-2'
+       >
+        See more
+       </button>
+      )}
+     </>
+    ) : (
+     <p className='text-center'>Not found new notes</p>
+    )}
    </div>
   </div>
  )

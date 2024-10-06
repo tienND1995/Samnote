@@ -57,13 +57,24 @@ const UserProfile = () => {
 
  useEffect(() => {
   fetchLastUsers()
-  // fetchAllNotePublic()
+  fetchAllNotePublic()
  }, [])
 
  const fetchLastUsers = async () => {
   const response = await api.get('/lastUser')
   if (response && response.data.status === 200) {
    setLastUsers(response.data.data)
+  }
+ }
+
+ const fetchAllNotePublic = async () => {
+  try {
+   const response = await api.get('/notes_public')
+   if (response && response.data.message === 'success') {
+    setAllNotePublic(response.data.public_note)
+   }
+  } catch (err) {
+   console.log(err)
   }
  }
 

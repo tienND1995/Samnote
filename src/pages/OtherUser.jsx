@@ -278,7 +278,7 @@ const OtherUser = () => {
                     height: '39px',
                   }}
                   onClick={() =>
-                    navigate(`/user/incognito`, { state: { userInfomations } })
+                    navigate(`/incognito`, { state: { userInfomations } })
                   }
                 >
                   <img

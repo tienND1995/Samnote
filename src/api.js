@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { TOKEN } from './constant'
-import { handleLogOut } from './helper'
+import { TOKEN } from './utils/constant'
+import { handleLogOut } from './utils/utils'
 
 const api = axios.create({
  baseURL: `https://samnote.mangasocial.online`,

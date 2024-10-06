@@ -137,7 +137,7 @@ const DeleteImages = ({
 
  if (!images?.length || !id) return
 
-const imageSort = images.sort((a, b) => a.id - b.id)
+ const imageSort = images.sort((a, b) => a.id - b.id)
 
  return (
   <div className='bg-white px-3 pt-2  rounded-md'>
@@ -168,32 +168,34 @@ const imageSort = images.sort((a, b) => a.id - b.id)
 
    <div className='max-w-[35vw] mx-auto'>
     <Slider {...settings}>
-     {imageSort.sort((a, b) => b.id - a.id)?.map(({ id, link }) => (
-      <li key={id} className='p-1 position-relative noteEdit-imageItem'>
-       <div className='position-absolute right-0 left-0 top-0 px-1 flex justify-between w-full items-center'>
-        <div>
-         <button type='button' onClick={() => handleDeleteImage(id)}>
-          <CloseIcon className='text-[20px]' />
-         </button>
+     {imageSort
+      .sort((a, b) => b.id - a.id)
+      ?.map(({ id, link }) => (
+       <li key={id} className='p-1 position-relative noteEdit-imageItem'>
+        <div className='position-absolute right-0 left-0 top-0 px-1 flex justify-between w-full items-center'>
+         <div>
+          <button type='button' onClick={() => handleDeleteImage(id)}>
+           <CloseIcon className='text-[20px]' />
+          </button>
+         </div>
+
+         <div>
+          <input
+           type='checkbox'
+           checked={checkedItems.has(id)}
+           data-key={id}
+           onChange={handleCheck}
+          />
+         </div>
         </div>
 
-        <div>
-         <input
-          type='checkbox'
-          checked={checkedItems.has(id)}
-          data-key={id}
-          onChange={handleCheck}
-         />
-        </div>
-       </div>
-
-       <img
-        className='object-cover aspect-[3/4] w-full rounded-sm'
-        src={link}
-        alt='img-editnote'
-       />
-      </li>
-     ))}
+        <img
+         className='object-cover aspect-[3/4] w-full rounded-sm'
+         src={link}
+         alt='img-editnote'
+        />
+       </li>
+      ))}
     </Slider>
    </div>
   </div>

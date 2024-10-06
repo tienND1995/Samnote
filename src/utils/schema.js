@@ -45,7 +45,7 @@ export const schemaNoteCreate = Joi.object({
   'string.min': 'At least 5 character!',
   'string.empty': 'Not content yet!',
  }),
-
+ 
  title: Joi.string().min(5).max(100).required().messages({
   'string.min': 'At least 5 character!',
   'string.empty': 'Not title yet!',
