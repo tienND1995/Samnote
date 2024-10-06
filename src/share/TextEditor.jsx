@@ -34,7 +34,7 @@ const TextEditor = ({ setValue, value, onChangeTextEditor }) => {
  }
 
  return (
-  <div className='bg-white flex flex-grow-1 rounded-[10px] overflow-hidden'>
+  <div className='bg-white flex flex-grow-1 overflow-hidden'>
    <ReactQuill
     ref={reactQuillRef}
     style={{

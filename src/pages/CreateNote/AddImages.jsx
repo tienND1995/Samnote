@@ -12,7 +12,7 @@ const AddImages = ({ imageList, onChangeUploadImages }) => {
   dots: false,
   infinite: false,
   speed: 500,
-  slidesToShow: 7,
+  slidesToShow: 5,
   slidesToScroll: 2,
   className: 'slider-btn-arrow',
   nextArrow: (
@@ -53,7 +53,7 @@ const AddImages = ({ imageList, onChangeUploadImages }) => {
 
  return (
   <div className='bg-white px-3 pt-2  rounded-md'>
-   <div className='flex justify-end gap-2 mb-2'>
+   <div className='flex justify-end gap-2 mb-2 flex-col justify-around'>
     <div>
      <input
       id='checked-list'
