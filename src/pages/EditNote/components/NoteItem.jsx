@@ -21,7 +21,7 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
   speed: 500,
   slidesToShow: 3,
   slidesToScroll: 1,
-  className: 'editnote-btn-slick',
+  className: 'slider-btn-arrow',
   nextArrow: (
    <button>
     <ArrowForwardIosIcon />

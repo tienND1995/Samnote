@@ -31,7 +31,7 @@ const DeleteImages = ({
   speed: 500,
   slidesToShow: 5,
   slidesToScroll: 1,
-  className: 'editnote-btn-slick',
+  className: 'slider-btn-arrow',
   nextArrow: (
    <button type='button'>
     <ArrowForwardIosIcon />
