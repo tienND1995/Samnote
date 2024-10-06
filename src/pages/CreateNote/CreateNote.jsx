@@ -61,29 +61,23 @@ const CreateNote = () => {
  const handleChangeTextEditor = (text) => setTextEditor(text)
  const handleChangeColor = (color) => setColor(color)
 
- const postNote = async (data) => {
-  let params = ''
-  params = uploadImageList.length > 0 ? 'new-note-image' : 'notes'
+ const postNote = (data) => {
+  const isFormData = data instanceof FormData
+  let params = '/notes'
+  params = isFormData ? '/new-note-image' : params
 
-  try {
-   const response = await fetch(
-    `https://samnote.mangasocial.online/${params}/${user?.id}`,
-    {
-     method: 'POST',
-     body: data,
-    }
-   )
+  fetchApiSamenote('post', `${params}/${user?.id}`, data)
+   .then((data) => {
+    console.log('data', data)
 
-   reset()
-
-   setSnackbar({
-    isOpen: true,
-    message: `Create note success!`,
-    severity: 'success',
+    reset()
+    setSnackbar({
+     isOpen: true,
+     message: `Create note success!`,
+     severity: 'success',
+    })
    })
-  } catch (error) {
-   console.log(error)
-  }
+   .catch((error) => console.log('error', error))
  }
 
  const onSubmit = (data) => {
@@ -122,6 +116,8 @@ const CreateNote = () => {
    dataWithImage.append('idFolder', dataForm.idFolder)
    dataWithImage.append('linkNoteShare', dataForm.linkNoteShare)
    dataWithImage.append('remindAt', dataForm.remindAt)
+   dataWithImage.append('notePublic', dataForm.notePublic)
+
    dataWithImage.append('r', newColor.r)
    dataWithImage.append('g', newColor.g)
    dataWithImage.append('b', newColor.b)
@@ -130,6 +126,7 @@ const CreateNote = () => {
    uploadImageList.forEach(({ file }) =>
     dataWithImage.append('image_note', file)
    )
+
    return postNote(dataWithImage)
   }
  }

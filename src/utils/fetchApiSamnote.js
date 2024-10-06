@@ -8,12 +8,19 @@ export const fetchApiSamenote = async (
  url = '',
  data = {}
 ) => {
+ const isFormData = data instanceof FormData
+
+ const option = {
+  method: nameMethod,
+  url: `${API_SERVER_URL}${url}`,
+  data,
+  headers: {
+   'Content-Type': isFormData ? 'multipart/form-data' : 'application/json',
+  },
+ }
+
  try {
-  const response = await axios({
-   method: nameMethod,
-   url: `${API_SERVER_URL}${url}`,
-   data,
-  })
+  const response = await axios(option)
 
   return response.data
  } catch (error) {
