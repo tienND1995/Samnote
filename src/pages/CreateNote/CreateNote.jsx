@@ -147,7 +147,7 @@ const CreateNote = () => {
  }
 
  return (
-  <div className='bg-[#181A1B] w-full p-4 flex flex-col'>
+  <div className='bg-[#181A1B] w-full p-4 flex flex-col gap-3 '>
    <div className='flex justify-center items-end gap-2'>
     <img src={imageCreateNote} alt='' />
 
@@ -155,9 +155,9 @@ const CreateNote = () => {
    </div>
    <form
     onSubmit={handleSubmit(onSubmit)}
-    className='bg-[#3A3F42] rounded-t-[10px] grid grid-cols-2 flex-grow-1 '
+    className='bg-[#3A3F42] grid grid-cols-2 flex-grow-1 rounded-t-[10px] overflow-hidden'
    >
-    <div className='p-4 flex flex-col justify-around'>
+    <div className='p-4 flex flex-col justify-between'>
      <div className='max-w-[600px] mx-auto w-full'>
       <FormCreateNote
        userID={user?.id}
@@ -182,7 +182,6 @@ const CreateNote = () => {
          control={
           <Checkbox
            className='text-white w-max h-max'
-
            {...register('pinned')}
           />
          }
