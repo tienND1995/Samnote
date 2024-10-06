@@ -45,22 +45,21 @@ export const schemaNoteCreate = Joi.object({
   'string.min': 'At least 5 character!',
   'string.empty': 'Not content yet!',
  }),
-
+ 
  title: Joi.string().min(5).max(100).required().messages({
   'string.min': 'At least 5 character!',
   'string.empty': 'Not title yet!',
  }),
 
- dueAt: Joi.date().max('now').required().messages({
-  'date.max': 'Current maximum date',
-
+ dueAt: Joi.date().greater('now').required().messages({
+  'date.greater': 'Greater current date now',
   'date.empty': 'Not content yet!',
  }),
 
  // no require  .....................
 
- remindAt: Joi.date().max('now').allow(null).messages({
-  'date.max': 'Current maximum date',
+ remindAt: Joi.date().min('now').allow(null).messages({
+  'date.max': 'Min Current date',
  }),
 
  idFolder: Joi.number().integer().allow(null),

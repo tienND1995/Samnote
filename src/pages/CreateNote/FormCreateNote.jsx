@@ -1,8 +1,4 @@
-import React, { useState } from 'react'
-
-import { useForm } from 'react-hook-form'
-import { joiResolver } from '@hookform/resolvers/joi'
-import { schemaNoteCreate } from '../../../utils/schema'
+import { useEffect, useState } from 'react'
 
 import {
  FormControl,
@@ -11,8 +7,16 @@ import {
  Select,
  TextField,
 } from '@mui/material'
+import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
 
-const FormCreateNote = () => {
+const FormCreateNote = ({
+ register,
+ watch,
+ errors,
+ userID,
+ dirtyFields,
+ onChangeColor,
+}) => {
  const [colorList, setColorList] = useState([])
  const [folderList, setFolderList] = useState([])
  const [color, setColor] = useState({
@@ -22,38 +26,34 @@ const FormCreateNote = () => {
   name: 'snow',
  })
 
- const {
-  register,
-  handleSubmit,
-  setValue,
-  getValues,
-  watch,
-  reset,
-
-  formState: { errors, dirtyFields },
- } = useForm({
-  //   resolver: joiResolver(schemaNoteCreate),
-  defaultValues: {
-   data: '',
-   title: '',
-   dueAt: null,
-
-   remindAt: null,
-   pinned: false,
-   notePublic: 1,
-   lock: '',
-   color: '',
-   idFolder: null,
-  },
- })
-
  const notePublicForm = watch('notePublic')
  const colorForm = watch('color')
  const folderForm = watch('idFolder')
 
+ useEffect(() => {
+  if (!userID) return
+
+  fetchApiSamenote('get', '/get_all_color').then((data) =>
+   setColorList(data.data)
+  )
+  fetchApiSamenote('get', `/folder/${userID}`).then((data) =>
+   setFolderList(data.folder)
+  )
+ }, [userID])
+
+ useEffect(() => {
+  // check color form change?
+  if (!dirtyFields.color) return
+
+  // handle change color
+  const colorMatch = colorList?.find((color) => color.name === colorForm)
+  setColor(colorMatch)
+  onChangeColor(colorMatch)
+ }, [colorForm])
+
  return (
-  <div className='row'>
-   <div className='col-12 mb-3'>
+  <div className='grid grid-cols-2 gap-3'>
+   <div className='col-span-2'>
     <InputLabel className='text-white'>Title</InputLabel>
     <TextField
      className='w-full bg-white rounded-1 '
@@ -63,13 +63,13 @@ const FormCreateNote = () => {
     />
 
     {errors.title && (
-     <p style={{ borderBottom: '1px solid red' }} className='text-red-600'>
+     <p className='text-red-600 border-b border-red-600'>
       {errors.title.message}
      </p>
     )}
    </div>
 
-   <div className='mb-3 col-6'>
+   <div>
     <InputLabel className='text-white'>Lock</InputLabel>
     <TextField
      className='w-full bg-white rounded-1 '
@@ -79,7 +79,7 @@ const FormCreateNote = () => {
     />
    </div>
 
-   <div className='mb-3 col-6'>
+   <div>
     <InputLabel className='text-white' id='select-public-form'>
      Folder
     </InputLabel>
@@ -101,7 +101,7 @@ const FormCreateNote = () => {
     </FormControl>
    </div>
 
-   <div className='col-6 mb-3'>
+   <div>
     <InputLabel className='text-white' id='select-color-form'>
      Background
     </InputLabel>
@@ -136,7 +136,7 @@ const FormCreateNote = () => {
     </FormControl>
    </div>
 
-   <div className='col-6 mb-3'>
+   <div>
     <InputLabel className='text-white' id='select-public-form'>
      Note Public
     </InputLabel>
@@ -151,7 +151,7 @@ const FormCreateNote = () => {
 
    <div className='w-max'>
     <div className='mb-3'>
-     <InputLabel className='text-white'>Remind At</InputLabel>
+     <InputLabel className='text-white'>Due At</InputLabel>
      <TextField
       className='w-full bg-white rounded-1 '
       size='small'
