@@ -92,6 +92,8 @@ const Group = () => {
   if (!socket) return
 
   socket.on('send_message', (result) => {
+   console.log('Sent message', result)
+
    if (result.message === 'Error') return
 
    getAllMessageList()
