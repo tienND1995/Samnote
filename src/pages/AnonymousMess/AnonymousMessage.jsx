@@ -84,8 +84,14 @@ const AnonymousMessage = () => {
       const getListChatUnknow = async () => {
         try {
           const res = await api.get(`/message/list_user_unknown/${user.id}`);
-          setListChatUnknow(res.data.data);
-          // console.log("data", res.data.data);
+
+          if (res.data.status === 200) {
+            setListChatUnknow(res.data.data);
+          } else {
+            setListChatUnknow([]);
+          }
+
+          console.log("data của listChatUnknow", res);
         } catch (err) {
           console.error("Error fetching chat list:", err);
         }
@@ -101,6 +107,8 @@ const AnonymousMessage = () => {
 
   // Hàm lọc danh sách dựa trên tab hiện tại
   const filteredChatList = () => {
+    console.log("listChatUnknow", listChatUnknow);
+
     if (activeTab === "unread") {
       return listChatUnknow.filter((item) => item.unReadCount > 0);
     } else if (activeTab === "read") {
