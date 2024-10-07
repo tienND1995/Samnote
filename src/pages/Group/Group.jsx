@@ -22,7 +22,6 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import ChatList from './ChatList/ChatList'
 import Information from './Information/Information'
 import SettingGroup from './SettingGroup/SettingGroup'
-import { info } from 'autoprefixer'
 
 const { API_SERVER_URL } = configs
 
@@ -43,18 +42,10 @@ const Group = () => {
   searchUser
 
  // var content message
- const [messageContent, setMessageContent] = useState({
-  messageContentRef: useRef(),
-  inputMessageFormRef: useRef(),
-  // heightMessageContent: '500',
-  messageContentUlRef: useRef(),
- })
- const {
-  inputMessageFormRef,
-  messageContentRef,
-  // heightMessageContent,
-  messageContentUlRef,
- } = messageContent
+ const messageContentRef = useRef()
+ const inputMessageFormRef = useRef()
+ // heightMessageContent: '500',
+ const messageContentUlRef = useRef()
 
  const [infoOtherUser, setInfoOtherUser] = useState({})
  const [infoGroupItem, setInfoGroupItem] = useState({})
@@ -68,7 +59,6 @@ const Group = () => {
  const [typeFilterChat, setTypeFilterChat] = useState(
   window.localStorage.getItem('typeFilterChat') || 'All'
  )
-
 
  const handleChangeTypeFilterChat = (type) => setTypeFilterChat(type)
 
@@ -378,6 +368,7 @@ const Group = () => {
 
    setDisableGroupName(true)
    setInfoGroupItem({ ...infoGroupItem, name: newName })
+   getAllMessageList()
   } catch (error) {
    console.log(error)
   }
@@ -500,7 +491,6 @@ const Group = () => {
   onClickUserItem: handleClickUserItem,
   onClickGroupItem: handleClickGroupItem,
   onShowModalSearch: handleShowModalSearch,
-  setSnackbar,
  }
 
  const propsSettingGroup = {

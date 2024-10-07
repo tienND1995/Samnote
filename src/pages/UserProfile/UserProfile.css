@@ -1,0 +1,92 @@
+.hide-scroll {
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Edge */
+}
+
+.radius-quicknotes {
+  border-radius: 12px;
+}
+
+.truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hide-quick {
+  display: none;
+}
+
+.borderNone:hover {
+  border: none;
+}
+
+.swiper-publicNotes::-webkit-scrollbar,
+.swiper-privateNotes::-webkit-scrollbar {
+  background-color: gray;
+  border-radius: 0.6rem;
+}
+
+.swiper-publicNotes::-webkit-scrollbar-thumb,
+.swiper-privateNotes::-webkit-scrollbar-thumb {
+  background-color: white;
+  border-radius: 0.6rem;
+}
+
+.swiper-publicNotes::-webkit-scrollbar {
+  width: 0.6rem;
+}
+
+.swiper-privateNotes::-webkit-scrollbar {
+  height: 0.6rem;
+}
+
+.quick-note-input .MuiInputBase-root {
+  scrollbar-width: thin;
+  scrollbar-color: gray #fff4ba;
+}
+
+Button.btn-create-quickNotes {
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  transition: all 0.3s ease-in-out;
+}
+
+Button.btn-create-quickNotes:hover {
+  background-color: #2563eb;
+  transform: scale(1.05);
+}
+
+.curved-line {
+  position: relative;
+  width: 32px;
+  height: 15px;
+  margin-right: 4px;
+}
+
+.curved-line::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -2px;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #e5e7eb;
+  border-top: none;
+  border-right: none;
+  border-radius: 0 0 0 16px;
+}
+
+.create-reply-comment .curved-line::before {
+  top: -22px;
+  width: 120%;
+  height: 200%;
+}

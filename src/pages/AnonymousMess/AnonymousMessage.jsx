@@ -107,6 +107,8 @@ const AnonymousMessage = () => {
 
   // Hàm lọc danh sách dựa trên tab hiện tại
   const filteredChatList = () => {
+    console.log("listChatUnknow", listChatUnknow);
+
     if (activeTab === "unread") {
       return listChatUnknow.filter((item) => item.unReadCount > 0);
     } else if (activeTab === "read") {
@@ -384,7 +386,7 @@ const AnonymousMessage = () => {
               ))
             ) : (
               <Typography
-                variant="body2"
+                variant="body1"
                 sx={{ marginTop: "20px", textAlign: "center" }}
               >
                 No chat messages.

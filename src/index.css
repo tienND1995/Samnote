@@ -3,6 +3,81 @@
 @tailwind utilities;
 
 * {
-  margin: 0;
-  padding: 0;
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+}
+
+html {
+ font-size: 100%;
+}
+
+body {
+ font-family: 'Roboto', sans-serif;
+ font-weight: 400;
+ font-style: normal;
+ /* font-size: 1.6rem; */
+}
+
+button,
+input {
+ outline: none;
+ border: none;
+ background: transparent;
+}
+
+ul {
+ padding-left: 0;
+ margin-bottom: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+ margin-bottom: 0;
+}
+
+/* _______________________ */
+.style-scrollbar-y::-webkit-scrollbar {
+ border-radius: 6px;
+ background-color: black;
+ width: 10px;
+}
+
+.style-scrollbar-y::-webkit-scrollbar-thumb {
+ background-color: white;
+ border-radius: 6px;
+ cursor: pointer;
+}
+
+.style-scrollbar-y-sm::-webkit-scrollbar {
+ width: 6px;
+}
+
+.style-scrollbar-y-md::-webkit-scrollbar {
+ width: 10px;
+}
+
+/* _____________________ */
+.style-scrollbar-x::-webkit-scrollbar {
+ border-radius: 6px;
+ background-color: black;
+ width: 10px;
+}
+
+.style-scrollbar-x::-webkit-scrollbar-thumb {
+ background-color: red;
+ border-radius: 6px;
+ cursor: pointer;
+}
+
+.style-scrollbar-x-sm::-webkit-scrollbar {
+ height: 6px;
+}
+
+.style-scrollbar-x-md::-webkit-scrollbar {
+ height: 10px;
 }
