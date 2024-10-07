@@ -116,7 +116,7 @@ const LeftsideContent = ({
       <Box className='flex mb-5 public-notes'>
         <Box className='flex-[4] w-full'>
           <TabContext value={publicNotesTabValue}>
-            <div className='header-tabContent'>
+            <div className='header-tabContent rounded-xl overflow-hidden mb-1'>
               <div
                 className='title'
                 style={{
@@ -358,7 +358,7 @@ const LeftsideContent = ({
       <Box className='flex mb-5 private-notes'>
         <Box className='flex-[4] w-full'>
           <TabContext value={privateNotesTabValue}>
-            <div className='header-tabContent'>
+            <div className='header-tabContent rounded-xl overflow-hidden mb-1'>
               <div
                 className='title'
                 style={{
