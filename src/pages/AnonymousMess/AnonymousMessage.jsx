@@ -118,9 +118,19 @@ const AnonymousMessage = () => {
   };
 
   const deleteChatUnknown = async (data) => {
+    // Kiểm tra xem user.id có tồn tại không
+    if (!user || !user.id) {
+      Swal.fire({
+        title: "Error!",
+        text: "User ID not found. Cannot delete chat.",
+        icon: "error",
+      });
+      return;
+    }
+
     console.log("data để xóa showChatBox", data);
     const payload = {
-      idRoom: data.idRoom,
+      idRoom: data.idRoom ? data.idRoom : `${user.id}#${data.idUser}`,
     };
 
     const result = await Swal.fire({
@@ -145,6 +155,8 @@ const AnonymousMessage = () => {
           avatar: null,
           username: "",
         }));
+        console.log(":xóa thành công");
+
         // Close the select menu
         setStatus((prev) => ({
           ...prev,
