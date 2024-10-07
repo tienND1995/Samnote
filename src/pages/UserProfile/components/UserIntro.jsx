@@ -21,8 +21,6 @@ const UserIntro = ({ userInfomations, user, userID }) => {
   })
  }, [])
 
- console.log('dataMess', dataMess)
-
  useEffect(() => {
   if (!socket) return
 
