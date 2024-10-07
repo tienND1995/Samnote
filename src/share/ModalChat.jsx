@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { AppContext } from "../context";
 import { useNavigate } from "react-router-dom";
+import { handleErrorAvatar } from "../helper";
 
 const ModalChat = (props) => {
   const appContext = useContext(AppContext);
@@ -31,8 +32,9 @@ const ModalChat = (props) => {
           <div className="w-[6%]">
             <img
               className="w-[40px] h-[40px] object-cover rounded-full mt-1"
-              src={item.user.Avarta}
+              src={item.user.Avarta || '/src/assets/avatar-default.png'}
               alt={item.user.Avarta}
+              onError={handleErrorAvatar}
             />
           </div>
           <div
