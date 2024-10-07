@@ -53,34 +53,25 @@ const AppSnackbar = () => {
 
 function App() {
     const isLogin = JSON.parse(localStorage.getItem('USER'))
-
     return (
         <main>
             <AppSnackbar />
-
             <Routes>
                 <Route path='/login' element={isLogin ? <Navigate to='/' /> : <Login />} />
-                <Route path='/' element={<Home />} />
+                <Route path='/' exact element={<Home />} />
                 <Route path='*' element={<Navigate replace to='/' />} />
-
                 <Route element={<RootLayout />}>
-                    <Route path='/other-user/:id' element={<OtherUser />} />
-                    <Route path='/user/note/:id' element={<UserNotes />} />
                     <Route path='/user/setting' element={<UserSetting />} />
                     <Route path='/user/sketch' element={<UserSketch />} />
-                    <Route path='/user/group' element={<UserGroup />} />
                     <Route path='/user/dustbin' element={<UserDustbin />} />
-
-                    <Route path='/user/create-note' element={<CreateNote />} />
-                    <Route path='/profile/:id' element={<UserProfile />} />
                     <Route path='/user/incognito' element={<AnonymousMessage />} />
-
                     {/* ................................ */}
-
-                    <Route path='/user/photo' element={<Photo />} />
+                    <Route path='/photo' element={<Photo />} />
                     <Route path='/group' element={<Group />} />
+                    <Route path='/profile/:id' element={<UserProfile />} />
                     <Route path='/editnote/:id' element={<EditNote />} />
-                    <Route path='/editnote' element={<EditNote />} />
+                    <Route path='/editnote' exact element={<EditNote />} />
+                    <Route path='/create-note' element={<CreateNote />} />
                     <Route path='/demo' element={<Demo />} />
                 </Route>
             </Routes>

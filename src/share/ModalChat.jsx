@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { AppContext } from "../context";
 import { useNavigate } from "react-router-dom";
-import { handleErrorAvatar } from "../helper";
+import { handleErrorAvatar } from "../utils/utils";
 
 const ModalChat = (props) => {
   const appContext = useContext(AppContext);
