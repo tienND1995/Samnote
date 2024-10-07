@@ -76,6 +76,7 @@ const FormEdit = ({ onDispatchName }) => {
  const colorForm = watch('color')
  const folderForm = watch('idFolder')
  const contentEditor = watch('data')
+ const pinnedForm = watch('pinned')
 
  const convertTime = (time) => moment(`${time}+0700`).format('YYYY-MM-DD')
 
@@ -355,7 +356,13 @@ const FormEdit = ({ onDispatchName }) => {
      <FormControlLabel
       className=' text-white rounded-1'
       label='Pinned'
-      control={<Checkbox className='text-white' {...register('pinned')} />}
+      control={
+       <Checkbox
+        className='text-white'
+        value={pinnedForm}
+        {...register('pinned')}
+       />
+      }
      />
 
      <div>
