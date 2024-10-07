@@ -61,7 +61,7 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
                 <div className='flex justify-between w-full'>
                     <h2 className='font-bold text-gray-700 text-3xl'>Quick Note</h2>
                     <Button
-                        className={`btn-create-quickNotes ${user.id != userID ? 'text-white bg-blue-300' : ''}`}
+                        className={`btn-create-quickNotes h-[2.5rem] ${user.id != userID ? 'text-white bg-blue-300' : ''}`}
                         disabled={user.id != userID}
                         onClick={handleCreateNote}
                     >
@@ -90,13 +90,15 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
                                         to={`/profile/${id}`}
                                         className='w-full flex justify-around items-center my-1 link-dark text-decoration-none'
                                     >
-                                        <img
-                                            className='w-[40px] h-[40px] rounded-xl object-cover'
-                                            src={linkAvatar || '/src/assets/avatar-default.png'}
-                                            alt='avatar'
-                                            onError={handleErrorAvatar}
-                                        />
-                                        <span className='truncate-text w-[40%]'>{user_name}</span>
+                                        <div className='flex w-[60%] items-center gap-3'>
+                                            <img
+                                                className='w-[40px] h-[40px] rounded-xl object-cover'
+                                                src={linkAvatar || '/src/assets/avatar-default.png'}
+                                                alt='avatar'
+                                                onError={handleErrorAvatar}
+                                            />
+                                            <span className='truncate-text'>{user_name}</span>
+                                        </div>
                                         <span className='text-sm'>
                                             {createAt.split(' ').slice(1, 4).join(' ')}
                                         </span>
@@ -125,10 +127,10 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
                             {allNotePublic.slice(0, visibleMoreNotes).map((item, index) => (
                                 <li key={`notePublic ${index}`} className="mb-4">
                                     <div className='w-full flex justify-around items-center'>
-                                        <span className='w-[20%] truncate-text'>
+                                        <span className='w-[20%] truncate-text text-center'>
                                             {item.author}
                                         </span>
-                                        <span className='w-[55%] break-words'>
+                                        <span className='w-[55%] break-words truncate-text'>
                                             Create a new public note
                                         </span>
                                         <span className='text-xs w-[15%] whitespace-nowrap'>

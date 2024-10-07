@@ -346,7 +346,11 @@ const LeftsideContent = ({
               )}
             </TabPanel>
             <TabPanel value='2' sx={{ width: '100%', padding: 0 }}>
-              tab2
+              <Box className='bg-white p-4 rounded-lg'>
+                <Typography variant='h5' className='font-semibold text-center'>
+                  No recommended notes to show
+                </Typography>
+              </Box>
             </TabPanel>
           </TabContext>
         </Box>
@@ -571,7 +575,11 @@ const LeftsideContent = ({
               )}
             </TabPanel>
             <TabPanel value='2' sx={{ width: '100%', padding: 0 }}>
-              tab2
+              <Box className='bg-white p-4 rounded-lg'>
+                <Typography variant='h5' className='font-semibold text-center'>
+                  No recommended notes to show
+                </Typography>
+              </Box>
             </TabPanel>
           </TabContext>
         </Box>

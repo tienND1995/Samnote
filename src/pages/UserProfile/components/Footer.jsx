@@ -6,8 +6,9 @@ const Footer = () => {
     return (
         <div className='footer w-[100%] h-[60px] bg-[#1D1D1D] flex items-center justify-center p-8'>
             <img src='/src/assets/footer-icon.png' alt='icon' className='w-[2.5rem] h-[2.5rem] mr-5' />
-            <p className='text-white text-center text-xl font-[700]'>
-                Now available on IOS and Android platform. Download now!
+            <p className='w-auto text-white text-center text-xl font-[700] m-0'>
+                <span className='mr-2 hidden md:inline'>Now available on IOS and Android platform.</span>
+                <span>Download now!</span>
             </p>
             <div className='dowload-app-icons flex items-center gap-2 ml-4'>
                 <AppleIcon
