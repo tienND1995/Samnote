@@ -23,14 +23,8 @@ const UserProfile = () => {
 
     //data note
     const [allNotePublic, setAllNotePublic] = useState([])
-    const [userNotes, setUserNotes] = useState(null)
-    const archivedNotes = (userNotes || []).filter((note) => note.inArchived)
-    const publicNotes = (archivedNotes || []).filter(
-        (note) => note.notePublic === 1
-    )
-    const privateNotes = (archivedNotes || []).filter(
-        (note) => note.notePublic === 0
-    )
+    const [userNotes, setUserNotes] = useState([])
+    const [archivedNotes, setArchivedNotes] = useState([])
 
     const [reload, setReload] = useState(0)
     const navigate = useNavigate()
@@ -47,11 +41,11 @@ const UserProfile = () => {
                 )
                 setUserInformations(res.data.user)
                 setUserNotes(res.data.note)
+                setArchivedNotes(res.data.note.filter((note) => note.inArchived))
             } catch (err) {
                 console.log(err)
             }
         }
-
         getUserInformation(userID)
     }, [userID, reload])
 
@@ -86,21 +80,18 @@ const UserProfile = () => {
                         <UserIntro
                             userInfomations={userInfomations}
                             user={user}
-                            userID={userID}
                         />
                         <div className='container-content row m-auto'>
                             <LeftsideContent
                                 userInfomations={userInfomations}
-                                publicNotes={publicNotes}
-                                privateNotes={privateNotes}
+                                archivedNotes={archivedNotes}
                                 setReload={setReload}
-                                userID={userID}
                             />
                             <RightsideContent
+                                userInfomations={userInfomations}
                                 lastUsers={lastUsers}
                                 allNotePublic={allNotePublic}
                                 setReload={setReload}
-                                userID={userID}
                             />
                         </div>
                         <Footer />

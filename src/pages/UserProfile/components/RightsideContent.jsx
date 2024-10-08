@@ -5,7 +5,7 @@ import { handleErrorAvatar, formatTimeAgo } from '../../../utils/utils'
 import { AppContext } from '../../../context'
 import api from '../../../api'
 
-const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
+const RightsideContent = ({ lastUsers, allNotePublic, setReload, userInfomations }) => {
     const [payloadData, setPayloadData] = useState('')
     const appContext = useContext(AppContext)
     const { setSnackbar, user } = appContext
@@ -61,8 +61,8 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userID }) => {
                 <div className='flex justify-between w-full'>
                     <h2 className='font-bold text-gray-700 text-3xl'>Quick Note</h2>
                     <Button
-                        className={`btn-create-quickNotes h-[2.5rem] ${user.id != userID ? 'text-white bg-blue-300' : ''}`}
-                        disabled={user.id != userID}
+                        className={`btn-create-quickNotes h-[2.5rem] ${user.id !== userInfomations.id ? 'text-white bg-blue-300' : ''}`}
+                        disabled={user.id !== userInfomations.id}
                         onClick={handleCreateNote}
                     >
                         Create

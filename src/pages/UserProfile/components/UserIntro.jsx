@@ -7,7 +7,7 @@ import { io } from 'socket.io-client'
 import api from '../../../api'
 import { getFormattedDate, handleErrorAvatar } from '../../../utils/utils'
 
-const UserIntro = ({ userInfomations, user, userID }) => {
+const UserIntro = ({ userInfomations, user }) => {
   const [isModalMess, setIsModalMessage] = useState(false)
   const [dataMess, setDataMess] = useState([])
   const [socket, setSocket] = useState(null)
@@ -42,7 +42,7 @@ const UserIntro = ({ userInfomations, user, userID }) => {
 
   const fetchAllDataMess = async () => {
     const response = await api.get(
-      `https://samnote.mangasocial.online/message/list_user_chat1vs1/${userID}`
+      `https://samnote.mangasocial.online/message/list_user_chat1vs1/${userInfomations.id}`
     )
     if (response && response.data.status === 200) {
       setDataMess(response.data.data)
@@ -66,7 +66,7 @@ const UserIntro = ({ userInfomations, user, userID }) => {
           className='w-full h-[500px] object-fit-cover cover-photo'
           style={{ filter: 'brightness(0.9)' }}
         />
-        {user.id == userID && (
+        {user.id === userInfomations.id && (
           <Box
             className='position-absolute flex justify-end w-full px-5'
             style={{
@@ -175,7 +175,7 @@ const UserIntro = ({ userInfomations, user, userID }) => {
           </Box>
         </div>
 
-        {user.id != userID && (
+        {user.id !== userInfomations.id && (
           <div className='actions-user flex gap-2 mt-2'>
             {/* <Button variant="contained" color="primary" style={{ textTransform: 'none' }}>
                             <GroupAddIcon className='mr-2' />
