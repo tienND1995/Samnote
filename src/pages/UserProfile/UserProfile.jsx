@@ -94,6 +94,7 @@ const UserProfile = () => {
                                 publicNotes={publicNotes}
                                 privateNotes={privateNotes}
                                 setReload={setReload}
+                                userID={userID}
                             />
                             <RightsideContent
                                 lastUsers={lastUsers}

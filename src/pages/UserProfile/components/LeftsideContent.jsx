@@ -18,6 +18,7 @@ const LeftsideContent = ({
   publicNotes,
   privateNotes,
   setReload,
+  userID,
 }) => {
   const appContext = useContext(AppContext)
   const { setSnackbar, user } = appContext
@@ -167,8 +168,6 @@ const LeftsideContent = ({
                     prevEl: '.swiper-button-prev',
                     nextEl: '.swiper-button-next',
                   }}
-                  onSlideChange={() => console.log('slide change')}
-                  onSwiper={(swiper) => console.log(swiper)}
                   className='swiper-publicNotes overflow-y-auto'
                 >
                   {publicNotes.map((info, index) => (
@@ -395,7 +394,7 @@ const LeftsideContent = ({
             </div>
 
             <TabPanel value='1' className='w-full p-0'>
-              {privateNotes.length > 0 ? (
+              {userInfomations.id == userID && privateNotes.length > 0 ? (
                 <Swiper
                   spaceBetween={20}
                   slidesPerView={2.5}
@@ -403,8 +402,6 @@ const LeftsideContent = ({
                     prevEl: '.swiper-button-prev',
                     nextEl: '.swiper-button-next',
                   }}
-                  onSlideChange={() => console.log('slide change')}
-                  onSwiper={(swiper) => console.log(swiper)}
                   className='swiper-privateNotes overflow-x-auto'
                 >
                   {privateNotes.map((info, index) => (

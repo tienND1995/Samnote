@@ -6,7 +6,7 @@ import { handleErrorAvatar, formatTimeAgo } from "../utils/utils";
 const ModalChat = ({ dataMess, setIsModalMessage, messageIconRef }) => {
   const appContext = useContext(AppContext);
   const { user } = appContext;
-  const [chatList, setChatList] = useState(dataMess);
+  const [chatList, setChatList] = useState([]);
   const [visibleMoreChat, setVisibleMoreChat] = useState(7);
   const chatRef = useRef(null);
   const navigate = useNavigate();
@@ -17,6 +17,10 @@ const ModalChat = ({ dataMess, setIsModalMessage, messageIconRef }) => {
     //   navigate(`/user/group`, { state: user });
     // }
   };
+
+  useEffect(() => {
+    setChatList(dataMess)
+  }, [dataMess])
 
   const handleClickOutside = (event) => {
     if (chatRef.current && !chatRef.current.contains(event.target) &&
