@@ -3,8 +3,8 @@ import Swal from 'sweetalert2'
 import axios from 'axios'
 import Modal from 'react-bootstrap/Modal'
 
-import avatarDefault from '../../../assets/avatar-default.png'
-import { fetchAllMemberGroup } from '../fetchApiGroup'
+import avatarDefault from '../../assets/avatar-default.png'
+import { fetchAllMemberGroup } from './fetchApiGroup'
 
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import LogoutIcon from '@mui/icons-material/Logout'
@@ -12,6 +12,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 import InfoIcon from '@mui/icons-material/Info'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
+import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
 
 const SettingGroup = (props) => {
  const {
@@ -22,6 +23,7 @@ const SettingGroup = (props) => {
   formName,
   groupMemberList,
   setGroupMemberList,
+  getAllMessageList,
  } = props.data
 
  const [showSettingGroup, setShowSettingGroup] = useState(false)
@@ -48,18 +50,16 @@ const SettingGroup = (props) => {
   return null
  }
 
- const fetchQuitGroup = async (idMem) => {
-  try {
-   const response = await axios.delete(
-    `https://samnote.mangasocial.online/group/quit/${idMem}`
-   )
+ const fetchQuitGroup = (idMem) => {
+  fetchApiSamenote('delete', `/group/quit/${idMem}`)
+   .then(() => {
+    fetchAllMemberGroup(groupItem.idGroup).then((data) =>
+     setGroupMemberList(data)
+    )
 
-   const newMemberList = await fetchAllMemberGroup(groupItem.idGroup)
-   setGroupMemberList(newMemberList)
-   //  setShowModalMemberList(false)
-  } catch (error) {
-   console.error(error)
-  }
+    getAllMessageList()
+   })
+   .catch((err) => console.error(err))
  }
 
  const handleQuitGroup = () => {
@@ -72,9 +72,9 @@ const SettingGroup = (props) => {
    })
   }
 
-  const memberQuit = groupItem.member.filter(
-   (member) => member.idUser === userID
-  )
+  const memberQuit = groupItem.member.find((member) => member.idUser === userID)
+
+  console.log('memberQuit', memberQuit)
 
   Swal.fire({
    title: 'Are you sure?',
@@ -226,7 +226,9 @@ const SettingGroup = (props) => {
    >
     <li>
      <button
-      className={`text-[25px] flex items-center ${typeButtonGroup === 'quit' ? 'active' : null}`}
+      className={`text-[25px] flex items-center ${
+       typeButtonGroup === 'quit' ? 'active' : null
+      }`}
       onClick={handleQuitGroup}
      >
       <LogoutIcon className='me-2 text-[30px]' /> Quit group
@@ -235,7 +237,9 @@ const SettingGroup = (props) => {
 
     <li>
      <button
-      className={`text-[25px] flex items-center ${typeButtonGroup === 'add' ? 'active' : null}`}
+      className={`text-[25px] flex items-center ${
+       typeButtonGroup === 'add' ? 'active' : null
+      }`}
       onClick={onShowModalSearch}
      >
       <AddCircleOutlineIcon className='me-2 text-[30px]' /> Add member
@@ -257,7 +261,9 @@ const SettingGroup = (props) => {
 
     <li>
      <button
-      className={`text-[25px] flex items-center ${typeButtonGroup === 'add' ? 'active' : null}`}
+      className={`text-[25px] flex items-center ${
+       typeButtonGroup === 'add' ? 'active' : null
+      }`}
       onClick={handleShowInformation}
       id='show-information'
      >

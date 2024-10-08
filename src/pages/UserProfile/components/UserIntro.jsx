@@ -7,6 +7,8 @@ import { io } from 'socket.io-client'
 import api from '../../../api'
 import { getFormattedDate, handleErrorAvatar } from '../../../utils/utils'
 
+import { useNavigate } from 'react-router-dom'
+
 const UserIntro = ({ userInfomations, user }) => {
   const [isModalMess, setIsModalMessage] = useState(false)
   const [dataMess, setDataMess] = useState([])
@@ -56,6 +58,8 @@ const UserIntro = ({ userInfomations, user }) => {
   const handleMess = () => {
     setIsModalMessage(!isModalMess)
   }
+
+  console.log('dataMess', dataMess)
 
   return (
     <div className='intro-user w-full h-auto'>
@@ -185,6 +189,7 @@ const UserIntro = ({ userInfomations, user }) => {
               variant='contained'
               color='primary'
               style={{ textTransform: 'none' }}
+              onClick={() => navigate('/group', { state: userInfomations })}
             >
               <svg
                 className='mr-2'
