@@ -10,7 +10,7 @@ import ImageIcon from '@mui/icons-material/Image'
 import SendIcon from '@mui/icons-material/Send'
 import AddBoxIcon from '@mui/icons-material/AddBox'
 
-import configs from '../../../configs/configs.json'
+import configs from '../../configs/configs.json'
 const { BASE64_URL } = configs
 
 const FormMessage = ({

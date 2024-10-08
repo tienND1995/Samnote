@@ -1,18 +1,18 @@
-import axios from 'axios'
+
 import { useEffect, useRef, useState } from 'react'
 import './ChatList.css'
 
 import TextTruncate from 'react-text-truncate'
 
-import avatarDefault from '../../../assets/avatar-default.png'
-import typeGroup from '../../../assets/type-group.png'
+import avatarDefault from '../../assets/avatar-default.png'
+import typeGroup from '../../assets/type-group.png'
 
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import CheckIcon from '@mui/icons-material/Check'
 import GroupAddIcon from '@mui/icons-material/GroupAdd'
 import SearchIcon from '@mui/icons-material/Search'
 
-import CreateGroup from '../../../share/CreateGroup'
+import CreateGroup from '../../share/CreateGroup'
 
 const ChatList = (props) => {
  const {

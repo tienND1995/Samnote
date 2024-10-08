@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import avatarDefault from '../../../assets/avatar-default.png'
+import avatarDefault from '../../assets/avatar-default.png'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
@@ -27,6 +27,8 @@ const Information = (props) => {
    const response = await axios.get(
     `https://samnote.mangasocial.online/group/allphoto/${idGroup}`
    )
+
+   console.log('response', response)
 
    setImageList(response.data.data)
   } catch (error) {
@@ -66,7 +68,7 @@ const Information = (props) => {
     transition: 'all ease-in-out .3s',
     boxShadow: '-1px 2px 2px 2px #00000040 ',
    }}
-   className={`p-3 position-absolute right-0 top-0 h-full bg-[#dffffe] overflow-hidden ${
+   className={`p-3 position-absolute right-0 top-0 h-full bg-[#dffffe] overflow-hidden flex flex-col ${
     showInfo ? 'opacity-100 visible w-[480px]' : 'opacity-0 invisible w-0'
    }`}
   >
@@ -172,7 +174,7 @@ const Information = (props) => {
     <h3 className='text-[30px] font-medium'>Image</h3>
    </div>
 
-   <ul className='my-3 row row-cols-3'>
+   <ul className='my-3 row row-cols-3 flex-grow-1 style-scrollbar-y style-scrollbar-y-sm'>
     {imageList?.map((image) => {
      return (
       <li key={image.id} className='col p-1'>
