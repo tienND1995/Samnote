@@ -6,7 +6,6 @@ import ModalChat from '../../../share/ModalChat'
 import { io } from 'socket.io-client'
 import api from '../../../api'
 import { getFormattedDate, handleErrorAvatar } from '../../../utils/utils'
-
 import { useNavigate } from 'react-router-dom'
 
 const UserIntro = ({ userInfomations, user }) => {
@@ -14,6 +13,7 @@ const UserIntro = ({ userInfomations, user }) => {
   const [dataMess, setDataMess] = useState([])
   const [socket, setSocket] = useState(null)
   const messageIconRef = useRef(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const newSocket = io('https://samnote.mangasocial.online')
@@ -58,8 +58,6 @@ const UserIntro = ({ userInfomations, user }) => {
   const handleMess = () => {
     setIsModalMessage(!isModalMess)
   }
-
-  console.log('dataMess', dataMess)
 
   return (
     <div className='intro-user w-full h-auto'>
