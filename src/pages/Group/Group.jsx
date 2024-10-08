@@ -3,7 +3,7 @@ import './Group.css'
 
 import axios from 'axios'
 import moment from 'moment'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import io from 'socket.io-client'
 
 import avatarDefault from '../../assets/avatar-default.png'
@@ -13,6 +13,7 @@ import configs from '../../configs/configs.json'
 import { AppContext } from '../../context'
 import FormMessage from './FormMessage'
 import { fetchAllMemberGroup, fetchAllMessageList } from './fetchApiGroup'
+import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
 
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -27,6 +28,7 @@ const { API_SERVER_URL } = configs
 const Group = () => {
  const appContext = useContext(AppContext)
  const { user } = appContext
+ const { state } = useLocation()
 
  const [socket, setSocket] = useState(null)
  const [showModalSearch, setShowModalSearch] = useState(false)
@@ -87,7 +89,11 @@ const Group = () => {
    if (result.message === 'Error') return
 
    getAllMessageList()
-   const { ReceivedID, SenderID } = result?.data
+   const { ReceivedID, SenderID, MessageID } = result?.data
+   if (SenderID === user?.id) {
+    fetchUpdateSeenMessage(MessageID)
+   }
+
    if (
     formName === 'chat' &&
     (ReceivedID === infoOtherUser.id || SenderID === infoOtherUser.id)
@@ -109,6 +115,20 @@ const Group = () => {
  useEffect(() => {
   scrollViewRef?.current.scrollIntoView()
  }, [messageList, messageGroupList])
+
+ // handle link profile to group
+ useEffect(() => {
+  if (!state) return
+
+  setFormName('chat')
+  setInfoOtherUser(state || {})
+
+  fetchApiSamenote('post', `/chatblock/${user?.id}`, {
+   idReceive: state.id,
+  })
+
+  state?.id && getMessageList(user?.id, state.id)
+ }, [state])
 
  // *********** handle chat user messages
  const handleClickUserItem = (otherUser) => {
