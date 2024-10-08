@@ -61,6 +61,8 @@ const UserIntro = ({ userInfomations, user, userID }) => {
   setIsModalMessage(!isModalMess)
  }
 
+ console.log('dataMess', dataMess)
+
  return (
   <div className='intro-user w-full h-auto'>
    <div className='cover-photo-container relative'>
