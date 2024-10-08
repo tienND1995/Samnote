@@ -11,3 +11,4 @@ export { default as Login } from "./Login";
 export { default as UserDustbin } from "./UserDustbin";
 export { default as UserSetting } from "./UserSetting";
 export { default as UserSketch } from "./UserSketch";
+export { default as SearchResults } from "./SearchResults/SearchResults";
