@@ -41,6 +41,11 @@ h6 {
  margin-bottom: 0;
 }
 
+a {
+ text-decoration: none;
+ color: black;
+}
+
 /* _______________________ */
 .style-scrollbar-y::-webkit-scrollbar {
  border-radius: 6px;

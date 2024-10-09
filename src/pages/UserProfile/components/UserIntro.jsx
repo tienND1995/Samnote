@@ -61,6 +61,7 @@ const UserIntro = ({ userInfomations, user, userID }) => {
   setIsModalMessage(!isModalMess)
  }
 
+
  return (
   <div className='intro-user w-full h-auto'>
    <div className='cover-photo-container relative'>

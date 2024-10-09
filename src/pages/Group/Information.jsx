@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import avatarDefault from '../../assets/avatar-default.png'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
@@ -9,6 +9,7 @@ import GroupsIcon from '@mui/icons-material/Groups'
 import ImageIcon from '@mui/icons-material/Image'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
+import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
 
 const Information = (props) => {
  const { showInfo, onHide, groupItem, groupMemberList } = props.data
@@ -19,8 +20,13 @@ const Information = (props) => {
  const btnBackRef = useRef()
 
  useEffect(() => {
-  groupItem.idGroup && fetchAllImageGroup(groupItem.idGroup)
- }, [groupItem?.idGroup])
+  groupItem.idGroup &&
+   fetchApiSamenote('get', `/group/allphoto/${groupItem.idGroup}`).then(
+    (response) => {
+     console.log('response', response)
+    }
+   )
+ }, [groupItem.idGroup])
 
  const fetchAllImageGroup = async (idGroup) => {
   try {
@@ -29,8 +35,7 @@ const Information = (props) => {
    )
 
    console.log('response', response)
-
-   setImageList(response.data.data)
+   //    setImageList(response.data.data)
   } catch (error) {
    console.log(error)
   }
@@ -85,15 +90,13 @@ const Information = (props) => {
    </div>
 
    <div className='position-relative w-max mx-auto my-[60px]'>
-    <Link to={'/'}>
-     <img
-      className='w-[90px] h-[90px] object-cover rounded-[100%]'
-      src={groupItem?.linkAvatar}
-      alt='avatar'
-     />
-    </Link>
+    <img
+     className='w-[90px] h-[90px] object-cover rounded-[100%]'
+     src={groupItem?.linkAvatar}
+     alt='avatar'
+    />
 
-    <div className='position-absolute bg-[#d9d9d9] w-[30px] h-[30px] rounded-full right-0 bottom-0 flex items-center justify-center'>
+    {/* <div className='position-absolute bg-[#d9d9d9] w-[30px] h-[30px] rounded-full right-0 bottom-0 flex items-center justify-center'>
      <input
       //   onChange={handleChangeAvatarGroup}
       id='info-file'
@@ -102,10 +105,10 @@ const Information = (props) => {
       //  disabled={!(infoGroupItem.idOwner === user.id)}
       //   disabled={!isLeaderTeam(infoGroupItem.idOwner)}
      />
-     <label htmlFor='info-file' className='flex'>
+     <label htmlFor='info-file' className='flex cursor-pointer'>
       <CameraAltIcon className='text-[20px]' />
      </label>
-    </div>
+    </div> */}
    </div>
 
    <div className='flex justify-between items-center'>
@@ -137,7 +140,10 @@ const Information = (props) => {
       key={item.idMember}
       className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
      >
-      <div className='flex gap-2 items-center'>
+      <NavLink
+       className='flex gap-2 items-center w-full'
+       to={`/profile/${item.idUser}`}
+      >
        <div>
         <img
          onError={(e) => {
@@ -152,9 +158,9 @@ const Information = (props) => {
        <div>
         <h5 className='text-lg font-extrabold capitalize'>{item.name}</h5>
        </div>
-      </div>
+      </NavLink>
 
-      <button
+      {/* <button
        onClick={() => {
         //   handleDeleteMemberGroup(item.idMember)
        }}
@@ -162,7 +168,7 @@ const Information = (props) => {
        className='text-red-500 rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
       >
        <RemoveCircleIcon className='text-[30px]' />
-      </button>
+      </button> */}
      </li>
     ))}
    </ul>

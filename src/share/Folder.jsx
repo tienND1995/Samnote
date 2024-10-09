@@ -221,7 +221,7 @@ import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { AppContext } from "../context";
 
-const Folder = ({ setReloadfunction }) => {
+const Folder = () => {
   const [folders, setFolders] = useState([]);
   const [showInputBox, setShowInputBox] = useState(false);
   const [loadingCreateFolder, setLoadingCreateFolder] = useState(false);
@@ -244,7 +244,7 @@ const Folder = ({ setReloadfunction }) => {
     try {
       const res = await api.get(`/allfolder/${user.id}`);
       setFolders(res.data.folder.reverse());
-      setReloadfunction((prev) => prev + 1);
+      // setReloadfunction((prev) => prev + 1);
     } catch (err) {
       console.log(err);
     }

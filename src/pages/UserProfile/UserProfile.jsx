@@ -33,7 +33,6 @@ const UserProfile = () => {
  )
 
  const [reload, setReload] = useState(0)
- const navigate = useNavigate()
 
  const params = useParams()
  const userID = params.id

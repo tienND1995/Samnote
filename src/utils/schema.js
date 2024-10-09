@@ -45,7 +45,7 @@ export const schemaNoteCreate = Joi.object({
   'string.min': 'At least 5 character!',
   'string.empty': 'Not content yet!',
  }),
- 
+
  title: Joi.string().min(5).max(100).required().messages({
   'string.min': 'At least 5 character!',
   'string.empty': 'Not title yet!',
@@ -67,4 +67,49 @@ export const schemaNoteCreate = Joi.object({
  notePublic: Joi.number().integer().allow('').allow(null),
  pinned: Joi.boolean().allow('').allow(null),
  lock: Joi.string().allow('').allow(null),
+})
+
+export const registerSchema = Joi.object({
+ gmail: Joi.string().required().messages({
+  'string.empty': 'Please enter a email',
+ }),
+
+ user_name: Joi.string().required().min(6).messages({
+  'string.empty': 'Please enter a user name',
+  'string.min': 'User name at least 6 characters',
+ }),
+
+ password: Joi.string().min(6).required().messages({
+  'string.empty': 'Please enter a password',
+  'string.min': 'Password at least 6 characters',
+ }),
+
+ confirm_password: Joi.any().valid(Joi.ref('password')).required().messages({
+  'any.only': 'Password must match',
+ }),
+})
+
+export const loginSchema = Joi.object({
+ user_name: Joi.string().required().messages({
+  'string.empty': 'Please enter a email or user name',
+ }),
+
+ password: Joi.string().required().messages({
+  'string.empty': 'Please enter a password',
+ }),
+})
+
+export const forgotSchema = Joi.object({
+ gmail: Joi.string().required().messages({
+  'string.empty': 'Please enter a email',
+ }),
+
+ password: Joi.string().required().messages({
+  'string.empty': 'Please enter a password',
+ }),
+
+ new_password: Joi.string().min(6).required().messages({
+  'string.empty': 'Please enter a password',
+  'string.min': 'New password at least 6 characters',
+ }),
 })
