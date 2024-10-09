@@ -2,8 +2,6 @@
 export default {
  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
  theme: {
-
-
   fontFamily: {
    SourceSan: ['Source Sans 3, sans-serif'],
    Mulish: ['Mulish, sans-serif'],

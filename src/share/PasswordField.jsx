@@ -4,7 +4,7 @@ import IconButton from "@mui/material/IconButton";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
-const PasswordField = ({ label, value, onChange, placeholder }) => {
+const PasswordField = ({ ...props }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => {
@@ -14,10 +14,7 @@ const PasswordField = ({ label, value, onChange, placeholder }) => {
   return (
     <TextField
       type={showPassword ? "text" : "password"}
-      label={label}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
+      {...props}
       sx={{ width: "300px" }}
       InputProps={{
         endAdornment: (
@@ -26,6 +23,7 @@ const PasswordField = ({ label, value, onChange, placeholder }) => {
           </IconButton>
         ),
       }}
+      // Truyền tất cả các props còn lại vào đây
     />
   );
 };

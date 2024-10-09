@@ -113,3 +113,12 @@ export const forgotSchema = Joi.object({
   'string.min': 'New password at least 6 characters',
  }),
 })
+
+export const settingSchema = Joi.object({
+ name: Joi.string().required().min(3).messages({
+  'string.empty': 'Please enter a name',
+  'string.min': 'Ít nhất 3 ký tự',
+ }),
+
+ avatar: Joi.string().uri().required(),
+})
