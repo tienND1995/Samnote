@@ -65,16 +65,7 @@ const SettingGroup = (props) => {
  const handleQuitGroup = () => {
   setTypeButtonGroup('quit')
 
-  if (groupItem.idOwner === userID) {
-   return Swal.fire({
-    icon: 'warning',
-    title: 'You are the team leader',
-   })
-  }
-
   const memberQuit = groupItem.member.find((member) => member.idUser === userID)
-
-  console.log('memberQuit', memberQuit)
 
   Swal.fire({
    title: 'Are you sure?',

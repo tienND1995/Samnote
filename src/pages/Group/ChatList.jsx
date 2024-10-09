@@ -136,7 +136,7 @@ const ChatList = (props) => {
 
     <ul
      id='list-chat'
-     className='flex flex-col flex-grow-1 gap-4 overflow-y-auto overflow-x-hidden list-chat'
+     className='flex flex-col flex-grow-1 gap-4 overflow-y-auto overflow-x-hidden list-chat mb-3'
      ref={chatListRef}
      style={{ height: `${heightChatList}px`, scrollbarWidth: 'none' }}
     >

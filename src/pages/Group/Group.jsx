@@ -27,7 +27,7 @@ const { API_SERVER_URL } = configs
 
 const Group = () => {
  const appContext = useContext(AppContext)
- const { user } = appContext
+ const { user, setSnackbar } = appContext
  const { state } = useLocation()
 
  const [socket, setSocket] = useState(null)
@@ -116,17 +116,22 @@ const Group = () => {
 
  // handle link profile to group
  useEffect(() => {
-  if (!state) return
+  if (!state || !socket) return
+
+  const roomSplit = (idUser, idOther) =>
+   idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
 
   setFormName('chat')
   setInfoOtherUser(state || {})
 
+  // đặt mối quan hệ true vs user khác
   fetchApiSamenote('post', `/chatblock/${user?.id}`, {
    idReceive: state.id,
   })
-
+  // join room chat
+  socket.emit('join_room', { room: roomSplit(user?.id, state.id) })
   state?.id && getMessageList(user?.id, state.id)
- }, [state])
+ }, [state, socket])
 
  // *********** handle chat user messages
  const handleClickUserItem = (otherUser) => {
@@ -213,6 +218,16 @@ const Group = () => {
   resetChat()
 
   inputMessageFormRef.current.focus()
+
+  console.log('group', group)
+
+  fetchApiSamenote(
+   'get',
+   `/seen_message_group/${group.id_lastest_message_in_group}/${user?.id}`
+  ).then((response) => {
+   if (response.error) return
+   getAllMessageList()
+  })
  }
 
  //  handle setting group
@@ -411,6 +426,8 @@ const Group = () => {
   idGroup: infoGroupItem?.idGroup,
   userID: user?.id,
   socket,
+  setGroupMemberList,
+  setSnackbar,
 
   clickUserSearch: {
    getMessageList,

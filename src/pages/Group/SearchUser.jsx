@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Modal from 'react-bootstrap/Modal'
 
 import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
+import { fetchAllMemberGroup } from './fetchApiGroup'
 
 import avatarDefault from '../../assets/avatar-default.png'
 
@@ -9,9 +10,13 @@ const SearchUser = ({
  showModalSearch,
  searchUserFormName,
  setShowModalSearch,
+ setGroupMemberList,
+
+ setSnackbar,
  idGroup,
  userID,
  socket,
+
  clickUserSearch,
 }) => {
  const [searchUserName, setSearchUserName] = useState('')
@@ -83,30 +88,28 @@ const SearchUser = ({
   const idMemberList = [userId]
   if (!idMemberList || !idGroup) return
 
-  // postMembersGroup(idMemberList, idGroup)
-
-  console.log(idMemberList, idGroup)
+  postMembersGroup(idMemberList, idGroup)
  }
 
- //  const postMembersGroup = async (idMemberList, idGroup) => {
- //   try {
- //    const response = await axios.post(`${API_SERVER_URL}/group/add/${idGroup}`, {
- //     idMembers: idMemberList,
- //    })
+ const postMembersGroup = (idMemberList, idGroup) => {
+  fetchApiSamenote('post', `/group/add/${idGroup}`, {
+   idMembers: idMemberList,
+   idUserAddMe: userID,
+  }).then(async (response) => {
+   if (response.error) return
 
- //    handleHideModalSearch()
- //    const groupMemberList = await fetchAllMemberGroup(infoGroupItem.idGroup)
- //    setGroupMemberList(groupMemberList)
+   // update members group
+   handleHideModalSearch()
+   const groupMemberList = await fetchAllMemberGroup(idGroup)
+   setGroupMemberList(groupMemberList)
 
- //    setSnackbar({
- //     isOpen: true,
- //     message: `Add members successfully!`,
- //     severity: 'success',
- //    })
- //   } catch (error) {
- //    console.log(error)
- //   }
- //  }
+   setSnackbar({
+    isOpen: true,
+    message: `Add members successfully!`,
+    severity: 'success',
+   })
+  })
+ }
 
  return (
   <Modal show={showModalSearch} centered={true} onHide={handleHideModalSearch}>

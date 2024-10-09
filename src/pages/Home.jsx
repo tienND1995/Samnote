@@ -341,7 +341,7 @@ const Home = () => {
             }
         }
         onClick={() => {
-         navigate(`/login`)
+         navigate(`/auth`)
         }}
        >
         <Link

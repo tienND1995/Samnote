@@ -21,9 +21,12 @@ export const fetchApiSamenote = async (
 
  try {
   const response = await axios(option)
-
   return response.data
  } catch (error) {
-  console.error(error)
+  console.log('error', error)
+  return {
+   error: error.response.data.message,
+   status: error.response.data.status,
+  }
  }
 }
