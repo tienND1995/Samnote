@@ -280,7 +280,7 @@ const UserPanel = () => {
   // }
 
   return userInfomations ? (
-    <Box className="bg-gray-700 text-white w-full pt-3 flex items-center flex-col md:gap-2 xl:gap-3 2xl:gap-4 gap-5">
+    <Box className="bg-gray-700 text-white w-full pt-3 flex items-center flex-col md:gap-2 xl:gap-3 2xl:gap-4 gap-3">
       {/* <AlertButton /> */}
       <Box
         className="flex items-center cursor-pointer"
@@ -313,6 +313,7 @@ const UserPanel = () => {
         <Box
           key={idx}
           className="flex cursor-pointer"
+          title={item.name}
           onClick={() => {
             if (item.state) {
               navigate(item.url, { state: item.state });

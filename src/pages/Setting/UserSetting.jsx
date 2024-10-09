@@ -8,87 +8,222 @@ import {
   CircularProgress,
   MenuItem,
   Select,
+  Avatar,
 } from "@mui/material";
+import Swal from "sweetalert2";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import { AppContext } from "../context";
-import PasswordField from "../share/PasswordField";
-import api from "../api"; // Make sure to import the API instance
+import { AppContext } from "../../context";
+import PasswordField from "../../share/PasswordField";
+import api from "../../api"; // Make sure to import the API instance
 
 const UserSetting = () => {
   const appContext = useContext(AppContext);
   const { user, setSnackbar } = appContext;
-
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedImageCover, setSelectedImageCover] = useState(null);
-  const [userInformations, setUserInformations] = useState(null);
   const [reload, setReload] = useState(0);
+  const [payLoad, setPayload] = useState({
+    avatar: null,
+    urlAvatar: null,
+    imgCover: null,
+    urlImgCover: null,
+    name: null,
+    gmail: null,
+    pw2: null,
+    currentPassword: null,
+    newPassword: null,
+  });
+  const [loading, setLoading] = useState({
+    loadingChangeImg: false,
+  });
+  const [status, setStatus] = useState({
+    openChangePW: false,
+  });
+  const { loadingChangeImg } = loading;
+  const { openChangePW } = status;
+  const {
+    avatar,
+    urlAvatar,
+    name,
+    gmail,
+    imgCover,
+    urlImgCover,
+    pw2,
+    currentPassword,
+    newPassword,
+  } = payLoad;
 
   useEffect(() => {
-    const getUserInformation = async () => {
-      try {
-        const res = await api.get(
-          `https://samnote.mangasocial.online/profile/${user.id}`
-        );
-        setUserInformations(res.data.user);
-        setImage(res.data.user?.AvtProfile);
-        setImageCover(res.data.user?.Avarta);
-      } catch (err) {
-        console.error(err);
+    if (user) {
+      const getUserInformation = async () => {
+        try {
+          const res = await api.get(
+            `https://samnote.mangasocial.online/profile/${user.id}`
+          );
+          //           console.log("restrar về data", res.data.user);
+
+          setPayload((prev) => ({
+            ...prev,
+            name: res.data.user.name,
+            urlAvatar: res.data.user.Avarta,
+            urlImgCover: res.data.user.AvtProfile,
+            gmail: res.data.user.gmail,
+            pw2: res.data.user.password_2,
+          }));
+        } catch (err) {
+          console.error(err);
+        }
+      };
+
+      getUserInformation();
+    }
+  }, [user, reload]);
+
+  const handleChangeImageCover = (e) => {
+    const selectedCoverImage = e.target.files[0];
+    if (selectedCoverImage) {
+      const imageCoverUrl = URL.createObjectURL(selectedCoverImage);
+
+      // Cập nhật state của payLoad
+      setPayload((prevPayload) => ({
+        ...prevPayload,
+        imgCover: selectedCoverImage,
+        urlImgCover: imageCoverUrl, // URL của ảnh để hiển thị
+      }));
+    }
+  };
+
+  const handleChangeAvatar = (e) => {
+    const selectedAvatar = e.target.files[0];
+    if (selectedAvatar) {
+      const urlAvatar = URL.createObjectURL(selectedAvatar);
+
+      // Cập nhật state của payLoad
+      setPayload((prevPayload) => ({
+        ...prevPayload,
+        avatar: selectedAvatar, // file ảnh gốc
+        urlAvatar: urlAvatar, // URL của ảnh
+      }));
+    }
+  };
+
+  const handleProfileUpdate = async () => {
+    if (!user || !user.id) {
+      Swal.fire({
+        title: "Error!",
+        text: "User ID not found. Cannot update profile.",
+        icon: "error",
+      });
+      return;
+    }
+
+    try {
+      setLoading((prev) => ({
+        ...prev,
+        loadingChangeImg: true,
+      }));
+
+      let Avarta = null;
+      let AvtProfile = null;
+
+      if (avatar) {
+        Avarta = await uploadToImgBB(avatar);
       }
+
+      if (imgCover) {
+        AvtProfile = await uploadToImgBB(imgCover);
+      }
+
+      const payload = {
+        name: name,
+        AvtProfile,
+        Avarta,
+      };
+
+      await api.patch(
+        `https://samnote.mangasocial.online/profile/change_Profile/${user.id}`,
+        payload
+      );
+
+      setReload((prev) => prev + 1);
+
+      Swal.fire({
+        title: "Success!",
+        text: "Your profile has been updated successfully.",
+        icon: "success",
+      });
+    } catch (error) {
+      console.error(error);
+
+      Swal.fire({
+        title: "Error!",
+        text: "Something went wrong while updating your profile.",
+        icon: "error",
+      });
+    } finally {
+      setLoading((prev) => ({
+        ...prev,
+        loadingChangeImg: false,
+      }));
+    }
+  };
+
+  const toggleOpenChangePw = () => {
+    setStatus((prev) => ({
+      ...prev,
+      openChangePW: !openChangePW,
+    }));
+  };
+
+  const handlePasswordUpdate = async () => {
+    const payload = {
+      gmail,
+      password: currentPassword,
+      new_password: newPassword,
     };
 
-    getUserInformation();
-  }, [user.id, reload]);
+    if (!currentPassword) {
+      setSnackbar({
+        isOpen: true,
+        message: "Current password cannot be empty",
+        severity: "error",
+      });
+      return;
+    }
 
-  const [image, setImage] = useState(userInformations?.AvtProfile);
-  const [imageCover, setImageCover] = useState(userInformations?.Avarta);
-  const [selected, setSelected] = useState("");
-  const [name, setName] = useState(user.name);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [currentPassword2, setCurrentPassword2] = useState("");
-  const [newPassword2, setNewPassword2] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [loadingPw2, setLoadingPw2] = useState(false);
-  const [loadingFogotPw2, setLoadingFogotPw2] = useState(false);
-  const [loadingProfile, setLoadingProfile] = useState(false);
-  const [currentCreatePassword2, setCurrentCreatePassword2] = useState(null);
-  const [createPassword2, setCreatePassword2] = useState(null);
-  const [confimNewPassword2, setConfimNewPassword2] = useState(null);
-  const [resultMessage, setResultMessage] = useState(null);
-  const [openPw2, setOpenPw2] = useState(true);
-  const [openPw, setOpenPw] = useState(true);
-  const [openCreatePw2, setOpenCreatePw2] = useState(true);
-  const [OpenForgotpw2, setOpenForgotpw2] = useState(false);
+    if (!newPassword) {
+      setSnackbar({
+        isOpen: true,
+        message: "New password cannot be empty",
+        severity: "error",
+      });
+      return;
+    }
 
-  const toggleOpenPw2 = () => {
+    try {
+      setLoading(true);
+      const response = await api.post(
+        `https://samnote.mangasocial.online/login/change_password/${user.id}`,
+        payload
+      );
+      //       setResultMessage(response.data.message);
+      console.log("payload", payload);
+      console.log(response.data);
+    } catch (error) {
+      console.error("lỗi", error);
+      setSnackbar({
+        isOpen: true,
+        message: "Failed to update password",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false); // Set loading state to false after request is complete
+    }
+  };
+  /////code chưa sửa
+  const toggleOpenChangePw2 = () => {
     setOpenPw2((prevState) => !prevState);
   };
   const toggleOpenCreatePw2 = () => {
     setOpenCreatePw2((prevState) => !prevState);
-  };
-  const toggleOpenPw = () => {
-    setOpenPw((prevState) => !prevState);
-  };
-
-  const toggleOpenForgotpw2 = () => {
-    setOpenForgotpw2((prevState) => !prevState);
-  };
-
-  const handleImageChange = (e) => {
-    const selectedImage = e.target.files[0];
-    setSelectedImage(selectedImage);
-    if (selectedImage) {
-      setImage(URL.createObjectURL(selectedImage));
-    }
-  };
-
-  const handleImageCoverChange = (e) => {
-    const selectedImageCover = e.target.files[0];
-    setSelectedImageCover(selectedImageCover);
-    if (selectedImageCover) {
-      setImageCover(URL.createObjectURL(selectedImageCover));
-    }
   };
 
   // const FogotPw2 = () => {
@@ -117,53 +252,6 @@ const UserSetting = () => {
 
   const handleChange = (event) => {
     setSelected(event.target.value);
-  };
-  const Email = user.gmail;
-  const handleProfileUpdate = async () => {
-    try {
-      setLoadingProfile(true);
-      let updatedImage = image;
-      let updatedImageCover = imageCover;
-      if (selectedImage) {
-        const imageUrl = await uploadToImgBB(selectedImage);
-        updatedImage = imageUrl;
-      }
-
-      if (selectedImageCover) {
-        const imageCoverUrl = await uploadToImgBB(selectedImageCover);
-        updatedImageCover = imageCoverUrl;
-      }
-
-      const payload = {
-        name,
-        AvtProfile: updatedImage,
-        Avarta: updatedImageCover,
-      };
-
-      await api.patch(
-        `https://samnote.mangasocial.online/profile/change_Profile/${user.id}`,
-        payload
-      );
-
-      setImage(updatedImage);
-      setImageCover(updatedImageCover);
-
-      setSnackbar({
-        isOpen: true,
-        message: "Profile updated successfully",
-        severity: "success",
-      });
-      setReload((prev) => prev + 1);
-    } catch (error) {
-      console.error(error);
-      setSnackbar({
-        isOpen: true,
-        message: "Failed to update profile",
-        severity: "error",
-      });
-    } finally {
-      setLoadingProfile(false); // Set loading state to false after request is complete
-    }
   };
 
   const CreatePassWord2 = async () => {
@@ -204,52 +292,6 @@ const UserSetting = () => {
       });
     } finally {
       setLoadingPw2(false); // Set loading state to false after request is complete
-    }
-  };
-
-  const handlePasswordUpdate = async () => {
-    const payload = {
-      gmail: Email,
-      password: currentPassword,
-      new_password: newPassword,
-    };
-
-    if (!currentPassword) {
-      setSnackbar({
-        isOpen: true,
-        message: "Current password cannot be empty",
-        severity: "error",
-      });
-      return;
-    }
-
-    if (!newPassword) {
-      setSnackbar({
-        isOpen: true,
-        message: "New password cannot be empty",
-        severity: "error",
-      });
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await api.post(
-        `https://samnote.mangasocial.online/login/change_password/${user.id}`,
-        payload
-      );
-      setResultMessage(response.data.message);
-      console.log("payload", payload);
-      console.log(response.data);
-    } catch (error) {
-      console.error(error);
-      setSnackbar({
-        isOpen: true,
-        message: "Failed to update password",
-        severity: "error",
-      });
-    } finally {
-      setLoading(false); // Set loading state to false after request is complete
     }
   };
 
@@ -349,11 +391,11 @@ const UserSetting = () => {
             id="avatar-button-file"
             type="file"
             style={{ display: "none" }}
-            onChange={handleImageCoverChange}
+            onChange={handleChangeAvatar}
           />
           <Box sx={{ marginLeft: 2 }}>
             <img
-              src={imageCover}
+              src={urlAvatar}
               alt="Avatar"
               style={{
                 width: "50px",
@@ -363,6 +405,7 @@ const UserSetting = () => {
               }}
             />
           </Box>
+
           <label htmlFor="avatar-button-file" style={{ marginLeft: "10px" }}>
             <Button variant="outlined" component="span">
               Change
@@ -375,7 +418,12 @@ const UserSetting = () => {
         <TextField
           required
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) =>
+            setPayload((prevPayload) => ({
+              ...prevPayload,
+              name: e.target.value,
+            }))
+          }
           className="sm:w-[300px] w-[200px]"
         />
       </Box>
@@ -387,11 +435,11 @@ const UserSetting = () => {
             id="cover-button-file"
             type="file"
             style={{ display: "none" }}
-            onChange={handleImageChange}
+            onChange={handleChangeImageCover}
           />
           <Box sx={{ marginLeft: 2 }}>
             <img
-              src={image}
+              src={urlImgCover}
               alt="Cover"
               style={{
                 width: "50px",
@@ -410,16 +458,16 @@ const UserSetting = () => {
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", marginTop: "20px" }}>
         <Typography className="sm:w-[200px] mr-[10px]">Gmail:</Typography>
-        <Typography>{user.gmail}</Typography>
+        <Typography>{gmail}</Typography>
       </Box>
 
       <Button
         sx={{ marginTop: "20px", width: "90px" }}
         variant="contained"
         onClick={handleProfileUpdate}
-        disabled={loadingProfile}
+        disabled={loadingChangeImg}
       >
-        {loadingProfile ? <CircularProgress size={24} /> : "UPDATE"}
+        {loadingChangeImg ? <CircularProgress size={24} /> : "UPDATE"}
       </Button>
 
       <Box sx={{ marginTop: "20px" }}>
@@ -437,13 +485,13 @@ const UserSetting = () => {
         <Box className="flex mt-[20px] flex-col sm:flex-row">
           {" "}
           <Typography className="sm:w-[200px]">Password:</Typography>
-          {openPw ? (
+          {!openChangePW ? (
             <Box className="flex flex-col sm:flex-row  mt-[10px]">
               <TextField required sx={{ width: "300px" }} value="********" />
               <Button
                 variant="outlined"
                 sx={{ margin: "10px 10px  0", height: "35px", width: "90px" }}
-                onClick={toggleOpenPw}
+                onClick={toggleOpenChangePw}
               >
                 change
               </Button>
@@ -454,36 +502,48 @@ const UserSetting = () => {
                 label="Current password"
                 placeholder="Enter current password"
                 value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                className=""
+                onChange={(e) =>
+                  setPayload((prevPayload) => ({
+                    ...prevPayload,
+                    currentPassword: e.target.value,
+                  }))
+                }
               />
               <PasswordField
                 label="New password"
+                className="mt-2"
                 placeholder="Enter new password"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) =>
+                  setPayload((prevPayload) => ({
+                    ...prevPayload,
+                    newPassword: e.target.value,
+                  }))
+                }
               />
               <Box>
                 {" "}
                 <Button
                   variant="outlined"
                   sx={{ margin: "10px 10px 0 0" }}
-                  onClick={toggleOpenPw}
+                  onClick={toggleOpenChangePw}
                 >
                   cancel
                 </Button>
                 <Button
                   variant="contained"
-                  disabled={loading}
+                  // disabled={loading}
                   sx={{ marginTop: "10px" }}
                   onClick={handlePasswordUpdate}
                 >
-                  {loading ? <CircularProgress size={24} /> : "UPDATE"}
+                  {loadingChangeImg ? <CircularProgress size={24} /> : "UPDATE"}
                 </Button>
               </Box>
             </Box>
           )}
         </Box>
-        <Typography
+        {/* <Typography
           variant="h5"
           sx={{
             marginTop: "30px",
@@ -507,7 +567,7 @@ const UserSetting = () => {
                   <Button
                     variant="outlined"
                     sx={{ margin: "10px 0", height: "35px" }}
-                    onClick={toggleOpenPw2}
+                    onClick={toggleOpenChangePw2}
                   >
                     change
                   </Button>{" "}
@@ -576,7 +636,7 @@ const UserSetting = () => {
                   <Button
                     variant="outlined"
                     sx={{ margin: "10px 10px 0 0" }}
-                    onClick={toggleOpenPw2}
+                    onClick={toggleOpenChangePw2}
                   >
                     cancel
                   </Button>
@@ -634,74 +694,8 @@ const UserSetting = () => {
               </Box>
             </Box>
           )}
-        </Box>
+        </Box> */}
       </Box>
-      <Typography
-        variant="h5"
-        sx={{
-          margin: "25px 0 20px",
-          color: "#6a53cc",
-          fontSize: "22px",
-          fontWeight: 700,
-        }}
-      >
-        General
-      </Typography>
-      <Box>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Typography className="sm:w-[200px]">Default screen:</Typography>
-          <Select
-            value={selected}
-            onChange={handleChange}
-            sx={{ minWidth: "150px" }}
-          >
-            <MenuItem value="calendar">Calendar</MenuItem>
-            <MenuItem value="archived">Archived</MenuItem>
-            <MenuItem value="deleted">Deleted</MenuItem>
-            <MenuItem value="settings">Settings</MenuItem>
-          </Select>
-        </Box>
-        <Typography>Default color:</Typography>
-      </Box>
-      <Typography
-        variant="h5"
-        sx={{
-          margin: "20px 0",
-          color: "#6a53cc",
-          fontSize: "22px",
-          fontWeight: 700,
-        }}
-      >
-        Online Sync & Backup
-      </Typography>
-      <Box>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Typography sx={{ width: "300px" }}>Sync on launch:</Typography>
-          <CheckCircleOutlineIcon />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", marginTop: "20px" }}>
-          <Typography sx={{ width: "300px" }}>Auto backup:</Typography>
-          <CheckCircleOutlineIcon />
-        </Box>
-      </Box>
-      {resultMessage !== null ? (
-        <Box className="fixed inset-0 z-50 bg-[rgba(0,0,0,0.4)] flex items-center justify-center flex-col">
-          <Box className="flex relative items-center justify-center bg-white h-[120px] w-[500px] pb-[50px] rounded-lg">
-            {" "}
-            {resultMessage}
-            <Button
-              className="absolute bottom-0 "
-              variant="contained"
-              sx={{ margin: "10px" }}
-              onClick={() => setResultMessage(null)}
-            >
-              ok
-            </Button>
-          </Box>
-        </Box>
-      ) : (
-        ""
-      )}
     </Container>
   );
 };
