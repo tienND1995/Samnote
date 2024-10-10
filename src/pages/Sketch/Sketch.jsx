@@ -1,12 +1,77 @@
-import React from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 
-import BrushIcon from '@mui/icons-material/Brush'
+import { useForm } from 'react-hook-form'
+
+import { AppContext } from '../../context'
+import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
+
+import FormNote from '../../share/FormNote'
+import SketchCanvas from './SketchCanvas'
+
+import SketchBar from './SketchBar'
+import { yellow } from '@mui/material/colors'
 
 const Sketch = () => {
+ const appContext = useContext(AppContext)
+ const { user } = appContext
+
+ const [color, setColor] = useState({
+  b: 250,
+  g: 250,
+  r: 255,
+  name: 'snow',
+ })
+
+ console.log('color', color)
+
+ // var canvas
+ const [strokeColor, setStrokeColor] = useState('red')
+ const [strokeWidth, setStrokeWidth] = useState(1)
+
+ const handleChangeColorCanvas = (color) => setStrokeColor(color)
+ const handleChangeStrokeWidth = (number) => setStrokeWidth(number)
+
+ const sketchCanvasRef = useRef()
+
+ const {
+  handleSubmit,
+  register,
+  watch,
+  formState: { errors, dirtyFields },
+ } = useForm({
+  defaultValues: {
+   data: '',
+   title: '',
+   dueAt: null,
+
+   remindAt: null,
+   pinned: false,
+   notePublic: 1,
+   lock: '',
+   color: '',
+   idFolder: null,
+  },
+ })
+
+ const handleChangeColor = (color) => setColor(color)
+
+ const propsFormNote = {
+  userID: user?.id,
+  register,
+  watch,
+  errors,
+  dirtyFields,
+  onChangeColor: handleChangeColor,
+ }
+
+ const onSubmitForm = (data) => {
+  console.log('data', data)
+ }
+
  return (
-  <div className='flex'>
-   <div className='bg-black w-full text-white'>
-    <h2 className='font-Roboto font-bold text-[40px] flex justify-center items-end gap-2'>
+  <div className='flex flex-col w-full'>
+   <div className='bg-black w-full text-white p-4'>
+    <h2 className='font-Roboto font-bold mb-5 text-[40px] flex justify-center items-end gap-2'>
      Sketch
      <div className='h-[50px] flex'>
       <svg
@@ -23,6 +88,45 @@ const Sketch = () => {
       </svg>
      </div>
     </h2>
+
+    <div className='grid grid-cols-2 gap-[10%]'>
+     <form onSubmit={handleSubmit(onSubmitForm)}>
+      <FormNote {...propsFormNote} />
+
+      <div>
+       <button
+        className='text-white bg-[#1876D2] w-[100px] h-[40px] rounded-md uppercase'
+        type='submit'
+       >
+        Create
+       </button>
+      </div>
+     </form>
+
+     <div>
+      <textarea
+       className='size-full max-h-[300px] mt-[23px] rounded-lg outline-none p-3'
+       placeholder='Content...'
+       {...register('data')}
+      />
+     </div>
+    </div>
+   </div>
+
+   <div className='bg-white size-full flex'>
+    <SketchBar
+     onChangeColorCanvas={handleChangeColorCanvas}
+     onChangeStrokeWidth={handleChangeStrokeWidth}
+     strokeColor={strokeColor}
+     strokeWidth={strokeWidth}
+     sketchCanvasRef={sketchCanvasRef}
+    />
+
+    <SketchCanvas
+     strokeColor={strokeColor}
+     strokeWidth={strokeWidth}
+     sketchCanvasRef={sketchCanvasRef}
+    />
    </div>
   </div>
  )
