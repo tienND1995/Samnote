@@ -7,6 +7,7 @@ export default {
   fontFamily: {
    SourceSan: ['Source Sans 3, sans-serif'],
    Mulish: ['Mulish, sans-serif'],
+   Roboto: ['Roboto, sans-serif'],
   },
 
   extend: {

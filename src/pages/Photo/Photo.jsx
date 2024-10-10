@@ -44,7 +44,7 @@ const Photo = () => {
 
  const handleDeleteImages = () => {
   const slectedImages = [...checkedItems]
-  if (setCheckedItems.length < 1) return
+  if (slectedImages.length < 1) return
 
   const imagesDelete = imagesCheckList.filter((item) =>
    slectedImages.some((id) => item.id_images === id)

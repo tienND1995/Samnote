@@ -12,7 +12,7 @@ import { AppContext } from '../../context'
 import ImageIcon from '@mui/icons-material/Image'
 import { Checkbox, FormControlLabel } from '@mui/material'
 import imageCreateNote from '../../assets/create-note.png'
-import FormCreateNote from './FormCreateNote'
+import FormNote from '../../share/FormNote'
 
 import AddImages from './AddImages'
 import TextEditor from '../../share/TextEditor'
@@ -80,7 +80,7 @@ const CreateNote = () => {
    .catch((error) => console.log('error', error))
  }
 
- const onSubmit = (data) => {
+ const onSubmit = async (data) => {
   if (data.data.trim() === '<p><br></p>') {
    return setError('data', { type: 'text', message: 'Not content yet!' })
   }
@@ -123,7 +123,7 @@ const CreateNote = () => {
    dataWithImage.append('b', newColor.b)
    dataWithImage.append('a', newColor.a)
 
-   uploadImageList.forEach(({ file }) =>
+   await uploadImageList.forEach(({ file }) =>
     dataWithImage.append('image_note', file)
    )
 
@@ -159,7 +159,7 @@ const CreateNote = () => {
    >
     <div className='p-4 flex flex-col justify-between'>
      <div className='max-w-[600px] mx-auto w-full'>
-      <FormCreateNote
+      <FormNote
        userID={user?.id}
        register={register}
        watch={watch}
@@ -212,11 +212,11 @@ const CreateNote = () => {
      />
     </div>
 
-    <div className='flex'>
+    <div className='flex relative'>
      {errors.data && (
       <p
-       style={{ borderBottom: '1px solid red' }}
-       className='text-red-600 w-max mb-3'
+       //  style={{ borderBottom: '1px solid red' }}
+       className='text-red-600 w-max absolute top-[120px] left-[15px]'
       >
        {errors.data.message}
       </p>

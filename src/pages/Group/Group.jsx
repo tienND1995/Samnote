@@ -221,8 +221,6 @@ const Group = () => {
 
   inputMessageFormRef.current.focus()
 
-  console.log('group', group)
-
   fetchApiSamenote(
    'get',
    `/seen_message_group/${group.id_lastest_message_in_group}/${user?.id}`
@@ -458,7 +456,7 @@ const Group = () => {
     >
      <div className='flex gap-2 items-center'>
       <div className='position-relative'>
-       <Link to={infoOtherUser.id && `/other-user/${infoOtherUser.id}`}>
+       <Link to={infoOtherUser.id && `/profile/${infoOtherUser.id}`}>
         <img
          className='w-[90px] h-[90px] object-cover rounded-[100%]'
          src={infoOtherUser.Avarta || infoGroupItem.linkAvatar || avatarDefault}
@@ -475,7 +473,7 @@ const Group = () => {
           className='hidden m-0'
           disabled={!isLeaderTeam(infoGroupItem.idOwner)}
          />
-         <label htmlFor='file-avatar-group' className='flex'>
+         <label htmlFor='file-avatar-group' className='flex cursor-pointer'>
           <CameraAltIcon className='text-[20px]' />
          </label>
         </div>

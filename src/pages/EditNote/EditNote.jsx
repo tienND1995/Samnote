@@ -31,6 +31,8 @@ const EditNote = () => {
   }
  }, [user, nameEvent])
 
+ console.log('noteList', noteList)
+
  return (
   <div className='bg-[#181A1B] px-4 gap-4 pt-4 pb-2 flex flex-col w-full'>
    <div className='flex justify-center items-start gap-3'>
