@@ -9,12 +9,11 @@ import {
  Select,
  TextField,
 } from '@mui/material'
-import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
+import { fetchApiSamenote } from '../utils/fetchApiSamnote'
 
 import AddIcon from '@mui/icons-material/Add'
-import CloseIcon from '@mui/icons-material/Close'
 
-const FormCreateNote = ({
+const FormNote = ({
  register,
  watch,
  errors,
@@ -245,4 +244,4 @@ const FormCreateNote = ({
  )
 }
 
-export default FormCreateNote
+export default FormNote

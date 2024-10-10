@@ -18,6 +18,7 @@ import {
  UserProfile,
 //  UserSetting,
  UserSketch,
+ Sketch,
 } from './pages'
 import AuthLayout from './layout/AuthLayout/AuthLayout'
 import SignIn from './layout/AuthLayout/SignIn'
@@ -70,7 +71,7 @@ function App() {
 
     <Route path='/' exact element={<Home />} />
     <Route path='*' element={<Navigate replace to='/' />} />
-    
+
     <Route element={<RootLayout />}>
      <Route path='/user/setting' element={<UserSetting />} />
      <Route path='/user/sketch' element={<UserSketch />} />
@@ -80,9 +81,12 @@ function App() {
      <Route path='/photo' element={<Photo />} />
      <Route path='/group' element={<Group />} />
      <Route path='/profile/:id' element={<UserProfile />} />
+
      <Route path='/editnote/:id' element={<EditNote />} />
      <Route path='/editnote' exact element={<EditNote />} />
      <Route path='/create-note' element={<CreateNote />} />
+
+     <Route path='/sketch' element={<Sketch />} />
     </Route>
    </Routes>
   </main>
