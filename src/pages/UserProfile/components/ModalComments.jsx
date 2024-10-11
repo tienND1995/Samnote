@@ -80,11 +80,13 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
     }
   }
 
-  const handleLikeComment = async (idComment, type) => {
-    console.log(idComment);
+  const handleLikeComment = async (idComment, type, isReply) => {
     try {
-      const res = await api.post(`/notes/favorite/${idComment}`, { idUser: user.id, type })
-      console.log(res);
+      if (isReply) {
+        const res = await api.post(`/notes/favorite_reply/${idComment}`, { idUser: user.id, type })
+      } else {
+        const res = await api.post(`/notes/favorite/${idComment}`, { idUser: user.id, type })
+      }
       fetchAllDataComments()
     } catch (err) {
       console.error(err)
@@ -164,7 +166,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
                                                                             absolute top-[-100%] right-[7%]'>
                                 <div
                                   className='like cursor-pointer flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300'
-                                  onClick={() => handleLikeComment(comment.id, 'like')}
+                                  onClick={() => handleLikeComment(comment.id, 'like', false)}
                                 >
                                   <svg
                                     width='1rem'
@@ -176,7 +178,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
                                 </div>
                                 <div
                                   className='dislike cursor-pointer flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300'
-                                  onClick={() => handleLikeComment(comment.id, 'dislike')}
+                                  onClick={() => handleLikeComment(comment.id, 'dislike', false)}
                                 >
                                   <svg
                                     width='1rem'
@@ -243,7 +245,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
                                                                                                 absolute top-[-100%] right-[7%]'>
                                             <div
                                               className='like cursor-pointer flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300'
-                                              onClick={() => handleLikeComment(reply.id_reply, 'like')}
+                                              onClick={() => handleLikeComment(reply.id_reply, 'like', true)}
                                             >
                                               <svg
                                                 width='1rem'
@@ -255,7 +257,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
                                             </div>
                                             <div
                                               className='dislike cursor-pointer flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300'
-                                              onClick={() => handleLikeComment(reply.id_reply, 'dislike')}
+                                              onClick={() => handleLikeComment(reply.id_reply, 'dislike', true)}
                                             >
                                               <svg
                                                 width='1rem'
