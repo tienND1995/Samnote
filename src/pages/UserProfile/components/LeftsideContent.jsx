@@ -28,7 +28,7 @@ const LeftsideContent = ({
   //tabvalue
   const [publicNotesTabValue, setPublicNotesTabValue] = useState('1')
   const [isShowModalComments, setIsShowModalComments] = useState(false)
-  const [idNoteShowComments, setIdNoteShowComments] = useState('')
+  const [noteShowComments, setNoteShowComments] = useState(null)
 
   const handlePublicNotesTabChange = (event, newValue) => {
     setPublicNotesTabValue(newValue)
@@ -97,13 +97,13 @@ const LeftsideContent = ({
     }
   }
 
-  const handleShowComments = (idNote) => {
-    setIdNoteShowComments(idNote)
+  const handleShowComments = (infoNote) => {
+    setNoteShowComments(infoNote)
     setIsShowModalComments(true)
   }
 
   return (
-    <div className='leftside col-lg-8'>
+    <div className='leftside width-full lg:w-[66%]'>
       <Box className='flex mb-4 public-notes'>
         <Box className='flex-[4] w-full'>
           <TabContext value={publicNotesTabValue}>
@@ -162,13 +162,13 @@ const LeftsideContent = ({
                 >
                   {publicNotes.map((info, index) => (
                     <SwiperSlide
-                      key={index}
-                      className={`p-2 border-[1px] rounded-xl border-black border-solid mr-1
+                      key={info.idNote}
+                      className={`w-[99.5%] p-2 border-[1px] rounded-xl border-black border-solid
                           ${isLightColor(info.color)
                           ? 'text-black'
                           : 'text-white'
                         }
-                                    `}
+                      `}
                       style={{
                         backgroundColor: `rgba(${info.color.r}, ${info.color.g}, ${info.color.b}, ${info.color.a})`,
                       }}
@@ -205,7 +205,7 @@ const LeftsideContent = ({
                             onError={handleErrorAvatar}
                           />
                           <Box sx={{ color: 'text.main' }}>
-                            <p style={{ margin: 0, fontSize: '1.2rem' }}>
+                            <p className='text-capitalize' style={{ margin: 0, fontSize: '1.2rem' }}>
                               <strong>{userInfomations.name}</strong>
                             </p>
                             <p style={{ margin: 0, opacity: '0.8' }}>
@@ -247,23 +247,7 @@ const LeftsideContent = ({
                         }}
                       >
                         <strong style={{ fontSize: '20px' }}>{info.title}</strong>
-                        {info.type === 'checkList' || info.type === 'checklist' ? (
-                          <>
-                            <Checklist data={info.data.slice(0, 3)} />
-                            {info.data.length - 3 > 0 && (
-                              <div className='font-bold'>
-                                +{info.data.length - 3} item hidden
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <div
-                            className='max-h-[100px] text-start overflow-hidden'
-                            dangerouslySetInnerHTML={{
-                              __html: info.data,
-                            }}
-                          />
-                        )}
+                        <div className='max-h-[100px] text-start overflow-hidden'>{info.data}</div>
                       </Box>
                       <Box
                         component='div'
@@ -309,7 +293,7 @@ const LeftsideContent = ({
                         </div>
                         <div
                           className='comment flex items-center gap-1 cursor-pointer'
-                          onClick={() => handleShowComments(info.idNote)}
+                          onClick={() => handleShowComments(info)}
                         >
                           <svg
                             width='1rem'
@@ -351,6 +335,7 @@ const LeftsideContent = ({
           userInfomations={userInfomations}
           handleDeleteNote={handleDeleteNote}
           handleShowComments={handleShowComments}
+          handleLikeNote={handleLikeNote}
         />
       </Box>
       {user.id === userInfomations.id &&
@@ -361,6 +346,7 @@ const LeftsideContent = ({
             userInfomations={userInfomations}
             handleDeleteNote={handleDeleteNote}
             handleShowComments={handleShowComments}
+            handleLikeNote={handleLikeNote}
           />
         </Box>
       }
@@ -371,11 +357,12 @@ const LeftsideContent = ({
           userInfomations={userInfomations}
           handleDeleteNote={handleDeleteNote}
           handleShowComments={handleShowComments}
+          handleLikeNote={handleLikeNote}
         />
       </Box>
       {isShowModalComments && (
         <ModalComments
-          idNote={idNoteShowComments}
+          infoNote={noteShowComments}
           setIsShowModalComments={setIsShowModalComments}
           setReload={setReload}
         />

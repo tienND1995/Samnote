@@ -8,8 +8,16 @@ import Checklist from './CheckList'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { handleErrorAvatar, convertApiToTime, isLightColor } from '../../../utils/utils'
 
-const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, handleShowComments }) => {
-
+const ListNotes = (
+    {
+        typeNotes,
+        dataNotes,
+        userInfomations,
+        handleDeleteNote,
+        handleShowComments,
+        handleLikeNote,
+    }
+) => {
     const [tabValue, setTabValue] = useState('1')
 
     const handleTabChange = (event, newValue) => {
@@ -58,22 +66,20 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                 <TabPanel value='1' className='w-full p-0'>
                     {dataNotes.length > 0 ? (
                         <Swiper
-                            spaceBetween={20}
-                            slidesPerView={2.5}
+                            spaceBetween={16}
+                            slidesPerView='auto'
                             navigation={{
                                 prevEl: '.swiper-button-prev',
                                 nextEl: '.swiper-button-next',
                             }}
                             className='swiper-privateNotes overflow-x-auto'
                         >
-                            {dataNotes.map((info, index) => (
+                            {dataNotes.map((info) => (
                                 <SwiperSlide
-                                    key={index}
-                                    className={`p-2 border-[1px] rounded-xl border-black border-solid mb-1
-                                                ${isLightColor(info.color)
-                                            ? 'text-black'
-                                            : 'text-white'
-                                        }`}
+                                    key={info.idNote}
+                                    className={`p-2 border-[1px] rounded-xl border-black border-solid mb-2
+                                                ${isLightColor(info.color) ? 'text-black' : 'text-white'}
+                                                ${dataNotes.length === 1 ? 'w-full' : dataNotes.length === 2 ? `w-[49%]` : 'w-[22rem]'}`}
                                     style={{
                                         backgroundColor: `rgba(${info.color.r}, ${info.color.g}, ${info.color.b}, ${info.color.a})`,
                                     }}
@@ -110,7 +116,7 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                                                 onError={handleErrorAvatar}
                                             />
                                             <Box sx={{ color: 'text.main' }}>
-                                                <p style={{ margin: 0, fontSize: '1.2rem' }}>
+                                                <p className='text-capitalize' style={{ margin: 0, fontSize: '1.2rem' }}>
                                                     <strong>{userInfomations.name}</strong>
                                                 </p>
                                                 <p style={{ margin: 0, opacity: '0.8' }}>
@@ -152,22 +158,17 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                                         }}
                                     >
                                         <strong style={{ fontSize: '20px' }}>{info.title}</strong>
-                                        {info.type === 'checkList' || info.type === 'checklist' ? (
+                                        {info.type === 'checkList' ? (
                                             <>
-                                                <Checklist data={info.data.slice(0, 3)} />
+                                                {/* <Checklist data={info.data.slice(0, 3)} />
                                                 {info.data.length - 3 > 0 && (
                                                     <div className='font-bold'>
                                                         +{info.data.length - 3} item hidden
                                                     </div>
-                                                )}
+                                                )} */}
                                             </>
                                         ) : (
-                                            <div
-                                                className='max-h-[100px] text-start overflow-hidden'
-                                                dangerouslySetInnerHTML={{
-                                                    __html: info.data,
-                                                }}
-                                            />
+                                            <div className='max-h-[100px] text-start overflow-hidden'>{info.data}</div>
                                         )}
                                     </Box>
                                     <Box
@@ -182,7 +183,9 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                                         </p>
                                     </Box>
                                     <div className='interacted-note flex justify-end items-center gap-3 pr-2 mt-2'>
-                                        <div className='like flex items-center gap-1 cursor-pointer'>
+                                        <div className='like flex items-center gap-1 cursor-pointer'
+                                            onClick={() => handleLikeNote(info.idNote, 'like')}
+                                        >
                                             <svg
                                                 width='1rem'
                                                 height='1rem'
@@ -194,7 +197,9 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                                             </svg>
                                             <span>{info.like_count}</span>
                                         </div>
-                                        <div className='dislike flex items-center gap-1 cursor-pointer'>
+                                        <div className='dislike flex items-center gap-1 cursor-pointer'
+                                            onClick={() => handleLikeNote(info.idNote, 'dislike')}
+                                        >
                                             <svg
                                                 width='1rem'
                                                 height='1rem'
@@ -208,7 +213,7 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                                         </div>
                                         <div
                                             className='comment flex items-center gap-1 cursor-pointer'
-                                            onClick={() => handleShowComments(info.idNote)}
+                                            onClick={() => handleShowComments(info)}
                                         >
                                             <svg
                                                 width='1rem'
