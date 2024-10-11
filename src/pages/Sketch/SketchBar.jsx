@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import Undo from '../../assets/svgs/Undo'
 import Redo from '../../assets/svgs/Redo'
 import penCanvas from '../../assets/pen.png'
 import BackspaceIcon from '@mui/icons-material/Backspace'
 import Eraser from '../../assets/svgs/Eraser'
+
+import uniqid from 'uniqid'
 
 import { COLOR_LIST } from '../../utils/constant'
 
@@ -14,6 +16,7 @@ const SketchBar = ({
  strokeWidth,
  onChangeColorCanvas,
  onChangeStrokeWidth,
+ setFileImage,
 }) => {
  const [eraseMode, setEraseMode] = useState(false)
 
@@ -39,8 +42,21 @@ const SketchBar = ({
   sketchCanvasRef.current?.clearCanvas()
  }
 
+ const handleSaveCanvas = () => {
+  // convert base64 to file
+
+  const file = sketchCanvasRef.current.exportImage('png').then((data) => {
+   fetch(data)
+    .then((res) => res.blob())
+    .then((blob) => {
+     const file = new File([blob], `samnote_${uniqid()}`, { type: 'image/png' })
+     setFileImage(file)
+    })
+  })
+ }
+
  return (
-  <div className='max-w-[200px] flex flex-col flex-grow-1 bg-[#618EA9] px-2 overflow-y-auto aspect-[1/2]'>
+  <div className='max-w-[200px] flex flex-col flex-grow-1 bg-[#618EA9] px-2 overflow-y-auto aspect-[1/2] style-scrollbar-y style-scrollbar-y-sm'>
    <div className='px-2 flex flex-col gap-2 mb-3'>
     <div className='flex justify-between'>
      <button onClick={handleUndoClick} type='button'>
@@ -122,6 +138,14 @@ const SketchBar = ({
      </li>
     ))}
    </ul>
+
+   <button
+    onClick={handleSaveCanvas}
+    type='button'
+    className='bg-red-600 opacity-90 duration-150 ease-out hover:opacity-100 text-white w-max mx-auto py-1 px-3 mt-2 rounded-md'
+   >
+    Save
+   </button>
   </div>
  )
 }

@@ -12,6 +12,7 @@ import {
 import { fetchApiSamenote } from '../utils/fetchApiSamnote'
 
 import AddIcon from '@mui/icons-material/Add'
+import ModalCreateFolder from './ModalCreateFolder'
 
 const FormNote = ({
  register,
@@ -52,71 +53,16 @@ const FormNote = ({
  // create folder
 
  const [showModalFolder, setShowModalFolder] = useState(false)
- const [nameFolder, setNameFolder] = useState('')
-
  const handleShowModalFolder = () => setShowModalFolder(true)
-
- const handleHideModalFolder = () => {
-  setShowModalFolder(false)
-  setNameFolder('')
- }
-
- const handleChangeNameFolder = (e) => setNameFolder(e.target.value)
-
- const handleCreateFolder = () => {
-  if (nameFolder.trim() === '') return
-
-  fetchApiSamenote('post', `/folder/${userID}`, { nameFolder }).then(
-   (response) => {
-    handleHideModalFolder()
-
-    fetchApiSamenote('get', `/folder/${userID}`).then((data) =>
-     setFolderList(data.folder)
-    )
-   }
-  )
- }
 
  return (
   <div className='grid grid-cols-2 gap-3'>
-   <Modal
-    size='sm'
-    centered={true}
-    show={showModalFolder}
-    onHide={handleHideModalFolder}
-   >
-    <div className='text-white bg-[#3A3F42] rounded-lg p-4 overflow-hidden border border-white'>
-     <h5 className='mb-3'>New Folder</h5>
-
-     <div className='flex flex-col gap-3'>
-      <div>
-       <input
-        className='form-control'
-        placeholder='Untitled folder'
-        type='text'
-        onChange={handleChangeNameFolder}
-       />
-      </div>
-
-      <div className='flex gap-3 justify-end '>
-       <button
-        onClick={handleHideModalFolder}
-        className='text-white'
-        type='button'
-       >
-        Cancel
-       </button>
-       <button
-        onClick={handleCreateFolder}
-        className='text-white'
-        type='button'
-       >
-        Create
-       </button>
-      </div>
-     </div>
-    </div>
-   </Modal>
+   <ModalCreateFolder
+    showModalFolder={showModalFolder}
+    setShowModalFolder={setShowModalFolder}
+    folderList={folderList}
+    setFolderList={setFolderList}
+   />
    <div className=''>
     <InputLabel className='text-white'>Title</InputLabel>
     <TextField

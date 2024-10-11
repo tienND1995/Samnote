@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 import ReactQuill, { Quill } from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 
-const TextEditor = ({ setValue, value, onChangeTextEditor, type }) => {
+const TextEditor = ({ setValue, value, onChangeTextEditor }) => {
  const reactQuillRef = useRef()
 
  useEffect(() => {

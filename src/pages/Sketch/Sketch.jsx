@@ -1,6 +1,8 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 
 import { useForm } from 'react-hook-form'
+import { joiResolver } from '@hookform/resolvers/joi'
+import { schemaNoteCreate } from '../../utils/schema'
 
 import { AppContext } from '../../context'
 import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
@@ -9,11 +11,11 @@ import FormNote from '../../share/FormNote'
 import SketchCanvas from './SketchCanvas'
 
 import SketchBar from './SketchBar'
-import { yellow } from '@mui/material/colors'
+import { convertColorNoteToApi, convertTimeToApi } from '../../utils/utils'
 
 const Sketch = () => {
  const appContext = useContext(AppContext)
- const { user } = appContext
+ const { user, setSnackbar } = appContext
 
  const [color, setColor] = useState({
   b: 250,
@@ -22,10 +24,10 @@ const Sketch = () => {
   name: 'snow',
  })
 
-
  // var canvas
  const [strokeColor, setStrokeColor] = useState('red')
  const [strokeWidth, setStrokeWidth] = useState(1)
+ const [fileImage, setFileImage] = useState(null)
 
  const handleChangeColorCanvas = (color) => setStrokeColor(color)
  const handleChangeStrokeWidth = (number) => setStrokeWidth(number)
@@ -36,8 +38,10 @@ const Sketch = () => {
   handleSubmit,
   register,
   watch,
+  reset,
   formState: { errors, dirtyFields },
  } = useForm({
+  resolver: joiResolver(schemaNoteCreate),
   defaultValues: {
    data: '',
    title: '',
@@ -61,17 +65,56 @@ const Sketch = () => {
   errors,
   dirtyFields,
   onChangeColor: handleChangeColor,
-  color
+  color,
+  setFileImage,
  }
 
  const onSubmitForm = (data) => {
-  console.log('data', data)
+  const dataForm = {
+   ...data,
+   color: convertColorNoteToApi(color),
+   dueAt: convertTimeToApi(data.dueAt),
+   remindAt: convertTimeToApi(data.remindAt),
+   type: 'text',
+   linkNoteShare: '',
+  }
+
+  // if (!fileImage) return
+  postNote(dataForm)
  }
+
+ const postNote = (data) => {
+  fetchApiSamenote('post', `/notes/${user?.id}`, data)
+   .then((data) => {
+    reset()
+    setColor({ b: 250, g: 250, r: 255, name: 'snow' })
+    setSnackbar({
+     isOpen: true,
+     message: `Create note success!`,
+     severity: 'success',
+    })
+
+    // post image sketch
+    const newFormData = new FormData()
+    newFormData.append('id_user', user?.id)
+    newFormData.append('id_note', data.note.idNote)
+    newFormData.append('image_note', fileImage)
+
+    fetchApiSamenote('post', '/add_image_note', newFormData)
+   })
+   .catch((error) => console.log('error', error))
+ }
+
+ const disableSubmit = () => {
+  return Object.keys(dirtyFields).length === 0 && !fileImage
+ }
+
+ console.log('dirtyFields', dirtyFields)
 
  return (
   <div className='flex flex-col w-full'>
    <div className='bg-black w-full text-white p-4'>
-    <h2 className='font-Roboto font-bold mb-5 text-[40px] flex justify-center items-end gap-2'>
+    <h2 className='font-Roboto font-bold mb-3 text-[40px] flex justify-center items-end gap-2'>
      Sketch
      <div className='h-[50px] flex'>
       <svg
@@ -93,10 +136,13 @@ const Sketch = () => {
      <form onSubmit={handleSubmit(onSubmitForm)}>
       <FormNote {...propsFormNote} />
 
-      <div>
+      <div className='mt-3'>
        <button
-        className='text-white bg-[#1876D2] w-[100px] h-[40px] rounded-md uppercase'
+        className={`text-white bg-[#1876D2] w-[100px] h-[40px] rounded-md uppercase ${
+         disableSubmit() ? 'opacity-70' : 'opacity-100'
+        }`}
         type='submit'
+        disabled={disableSubmit()}
        >
         Create
        </button>
@@ -105,10 +151,16 @@ const Sketch = () => {
 
      <div>
       <textarea
-       className='size-full max-h-[300px] mt-[23px] rounded-lg outline-none p-3'
+       className='size-full relative max-h-[300px] mt-[23px] rounded-lg outline-none p-3'
        placeholder='Content...'
        {...register('data')}
-      />
+      ></textarea>
+
+      {errors?.data && (
+       <span style={{ borderBottom: '1px solid red' }} className='text-red-600'>
+        {errors.data.message}
+       </span>
+      )}
      </div>
     </div>
    </div>
@@ -120,6 +172,7 @@ const Sketch = () => {
      strokeColor={strokeColor}
      strokeWidth={strokeWidth}
      sketchCanvasRef={sketchCanvasRef}
+     setFileImage={setFileImage}
     />
 
     <SketchCanvas

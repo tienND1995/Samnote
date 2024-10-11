@@ -1,7 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2'
 
-import moment from 'moment'
 import Markdown from 'react-markdown'
 import Slider from 'react-slick'
 import TextTruncate from 'react-text-truncate'
@@ -13,8 +12,9 @@ import deleteNote from '../../../assets/delete-note.png'
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import axios from 'axios'
+import { fetchApiSamenote } from '../../../utils/fetchApiSamnote'
 
-const NoteItem = ({ note, onDispatchEventName, noteList }) => {
+const NoteItem = ({ note, noteList }) => {
  const navigate = useNavigate()
  const settings = {
   dots: false,
@@ -42,12 +42,20 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
    )
 
    //  handle after delete note
-   if (noteList.length === 1) navigate(`/editnote`)
-   if (indexNoteNext === noteList.length - 1)
-    return navigate(`/editnote/${noteList[indexNoteNext - 1].idNote}`)
-   navigate(`/editnote/${noteList[indexNoteNext + 1].idNote}`)
 
-   onDispatchEventName('Delete note')
+   if (noteList.length === 1) {
+    return navigate(`/editnote`, { state: 'Delete note' })
+   }
+
+   if (indexNoteNext === noteList.length - 1) {
+    return navigate(`/editnote/${noteList[indexNoteNext - 1].idNote}`, {
+     state: 'Delete note',
+    })
+   }
+
+   return navigate(`/editnote/${noteList[indexNoteNext + 1].idNote}`, {
+    state: 'Delete note',
+   })
   } catch (error) {
    console.error(error)
   }
@@ -69,6 +77,7 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
   }).then((result) => {
    if (result.isConfirmed) {
     deleteNoteId(idNote, indexNoteNext)
+
     Swal.fire({
      title: 'Deleted!',
      text: `Your image has been deleted.`,

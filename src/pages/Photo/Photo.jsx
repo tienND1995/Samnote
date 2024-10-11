@@ -11,7 +11,7 @@ import Swal from 'sweetalert2'
 
 const Photo = () => {
  const appContext = useContext(AppContext)
- const { user, setSnackbar } = appContext
+ const { user } = appContext
 
  const [photoList, setPhotoList] = useState([])
  const [imagesCheckList, setImagesCheckList] = useState([])
@@ -35,6 +35,8 @@ const Photo = () => {
    setImagesCheckList(newImageList)
   })
  }
+
+ console.log('photoList', photoList)
 
  useEffect(() => {
   if (!user?.id) return
@@ -70,12 +72,6 @@ const Photo = () => {
        if (index === imagesDelete.length - 1) {
         fetchPhotoList()
         setCheckedItems(new Set())
-
-        setSnackbar({
-         isOpen: true,
-         message: `Delete images success!`,
-         severity: 'success',
-        })
        }
       }
      )
@@ -94,10 +90,10 @@ const Photo = () => {
    <div className='flex gap-2 justify-center items-center'>
     <PhotoIcon className='text-5xl' />
 
-    <h5 className='text-3xl'>All Photo({photoList.length})</h5>
+    <h5 className='text-3xl'>All Photo({imagesCheckList.length})</h5>
    </div>
 
-   {photoList.length > 1 ? (
+   {photoList.length > 0 ? (
     <>
      <div className='flex justify-end gap-3'>
       <div>

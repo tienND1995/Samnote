@@ -95,6 +95,7 @@ export const handleErrorAvatar = (e) => {
  }
 }
 
+// ** time
 export const convertApiToTime = (time) =>
  moment(`${time}+0700`).format('YYYY-MM-DD')
 
@@ -104,7 +105,15 @@ export const convertTimeToApi = (time) =>
 export const convertTimeApiNoteToHtml = (time) =>
  `${moment(time).format('DD/MM/YYYY')}`
 
+// ** color
 export const isLightColor = (color) => {
  const luminance = getLuminance(`rgb(${color.r}, ${color.g}, ${color.b})`)
  return luminance > 0.5
 }
+
+export const convertColorNoteToApi = (color) => ({
+ r: color.r,
+ b: color.b,
+ g: color.g,
+ a: 1,
+})
