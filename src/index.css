@@ -87,3 +87,15 @@ a {
 .style-scrollbar-x-md::-webkit-scrollbar {
  height: 10px;
 }
+
+/* style checkbox note list */
+
+ul[data-checked='true'] > li::before {
+ content: '\2611';
+ margin-right: 4px;
+}
+
+ul[data-checked='false'] > li::before {
+ content: '\2610';
+ margin-right: 4px;
+}

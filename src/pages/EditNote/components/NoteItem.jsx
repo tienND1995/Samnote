@@ -113,7 +113,7 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
         element='p'
         truncateText='…'
         text={<Markdown rehypePlugins={[rehypeRaw]}>{note.data}</Markdown>}
-        containerClassName='text-center'
+        containerClassName='flex justify-center'
        />
       )}
      </div>

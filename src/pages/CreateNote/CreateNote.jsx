@@ -68,7 +68,6 @@ const CreateNote = () => {
 
   fetchApiSamenote('post', `${params}/${user?.id}`, data)
    .then((data) => {
-
     reset()
     setColor({ b: 250, g: 250, r: 255, name: 'snow' })
     setSnackbar({
@@ -210,6 +209,7 @@ const CreateNote = () => {
       setValue={setValue}
       value={contentEditor}
       onChangeTextEditor={handleChangeTextEditor}
+      type={'check-list'}
      />
     </div>
    </form>
