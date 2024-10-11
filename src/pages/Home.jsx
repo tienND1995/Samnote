@@ -291,7 +291,7 @@ const Home = () => {
             fontWeight: '500',
            }
        }
-       onClick={() => navigate(`/user/dustbin`)}
+       onClick={() => navigate(`/dustbin`)}
       >
        Dustbin
       </li>
@@ -307,7 +307,7 @@ const Home = () => {
             fontWeight: '500',
            }
        }
-       onClick={() => navigate(`/user/sketch`)}
+       onClick={() => navigate(`/sketch`)}
       >
        Sketch
       </li>

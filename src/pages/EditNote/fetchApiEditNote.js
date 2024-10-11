@@ -23,26 +23,3 @@ export const fetchAllFolder = async (userID) => {
  }
 }
 
-export const postImages = async (formData, setAlert) => {
- try {
-  const response = await axios.post(
-   `${API_SERVER_URL}/add_image_note`,
-   formData
-  )
-
-  setAlert({
-   isOpen: true,
-   message: `Add images complete`,
-   severity: 'success',
-  })
-
-  return response.data
- } catch (error) {
-  console.error(error)
-  setAlert({
-   isOpen: true,
-   message: error.message,
-   severity: 'error',
-  })
- }
-}

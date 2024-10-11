@@ -68,14 +68,24 @@ const CreateNote = () => {
 
   fetchApiSamenote('post', `${params}/${user?.id}`, data)
    .then((data) => {
-    console.log('data', data)
-
     reset()
+    setColor({ b: 250, g: 250, r: 255, name: 'snow' })
     setSnackbar({
      isOpen: true,
      message: `Create note success!`,
      severity: 'success',
     })
+
+    // post image list
+    const newFormData = new FormData()
+    newFormData.append('id_user', user?.id)
+    newFormData.append('id_note', data.note.idNote)
+
+    uploadImageList.forEach((image) => {
+     newFormData.append('image_note', image.file)
+    })
+
+    fetchApiSamenote('post', '/add_image_note', newFormData)
    })
    .catch((error) => console.log('error', error))
  }
@@ -101,34 +111,7 @@ const CreateNote = () => {
    linkNoteShare: '',
   }
 
-  if (uploadImageList.length === 0) {
-   return postNote(dataForm)
-  }
-
-  if (uploadImageList.length > 0) {
-   const dataWithImage = new FormData()
-
-   dataWithImage.append('content', dataForm.data)
-   dataWithImage.append('dueAt', dataForm.dueAt)
-   dataWithImage.append('type', 'image')
-   dataWithImage.append('title', dataForm.title)
-   dataWithImage.append('pinned', dataForm.pinned)
-   dataWithImage.append('idFolder', dataForm.idFolder)
-   dataWithImage.append('linkNoteShare', dataForm.linkNoteShare)
-   dataWithImage.append('remindAt', dataForm.remindAt)
-   dataWithImage.append('notePublic', dataForm.notePublic)
-
-   dataWithImage.append('r', newColor.r)
-   dataWithImage.append('g', newColor.g)
-   dataWithImage.append('b', newColor.b)
-   dataWithImage.append('a', newColor.a)
-
-   await uploadImageList.forEach(({ file }) =>
-    dataWithImage.append('image_note', file)
-   )
-
-   return postNote(dataWithImage)
-  }
+  return postNote(dataForm)
  }
 
  // handle upload image
@@ -166,6 +149,7 @@ const CreateNote = () => {
        errors={errors}
        dirtyFields={dirtyFields}
        onChangeColor={handleChangeColor}
+       color={color}
       />
 
       <div className='flex justify-between mt-4'>
@@ -225,6 +209,7 @@ const CreateNote = () => {
       setValue={setValue}
       value={contentEditor}
       onChangeTextEditor={handleChangeTextEditor}
+      type={'check-list'}
      />
     </div>
    </form>

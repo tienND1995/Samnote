@@ -20,15 +20,10 @@ const FormNote = ({
  userID,
  dirtyFields,
  onChangeColor,
+ color,
 }) => {
  const [colorList, setColorList] = useState([])
  const [folderList, setFolderList] = useState([])
- const [color, setColor] = useState({
-  b: 250,
-  g: 250,
-  r: 255,
-  name: 'snow',
- })
 
  const notePublicForm = watch('notePublic')
  const colorForm = watch('color')
@@ -51,7 +46,6 @@ const FormNote = ({
 
   // handle change color
   const colorMatch = colorList?.find((color) => color.name === colorForm)
-  setColor(colorMatch)
   onChangeColor(colorMatch)
  }, [colorForm])
 
@@ -123,7 +117,7 @@ const FormNote = ({
      </div>
     </div>
    </Modal>
-   <div className='col-span-2'>
+   <div className=''>
     <InputLabel className='text-white'>Title</InputLabel>
     <TextField
      className='w-full bg-white rounded-1 '
@@ -140,6 +134,30 @@ const FormNote = ({
    </div>
 
    <div>
+    <InputLabel className='text-white' id='select-type-form'>
+     Type
+    </InputLabel>
+
+    <FormControl className=' bg-white rounded-1 w-full'>
+     <Select
+      value={1}
+    //   {...register('type')}
+      labelId='select-type-form'
+      size='small'
+      className='capitalize'
+     >
+      <MenuItem value={0} className='capitalize'>
+       text
+      </MenuItem>
+
+      <MenuItem value={1} className='capitalize'>
+       check list
+      </MenuItem>
+     </Select>
+    </FormControl>
+   </div>
+
+   <div>
     <InputLabel className='text-white'>Lock</InputLabel>
     <TextField
      className='w-full bg-white rounded-1 '
@@ -150,7 +168,7 @@ const FormNote = ({
    </div>
 
    <div>
-    <InputLabel className='text-white' id='select-public-form'>
+    <InputLabel className='text-white' id='select-folder-form'>
      Folder
     </InputLabel>
 
@@ -158,7 +176,7 @@ const FormNote = ({
      <Select
       value={folderForm}
       {...register('idFolder')}
-      labelId='select-public-form'
+      labelId='select-folder-form'
       size='small'
       className='capitalize'
      >
@@ -216,7 +234,12 @@ const FormNote = ({
     </InputLabel>
 
     <FormControl className=' bg-white rounded-1 w-full'>
-     <Select value={notePublicForm} {...register('notePublic')} size='small'>
+     <Select
+      labelId='select-public-form'
+      value={notePublicForm}
+      {...register('notePublic')}
+      size='small'
+     >
       <MenuItem value={1}>Public</MenuItem>
       <MenuItem value={0}>Private</MenuItem>
      </Select>

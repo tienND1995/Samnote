@@ -264,7 +264,7 @@ const FormEdit = ({ onDispatchName }) => {
 
      <div className='col'>
       <div className='mb-3'>
-       <InputLabel className='text-white'>title</InputLabel>
+       <InputLabel className='text-white'>Title</InputLabel>
        <TextField
         className='w-full bg-white rounded-1 '
         size='small'
