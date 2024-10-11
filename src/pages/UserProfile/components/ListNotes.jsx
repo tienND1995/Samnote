@@ -66,7 +66,7 @@ const ListNotes = (
                 <TabPanel value='1' className='w-full p-0'>
                     {dataNotes.length > 0 ? (
                         <Swiper
-                            spaceBetween={20}
+                            spaceBetween={16}
                             slidesPerView='auto'
                             navigation={{
                                 prevEl: '.swiper-button-prev',
@@ -74,12 +74,12 @@ const ListNotes = (
                             }}
                             className='swiper-privateNotes overflow-x-auto'
                         >
-                            {dataNotes.map((info, index) => (
+                            {dataNotes.map((info) => (
                                 <SwiperSlide
                                     key={info.idNote}
-                                    className={`p-2 border-[1px] rounded-xl border-black border-solid mb-1
+                                    className={`p-2 border-[1px] rounded-xl border-black border-solid mb-2
                                                 ${isLightColor(info.color) ? 'text-black' : 'text-white'}
-                                                ${dataNotes.length < 3 ? `w-[${100 / dataNotes.length}%]` : 'w-[22rem]'}`}
+                                                ${dataNotes.length === 1 ? 'w-full' : dataNotes.length === 2 ? `w-[49%]` : 'w-[22rem]'}`}
                                     style={{
                                         backgroundColor: `rgba(${info.color.r}, ${info.color.g}, ${info.color.b}, ${info.color.a})`,
                                     }}
