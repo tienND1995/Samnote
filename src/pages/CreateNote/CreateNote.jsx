@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react'
 
 import uniqid from 'uniqid'
-import { convertTimeToApi } from '../../utils/utils'
+import { convertColorNoteToApi, convertTimeToApi } from '../../utils/utils'
 
 import { joiResolver } from '@hookform/resolvers/joi'
 import { useForm } from 'react-hook-form'
@@ -62,11 +62,7 @@ const CreateNote = () => {
  const handleChangeColor = (color) => setColor(color)
 
  const postNote = (data) => {
-  const isFormData = data instanceof FormData
-  let params = '/notes'
-  params = isFormData ? '/new-note-image' : params
-
-  fetchApiSamenote('post', `${params}/${user?.id}`, data)
+  fetchApiSamenote('post', `/notes/${user?.id}`, data)
    .then((data) => {
     reset()
     setColor({ b: 250, g: 250, r: 255, name: 'snow' })
@@ -76,6 +72,7 @@ const CreateNote = () => {
      severity: 'success',
     })
 
+    setUploadImageList([])
     // post image list
     const newFormData = new FormData()
     newFormData.append('id_user', user?.id)
@@ -95,18 +92,11 @@ const CreateNote = () => {
    return setError('data', { type: 'text', message: 'Not content yet!' })
   }
 
-  // *** convert time and color to api
-  const newColor = {
-   r: color.r,
-   b: color.b,
-   g: color.g,
-   a: 1,
-  }
-
   const dataForm = {
    ...data,
-   color: newColor,
+   color: convertColorNoteToApi(color),
    dueAt: convertTimeToApi(data.dueAt),
+   remindAt: convertTimeToApi(data.remindAt),
    type: 'text',
    linkNoteShare: '',
   }
@@ -127,6 +117,11 @@ const CreateNote = () => {
   }
 
   setUploadImageList([...uploadImageList, image])
+ }
+
+ // disable btn
+ const disableBtnSubmit = () => {
+  return Object.keys(dirtyFields).length === 0 && textEditor?.trim() == ''
  }
 
  return (
@@ -154,12 +149,6 @@ const CreateNote = () => {
 
       <div className='flex justify-between mt-4'>
        <div className='flex justify-start items-center gap-3'>
-        <div>
-         <button type='button' className='btn btn-primary w-max'>
-          Share Note
-         </button>
-        </div>
-
         <FormControlLabel
          className=' text-white rounded-1 '
          label='Pinned'
@@ -185,7 +174,14 @@ const CreateNote = () => {
        </div>
 
        <div>
-        <button className='btn btn-primary text-white uppercase'>Create</button>
+        <button
+         disabled={disableBtnSubmit()}
+         className={`btn btn-primary text-white uppercase ${
+          disableBtnSubmit() ? 'opacity-50' : 'opacity-100'
+         }`}
+        >
+         Create
+        </button>
        </div>
       </div>
      </div>
@@ -197,11 +193,8 @@ const CreateNote = () => {
     </div>
 
     <div className='flex relative'>
-     {errors.data && (
-      <p
-       //  style={{ borderBottom: '1px solid red' }}
-       className='text-red-600 w-max absolute top-[120px] left-[15px]'
-      >
+     {errors.data && textEditor.trim().length < 1 && (
+      <p className='text-red-600 w-max absolute top-[120px] left-[15px]'>
        {errors.data.message}
       </p>
      )}
@@ -209,7 +202,6 @@ const CreateNote = () => {
       setValue={setValue}
       value={contentEditor}
       onChangeTextEditor={handleChangeTextEditor}
-      type={'check-list'}
      />
     </div>
    </form>
