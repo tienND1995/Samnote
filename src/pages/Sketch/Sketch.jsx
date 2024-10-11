@@ -22,7 +22,6 @@ const Sketch = () => {
   name: 'snow',
  })
 
- console.log('color', color)
 
  // var canvas
  const [strokeColor, setStrokeColor] = useState('red')
@@ -62,6 +61,7 @@ const Sketch = () => {
   errors,
   dirtyFields,
   onChangeColor: handleChangeColor,
+  color
  }
 
  const onSubmitForm = (data) => {

@@ -20,15 +20,10 @@ const FormNote = ({
  userID,
  dirtyFields,
  onChangeColor,
+ color,
 }) => {
  const [colorList, setColorList] = useState([])
  const [folderList, setFolderList] = useState([])
- const [color, setColor] = useState({
-  b: 250,
-  g: 250,
-  r: 255,
-  name: 'snow',
- })
 
  const notePublicForm = watch('notePublic')
  const colorForm = watch('color')
@@ -51,7 +46,6 @@ const FormNote = ({
 
   // handle change color
   const colorMatch = colorList?.find((color) => color.name === colorForm)
-  setColor(colorMatch)
   onChangeColor(colorMatch)
  }, [colorForm])
 

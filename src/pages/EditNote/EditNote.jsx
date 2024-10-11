@@ -5,7 +5,7 @@ import { fetchNoteList } from './fetchApiEditNote'
 
 import FormEdit from './components/FormEdit.jsx'
 import NoteList from './components/NoteList.jsx'
-import './EditNote.css'
+
 
 const EditNote = () => {
  const appContext = useContext(AppContext)
@@ -21,6 +21,8 @@ const EditNote = () => {
 
  const getNoteList = async () => {
   const data = await fetchNoteList(user?.id)
+
+  
   setNoteList(data)
   setNameEvent(null)
  }

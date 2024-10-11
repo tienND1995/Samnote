@@ -42,10 +42,9 @@ const Photo = () => {
   fetchPhotoList()
  }, [user])
 
- const handleDeleteImages = () => {
-  const slectedImages = [...checkedItems]
-  if (slectedImages.length < 1) return
+ const slectedImages = [...checkedItems]
 
+ const handleDeleteImages = () => {
   const imagesDelete = imagesCheckList.filter((item) =>
    slectedImages.some((id) => item.id_images === id)
   )
@@ -119,8 +118,13 @@ const Photo = () => {
 
       <div>
        <button
+        disabled={slectedImages.length < 1}
         onClick={handleDeleteImages}
-        className='flex items-center text-white text-3xl bg-[#ff0000] rounded-lg px-2 py-1 cursor-pointer ease-in duration-200 hover:bg-red-600'
+        className={`flex items-center text-white text-3xl bg-[#ff0000] rounded-lg px-2 py-1 ease-in duration-200 ${
+         slectedImages.length < 1
+          ? 'opacity-50 cursor-auto'
+          : 'opacity-100 cursor-pointer'
+        }`}
        >
         Delete <DeleteIcon className='text-3xl' />
        </button>

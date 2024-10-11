@@ -34,8 +34,6 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
   ),
  }
 
- const markdown = `<img src="http://samnote.mangasocial.online/get-image/127/127_note_612976.jpg" alt="img upload" style="width: 100px; height: 100px;">`
-
  const convertTime = (time) =>
   moment(`${time}+0700`).subtract(10, 'days').calendar()
 
@@ -45,6 +43,7 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
     `https://samnote.mangasocial.online/notes/${id}`
    )
 
+   //  handle after delete note
    if (noteList.length === 1) navigate(`/editnote`)
    if (indexNoteNext === noteList.length - 1)
     return navigate(`/editnote/${noteList[indexNoteNext - 1].idNote}`)
@@ -94,7 +93,15 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
      boxShadow: '0px 4px 10px 0px #00000040',
      backgroundColor: `rgb(${note.color.r}, ${note.color.g}, ${note.color.b})`,
     }}
-    className='row row-cols-4 justify-between rounded-lg mx-0 p-2 position-relative cursor-pointer text-decoration-none text-black'
+    className={({ isActive, isPending }) =>
+     `row row-cols-4 justify-between rounded-lg mx-0 p-2 position-relative cursor-pointer text-decoration-none text-black border-2 ${
+      isPending
+       ? 'pending'
+       : isActive
+       ? 'border-2 border-green-600 border-solid'
+       : ''
+     }`
+    }
    >
     <h6 className='col font-semibold'>{note.title}</h6>
 
