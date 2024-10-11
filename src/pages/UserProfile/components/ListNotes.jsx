@@ -8,8 +8,16 @@ import Checklist from './CheckList'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { handleErrorAvatar, convertApiToTime, isLightColor } from '../../../utils/utils'
 
-const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, handleShowComments }) => {
-
+const ListNotes = (
+    {
+        typeNotes,
+        dataNotes,
+        userInfomations,
+        handleDeleteNote,
+        handleShowComments,
+        handleLikeNote,
+    }
+) => {
     const [tabValue, setTabValue] = useState('1')
 
     const handleTabChange = (event, newValue) => {
@@ -68,7 +76,7 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                         >
                             {dataNotes.map((info, index) => (
                                 <SwiperSlide
-                                    key={index}
+                                    key={info.idNote}
                                     className={`p-2 border-[1px] rounded-xl border-black border-solid mb-1
                                                 ${isLightColor(info.color)
                                             ? 'text-black'
@@ -182,7 +190,9 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                                         </p>
                                     </Box>
                                     <div className='interacted-note flex justify-end items-center gap-3 pr-2 mt-2'>
-                                        <div className='like flex items-center gap-1 cursor-pointer'>
+                                        <div className='like flex items-center gap-1 cursor-pointer'
+                                            onClick={() => handleLikeNote(info.idNote, 'like')}
+                                        >
                                             <svg
                                                 width='1rem'
                                                 height='1rem'
@@ -194,7 +204,9 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                                             </svg>
                                             <span>{info.like_count}</span>
                                         </div>
-                                        <div className='dislike flex items-center gap-1 cursor-pointer'>
+                                        <div className='dislike flex items-center gap-1 cursor-pointer'
+                                            onClick={() => handleLikeNote(info.idNote, 'dislike')}
+                                        >
                                             <svg
                                                 width='1rem'
                                                 height='1rem'

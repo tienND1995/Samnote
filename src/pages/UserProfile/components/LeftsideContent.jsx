@@ -162,7 +162,7 @@ const LeftsideContent = ({
                 >
                   {publicNotes.map((info, index) => (
                     <SwiperSlide
-                      key={index}
+                      key={info.idNote}
                       className={`p-2 border-[1px] rounded-xl border-black border-solid mr-1
                           ${isLightColor(info.color)
                           ? 'text-black'
@@ -351,6 +351,7 @@ const LeftsideContent = ({
           userInfomations={userInfomations}
           handleDeleteNote={handleDeleteNote}
           handleShowComments={handleShowComments}
+          handleLikeNote={handleLikeNote}
         />
       </Box>
       {user.id === userInfomations.id &&
@@ -361,6 +362,7 @@ const LeftsideContent = ({
             userInfomations={userInfomations}
             handleDeleteNote={handleDeleteNote}
             handleShowComments={handleShowComments}
+            handleLikeNote={handleLikeNote}
           />
         </Box>
       }
@@ -371,6 +373,7 @@ const LeftsideContent = ({
           userInfomations={userInfomations}
           handleDeleteNote={handleDeleteNote}
           handleShowComments={handleShowComments}
+          handleLikeNote={handleLikeNote}
         />
       </Box>
       {isShowModalComments && (

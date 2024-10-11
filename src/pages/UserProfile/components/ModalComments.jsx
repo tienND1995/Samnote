@@ -43,18 +43,6 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
       console.log('Received new comment:', newComment)
       fetchAllDataComments()
       setReload((prev) => prev + 1)
-      // if (newComment.parent_id === 0) {
-      //   setDataComments(prevComments => [...prevComments, newComment])
-      // } else {
-      //   setDataComments(prevComments => {
-      //     const updatedComments = [...prevComments]
-      //     const parentCommentIndex = updatedComments.findIndex(comment => comment.id === newComment.parent_id)
-      //     if (parentCommentIndex !== -1) {
-      //       updatedComments[parentCommentIndex].reply_comments = [...updatedComments[parentCommentIndex].reply_comments, newComment]
-      //     }
-      //     return updatedComments
-      //   })
-      // }
     })
 
     ws.on('favorite_comment', (favoriteComment) => {
@@ -63,72 +51,18 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
       }
       console.log('Received favorite comment:', favoriteComment)
       fetchAllDataComments()
-
-      // setDataComments(prevComments => {
-      //   const updatedComments = prevComments.map(comment => {
-      //     if (comment.id === favoriteComment.idComment) {
-      //       return updateFavoriteComment(comment, favoriteComment.type);
-      //     } else if (comment.reply_comments &&
-      //       comment.reply_comments.some(reply => reply.id === favoriteComment.idComment)) {
-      //       return {
-      //         ...comment,
-      //         reply_comments: comment.reply_comments.map(reply => {
-      //           if (reply.id === favoriteComment.idComment) {
-      //             return updateFavoriteComment(reply, favoriteComment.type);
-      //           }
-      //           return reply;
-      //         })
-      //       };
-      //     }
-      //     return comment;
-      //   });
-      //   return updatedComments;
-      // });
     })
-
-    // ws.onopen = (event) => {
-    //     console.log('Connected to WebSocket server')
-    // }
-
-    // ws.onmessage = (event) => {
-    //     console.log('Received from server:', event.data);
-    // }
 
     return () => {
       ws.disconnect()
     }
   }, [idNote])
 
-  const updateFavoriteComment = (comment, type) => ({
-    ...comment,
-    [type]: comment[type] + 1,
-  });
-
-  const sendComment = (parentsNoteId, content) => {
-    try {
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-          action: 'create_comment',
-          parent_id: parentsNoteId,
-          sendAt: new Date().toISOString(),
-          content: content,
-          idNote: idNote,
-          idUser: user.id,
-        }));
-        setContentComment('')
-        setContentReplyComment('')
-      }
-    } catch (err) {
-      console.error(err)
-    }
-  };
-
   const handleSubmitComment = async (parentsNoteId) => {
     const content = parentsNoteId ? contentReplyComment : contentComment
     if (content.trim() === '') {
       return
     }
-    //sendComment(parentsNoteId, content)
     try {
       const res = await api.post(`/notes/notes-comment/${idNote}`, {
         parent_id: parentsNoteId,
@@ -147,8 +81,10 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
   }
 
   const handleLikeComment = async (idComment, type) => {
+    console.log(idComment);
     try {
-      await api.post(`/notes/favorite/${idComment}`, { idUser: user.id, type })
+      const res = await api.post(`/notes/favorite/${idComment}`, { idUser: user.id, type })
+      console.log(res);
       fetchAllDataComments()
     } catch (err) {
       console.error(err)
@@ -272,7 +208,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
                             seeReplyStates[index] ? (
                               <div className="replies-list flex flex-col">
                                 {comment.reply_comments.map((reply) => (
-                                  <div key={reply.id} className='flex flex-row'>
+                                  <div key={reply.id_reply} className='flex flex-row'>
                                     <div className='line-reply-straight ml-[19px]'>
                                       <div className='bg-gray-200 h-full w-[2px]' />
                                     </div>
@@ -300,14 +236,14 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
                                         </div>
                                         <div className="reply-actions d-flex align-items-center mt-1 ml-2 relative">
                                           <div className='amount-like-dislike flex flex-row gap-1'>
-                                            <p className="text-sm mr-5 mb-0">Like: {reply.like || 0}</p>
-                                            <p className="text-sm mr-5 mb-0">Dislike: {reply.dislike || 0}</p>
+                                            <p className="text-sm mr-5 mb-0">Like: {reply.like_count || 0}</p>
+                                            <p className="text-sm mr-5 mb-0">Dislike: {reply.dislike_count || 0}</p>
                                           </div>
                                           <div className='interacted-rely flex justify-end items-center gap-2 opacity-80
                                                                                                 absolute top-[-100%] right-[7%]'>
                                             <div
                                               className='like cursor-pointer flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300'
-                                              onClick={() => handleLikeComment(reply.id, 'like')}
+                                              onClick={() => handleLikeComment(reply.id_reply, 'like')}
                                             >
                                               <svg
                                                 width='1rem'
@@ -319,7 +255,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
                                             </div>
                                             <div
                                               className='dislike cursor-pointer flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300'
-                                              onClick={() => handleLikeComment(reply.id, 'dislike')}
+                                              onClick={() => handleLikeComment(reply.id_reply, 'dislike')}
                                             >
                                               <svg
                                                 width='1rem'
