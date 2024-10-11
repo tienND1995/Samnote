@@ -1,12 +1,12 @@
 import axios from 'axios'
 import { useContext, useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
 import { useParams } from 'react-router-dom'
 
+import { useForm } from 'react-hook-form'
+import { schemaNoteEdit } from '../../../utils/schema'
 import { joiResolver } from '@hookform/resolvers/joi'
 
-import moment from 'moment'
-import { schemaNoteEdit } from '../../../utils/schema'
+import { convertTimeToApi, convertApiToTime } from '../../../utils/utils'
 
 import { AppContext } from '../../../context'
 import { fetchAllFolder, fetchNoteList } from '../fetchApiEditNote'
@@ -52,7 +52,6 @@ const FormEdit = ({ onDispatchName }) => {
   register,
   handleSubmit,
   setValue,
-  getValues,
   watch,
   reset,
 
@@ -65,6 +64,7 @@ const FormEdit = ({ onDispatchName }) => {
    pinned: false,
    title: '',
    dueAt: null,
+   remindAt: null,
    lock: '',
    color: '',
    type: 'text',
@@ -77,8 +77,6 @@ const FormEdit = ({ onDispatchName }) => {
  const folderForm = watch('idFolder')
  const contentEditor = watch('data')
  const pinnedForm = watch('pinned')
-
- const convertTime = (time) => moment(`${time}+0700`).format('YYYY-MM-DD')
 
  const getDataNoteId = async () => {
   const noteList = await fetchNoteList(user?.id)
@@ -93,7 +91,8 @@ const FormEdit = ({ onDispatchName }) => {
   setValue('data', noteId[0].data)
   setValue('pinned', noteId[0].pinned)
   setValue('type', noteId[0].type)
-  setValue('dueAt', convertTime(noteId[0].dueAt))
+  setValue('dueAt', convertApiToTime(noteId[0].dueAt))
+  setValue('remindAt', convertApiToTime(noteId[0].remindAt))
   setValue('notePublic', noteId[0].notePublic)
   setValue('idFolder', noteId[0].idFolder)
  }
@@ -164,8 +163,7 @@ const FormEdit = ({ onDispatchName }) => {
  const onSubmit = async (data) => {
   if (color.name !== data.color || !noteItem.idNote || !id) return
 
-  // *** convert time and color to api
-  const newDueAt = `${moment(data.dueAt).format('DD/MM/YYYY hh:mm A')} +07:00`
+  // *** convert color to api
   const newColor = {
    r: color.r,
    b: color.b,
@@ -176,7 +174,8 @@ const FormEdit = ({ onDispatchName }) => {
   const dataForm = {
    ...data,
    color: newColor,
-   dueAt: newDueAt,
+   dueAt: convertTimeToApi(data.dueAt),
+   remindAt: convertTimeToApi(data.remindAt),
    type: 'text',
   }
 
@@ -318,6 +317,22 @@ const FormEdit = ({ onDispatchName }) => {
      <div className='col flex flex-col justify-between'>
       <div className='mb-3'>
        <InputLabel className='text-white'>Remind At</InputLabel>
+       <TextField
+        className='w-full bg-white rounded-1 '
+        size='small'
+        type='date'
+        {...register('remindAt')}
+       />
+      </div>
+
+      {errors.remindAt && (
+       <p style={{ borderBottom: '1px solid red' }} className='text-red-600'>
+        {errors.remindAt.message}
+       </p>
+      )}
+
+      <div className='mb-3'>
+       <InputLabel className='text-white'>Due At</InputLabel>
        <TextField
         className='w-full bg-white rounded-1 '
         size='small'

@@ -7,6 +7,7 @@ import Slider from 'react-slick'
 import TextTruncate from 'react-text-truncate'
 import rehypeRaw from 'rehype-raw'
 
+import { convertTimeApiNoteToHtml } from '../../../utils/utils'
 import deleteNote from '../../../assets/delete-note.png'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
@@ -33,9 +34,6 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
    </button>
   ),
  }
-
- const convertTime = (time) =>
-  moment(`${time}+0700`).subtract(10, 'days').calendar()
 
  const deleteNoteId = async (id, indexNoteNext) => {
   try {
@@ -78,8 +76,6 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
     })
    }
   })
-
-  //   confirmDelete('note', idNote, deleteNoteId)
  }
 
  //  *__________________________
@@ -138,7 +134,7 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
     </div>
 
     <time className='col font-semibold text-center'>
-     {convertTime(note.createAt)}
+     {convertTimeApiNoteToHtml(note.createAt)}
     </time>
 
     <button

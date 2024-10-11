@@ -107,6 +107,7 @@ const CreateNote = () => {
    ...data,
    color: newColor,
    dueAt: convertTimeToApi(data.dueAt),
+   remindAt: convertTimeToApi(data.remindAt),
    type: 'text',
    linkNoteShare: '',
   }
@@ -154,12 +155,6 @@ const CreateNote = () => {
 
       <div className='flex justify-between mt-4'>
        <div className='flex justify-start items-center gap-3'>
-        <div>
-         <button type='button' className='btn btn-primary w-max'>
-          Share Note
-         </button>
-        </div>
-
         <FormControlLabel
          className=' text-white rounded-1 '
          label='Pinned'

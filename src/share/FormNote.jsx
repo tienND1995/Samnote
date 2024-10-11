@@ -141,7 +141,7 @@ const FormNote = ({
     <FormControl className=' bg-white rounded-1 w-full'>
      <Select
       value={1}
-    //   {...register('type')}
+      //   {...register('type')}
       labelId='select-type-form'
       size='small'
       className='capitalize'
@@ -246,8 +246,26 @@ const FormNote = ({
     </FormControl>
    </div>
 
-   <div className='w-max'>
-    <div className='mb-3'>
+   <div>
+    <div>
+     <InputLabel className='text-white'>Remind At</InputLabel>
+     <TextField
+      className='w-full bg-white rounded-1 '
+      size='small'
+      type='date'
+      {...register('remindAt')}
+     />
+    </div>
+
+    {errors.remindAt && (
+     <p style={{ borderBottom: '1px solid red' }} className='text-red-600'>
+      {errors.remindAt.message}
+     </p>
+    )}
+   </div>
+
+   <div>
+    <div>
      <InputLabel className='text-white'>Due At</InputLabel>
      <TextField
       className='w-full bg-white rounded-1 '
