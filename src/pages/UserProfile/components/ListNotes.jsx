@@ -67,7 +67,7 @@ const ListNotes = (
                     {dataNotes.length > 0 ? (
                         <Swiper
                             spaceBetween={20}
-                            slidesPerView={2.5}
+                            slidesPerView='auto'
                             navigation={{
                                 prevEl: '.swiper-button-prev',
                                 nextEl: '.swiper-button-next',
@@ -77,7 +77,7 @@ const ListNotes = (
                             {dataNotes.map((info, index) => (
                                 <SwiperSlide
                                     key={info.idNote}
-                                    className={`p-2 border-[1px] rounded-xl border-black border-solid mb-1
+                                    className={`w-[22rem] p-2 border-[1px] rounded-xl border-black border-solid mb-1
                                                 ${isLightColor(info.color)
                                             ? 'text-black'
                                             : 'text-white'

@@ -64,8 +64,8 @@ const UserIntro = ({ userInfomations, user }) => {
       <div className='cover-photo-container relative'>
         <img
           src={userInfomations.AvtProfile}
-          alt=''
-          className='w-full h-[500px] object-fit-cover cover-photo'
+          alt='cover photo'
+          className='w-full lg:h-[500px] h-[300px] object-fit-cover cover-photo'
           style={{ filter: 'brightness(0.9)' }}
         />
         {user.id === userInfomations.id && (
@@ -81,10 +81,10 @@ const UserIntro = ({ userInfomations, user }) => {
                 className='infomation text-white mr-5'
                 style={{ textShadow: '2px 2px 5px rgba(0, 0, 0, 0.5)' }}
               >
-                <Typography variant='h5' className='font-bold'>
+                <Typography className='font-bold text-2xl md:text-3xl'>
                   Hello {userInfomations.name} !
                 </Typography>
-                <Typography className='text-xl'>
+                <Typography className='text-base md:text-xl'>
                   {getFormattedDate(new Date())}
                 </Typography>
               </div>
@@ -94,8 +94,7 @@ const UserIntro = ({ userInfomations, user }) => {
                   style={{ cursor: 'pointer', height: '39px' }}
                 >
                   <svg
-                    width='28'
-                    height='28'
+                    className="w-6 h-6 md:w-7 md:h-7"
                     fill='#fff'
                     xmlns='http://www.w3.org/2000/svg'
                     viewBox='0 0 448 512'
@@ -111,8 +110,7 @@ const UserIntro = ({ userInfomations, user }) => {
                     ref={messageIconRef}
                   >
                     <svg
-                      width='28'
-                      height='28'
+                      className="w-6 h-6 md:w-7 md:h-7"
                       viewBox='0 0 48 48'
                       fill='none'
                       xmlns='http://www.w3.org/2000/svg'
@@ -131,8 +129,7 @@ const UserIntro = ({ userInfomations, user }) => {
                     </svg>
                   </div>
                   <div
-                    className='position-absolute translate-middle badge rounded-pill bg-danger'
-                    style={{ top: '15%', left: '85%' }}
+                    className='absolute top-[15%] left-[85%] translate-middle badge rounded-pill bg-danger'
                   >
                     {dataMess.filter((mess) => !mess.is_seen).length || 0}
                   </div>
@@ -150,10 +147,10 @@ const UserIntro = ({ userInfomations, user }) => {
         )}
       </div>
       <div
-        className='info-user-container flex items-center justify-between 
-                                lg:flex-row sm:flex-col px-12 py-8 relative'
+        className='info-user-container w-full flex md:items-center items-start justify-between 
+                                md:flex-row flex-col px-12 py-8 relative gap-2'
       >
-        <div className='info-user flex items-center gap-8 lg:w-auto sm:w-full'>
+        <div className='info-user flex items-center gap-2 w-full md:max-w-[80%]'>
           <div className='avartar-user relative'>
             <img
               src={
@@ -162,16 +159,16 @@ const UserIntro = ({ userInfomations, user }) => {
                   : '/src/assets/avatar-default.png'
               }
               alt=''
-              className='w-28 h-28 rounded-full object-cover'
+              className='w-20 h-20 md:w-28 md:h-28 rounded-full object-cover'
               onError={handleErrorAvatar}
             />
-            <div className='absolute bottom-1 right-1 bg-green-500 w-7 h-7 rounded-full'></div>
+            <div className='absolute bottom-1 right-1 bg-green-500 w-5 h-5 md:w-7 md:h-7 rounded-full'></div>
           </div>
-          <Box className='text-white'>
-            <Typography variant='h4' className='name-user font-bold mb-1'>
+          <Box className='text-white flex-1 truncate-text'>
+            <Typography className='name-user font-bold mb-1 text-3xl md:text-4xl truncate-text'>
               {userInfomations.name}
             </Typography>
-            <Typography className='date-joined text-xl'>
+            <Typography className='date-joined text-base md:text-xl'>
               Join at {getFormattedDate(userInfomations.createAccount)}
             </Typography>
           </Box>
