@@ -56,7 +56,7 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userInfomations
     }
 
     return (
-        <div className='rightside col-lg-4 flex flex-column mb-4'>
+        <div className='rightside flex flex-column mb-4 w-full lg:w-[33%]'>
             <div className='quick-note-container w-[100%] h-[450px] bg-[#FFF4BA] rounded-xl p-4'>
                 <div className='flex justify-between w-full'>
                     <h2 className='font-bold text-gray-700 text-3xl'>Quick Note</h2>
@@ -79,8 +79,7 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userInfomations
                     onChange={(event) => setPayloadData(event.target.value)}
                 />
             </div>
-            <div className='flex flex-col md:flex-row lg:flex-col gap-3'>
-
+            <div className='flex flex-col md:flex-row lg:flex-col md:gap-3 lg:gap-0'>
                 <div className='new-users w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3'>
                     <span className='font-[700] text-[#888888] text-xl mb-3 ml-2'>New Users</span>
                     {lastUsers.length > 0 ? (

@@ -81,7 +81,7 @@ const UserIntro = ({ userInfomations, user }) => {
                 className='infomation text-white mr-5'
                 style={{ textShadow: '2px 2px 5px rgba(0, 0, 0, 0.5)' }}
               >
-                <Typography className='font-bold text-2xl md:text-3xl'>
+                <Typography className='font-bold text-2xl md:text-3xl text-capitalize'>
                   Hello {userInfomations.name} !
                 </Typography>
                 <Typography className='text-base md:text-xl'>
@@ -165,7 +165,7 @@ const UserIntro = ({ userInfomations, user }) => {
             <div className='absolute bottom-1 right-1 bg-green-500 w-5 h-5 md:w-7 md:h-7 rounded-full'></div>
           </div>
           <Box className='text-white flex-1 truncate-text'>
-            <Typography className='name-user font-bold mb-1 text-3xl md:text-4xl truncate-text'>
+            <Typography className='name-user font-bold mb-1 text-3xl md:text-4xl truncate-text text-capitalize'>
               {userInfomations.name}
             </Typography>
             <Typography className='date-joined text-base md:text-xl'>

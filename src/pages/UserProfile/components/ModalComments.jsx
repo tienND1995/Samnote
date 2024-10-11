@@ -5,7 +5,7 @@ import SendIcon from '@mui/icons-material/Send';
 import { formatTimeAgo } from '../../../utils/utils';
 import { io } from 'socket.io-client'
 
-const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
+const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
   const [dataComments, setDataComments] = useState([])
   const [contentComment, setContentComment] = useState('')
   const [contentReplyComment, setContentReplyComment] = useState('')
@@ -15,12 +15,12 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
 
   const fetchAllDataComments = useCallback(async () => {
     try {
-      const res = await api.get(`/notes/notes-comment/${idNote}`)
+      const res = await api.get(`/notes/notes-comment/${infoNote.idNote}`)
       setDataComments(res.data.data)
     } catch (err) {
       console.error(err)
     }
-  }, [idNote])
+  }, [infoNote])
 
   useEffect(() => {
     fetchAllDataComments()
@@ -37,7 +37,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
     })
 
     ws.on('new_comment', (newComment) => {
-      if (idNote !== newComment.idNote) {
+      if (infoNote.idNote !== newComment.idNote) {
         return
       }
       console.log('Received new comment:', newComment)
@@ -46,7 +46,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
     })
 
     ws.on('favorite_comment', (favoriteComment) => {
-      if (favoriteComment.idNote !== idNote) {
+      if (favoriteComment.idNote !== infoNote.idNote) {
         return
       }
       console.log('Received favorite comment:', favoriteComment)
@@ -56,7 +56,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
     return () => {
       ws.disconnect()
     }
-  }, [idNote])
+  }, [infoNote])
 
   const handleSubmitComment = async (parentsNoteId) => {
     const content = parentsNoteId ? contentReplyComment : contentComment
@@ -64,11 +64,11 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
       return
     }
     try {
-      const res = await api.post(`/notes/notes-comment/${idNote}`, {
+      const res = await api.post(`/notes/notes-comment/${infoNote.idNote}`, {
         parent_id: parentsNoteId,
         sendAt: new Date().toISOString(),
         content: content,
-        idNote: idNote,
+        idNote: infoNote.idNote,
         idUser: user.id,
       })
       setContentComment('')
@@ -121,7 +121,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
         <div className="modal-dialog-container w-[45rem] max-w-[70%] max-h-[90vh] pointer-events-auto">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">Comments</h5>
+              <h5 className="modal-title font-bold truncate-text">{infoNote.title}'s Comments</h5>
               <button type="button" className="btn-close" onClick={() => setIsShowModalComments(false)}></button>
             </div>
             <div className="modal-body">

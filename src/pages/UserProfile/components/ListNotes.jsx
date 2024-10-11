@@ -77,11 +77,9 @@ const ListNotes = (
                             {dataNotes.map((info, index) => (
                                 <SwiperSlide
                                     key={info.idNote}
-                                    className={`w-[22rem] p-2 border-[1px] rounded-xl border-black border-solid mb-1
-                                                ${isLightColor(info.color)
-                                            ? 'text-black'
-                                            : 'text-white'
-                                        }`}
+                                    className={`p-2 border-[1px] rounded-xl border-black border-solid mb-1
+                                                ${isLightColor(info.color) ? 'text-black' : 'text-white'}
+                                                ${dataNotes.length < 3 ? `w-[${100 / dataNotes.length}%]` : 'w-[22rem]'}`}
                                     style={{
                                         backgroundColor: `rgba(${info.color.r}, ${info.color.g}, ${info.color.b}, ${info.color.a})`,
                                     }}
@@ -118,7 +116,7 @@ const ListNotes = (
                                                 onError={handleErrorAvatar}
                                             />
                                             <Box sx={{ color: 'text.main' }}>
-                                                <p style={{ margin: 0, fontSize: '1.2rem' }}>
+                                                <p className='text-capitalize' style={{ margin: 0, fontSize: '1.2rem' }}>
                                                     <strong>{userInfomations.name}</strong>
                                                 </p>
                                                 <p style={{ margin: 0, opacity: '0.8' }}>
@@ -160,22 +158,17 @@ const ListNotes = (
                                         }}
                                     >
                                         <strong style={{ fontSize: '20px' }}>{info.title}</strong>
-                                        {info.type === 'checkList' || info.type === 'checklist' ? (
+                                        {info.type === 'checkList' ? (
                                             <>
-                                                <Checklist data={info.data.slice(0, 3)} />
+                                                {/* <Checklist data={info.data.slice(0, 3)} />
                                                 {info.data.length - 3 > 0 && (
                                                     <div className='font-bold'>
                                                         +{info.data.length - 3} item hidden
                                                     </div>
-                                                )}
+                                                )} */}
                                             </>
                                         ) : (
-                                            <div
-                                                className='max-h-[100px] text-start overflow-hidden'
-                                                dangerouslySetInnerHTML={{
-                                                    __html: info.data,
-                                                }}
-                                            />
+                                            <div className='max-h-[100px] text-start overflow-hidden'>{info.data}</div>
                                         )}
                                     </Box>
                                     <Box
@@ -220,7 +213,7 @@ const ListNotes = (
                                         </div>
                                         <div
                                             className='comment flex items-center gap-1 cursor-pointer'
-                                            onClick={() => handleShowComments(info.idNote)}
+                                            onClick={() => handleShowComments(info)}
                                         >
                                             <svg
                                                 width='1rem'

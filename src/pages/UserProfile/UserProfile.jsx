@@ -81,7 +81,7 @@ const UserProfile = () => {
                             userInfomations={userInfomations}
                             user={user}
                         />
-                        <div className='container-content row m-auto'>
+                        <div className='container-content w-[98%] flex flex-col lg:flex-row justify-between m-auto'>
                             <LeftsideContent
                                 userInfomations={userInfomations}
                                 archivedNotes={archivedNotes}
