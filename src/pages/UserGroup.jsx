@@ -744,7 +744,7 @@ const UserGroup = () => {
      }}
     >
      <div style={{ display: 'flex', alignItems: 'center' }}>
-      <Link to={`/other-user/${infoOtherUser.id}`}>
+      <Link to={`/profile/${infoOtherUser.id}`}>
        <Avatar
         style={{
          height: '40px',

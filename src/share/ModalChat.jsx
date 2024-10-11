@@ -1,59 +1,106 @@
-import { useContext, useState } from "react";
-import { AppContext } from "../context";
-import { useNavigate } from "react-router-dom";
+import { useContext, useEffect, useRef, useState } from 'react'
+import { NavLink } from 'react-router-dom'
+import { AppContext } from '../context'
+import { formatTimeAgo, handleErrorAvatar } from '../utils/utils'
 
-const ModalChat = (props) => {
-  const appContext = useContext(AppContext);
-  const { user } = appContext;
-  const [data, setData] = useState(props.dataMess);
-  const navi = useNavigate();
-  const performanceData = (arr) => {
-    if (arr.length > 6) {
-      return arr.slice(0, 6);
-    } else {
-      return arr;
+const ModalChat = ({ dataMess, setIsModalMessage, messageIconRef }) => {
+  const appContext = useContext(AppContext)
+  const { user } = appContext
+  const [chatList, setChatList] = useState([])
+  const [visibleMoreChat, setVisibleMoreChat] = useState(7)
+  const chatRef = useRef(null)
+
+  useEffect(() => {
+    setChatList(dataMess)
+  }, [dataMess])
+
+  const handleClickOutside = (event) => {
+    if (
+      chatRef.current &&
+      !chatRef.current.contains(event.target) &&
+      messageIconRef.current &&
+      !messageIconRef.current.contains(event.target)
+    ) {
+      setIsModalMessage(false)
     }
-  };
-  const handleNavi = (data) => {
-    const user = data.user;
-    if (data) {
-      navi(`/user/group`, { state: user });
+  }
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
     }
-  };
+  }, [setIsModalMessage, messageIconRef])
+
+  const handleSeeMore = () => {
+    setVisibleMoreChat((prevVisible) => prevVisible + 7)
+  }
+
   return (
-    <div className="absolute bg-white p-2 right-[40%] w-[500px] h-auto flex flex-col justify-center rounded-[21.4px] max-h-[800px] overflow-y-scroll ">
-      {performanceData(data).map((item, index) => (
-        <div
-          key={`mess ${index}`}
-          className="w-full my-2 flex justify-around bg-[#F2F2F7] rounded-[21.4px] cursor-pointer"
-          onClick={() => handleNavi(item)}
-        >
-          <div className="w-[6%]">
-            <img
-              className="w-[40px] h-[40px] object-cover rounded-full mt-1"
-              src={item.user.Avarta}
-              alt={item.user.Avarta}
-            />
+    <div
+      className='absolute bg-white right-0 top-[125%] w-[400px] max-h-[450px] shadow-lg 
+                    flex flex-col justify-center rounded-3 z-10 overflow-hidden'
+      ref={chatRef}
+    >
+      <div className='p-3 border-bottom border-gray-200'>
+        <h2 className='text-2xl font-semibold'>Chats</h2>
+      </div>
+      <ul className='flex flex-col overflow-y-auto'>
+        {chatList.length > 0 ? (
+          chatList.slice(0, visibleMoreChat).map((item) => (
+            <li key={item.idMessage} className='list-none'>
+              <NavLink
+                to={`/group`}
+                state={item.user}
+                className='flex items-center hover:bg-gray-100 p-3 no-underline text-black'
+              >
+                <img
+                  className='w-12 h-12 rounded-full mr-3 max-w-[20%]'
+                  src={item.user.Avarta || '/src/assets/avatar-default.png'}
+                  alt={item.user.name}
+                  onError={handleErrorAvatar}
+                />
+                <div className='flex-1 w-[80%]'>
+                  <div className='flex justify-between items-baseline'>
+                    <h5 className='font-semibold truncate-text w-[70%]'>
+                      {item.user.name}
+                    </h5>
+                    <span className='text-xs text-gray-500'>
+                      {formatTimeAgo(item.sendAt)}
+                    </span>
+                  </div>
+                  <p
+                    className={`text-sm truncate-text m-0 w-[70%]
+                              ${item.idSend !== user.id && item.is_seen === 0
+                        ? 'font-semibold'
+                        : 'text-gray-500'
+                      }`}
+                  >
+                    {item.idSend === user.id ? 'You: ' : ''}
+                    {item.last_text}
+                  </p>
+                </div>
+              </NavLink>
+            </li>
+          ))
+        ) : (
+          <div className='flex items-center justify-center h-full'>
+            <p className='text-gray-500'>No messages yet</p>
           </div>
-          <div
-            className="w-[40%] px-2"
-            style={{
-              borderLeft: "1px solid #333",
-              borderRight: "1px solid #333",
-            }}
+        )}
+      </ul>
+      {visibleMoreChat < chatList.length && (
+        <div className='flex items-center justify-center p-2 border-top border-gray-200'>
+          <p
+            className='m-0 text-sm cursor-pointer text-gray-500 hover:text-gray-700'
+            onClick={handleSeeMore}
           >
-            <div>{item.user.name}</div>
-            <div>
-              {item.user.id === user.id
-                ? `Bạn: ${item.last_text}`
-                : item.last_text}
-            </div>
-          </div>
-          <div className="text-xs mt-4">{item.sendAt}</div>
+            See more
+          </p>
         </div>
-      ))}
+      )}
     </div>
-  );
-};
+  )
+}
 
-export default ModalChat;
+export default ModalChat

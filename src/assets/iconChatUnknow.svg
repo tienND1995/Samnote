@@ -1,7 +1,7 @@
-function IconChatUnknow({ className }) {
-  return (
+
     <svg
-      className={`${className}`}
+      width="34"
+      height="34"
       viewBox="0 0 25 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -11,7 +11,4 @@ function IconChatUnknow({ className }) {
         fill="white"
       />
     </svg>
-  );
-}
 
-export default IconChatUnknow;

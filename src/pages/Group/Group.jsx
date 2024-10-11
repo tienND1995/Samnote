@@ -3,49 +3,39 @@ import './Group.css'
 
 import axios from 'axios'
 import moment from 'moment'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import io from 'socket.io-client'
-
-import Modal from 'react-bootstrap/Modal'
 
 import avatarDefault from '../../assets/avatar-default.png'
 import bgMessage from '../../assets/img-chat-an-danh.jpg'
 
 import configs from '../../configs/configs.json'
 import { AppContext } from '../../context'
-import FormMessage from './FormMessage/FormMessage'
+import FormMessage from './FormMessage'
 import { fetchAllMemberGroup, fetchAllMessageList } from './fetchApiGroup'
+import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
 
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import DeleteIcon from '@mui/icons-material/Delete'
 
-import ChatList from './ChatList/ChatList'
-import Information from './Information/Information'
-import SettingGroup from './SettingGroup/SettingGroup'
+import ChatList from './ChatList'
+import Information from './Information'
+import SettingGroup from './SettingGroup'
+import SearchUser from './SearchUser'
 
 const { API_SERVER_URL } = configs
 
 const Group = () => {
  const appContext = useContext(AppContext)
- const { setSnackbar, user } = appContext
+ const { user, setSnackbar } = appContext
+ const { state } = useLocation()
 
  const [socket, setSocket] = useState(null)
-
- // var search user
- const [searchUser, setSearchUser] = useState({
-  searchUserName: '',
-  searchUserResult: [],
-  showModalSearch: false,
-  messageNotifi: '',
- })
- const { searchUserName, searchUserResult, showModalSearch, messageNotifi } =
-  searchUser
+ const [showModalSearch, setShowModalSearch] = useState(false)
 
  // var content message
  const messageContentRef = useRef()
  const inputMessageFormRef = useRef()
- // heightMessageContent: '500',
- const messageContentUlRef = useRef()
 
  const [infoOtherUser, setInfoOtherUser] = useState({})
  const [infoGroupItem, setInfoGroupItem] = useState({})
@@ -88,6 +78,8 @@ const Group = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
  }, [user?.id, socket, typeFilterChat])
 
+ const scrollViewRef = useRef()
+
  useEffect(() => {
   if (!socket) return
 
@@ -95,16 +87,16 @@ const Group = () => {
    if (result.message === 'Error') return
 
    getAllMessageList()
-   const { ReceivedID, SenderID } = result?.data
+   const { ReceivedID, SenderID, MessageID } = result?.data
+   if (SenderID === user?.id) {
+    fetchUpdateSeenMessage(MessageID)
+   }
+
    if (
     formName === 'chat' &&
     (ReceivedID === infoOtherUser.id || SenderID === infoOtherUser.id)
    ) {
     getMessageList(user.id, ReceivedID === user.id ? SenderID : ReceivedID)
-    if (messageContentRef.current && messageContentUlRef.current) {
-     messageContentRef.current.scrollTop =
-      messageContentUlRef.current.offsetHeight
-    }
    }
   })
 
@@ -113,15 +105,33 @@ const Group = () => {
    if (formName === 'group') {
     const newIdGroup = result.data.idGroup
     fetchMessagesGroup(newIdGroup)
-
-    if (messageContentRef.current && messageContentUlRef.current) {
-     messageContentRef.current.scrollTop =
-      messageContentUlRef.current.offsetHeight
-    }
    }
   })
   // eslint-disable-next-line react-hooks/exhaustive-deps
  }, [socket, formName, typeFilterChat])
+
+ useEffect(() => {
+  scrollViewRef?.current.scrollIntoView()
+ }, [messageList, messageGroupList])
+
+ // handle link profile to group
+ useEffect(() => {
+  if (!state || !socket) return
+
+  const roomSplit = (idUser, idOther) =>
+   idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
+
+  setFormName('chat')
+  setInfoOtherUser(state || {})
+
+  // đặt mối quan hệ true vs user khác
+  fetchApiSamenote('post', `/chatblock/${user?.id}`, {
+   idReceive: state.id,
+  })
+  // join room chat
+  socket.emit('join_room', { room: roomSplit(user?.id, state.id) })
+  state?.id && getMessageList(user?.id, state.id)
+ }, [state, socket])
 
  // *********** handle chat user messages
  const handleClickUserItem = (otherUser) => {
@@ -130,9 +140,7 @@ const Group = () => {
   }
 
   getMessageList(user.id, otherUser.user.id)
-
   setInfoOtherUser(otherUser.user)
-
   resetGroup()
  }
 
@@ -172,92 +180,9 @@ const Group = () => {
 
  const convertTime = (time) => moment(`${time}+0700`).calendar()
 
- // ** search user buy name
-
- const fetchSearchUser = async (userName) => {
-  try {
-   const url = `${API_SERVER_URL}/group/search_user_by_word`
-   const response = await axios.post(url, {
-    start_name: userName,
-   })
-
-   setSearchUser({
-    ...searchUser,
-    searchUserResult: response.data.data ? response.data.data : [],
-    messageNotifi: response.data.message ? response.data.message : '',
-   })
-  } catch (error) {
-   console.error(error)
-  }
- }
-
- const postRelation = async (userID, otherUserID) => {
-  try {
-   const response = await axios.post(`${API_SERVER_URL}/chatblock/${userID}`, {
-    idReceive: otherUserID,
-   })
-  } catch (error) {
-   console.log(error)
-  }
- }
-
- const roomSplit = (idUser, idOther) =>
-  idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
-
- const handleChangeSearchUser = (e) => {
-  setSearchUser({ ...searchUser, searchUserName: e.target.value })
- }
-
- const handleSubmitSearchUser = (e) => {
-  e.preventDefault()
-  if (
-   searchUserName.trim().split(' ').length !== 1 ||
-   searchUserName.trim() === ''
-  )
-   return
-
-  fetchSearchUser(searchUserName)
- }
-
- const handleClickSearchBtn = (otherUser) => {
-  if (!otherUser) return
-  const newInfoOtherUser = {
-   id: otherUser.idUser,
-   Avarta: otherUser.linkAvatar,
-   name: otherUser.userName,
-  }
-
-  const roomID = roomSplit(user.id, otherUser.idUser)
-  socket.emit('join_room', { room: roomID })
-
-  // console.log(socket)
-
-  setFormName('chat')
-  setInfoOtherUser(newInfoOtherUser)
-  resetGroup()
-
-  postRelation(user.id, otherUser.idUser)
-
-  getMessageList(user.id, otherUser.idUser)
-
-  handleHideModalSearch()
-  inputMessageFormRef.current.focus()
- }
-
+ // ** search user
  const handleShowModalSearch = (e) => {
-  setSearchUser({ ...searchUser, showModalSearch: true })
-  setSearchUserFormName('chat')
- }
-
- const handleHideModalSearch = (e) => {
-  setSearchUser({
-   ...searchUser,
-   searchUserResult: [],
-   searchUserName: '',
-   showModalSearch: false,
-   messageNotifi: '',
-  })
-
+  setShowModalSearch(true)
   setSearchUserFormName('chat')
  }
 
@@ -293,6 +218,14 @@ const Group = () => {
   resetChat()
 
   inputMessageFormRef.current.focus()
+
+  fetchApiSamenote(
+   'get',
+   `/seen_message_group/${group.id_lastest_message_in_group}/${user?.id}`
+  ).then((response) => {
+   if (response.error) return
+   getAllMessageList()
+  })
  }
 
  //  handle setting group
@@ -300,36 +233,8 @@ const Group = () => {
  const [searchUserFormName, setSearchUserFormName] = useState('chat')
 
  const handleShowModalSearchUserGroup = () => {
-  setSearchUser({ ...searchUser, showModalSearch: true })
+  setShowModalSearch(true)
   setSearchUserFormName('group')
- }
-
- const handleAddUserSearch = (user) => {
-  const idMemberList = [user.idUser]
-  const idGroup = infoGroupItem.idGroup
-  if (!idMemberList || !idGroup) return
-
-  postMembersGroup(idMemberList, idGroup)
- }
-
- const postMembersGroup = async (idMemberList, idGroup) => {
-  try {
-   const response = await axios.post(`${API_SERVER_URL}/group/add/${idGroup}`, {
-    idMembers: idMemberList,
-   })
-
-   handleHideModalSearch()
-   const groupMemberList = await fetchAllMemberGroup(infoGroupItem.idGroup)
-   setGroupMemberList(groupMemberList)
-
-   setSnackbar({
-    isOpen: true,
-    message: `Add members successfully!`,
-    severity: 'success',
-   })
-  } catch (error) {
-   console.log(error)
-  }
  }
 
  const [groupMemberList, setGroupMemberList] = useState([])
@@ -501,6 +406,7 @@ const Group = () => {
   setGroupMemberList,
   onShowModalSearch: handleShowModalSearchUserGroup,
   setShowInforMation,
+  getAllMessageList,
  }
 
  const propsInformation = {
@@ -511,106 +417,36 @@ const Group = () => {
   groupMemberList,
  }
 
+ const propsSearchUser = {
+  setShowModalSearch,
+  showModalSearch,
+  searchUserFormName,
+  idGroup: infoGroupItem?.idGroup,
+  userID: user?.id,
+  socket,
+  setGroupMemberList,
+  setSnackbar,
+
+  clickUserSearch: {
+   getMessageList,
+   resetGroup,
+   setInfoOtherUser,
+   setFormName,
+  },
+ }
+
  return (
   <div className='flex flex-grow-1'>
-   <div className='col-3 group-sidebar flex flex-col px-0'>
+   <div className='col col-md-4 col-xl-3 group-sidebar flex flex-col px-0'>
     <h3 className='text-center py-[60px] px-3 font-bold'>Chat</h3>
 
-    <Modal show={showModalSearch} onHide={handleHideModalSearch}>
-     <div className='p-3'>
-      <h3 className='text-[25px] font-medium'>Search user</h3>
-
-      <form
-       onSubmit={handleSubmitSearchUser}
-       className='flex gap-2 ms-4 me-2 my-3 items-center'
-      >
-       <div className='border border-black rounded-sm p-2 w-100'>
-        <input
-         className='w-100 text-[25px]'
-         type='text'
-         placeholder='User name'
-         onChange={handleChangeSearchUser}
-         value={searchUserName}
-        />
-       </div>
-
-       <button
-        className='bg-black h-max text-white text-[20px] px-3 py-1 rounded-md'
-        type='submit'
-       >
-        Search
-       </button>
-      </form>
-
-      <ul className='flex flex-col gap-2'>
-       {searchUserResult?.map((user) => (
-        <li
-         key={user.idUser}
-         className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
-        >
-         <div className='flex gap-2 items-center'>
-          <div>
-           <img
-            onError={(e) => {
-             e.target.src = avatarDefault
-            }}
-            src={user.linkAvatar}
-            alt='avatar '
-            className='w-[50px] h-[50px] object-cover rounded-[100%]'
-           />
-          </div>
-
-          <div>
-           <h5 className='text-lg font-extrabold capitalize'>
-            {user.userName}
-           </h5>
-          </div>
-         </div>
-
-         {searchUserFormName === 'chat' && (
-          <button
-           onClick={() => handleClickSearchBtn(user)}
-           type='button'
-           className='bg-[#F56852] text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
-          >
-           Chat
-          </button>
-         )}
-
-         {searchUserFormName === 'group' && (
-          <button
-           onClick={() => handleAddUserSearch(user)}
-           type='button'
-           className='bg-black text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
-          >
-           Add
-          </button>
-         )}
-        </li>
-       ))}
-
-       {messageNotifi.trim() !== '' && (
-        <li className='font-bold text-[#ff2d2d]'>{messageNotifi} !</li>
-       )}
-      </ul>
-
-      <div className='text-right'>
-       <button
-        className='text-[25px] font-medium text-[#ff2d2d]'
-        type='button'
-        onClick={handleHideModalSearch}
-       >
-        Cancel
-       </button>
-      </div>
-     </div>
-    </Modal>
+    <SearchUser {...propsSearchUser} />
     <ChatList data={propsChatList} />
    </div>
 
    <div
     style={{ boxShadow: '0px 8px 10px 0px #00000040' }}
-    className='col-9 px-0 flex flex-col bg-red-300'
+    className='col col-md-8 col-xl-9 px-0 flex flex-col'
    >
     <div
      ref={infoAnonymusRef}
@@ -618,7 +454,7 @@ const Group = () => {
     >
      <div className='flex gap-2 items-center'>
       <div className='position-relative'>
-       <Link to={infoOtherUser.id && `/other-user/${infoOtherUser.id}`}>
+       <Link to={infoOtherUser.id && `/profile/${infoOtherUser.id}`}>
         <img
          className='w-[90px] h-[90px] object-cover rounded-[100%]'
          src={infoOtherUser.Avarta || infoGroupItem.linkAvatar || avatarDefault}
@@ -635,7 +471,7 @@ const Group = () => {
           className='hidden m-0'
           disabled={!isLeaderTeam(infoGroupItem.idOwner)}
          />
-         <label htmlFor='file-avatar-group' className='flex'>
+         <label htmlFor='file-avatar-group' className='flex cursor-pointer'>
           <CameraAltIcon className='text-[20px]' />
          </label>
         </div>
@@ -724,14 +560,10 @@ const Group = () => {
      className='flex-grow-1 flex flex-col position-relative'
     >
      <div
-      style={{
-       overflowY: 'auto',
-       scrollbarWidth: 'none',
-      }}
-      className='flex-grow-1 p-[20px]'
+      className='flex-grow-1 p-[20px] overflow-auto style-scrollbar-y style-scrollbar-y-md'
       ref={messageContentRef}
      >
-      <ul id='message-content' ref={messageContentUlRef}>
+      <ul id='message-content'>
        {formName === 'chat' &&
         messageList?.map((item) =>
          item.idSend === user.id ? (
@@ -927,6 +759,8 @@ const Group = () => {
           </div>
          )
         )}
+
+       <span ref={scrollViewRef}></span>
       </ul>
      </div>
 

@@ -341,7 +341,7 @@ const Home = () => {
             }
         }
         onClick={() => {
-         navigate(`/login`)
+         navigate(`/auth`)
         }}
        >
         <Link
@@ -779,7 +779,7 @@ const Home = () => {
           cursor: 'pointer',
          }}
          onClick={() => {
-          navigate(`/other-user/${info.idUser}`)
+          navigate(`/profile/${info.idUser}`)
          }}
         >
          <p style={{ margin: 0, width: '7%' }}>{index + 1}</p>
@@ -916,7 +916,7 @@ const Home = () => {
         borderBottom: '1px dotted #000',
         alignItems: 'center',
        }}
-       onClick={() => navigate(`/other-user/${item.id}`)}
+       onClick={() => navigate(`/profile/${item.id}`)}
       >
        <div
         style={{

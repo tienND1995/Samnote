@@ -50,6 +50,7 @@
     "swiper": "^11.1.4",
     "tinymce": "^7.1.2",
     "uniqid": "^5.4.0",
+    "vite-plugin-node-polyfills": "^0.22.0",
     "websocket": "^1.0.35"
   },
   "devDependencies": {

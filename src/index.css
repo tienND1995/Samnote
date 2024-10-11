@@ -31,6 +31,7 @@ ul {
  margin-bottom: 0;
 }
 
+p,
 h1,
 h2,
 h3,
@@ -40,15 +41,20 @@ h6 {
  margin-bottom: 0;
 }
 
+a {
+ text-decoration: none;
+ color: black;
+}
+
 /* _______________________ */
 .style-scrollbar-y::-webkit-scrollbar {
  border-radius: 6px;
- background-color: black;
+ background-color: rgb(230, 224, 224);
  width: 10px;
 }
 
 .style-scrollbar-y::-webkit-scrollbar-thumb {
- background-color: white;
+ background-color: rgb(128, 125, 125);
  border-radius: 6px;
  cursor: pointer;
 }
