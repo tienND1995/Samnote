@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Box, Typography, Tab, Avatar } from '@mui/material'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
@@ -7,6 +7,8 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import Checklist from './CheckList'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { handleErrorAvatar, convertApiToTime, isLightColor } from '../../../utils/utils'
+import Markdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
 
 const ListNotes = (
     {
@@ -39,7 +41,8 @@ const ListNotes = (
                         }}
                     >
                         <Box component='h4' className='font-bold text-2xl mx-2'>
-                            {typeNotes}
+                            <span className='text-capitalize'>{typeNotes}</span>
+                            <span> notes</span>
                         </Box>
                         <MoreHorizIcon sx={{ cursor: 'pointer', color: 'text.main' }} />
                     </div>
@@ -77,7 +80,7 @@ const ListNotes = (
                             {dataNotes.map((info) => (
                                 <SwiperSlide
                                     key={info.idNote}
-                                    className={`p-2 border-[1px] rounded-xl border-black border-solid mb-2
+                                    className={`relative p-2 border-[1px] rounded-xl border-black border-solid mb-2
                                                 ${isLightColor(info.color) ? 'text-black' : 'text-white'}
                                                 ${dataNotes.length === 1 ? 'w-full' : dataNotes.length === 2 ? `w-[49%]` : 'w-[22rem]'}`}
                                     style={{
@@ -116,7 +119,7 @@ const ListNotes = (
                                                 onError={handleErrorAvatar}
                                             />
                                             <Box sx={{ color: 'text.main' }}>
-                                                <p className='text-capitalize' style={{ margin: 0, fontSize: '1.2rem' }}>
+                                                <p className='text-capitalize max-w-[150px] truncate-text' style={{ margin: 0, fontSize: '1.2rem' }}>
                                                     <strong>{userInfomations.name}</strong>
                                                 </p>
                                                 <p style={{ margin: 0, opacity: '0.8' }}>
@@ -158,18 +161,9 @@ const ListNotes = (
                                         }}
                                     >
                                         <strong style={{ fontSize: '20px' }}>{info.title}</strong>
-                                        {info.type === 'checkList' ? (
-                                            <>
-                                                {/* <Checklist data={info.data.slice(0, 3)} />
-                                                {info.data.length - 3 > 0 && (
-                                                    <div className='font-bold'>
-                                                        +{info.data.length - 3} item hidden
-                                                    </div>
-                                                )} */}
-                                            </>
-                                        ) : (
-                                            <div className='max-h-[100px] text-start overflow-hidden'>{info.data}</div>
-                                        )}
+                                        <div className='text-start truncate-text'>
+                                            {<Markdown rehypePlugins={[rehypeRaw]}>{info.data}</Markdown>}
+                                        </div>
                                     </Box>
                                     <Box
                                         component='div'
@@ -227,6 +221,15 @@ const ListNotes = (
                                             <span>{info.comment_count}</span>
                                         </div>
                                     </div>
+                                    {typeNotes === 'pinned' &&
+                                        <div className='pin-icon absolute left-[50%] top-[0.2rem]'>
+                                            <img
+                                                className='w-[1.8rem] h-[2.5rem]'
+                                                src='/src/assets/pin-icon.png'
+                                                alt='pin-icon'
+                                            />
+                                        </div>
+                                    }
                                 </SwiperSlide>
                             ))}
                         </Swiper>

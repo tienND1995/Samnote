@@ -12,6 +12,8 @@ import Swal from 'sweetalert2'
 import ModalComments from './ModalComments'
 import { handleErrorAvatar, convertApiToTime, isLightColor } from '../../../utils/utils'
 import ListNotes from './ListNotes'
+import Markdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
 
 const LeftsideContent = ({
   userInfomations,
@@ -45,17 +47,27 @@ const LeftsideContent = ({
       }
 
     }))
+    setChecklistNotes(archivedNotes.filter((note) => {
+      if (user.id === userInfomations.id) {
+        return note.type === 'checkList';
+      } else {
+        return note.notePublic && note.type === 'checkList';
+      }
+
+    }))
   }, [archivedNotes])
 
   const deleteNote = async (index) => {
     try {
-      await api.delete(`/notes/${index}`)
-      setSnackbar({
-        isOpen: true,
-        message: `Remove note successfully ${index}`,
-        severity: 'success',
-      })
-      setReload((prev) => prev + 1) // Update the state to trigger useEffect
+      const res = await api.delete(`/notes/${index}`)
+      if (res && res.status == 200) {
+        setSnackbar({
+          isOpen: true,
+          message: `Remove note successfully ${index}`,
+          severity: 'success',
+        })
+        setReload((prev) => prev + 1)
+      }// Update the state to trigger useEffect
     } catch (err) {
       console.error(err)
       setSnackbar({
@@ -90,8 +102,11 @@ const LeftsideContent = ({
   const handleLikeNote = async (idNote, type) => {
     console.log(idNote, type)
     try {
-      await api.post(`/notes/favorite_notes/${idNote}`, { idUser: user.id, type })
-      setReload((prev) => prev + 1)
+      const res = await api.post(`/notes/favorite_notes/${idNote}`, { idUser: user.id, type })
+      if (res && res.status === 200) {
+        setReload((prev) => prev + 1)
+      }
+
     } catch (err) {
       console.error(err)
     }
@@ -247,7 +262,9 @@ const LeftsideContent = ({
                         }}
                       >
                         <strong style={{ fontSize: '20px' }}>{info.title}</strong>
-                        <div className='max-h-[100px] text-start overflow-hidden'>{info.data}</div>
+                        <div className='text-start truncate-text'>
+                          {<Markdown rehypePlugins={[rehypeRaw]}>{info.data}</Markdown>}
+                        </div>
                       </Box>
                       <Box
                         component='div'
@@ -330,7 +347,7 @@ const LeftsideContent = ({
       </Box>
       <Box className='flex mb-4 pinned-notes'>
         <ListNotes
-          typeNotes={'Pinned notes'}
+          typeNotes={'pinned'}
           dataNotes={pinnedNotes}
           userInfomations={userInfomations}
           handleDeleteNote={handleDeleteNote}
@@ -341,7 +358,7 @@ const LeftsideContent = ({
       {user.id === userInfomations.id &&
         <Box className='flex mb-4 private-notes'>
           <ListNotes
-            typeNotes={'Privates notes'}
+            typeNotes={'private'}
             dataNotes={privateNotes}
             userInfomations={userInfomations}
             handleDeleteNote={handleDeleteNote}
@@ -352,7 +369,7 @@ const LeftsideContent = ({
       }
       <Box className='flex mb-4 checklist-notes'>
         <ListNotes
-          typeNotes={'Checklist'}
+          typeNotes={'checklist'}
           dataNotes={checklistNotes}
           userInfomations={userInfomations}
           handleDeleteNote={handleDeleteNote}
