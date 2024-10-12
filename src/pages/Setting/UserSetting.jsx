@@ -399,7 +399,6 @@ const UserSetting = () => {
           Update Password
         </Typography>
         <Box className="flex mt-[20px] flex-col sm:flex-row">
-          {" "}
           <Typography className="sm:w-[200px]">Password:</Typography>
           {!openChangePW ? (
             <Box className="flex flex-col sm:flex-row  mt-[10px]">

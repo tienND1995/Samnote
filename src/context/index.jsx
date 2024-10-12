@@ -2,11 +2,14 @@
 import { createContext, useState, useEffect } from 'react'
 import { USER } from '../utils/constant'
 import axios from 'axios'
+import { fetchApiSamenote } from '../utils/fetchApiSamnote'
 
 export const AppContext = createContext(null)
 
 const AppProvider = ({ children }) => {
- const [user, setUser] = useState(null)
+ const [user, setUser] = useState(
+  JSON.parse(localStorage.getItem(USER)) || null
+ )
  const [snackbar, setSnackbar] = useState({
   isOpen: false,
   message: '',
@@ -14,41 +17,7 @@ const AppProvider = ({ children }) => {
  })
 
  useEffect(() => {
-  // Lấy dữ liệu từ localStorage khi component mount
-  const localUser = JSON.parse(localStorage.getItem(USER))
-
-  try {
-   if (localUser) {
-    setUser(localUser)
-   }
-  } catch (error) {
-   console.error('Error parsing user from localStorage:', error)
-  }
-
-  // Đăng ký sự kiện lắng nghe thay đổi trong localStorage
-  const handleStorageChange = (event) => {
-   if (event.key === USER) {
-    try {
-     const parseUser = JSON.parse(event.newValue)
-     if (parseUser) {
-      setUser(parseUser)
-     }
-    } catch (error) {
-     console.error('Error parsing user from localStorage:', error)
-    }
-   }
-  }
-
-  window.addEventListener('storage', handleStorageChange)
-
-  // Clean up function để loại bỏ sự kiện lắng nghe khi component unmount
-  return () => {
-   window.removeEventListener('storage', handleStorageChange)
-  }
- }, [])
-
- useEffect(() => {
-  if (user && user.id) {
+  if (user) {
    // Gọi API mỗi 6 giây
    const interval = setInterval(() => {
     axios
