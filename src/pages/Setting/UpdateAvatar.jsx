@@ -22,55 +22,55 @@ import { useForm } from "react-hook-form";
 import { joiResolver } from "@hookform/resolvers/joi";
 import { settingSchema } from "../../utils/schema";
 import axios from "axios";
+import { fetchApiSamenote } from "../../utils/fetchApiSamnote";
 
 const UpdateAvatar = () => {
   const appContext = useContext(AppContext);
-  const { user, setSnackbar } = appContext;
+  const { user, setSnackbar, setUser } = appContext;
 
   const {
     handleSubmit,
     register,
     setValue,
-    setError,
-    formState: { errors },
+    formState: { errors, dirtyFields },
     reset,
+    watch,
   } = useForm({
     resolver: joiResolver(settingSchema),
     defaultValues: {
       name: "",
-      Avarta: "",
-      AvtProfile: "",
-      email: "",
+      gmail: "",
     },
   });
 
-  // Sử dụng useEffect để cập nhật khi user thay đổi
-  useEffect(() => {
-    if (!user) {
-      return; // Nếu không có user thì không làm gì cả
-    }
+  const [avatarProfile, setAvatarProfile] = useState({
+    thumb: "",
+    file: null,
+    isChange: false,
+  });
 
+  const [backgroundProfile, setBackgroundProfile] = useState({
+    thumb: "",
+    file: null,
+    isChange: false,
+  });
+
+  //  Sử dụng useEffect để cập nhật khi user thay đổi
+  useEffect(() => {
     const fetchUserData = async () => {
       try {
         const res = await axios.get(
           `https://samnote.mangasocial.online/profile/${user.id}`
         );
-        console.log("res", res.data.user);
 
         const { Avarta, name, gmail, AvtProfile } = res.data.user;
-        setAvatar((prev) => ({
-          ...prev,
-          avatar1: Avarta,
-          avatar2: AvtProfile,
-        }));
+
+        setAvatarProfile({ ...avatarProfile, thumb: Avarta });
+        setBackgroundProfile({ ...avatarProfile, thumb: AvtProfile });
 
         // Cập nhật form với dữ liệu mới
-        reset({
-          Avarta,
-          name,
-          email: gmail,
-          AvtProfile,
-        });
+        setValue("name", name);
+        setValue("gmail", gmail);
       } catch (error) {
         console.error("Failed to fetch user profile", error);
       }
@@ -79,29 +79,77 @@ const UpdateAvatar = () => {
     fetchUserData();
   }, [user, reset]);
 
-  const onSubmit = (data) => {
-    console.log("data", data);
-
-    setSnackbar({
-      isOpen: true,
-      message: "user đã có",
-      severity: "error",
-    });
+  const disableBtnUpdate = () => {
+    return Object.keys(dirtyFields).length === 0;
   };
 
-  const [avatar, setAvatar] = useState({ avatar1: null, avatar2: null });
-  const { avatar1, avatar2 } = avatar;
-  const handleChangeAvatar1 = (e) => {
-    const blobUrl = URL.createObjectURL(e.target.files[0]);
+  console.log("dirtyFields", dirtyFields);
 
-    setValue("Avarta", blobUrl);
-    setAvatar((prev) => ({ ...prev, avatar1: blobUrl }));
+  const onSubmit = async (data) => {
+    const dataForm = { name: data.name };
+
+    // if (avatarProfile.isChange) {
+    //  const imageFormData = new FormData()
+    //  imageFormData.append('image', avatarProfile.file)
+
+    //  const dataImage = await fetchApiSamenote(
+    //   'post',
+    //   `/upload_image/${user.id}`,
+    //   imageFormData
+    //  )
+
+    //  console.log('dataImage', dataImage)
+
+    //  dataForm.Avarta = dataImage.imagelink
+    // }
+
+    // if (backgroundProfile.isChange) {
+    //  const imageFormData = new FormData()
+    //  imageFormData.append('image', backgroundProfile.file)
+
+    //  const dataImage = await fetchApiSamenote(
+    //   'post',
+    //   `/upload_image/${user.id}`,
+    //   imageFormData
+    //  )
+
+    //  dataForm.AvtProfile = dataImage.imagelink
+    // }
+
+    // fetchApiSamenote(
+    //  'patch',
+    //  `/profile/change_Profile/${user.id}`,
+    //  dataForm
+    // ).then((response) => {
+    //  if (response?.error) {
+    //   setSnackbar({
+    //    isOpen: true,
+    //    message: response?.error,
+    //    severity: 'error',
+    //   })
+    //  } else {
+    //   setUser(response)
+    //   setSnackbar({
+    //    isOpen: true,
+    //    message: 'Updated profile !',
+    //    severity: 'success',
+    //   })
+    //  }
+    // })
   };
-  const handleChangeAvatar2 = (e) => {
-    const blobUrl = URL.createObjectURL(e.target.files[0]);
 
-    setValue("AvtProfile", blobUrl);
-    setAvatar((prev) => ({ ...prev, avatar2: blobUrl }));
+  const handleChangeAvatar = (e) => {
+    const file = e.target.files[0];
+    const blobUrl = URL.createObjectURL(file);
+
+    setAvatarProfile({ thumb: blobUrl, file, isChange: true });
+  };
+
+  const handleChangeBackground = (e) => {
+    const file = e.target.files[0];
+    const blobUrl = URL.createObjectURL(file);
+
+    setBackgroundProfile({ thumb: blobUrl, file, isChange: true });
   };
 
   return (
@@ -127,16 +175,10 @@ const UpdateAvatar = () => {
             Avatar:
           </label>
 
-          {errors?.Avarta && !avatar1 && (
-            <span className="text-red-400 mt-3 w-full">
-              {errors.Avarta.message}
-            </span>
-          )}
-
           <div className="flex items-center gap-3">
             <img
               className="size-[60px] object-cover rounded-full"
-              src={avatar1}
+              src={avatarProfile.thumb || avatarDefault}
               alt="avatar default"
             />
 
@@ -145,7 +187,7 @@ const UpdateAvatar = () => {
                 id="setting-upload-avatar"
                 type="file"
                 hidden
-                onChange={handleChangeAvatar1}
+                onChange={handleChangeAvatar}
               />
               <label
                 htmlFor="setting-upload-avatar"
@@ -161,7 +203,6 @@ const UpdateAvatar = () => {
           <label className="w-[300px]">Name:</label>
 
           <div className="flex flex-col">
-            {" "}
             <TextField
               type="text"
               placeholder="name..."
@@ -181,7 +222,7 @@ const UpdateAvatar = () => {
             disabled
             type="text"
             className="sm:w-[300px] form-control w-[200px]"
-            {...register("email")}
+            value={watch("gmail")}
           />
         </div>
         <div className="flex items-center">
@@ -189,16 +230,10 @@ const UpdateAvatar = () => {
             Avatar Profile:
           </label>
 
-          {errors?.AvtProfile && !avatar2 && (
-            <span className="text-red-400 mt-3">
-              {errors.AvtProfile.message}
-            </span>
-          )}
-
           <div className="flex items-center gap-3">
             <img
               className="size-[60px] object-cover rounded-lg"
-              src={avatar2}
+              src={backgroundProfile.thumb || avatarDefault}
               alt="avatar default"
             />
 
@@ -207,7 +242,7 @@ const UpdateAvatar = () => {
                 id="setting-upload-avatarProfile"
                 type="file"
                 hidden
-                onChange={handleChangeAvatar2}
+                onChange={handleChangeBackground}
               />
               <label
                 htmlFor="setting-upload-avatarProfile"
@@ -219,7 +254,11 @@ const UpdateAvatar = () => {
           </div>
         </div>
         <div className="flex gap-4">
-          <button type="submit" className="btn btn-primary px-4 uppercase">
+          <button
+            disabled={disableBtnUpdate()}
+            type="submit"
+            className="btn btn-primary px-4 uppercase"
+          >
             Update
           </button>
 
