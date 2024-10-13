@@ -189,7 +189,7 @@ const UpdateAvatar = () => {
             Avatar Profile:
           </label>
 
-          {errors?.AvtProfile && avatar2 && (
+          {errors?.AvtProfile && !avatar2 && (
             <span className="text-red-400 mt-3">
               {errors.AvtProfile.message}
             </span>
