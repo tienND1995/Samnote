@@ -7,23 +7,27 @@ import Pagination from './Pagination';
 
 const SearchResults = () => {
     const { user } = useContext(AppContext)
-    const [searchText, setSearchText] = useState('a')
+    const [searchText, setSearchText] = useState('')
     const [activeTab, setActiveTab] = useState('everyone')
     const [results, setResults] = useState([])
     const [currentPage, setCurrentPage] = useState(1)
-    const [totalPages, setTotalPages] = useState(10)
+    const [totalPages, setTotalPages] = useState(0)
 
     useEffect(() => {
         fetchResults()
     }, [activeTab, currentPage])
 
     const fetchResults = async () => {
+        if (searchText.trim() === '') {
+            setResults([])
+            return
+        }
         let response
         switch (activeTab) {
             case 'everyone':
                 response = await fetchApiSamenote(
                     'get',
-                    `/notes_search?key=${searchText}`
+                    `/public_notes_search?key=${searchText}&page=${currentPage}`
                 )
                 console.log('everyone', response.search_note)
                 setResults(response.search_note)
@@ -51,11 +55,7 @@ const SearchResults = () => {
                 setResults(response.data)
                 break
         }
-        if (response && response.status === 200) {
-            console.log('data search', response.data)
-            setResults(response.data)
-        }
-        if (response.total_pages) setTotalPages(response.total_pages)
+        if (response.number_page) setTotalPages(Math.ceil(response.number_page))
     }
 
     const handleSearch = () => {
@@ -106,16 +106,14 @@ const SearchResults = () => {
                     ))}
                 </ul>
 
-                <div className="tab-content py-2 h-[80rem] relative"
+                <div className="tab-content py-3 min-h-[40rem]"
                     style={{
                         backgroundImage: 'url(/src/assets/bg-search-results.png)',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                     }}
                 >
-                    <div className="tab-pane active">
-                        {/* <ListResults results={results} /> */}
-                    </div>
+                    <ListResults results={results} />
                     {totalPages > 1 &&
                         <Pagination
                             currentPage={currentPage}
