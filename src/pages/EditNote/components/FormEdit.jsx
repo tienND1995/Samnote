@@ -10,6 +10,7 @@ import {
  convertApiToTime,
  convertColorNoteToApi,
  convertTimeToApi,
+ isLightColor,
 } from '../../../utils/utils'
 
 import { AppContext } from '../../../context'
@@ -110,7 +111,11 @@ const FormEdit = ({ onDispatchName }) => {
   setValue('idFolder', noteId[0].idFolder)
 
   if (noteId[0].type === 'text') {
-   setDataContent((prev) => ({ ...prev, content: noteId[0].data }))
+   setDataContent((prev) => ({
+    ...prev,
+    content: noteId[0].data,
+    isError: false,
+   }))
   } else {
    setChecklist(noteId[0].data)
   }
@@ -128,12 +133,20 @@ const FormEdit = ({ onDispatchName }) => {
 
  // reset errors
  useEffect(() => {
-  if (textEditor?.trim() === '' && typeForm === 'text') return
+  if (
+   dataContent.content.trim() === '<p><br></p>' &&
+   typeForm === 'text' &&
+   textEditor?.trim() === ''
+  )
+   return
   if (checklist.length === 0 && typeForm === 'checklist') return
 
-  if (checklist.length > 0 || typeForm === 'text')
+  if (
+   checklist.length > 0 ||
+   (typeForm === 'text' && dataContent.content.trim() !== '<p><br></p>')
+  )
    setDataContent((prev) => ({ ...prev, isError: false, message: '' }))
- }, [textEditor, checklist.length])
+ }, [textEditor, checklist.length, dataContent.content])
 
  useEffect(() => {
   const fetchAllColor = async () => {
@@ -189,11 +202,6 @@ const FormEdit = ({ onDispatchName }) => {
    const response = await axios.patch(`${API_SERVER_URL}/notes/${noteId}`, data)
    onDispatchName('patch note')
 
-   setDataContent({
-    isError: false,
-    message: '',
-    content: '',
-   })
    setSnackbar({
     isOpen: true,
     message: `Update note complete!`,
@@ -209,7 +217,10 @@ const FormEdit = ({ onDispatchName }) => {
 
   // set errors when text empty
   if (typeForm === 'text') {
-   if (textEditor.trim() === '')
+   if (
+    textEditor?.trim() === '' &&
+    dataContent.content.trim() === '<p><br></p>'
+   )
     return setDataContent((prev) => ({
      ...prev,
      isError: true,
@@ -384,7 +395,10 @@ const FormEdit = ({ onDispatchName }) => {
       <FormControl className=' bg-white rounded-1 w-full'>
        <Select
         value={colorForm}
-        style={{ background: `rgb(${color?.r}, ${color?.g}, ${color?.b})` }}
+        style={{
+         background: `rgb(${color?.r}, ${color?.g}, ${color?.b})`,
+         color: isLightColor(color) ? 'black' : 'white',
+        }}
         {...register('color')}
         labelId='select-color-form'
         size='small'

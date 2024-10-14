@@ -6,7 +6,7 @@ import Slider from 'react-slick'
 import TextTruncate from 'react-text-truncate'
 import rehypeRaw from 'rehype-raw'
 
-import { convertTimeApiNoteToHtml } from '../../../utils/utils'
+import { convertTimeApiNoteToHtml, isLightColor } from '../../../utils/utils'
 import deleteNote from '../../../assets/delete-note.png'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
@@ -96,9 +96,10 @@ const NoteItem = ({ note, noteList }) => {
     style={{
      boxShadow: '0px 4px 10px 0px #00000040',
      backgroundColor: `rgb(${note.color.r}, ${note.color.g}, ${note.color.b})`,
+     color: isLightColor(note.color) ? 'black' : 'white',
     }}
     className={({ isActive, isPending }) =>
-     `row row-cols-4 justify-between rounded-lg mx-0 p-2 position-relative cursor-pointer text-decoration-none text-black border-2 ${
+     `row row-cols-4 justify-between rounded-lg mx-0 p-2 position-relative cursor-pointer text-decoration-none border-2 ${
       isPending
        ? 'pending'
        : isActive

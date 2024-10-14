@@ -106,8 +106,10 @@ export const convertTimeApiNoteToHtml = (time) =>
  `${moment(time).format('DD/MM/YYYY')}`
 
 // ** color
-export const isLightColor = (color) => {
- const luminance = getLuminance(`rgb(${color.r}, ${color.g}, ${color.b})`)
+export const isLightColor = (colorObj) => {
+ const luminance = getLuminance(
+  `rgb(${colorObj.r}, ${colorObj.g}, ${colorObj.b})`
+ )
  return luminance > 0.5
 }
 
