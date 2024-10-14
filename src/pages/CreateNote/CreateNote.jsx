@@ -17,10 +17,18 @@ import FormNote from '../../share/FormNote'
 import AddImages from './AddImages'
 import TextEditor from '../../share/TextEditor'
 import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
+import ChecklistNote from '../../share/ChecklistNote'
 
 const CreateNote = () => {
  const appContext = useContext(AppContext)
  const { user, setSnackbar } = appContext
+
+ const [checklist, setChecklist] = useState([])
+ const [dataContent, setDataContent] = useState({
+  isError: false,
+  message: '',
+  content: '',
+ })
 
  const [uploadImageList, setUploadImageList] = useState([])
  const [color, setColor] = useState({
@@ -33,18 +41,16 @@ const CreateNote = () => {
  const {
   register,
   handleSubmit,
-  setValue,
   watch,
   reset,
-  setError,
 
   formState: { errors, dirtyFields },
  } = useForm({
   resolver: joiResolver(schemaNoteCreate),
   defaultValues: {
-   data: '',
    title: '',
    dueAt: null,
+   type: 'text',
 
    remindAt: null,
    pinned: false,
@@ -55,7 +61,7 @@ const CreateNote = () => {
   },
  })
 
- const contentEditor = watch('data')
+ const typeForm = watch('type')
 
  const [textEditor, setTextEditor] = useState('')
  const handleChangeTextEditor = (text) => setTextEditor(text)
@@ -65,6 +71,11 @@ const CreateNote = () => {
   fetchApiSamenote('post', `/notes/${user?.id}`, data)
    .then((data) => {
     reset()
+    setDataContent({
+      isError: false,
+      message: '',
+      content: '',
+     })
     setColor({ b: 250, g: 250, r: 255, name: 'snow' })
     setSnackbar({
      isOpen: true,
@@ -87,17 +98,51 @@ const CreateNote = () => {
    .catch((error) => console.log('error', error))
  }
 
+ useEffect(() => {
+  typeForm === 'text'
+   ? setChecklist([])
+   : setDataContent({
+      isError: false,
+      message: '',
+      content: '',
+     })
+ }, [typeForm])
+
+ useEffect(() => {
+  if (textEditor.trim() === '') return
+  setDataContent((prev) => ({ ...prev, isError: false, message: '' }))
+ }, [textEditor])
+
  const onSubmit = async (data) => {
-  if (data.data.trim() === '<p><br></p>') {
-   return setError('data', { type: 'text', message: 'Not content yet!' })
+  if (typeForm === 'text') {
+   if (textEditor.trim() === '')
+    return setDataContent((prev) => ({
+     ...prev,
+     isError: true,
+     message: 'Not content yet!',
+    }))
   }
+
+  if (typeForm === 'checklist') {
+   if (checklist.length < 1)
+    return setDataContent((prev) => ({
+     ...prev,
+     isError: true,
+     message: 'Not content yet!',
+    }))
+  }
+
+  const newChecklist = checklist?.map((item) => {
+   delete item.id
+   return item
+  })
 
   const dataForm = {
    ...data,
+   data: typeForm === 'text' ? dataContent.content : newChecklist,
    color: convertColorNoteToApi(color),
    dueAt: convertTimeToApi(data.dueAt),
    remindAt: convertTimeToApi(data.remindAt),
-   type: 'text',
    linkNoteShare: '',
   }
 
@@ -193,16 +238,21 @@ const CreateNote = () => {
     </div>
 
     <div className='flex relative'>
-     {errors.data && textEditor.trim().length < 1 && (
+     {dataContent.isError && (
       <p className='text-red-600 w-max absolute top-[120px] left-[15px]'>
-       {errors.data.message}
+       {dataContent.message}
       </p>
      )}
-     <TextEditor
-      setValue={setValue}
-      value={contentEditor}
-      onChangeTextEditor={handleChangeTextEditor}
-     />
+
+     {typeForm === 'text' ? (
+      <TextEditor
+       setDataContent={setDataContent}
+       onChangeTextEditor={handleChangeTextEditor}
+       value={dataContent.content}
+      />
+     ) : (
+      <ChecklistNote checklist={checklist} setChecklist={setChecklist} />
+     )}
     </div>
    </form>
   </div>

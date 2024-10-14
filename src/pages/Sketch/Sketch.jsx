@@ -79,7 +79,7 @@ const Sketch = () => {
    linkNoteShare: '',
   }
 
-  // if (!fileImage) return
+  if (!fileImage) return
   postNote(dataForm)
  }
 
@@ -108,8 +108,6 @@ const Sketch = () => {
  const disableSubmit = () => {
   return Object.keys(dirtyFields).length === 0 && !fileImage
  }
-
- console.log('dirtyFields', dirtyFields)
 
  return (
   <div className='flex flex-col w-full'>

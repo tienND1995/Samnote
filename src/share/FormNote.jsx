@@ -29,6 +29,7 @@ const FormNote = ({
  const notePublicForm = watch('notePublic')
  const colorForm = watch('color')
  const folderForm = watch('idFolder')
+ const typeForm = watch('type')
 
  useEffect(() => {
   if (!userID) return
@@ -86,21 +87,27 @@ const FormNote = ({
 
     <FormControl className=' bg-white rounded-1 w-full'>
      <Select
-      value={1}
-      //   {...register('type')}
+      value={typeForm}
+      {...register('type')}
       labelId='select-type-form'
       size='small'
       className='capitalize'
      >
-      <MenuItem value={0} className='capitalize'>
+      <MenuItem value={'text'} className='capitalize'>
        text
       </MenuItem>
 
-      <MenuItem value={1} className='capitalize'>
+      <MenuItem value={'checklist'} className='capitalize'>
        check list
       </MenuItem>
      </Select>
     </FormControl>
+
+    {errors.type && (
+     <p className='text-red-600 border-b border-red-600'>
+      {errors.type.message}
+     </p>
+    )}
    </div>
 
    <div>
