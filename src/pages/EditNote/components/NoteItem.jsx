@@ -12,7 +12,6 @@ import deleteNote from '../../../assets/delete-note.png'
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import axios from 'axios'
-import { fetchApiSamenote } from '../../../utils/fetchApiSamnote'
 
 const NoteItem = ({ note, noteList }) => {
  const navigate = useNavigate()
@@ -112,7 +111,7 @@ const NoteItem = ({ note, noteList }) => {
 
     <div className='col-6 px-0'>
      <div className='max-h-[100px] overflow-y-auto style-scrollbar-y style-scrollbar-y-sm'>
-      {typeof note.data == 'string' && (
+      {note.type === 'text' && (
        <TextTruncate
         line={3}
         element='p'
@@ -120,6 +119,19 @@ const NoteItem = ({ note, noteList }) => {
         text={<Markdown rehypePlugins={[rehypeRaw]}>{note.data}</Markdown>}
         containerClassName='flex justify-center'
        />
+      )}
+
+      {note.type === 'checklist' && (
+       <ul>
+        {note.data?.map(({ content, status }) => {
+         return (
+          <li key={content}>
+           <input checked={status} type='checkbox' />
+           <span className='ms-2'>{content}</span>
+          </li>
+         )
+        })}
+       </ul>
       )}
      </div>
 
