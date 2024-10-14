@@ -49,9 +49,9 @@ const LeftsideContent = ({
     }))
     setChecklistNotes(archivedNotes.filter((note) => {
       if (user.id === userInfomations.id) {
-        return note.type === 'checkList';
+        return note.type === 'checklist';
       } else {
-        return note.notePublic && note.type === 'checkList';
+        return note.notePublic && note.type === 'checklist';
       }
 
     }))
@@ -256,15 +256,19 @@ const LeftsideContent = ({
                         component='div'
                         sx={{
                           color: 'text.main',
-                          margin: '10px 10px 0px',
+                          margin: '10px 16px 0px',
                           height: '160px',
                           overflow: 'hidden',
                         }}
                       >
                         <strong style={{ fontSize: '20px' }}>{info.title}</strong>
-                        <div className='text-start truncate-text'>
-                          {<Markdown rehypePlugins={[rehypeRaw]}>{info.data}</Markdown>}
-                        </div>
+                        {info.type.toLowerCase() === 'checklist' ? (
+                          <Checklist data={info.data.slice(0, 3)} />
+                        ) : (
+                          <div className='text-start truncate-text'>
+                            {<Markdown rehypePlugins={[rehypeRaw]}>{info.data}</Markdown>}
+                          </div>
+                        )}
                       </Box>
                       <Box
                         component='div'

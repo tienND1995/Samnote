@@ -155,7 +155,7 @@ const ListNotes = (
                                         component='div'
                                         sx={{
                                             color: 'text.main',
-                                            margin: '10px 10px 0px',
+                                            margin: '10px 16px 0px',
                                             height: '160px',
                                             overflow: 'hidden',
                                         }}
