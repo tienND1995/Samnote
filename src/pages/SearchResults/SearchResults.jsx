@@ -1,7 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState, useReducer } from 'react'
 import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
 import { AppContext } from '../../context'
 import SearchIcon from '@mui/icons-material/Search';
+import ListResults from './ListResults';
+import Pagination from './Pagination';
 
 const SearchResults = () => {
     const { user } = useContext(AppContext)
@@ -9,7 +11,7 @@ const SearchResults = () => {
     const [activeTab, setActiveTab] = useState('everyone')
     const [results, setResults] = useState([])
     const [currentPage, setCurrentPage] = useState(1)
-    const [totalPages, setTotalPages] = useState(5)
+    const [totalPages, setTotalPages] = useState(10)
 
     useEffect(() => {
         fetchResults()
@@ -49,26 +51,16 @@ const SearchResults = () => {
                 setResults(response.data)
                 break
         }
+        if (response && response.status === 200) {
+            console.log('data search', response.data)
+            setResults(response.data)
+        }
         if (response.total_pages) setTotalPages(response.total_pages)
     }
 
     const handleSearch = () => {
         setCurrentPage(1)
         fetchResults()
-    }
-
-    const renderResults = () => {
-        return results.map((item, index) => (
-            <div key={index} className="card mb-3">
-                <div className="card-body">
-                    <h5 className="card-title">{item.user_name}</h5>
-                    <p className="card-text">{item.content}</p>
-                    {item.images && item.images.map((img, imgIndex) => (
-                        <img key={imgIndex} src={img} alt="Note image" className="img-thumbnail mr-2" style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
-                    ))}
-                </div>
-            </div>
-        ))
     }
 
     return (
@@ -79,30 +71,31 @@ const SearchResults = () => {
                     src='/src/assets/SearchResults.png'
                     alt="search-img"
                 />
-                <h2 className="text-white text-bottom">Search results</h2>
+                <h2 className="text-white text-4xl text-bottom">Search results</h2>
             </div>
 
-            <div className="form-search w-[50%] m-auto relative bg-[#fff] rounded-pill">
-                <input
-                    type="text"
-                    className="rounded-start-pill w-[95%] px-3 py-2"
-                    placeholder="Search"
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                />
-                <div className="absolute right-0 top-0 z-10 p-2 cursor-pointer"
-                    onClick={handleSearch}>
-                    <SearchIcon />
+            <div className="flex justify-center w-full">
+                <div className="form-search w-[50%] relative bg-[#fff] rounded-pill">
+                    <input
+                        type="text"
+                        className="rounded-start-pill w-[95%] px-3 py-2"
+                        placeholder="Search"
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                    />
+                    <div className="absolute right-0 top-0 z-10 p-2 cursor-pointer"
+                        onClick={handleSearch}>
+                        <SearchIcon />
+                    </div>
                 </div>
             </div>
 
             <div className='content-container w-[95%] mx-auto my-5'>
                 <ul className="nav nav-tabs flex bg-[#000000]">
                     {['everyone', 'anonymous', 'own', 'group'].map((tab) => (
-                        <li className="nav-item flex-1 text-center" key={tab}>
+                        <li className="nav-item flex-1 text-center cursor-pointer" key={tab}>
                             <a
-                                className={`nav-link text-white ${activeTab === tab ? 'active bg-[#F56852]' : ''}`}
-                                href="#"
+                                className={`nav-link text-white text-xl ${activeTab === tab ? 'active bg-[#F56852]' : ''}`}
                                 onClick={() => setActiveTab(tab)}
                             >
                                 {tab === 'everyone' ? "Everyone's notes" :
@@ -113,7 +106,7 @@ const SearchResults = () => {
                     ))}
                 </ul>
 
-                <div className="tab-content py-2 h-[60rem] relative"
+                <div className="tab-content py-2 h-[80rem] relative"
                     style={{
                         backgroundImage: 'url(/src/assets/bg-search-results.png)',
                         backgroundSize: 'cover',
@@ -121,29 +114,16 @@ const SearchResults = () => {
                     }}
                 >
                     <div className="tab-pane active">
-                        {/* {renderResults()} */}
+                        {/* <ListResults results={results} /> */}
                     </div>
-                    <nav
-                        aria-label="Page navigation"
-                        className='absolute top-[92%] w-full'
-                    >
-                        <ul className="pagination justify-content-center">
-                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                <a className="page-link" href="#" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}>Previous</a>
-                            </li>
-                            {Array.from({ length: totalPages }, (_, number) => (
-                                <li className={`page-item ${currentPage === number + 1 ? 'active' : ''}`} key={number}>
-                                    <a className="page-link" href="#" onClick={() => setCurrentPage(number + 1)}>{number + 1}</a>
-                                </li>
-                            ))}
-                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                <a className="page-link" href="#" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}>Next</a>
-                            </li>
-                        </ul>
-                    </nav>
+                    {totalPages > 1 &&
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            setCurrentPage={setCurrentPage}
+                        />
+                    }
                 </div>
-
-
             </div>
         </div>
     )

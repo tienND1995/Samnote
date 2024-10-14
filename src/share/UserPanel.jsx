@@ -294,7 +294,10 @@ const UserPanel = () => {
       </Box>
 
       {/* className="size-[12px]" */}
-      <Box className="flex items-end text-white hidden md:block whitespace-nowrap ">
+      <Box
+        className="flex items-end text-white hidden md:block whitespace-nowrap cursor-pointer"
+        onClick={() => navigate(`/search-results`)}
+      >
         <SearchIcon className="mr-1 text-white md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
       </Box>
 
