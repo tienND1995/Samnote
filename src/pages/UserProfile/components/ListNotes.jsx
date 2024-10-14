@@ -80,7 +80,7 @@ const ListNotes = (
                             {dataNotes.map((info) => (
                                 <SwiperSlide
                                     key={info.idNote}
-                                    className={`relative p-2 border-[1px] rounded-xl border-black border-solid mb-2
+                                    className={`relative p-2 border-[1px] rounded-xl border-black border-solid mb-2 min-w-[22rem]
                                                 ${isLightColor(info.color) ? 'text-black' : 'text-white'}
                                                 ${dataNotes.length === 1 ? 'w-full' : dataNotes.length === 2 ? `w-[49%]` : 'w-[22rem]'}`}
                                     style={{
