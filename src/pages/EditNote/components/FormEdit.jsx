@@ -83,7 +83,7 @@ const FormEdit = ({ onDispatchName }) => {
    lock: '',
    color: '',
    type: 'text',
-   idFolder: null,
+   idFolder: '',
   },
  })
 
