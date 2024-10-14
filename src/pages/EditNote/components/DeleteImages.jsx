@@ -190,7 +190,7 @@ const DeleteImages = ({
         </div>
 
         <img
-         className='object-cover aspect-[3/4] w-full rounded-sm'
+         className='object-cover aspect-[3/4] w-full rounded-sm border border-gray-400'
          src={link}
          alt='img-editnote'
         />

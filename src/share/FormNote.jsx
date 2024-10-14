@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
 
-import { Modal } from 'react-bootstrap'
-
 import {
  FormControl,
  InputLabel,

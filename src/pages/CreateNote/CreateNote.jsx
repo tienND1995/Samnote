@@ -68,52 +68,57 @@ const CreateNote = () => {
  const handleChangeColor = (color) => setColor(color)
 
  const postNote = (data) => {
-  fetchApiSamenote('post', `/notes/${user?.id}`, data)
-   .then((data) => {
-    reset()
-    setDataContent({
-      isError: false,
-      message: '',
-      content: '',
-     })
-    setColor({ b: 250, g: 250, r: 255, name: 'snow' })
-    setSnackbar({
-     isOpen: true,
-     message: `Create note success!`,
-     severity: 'success',
-    })
-
-    setUploadImageList([])
-    // post image list
-    const newFormData = new FormData()
-    newFormData.append('id_user', user?.id)
-    newFormData.append('id_note', data.note.idNote)
-
-    uploadImageList.forEach((image) => {
-     newFormData.append('image_note', image.file)
-    })
-
-    fetchApiSamenote('post', '/add_image_note', newFormData)
+  fetchApiSamenote('post', `/notes/${user?.id}`, data).then((data) => {
+   reset()
+   setDataContent({
+    isError: false,
+    message: '',
+    content: '',
    })
-   .catch((error) => console.log('error', error))
+   setChecklist([])
+   setColor({ b: 250, g: 250, r: 255, name: 'snow' })
+
+   setSnackbar({
+    isOpen: true,
+    message: `Create note success!`,
+    severity: 'success',
+   })
+
+   setUploadImageList([])
+   // post image list
+   const newFormData = new FormData()
+   newFormData.append('id_user', user?.id)
+   newFormData.append('id_note', data.note.idNote)
+
+   uploadImageList.forEach((image) => {
+    newFormData.append('image_note', image.file)
+   })
+
+   fetchApiSamenote('post', '/add_image_note', newFormData)
+  })
  }
 
+ // reset content
  useEffect(() => {
-  typeForm === 'text'
-   ? setChecklist([])
-   : setDataContent({
-      isError: false,
-      message: '',
-      content: '',
-     })
+  if (typeForm === 'text') {
+   setChecklist([])
+   setDataContent((prev) => ({ ...prev, isError: false }))
+  } else {
+   setDataContent((prev) => ({ ...prev, isError: false, content: '' }))
+  }
  }, [typeForm])
 
+ // reset errors
  useEffect(() => {
-  if (textEditor.trim() === '') return
-  setDataContent((prev) => ({ ...prev, isError: false, message: '' }))
- }, [textEditor])
+  if (textEditor.trim() === '' && typeForm === 'text') return
+  if (checklist.length === 0 && typeForm === 'checklist') return
+
+  if (checklist.length > 0 || typeForm === 'text')
+   setDataContent((prev) => ({ ...prev, isError: false, message: '' }))
+ }, [textEditor, checklist.length])
 
  const onSubmit = async (data) => {
+  // set errors when text empty
   if (typeForm === 'text') {
    if (textEditor.trim() === '')
     return setDataContent((prev) => ({
@@ -123,8 +128,9 @@ const CreateNote = () => {
     }))
   }
 
+  // set errors when checkbox empty
   if (typeForm === 'checklist') {
-   if (checklist.length < 1)
+   if (checklist.length === 0)
     return setDataContent((prev) => ({
      ...prev,
      isError: true,
@@ -205,17 +211,19 @@ const CreateNote = () => {
          }
         />
 
-        <div>
-         <input
-          onChange={handleChangeImage}
-          id='upload-file-craete-note'
-          type='file'
-          className='hidden'
-         />
-         <label htmlFor='upload-file-craete-note' className='flex'>
-          <ImageIcon className='text-[40px] text-white' />
-         </label>
-        </div>
+        {typeForm === 'text' && (
+         <div>
+          <input
+           onChange={handleChangeImage}
+           id='upload-file-craete-note'
+           type='file'
+           className='hidden'
+          />
+          <label htmlFor='upload-file-craete-note' className='flex'>
+           <ImageIcon className='text-[40px] text-white' />
+          </label>
+         </div>
+        )}
        </div>
 
        <div>

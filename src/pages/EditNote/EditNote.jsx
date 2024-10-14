@@ -31,8 +31,8 @@ const EditNote = () => {
 
  useEffect(() => {
   if (!state) return
+  if (!state.typeNoteId) return disPatchNameEvent(state)
 
-  disPatchNameEvent(state)
  }, [state])
 
  useEffect(() => {
@@ -40,8 +40,6 @@ const EditNote = () => {
    getNoteList()
   }
  }, [user, nameEvent])
-
- console.log('noteList', noteList)
 
  return (
   <div className='bg-[#181A1B] px-4 gap-4 pt-4 pb-2 flex flex-col w-full'>
@@ -73,7 +71,7 @@ const EditNote = () => {
      />
     </div>
     <div className='col flex'>
-     <FormEdit onDispatchName={disPatchNameEvent} />
+     {<FormEdit onDispatchName={disPatchNameEvent} />}
     </div>
    </div>
   </div>

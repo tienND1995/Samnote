@@ -2,14 +2,14 @@ import axios from 'axios'
 import { useContext, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
+import { joiResolver } from '@hookform/resolvers/joi'
 import { useForm } from 'react-hook-form'
 import { schemaNoteEdit } from '../../../utils/schema'
-import { joiResolver } from '@hookform/resolvers/joi'
 
 import {
- convertTimeToApi,
  convertApiToTime,
  convertColorNoteToApi,
+ convertTimeToApi,
 } from '../../../utils/utils'
 
 import { AppContext } from '../../../context'
@@ -28,10 +28,11 @@ import {
 
 import AddIcon from '@mui/icons-material/Add'
 
-import TextEditor from '../../../share/TextEditor'
 import configs from '../../../configs/configs.json'
-import AddImages from './AddImages'
 import ModalCreateFolder from '../../../share/ModalCreateFolder'
+import TextEditor from '../../../share/TextEditor'
+import AddImages from './AddImages'
+import ChecklistNote from '../../../share/ChecklistNote'
 const { API_SERVER_URL } = configs
 
 const FormEdit = ({ onDispatchName }) => {
@@ -40,6 +41,13 @@ const FormEdit = ({ onDispatchName }) => {
  const { id } = useParams()
 
  const [noteItem, setNoteItem] = useState({})
+
+ const [checklist, setChecklist] = useState([])
+ const [dataContent, setDataContent] = useState({
+  isError: false,
+  message: '',
+  content: '',
+ })
 
  const [colorList, setColorList] = useState([])
  const [folderList, setFolderList] = useState([])
@@ -67,7 +75,6 @@ const FormEdit = ({ onDispatchName }) => {
   resolver: joiResolver(schemaNoteEdit),
   defaultValues: {
    notePublic: 1,
-   data: '',
    pinned: false,
    title: '',
    dueAt: null,
@@ -82,8 +89,8 @@ const FormEdit = ({ onDispatchName }) => {
  const notePublicForm = watch('notePublic')
  const colorForm = watch('color')
  const folderForm = watch('idFolder')
- const contentEditor = watch('data')
  const pinnedForm = watch('pinned')
+ const typeForm = watch('type')
 
  const getDataNoteId = async () => {
   const noteList = await fetchNoteList(user?.id)
@@ -95,14 +102,38 @@ const FormEdit = ({ onDispatchName }) => {
 
   // set values form default
   setValue('title', noteId[0].title)
-  setValue('data', noteId[0].data)
   setValue('pinned', noteId[0].pinned)
   setValue('type', noteId[0].type)
   setValue('dueAt', convertApiToTime(noteId[0].dueAt))
   setValue('remindAt', convertApiToTime(noteId[0].remindAt))
   setValue('notePublic', noteId[0].notePublic)
   setValue('idFolder', noteId[0].idFolder)
+
+  if (noteId[0].type === 'text') {
+   setDataContent((prev) => ({ ...prev, content: noteId[0].data }))
+  } else {
+   setChecklist(noteId[0].data)
+  }
  }
+
+ // reset content
+ useEffect(() => {
+  if (typeForm === 'text') {
+   setChecklist([])
+   setDataContent((prev) => ({ ...prev, isError: false }))
+  } else {
+   setDataContent((prev) => ({ ...prev, isError: false, content: '' }))
+  }
+ }, [typeForm])
+
+ // reset errors
+ useEffect(() => {
+  if (textEditor?.trim() === '' && typeForm === 'text') return
+  if (checklist.length === 0 && typeForm === 'checklist') return
+
+  if (checklist.length > 0 || typeForm === 'text')
+   setDataContent((prev) => ({ ...prev, isError: false, message: '' }))
+ }, [textEditor, checklist.length])
 
  useEffect(() => {
   const fetchAllColor = async () => {
@@ -157,6 +188,12 @@ const FormEdit = ({ onDispatchName }) => {
   try {
    const response = await axios.patch(`${API_SERVER_URL}/notes/${noteId}`, data)
    onDispatchName('patch note')
+
+   setDataContent({
+    isError: false,
+    message: '',
+    content: '',
+   })
    setSnackbar({
     isOpen: true,
     message: `Update note complete!`,
@@ -170,12 +207,38 @@ const FormEdit = ({ onDispatchName }) => {
  const onSubmit = async (data) => {
   if (color.name !== data.color || !noteItem.idNote || !id) return
 
+  // set errors when text empty
+  if (typeForm === 'text') {
+   if (textEditor.trim() === '')
+    return setDataContent((prev) => ({
+     ...prev,
+     isError: true,
+     message: 'Not content yet!',
+    }))
+  }
+
+  // set errors when checkbox empty
+  if (typeForm === 'checklist') {
+   if (checklist.length === 0)
+    return setDataContent((prev) => ({
+     ...prev,
+     isError: true,
+     message: 'Not content yet!',
+    }))
+  }
+
+  const newChecklist = checklist?.map((item) => {
+   delete item.id
+   return item
+  })
+
   const dataForm = {
    ...data,
+   data: typeForm === 'text' ? dataContent.content : newChecklist,
    color: convertColorNoteToApi(color),
    dueAt: convertTimeToApi(data.dueAt),
    remindAt: convertTimeToApi(data.remindAt),
-   type: 'text',
+   type: noteItem.type,
   }
 
   pacthNote(noteItem.idNote, dataForm)
@@ -186,11 +249,11 @@ const FormEdit = ({ onDispatchName }) => {
   const isChangeForm =
    Object.keys(dirtyFields).length === 0 &&
    (textEditor?.trim() == '' ||
-    noteItem.data === contentEditor ||
+    noteItem.data === dataContent.content ||
+    checklist.length === 0 ||
     textEditor?.trim() === noteItem.data?.trim())
 
   const isNoteIdEdit = !id
-
   return isChangeForm || isNoteIdEdit
  }
 
@@ -399,29 +462,35 @@ const FormEdit = ({ onDispatchName }) => {
       </button>
      </div>
 
-     <AddImages
-      userId={user?.id}
-      noteId={id}
-      onDispatchName={onDispatchName}
-      onGetNoteId={getDataNoteId}
-     />
+     {noteItem.type === 'text' && (
+      <AddImages
+       userId={user?.id}
+       noteId={id}
+       onDispatchName={onDispatchName}
+       onGetNoteId={getDataNoteId}
+      />
+     )}
     </div>
 
     <div className='mx-auto w-full flex flex-col flex-grow-1 gap-2'>
-     {errors.data && (
+     {dataContent.isError && (
       <p
        style={{ borderBottom: '1px solid red' }}
        className='text-red-600 w-max'
       >
-       {errors.data.message}
+       {dataContent.message}
       </p>
      )}
 
-     <TextEditor
-      setValue={setValue}
-      value={contentEditor}
-      onChangeTextEditor={handleChangeTextEditor}
-     />
+     {noteItem.type === 'text' ? (
+      <TextEditor
+       value={dataContent.content}
+       setDataContent={setDataContent}
+       onChangeTextEditor={handleChangeTextEditor}
+      />
+     ) : (
+      <ChecklistNote checklist={checklist} setChecklist={setChecklist} />
+     )}
     </div>
    </form>
   </div>

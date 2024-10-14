@@ -24,6 +24,12 @@ const Sketch = () => {
   name: 'snow',
  })
 
+ const [dataContent, setDataContent] = useState({
+  isError: false,
+  message: '',
+  content: '',
+ })
+
  // var canvas
  const [strokeColor, setStrokeColor] = useState('red')
  const [strokeWidth, setStrokeWidth] = useState(1)
@@ -43,7 +49,6 @@ const Sketch = () => {
  } = useForm({
   resolver: joiResolver(schemaNoteCreate),
   defaultValues: {
-   data: '',
    title: '',
    dueAt: null,
 
@@ -70,8 +75,16 @@ const Sketch = () => {
  }
 
  const onSubmitForm = (data) => {
+  if (dataContent.content.trim() === '')
+   return setDataContent((prev) => ({
+    ...prev,
+    isError: true,
+    message: 'Not content yet!',
+   }))
+
   const dataForm = {
    ...data,
+   data: dataContent.content,
    color: convertColorNoteToApi(color),
    dueAt: convertTimeToApi(data.dueAt),
    remindAt: convertTimeToApi(data.remindAt),
@@ -79,7 +92,6 @@ const Sketch = () => {
    linkNoteShare: '',
   }
 
-  if (!fileImage) return
   postNote(dataForm)
  }
 
@@ -87,6 +99,12 @@ const Sketch = () => {
   fetchApiSamenote('post', `/notes/${user?.id}`, data)
    .then((data) => {
     reset()
+    setFileImage(null)
+    setDataContent({
+     isError: false,
+     message: '',
+     content: '',
+    })
     setColor({ b: 250, g: 250, r: 255, name: 'snow' })
     setSnackbar({
      isOpen: true,
@@ -106,8 +124,14 @@ const Sketch = () => {
  }
 
  const disableSubmit = () => {
-  return Object.keys(dirtyFields).length === 0 && !fileImage
+  return !fileImage
  }
+
+ // reset errors
+ useEffect(() => {
+  if (dataContent.content.trim() === '') return
+  setDataContent((prev) => ({ ...prev, isError: false, message: '' }))
+ }, [dataContent.content])
 
  return (
   <div className='flex flex-col w-full'>
@@ -151,12 +175,15 @@ const Sketch = () => {
       <textarea
        className='size-full relative max-h-[300px] mt-[23px] rounded-lg outline-none p-3'
        placeholder='Content...'
-       {...register('data')}
+       value={dataContent.content}
+       onChange={(e) =>
+        setDataContent((prev) => ({ ...prev, content: e.target.value }))
+       }
       ></textarea>
 
-      {errors?.data && (
+      {dataContent?.isError && (
        <span style={{ borderBottom: '1px solid red' }} className='text-red-600'>
-        {errors.data.message}
+        {dataContent?.message}
        </span>
       )}
      </div>

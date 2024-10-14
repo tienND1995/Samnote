@@ -31,7 +31,7 @@ const ChecklistNote = ({ checklist, setChecklist }) => {
  }
 
  return (
-  <div className='bg-white w-full'>
+  <div className='bg-white flex flex-col flex-grow-1'>
    <div
     style={{ boxShadow: '0px 8px 10px 0px #00000026' }}
     className='flex justify-center items-end p-3 gap-5'
