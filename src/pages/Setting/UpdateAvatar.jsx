@@ -27,6 +27,8 @@ import { fetchApiSamenote } from "../../utils/fetchApiSamnote";
 const UpdateAvatar = () => {
   const appContext = useContext(AppContext);
   const { user, setSnackbar, setUser } = appContext;
+  const [checkChange, setCheckChange] = useState(false);
+  console.log("checkChange", checkChange);
 
   const {
     handleSubmit,
@@ -42,6 +44,8 @@ const UpdateAvatar = () => {
       gmail: "",
     },
   });
+  console.log("errors", errors);
+  console.log("dirtyFields", dirtyFields);
 
   const [avatarProfile, setAvatarProfile] = useState({
     thumb: "",
@@ -54,6 +58,12 @@ const UpdateAvatar = () => {
     file: null,
     isChange: false,
   });
+
+  useEffect(() => {
+    if (dirtyFields?.name) {
+      setCheckChange(true);
+    }
+  }, [watch("name")]);
 
   //  Sử dụng useEffect để cập nhật khi user thay đổi
   useEffect(() => {
@@ -79,63 +89,57 @@ const UpdateAvatar = () => {
     fetchUserData();
   }, [user, reset]);
 
-  const disableBtnUpdate = () => {
-    return Object.keys(dirtyFields).length === 0;
-  };
-
-  console.log("dirtyFields", dirtyFields);
-
   const onSubmit = async (data) => {
     const dataForm = { name: data.name };
 
-    // if (avatarProfile.isChange) {
-    //  const imageFormData = new FormData()
-    //  imageFormData.append('image', avatarProfile.file)
+    if (avatarProfile.isChange) {
+      const imageFormData = new FormData();
+      imageFormData.append("image", avatarProfile.file);
 
-    //  const dataImage = await fetchApiSamenote(
-    //   'post',
-    //   `/upload_image/${user.id}`,
-    //   imageFormData
-    //  )
+      const dataImage = await fetchApiSamenote(
+        "post",
+        `/upload_image/${user.id}`,
+        imageFormData
+      );
 
-    //  console.log('dataImage', dataImage)
+      console.log("dataImage", dataImage);
 
-    //  dataForm.Avarta = dataImage.imagelink
-    // }
+      dataForm.Avarta = dataImage.imagelink;
+    }
 
-    // if (backgroundProfile.isChange) {
-    //  const imageFormData = new FormData()
-    //  imageFormData.append('image', backgroundProfile.file)
+    if (backgroundProfile.isChange) {
+      const imageFormData = new FormData();
+      imageFormData.append("image", backgroundProfile.file);
 
-    //  const dataImage = await fetchApiSamenote(
-    //   'post',
-    //   `/upload_image/${user.id}`,
-    //   imageFormData
-    //  )
+      const dataImage = await fetchApiSamenote(
+        "post",
+        `/upload_image/${user.id}`,
+        imageFormData
+      );
 
-    //  dataForm.AvtProfile = dataImage.imagelink
-    // }
+      dataForm.AvtProfile = dataImage.imagelink;
+    }
 
-    // fetchApiSamenote(
-    //  'patch',
-    //  `/profile/change_Profile/${user.id}`,
-    //  dataForm
-    // ).then((response) => {
-    //  if (response?.error) {
-    //   setSnackbar({
-    //    isOpen: true,
-    //    message: response?.error,
-    //    severity: 'error',
-    //   })
-    //  } else {
-    //   setUser(response)
-    //   setSnackbar({
-    //    isOpen: true,
-    //    message: 'Updated profile !',
-    //    severity: 'success',
-    //   })
-    //  }
-    // })
+    fetchApiSamenote(
+      "patch",
+      `/profile/change_Profile/${user.id}`,
+      dataForm
+    ).then((response) => {
+      if (response?.error) {
+        setSnackbar({
+          isOpen: true,
+          message: response?.error,
+          severity: "error",
+        });
+      } else {
+        setUser(response);
+        setSnackbar({
+          isOpen: true,
+          message: "Updated profile !",
+          severity: "success",
+        });
+      }
+    });
   };
 
   const handleChangeAvatar = (e) => {
@@ -143,6 +147,7 @@ const UpdateAvatar = () => {
     const blobUrl = URL.createObjectURL(file);
 
     setAvatarProfile({ thumb: blobUrl, file, isChange: true });
+    setCheckChange(true);
   };
 
   const handleChangeBackground = (e) => {
@@ -150,6 +155,7 @@ const UpdateAvatar = () => {
     const blobUrl = URL.createObjectURL(file);
 
     setBackgroundProfile({ thumb: blobUrl, file, isChange: true });
+    setCheckChange(true);
   };
 
   return (
@@ -254,13 +260,14 @@ const UpdateAvatar = () => {
           </div>
         </div>
         <div className="flex gap-4">
-          <button
-            disabled={disableBtnUpdate()}
+          <Button
+            disabled={!checkChange}
+            variant={checkChange ? "contained" : "outlined"}
             type="submit"
-            className="btn btn-primary px-4 uppercase"
+            className=" px-4 uppercase"
           >
             Update
-          </button>
+          </Button>
 
           <button type="button" className="btn btn-danger">
             delete
