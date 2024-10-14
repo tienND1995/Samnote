@@ -28,6 +28,7 @@ const UpdateAvatar = () => {
   const appContext = useContext(AppContext);
   const { user, setSnackbar, setUser } = appContext;
   const [checkChange, setCheckChange] = useState(false);
+  const [openDeleteTab, setOpenDeleteTab] = useState(false);
 
   const {
     handleSubmit,
@@ -85,6 +86,12 @@ const UpdateAvatar = () => {
 
     fetchUserData();
   }, [user, reset]);
+
+  const openDeleteAccount = () => {
+    setOpenDeleteTab(!openDeleteTab);
+
+    console.log("mở màn xóa", openDeleteTab);
+  };
 
   const onSubmit = async (data) => {
     const dataForm = { name: data.name };
@@ -264,15 +271,69 @@ const UpdateAvatar = () => {
             Update
           </Button>
 
-          <button type="button" className="btn btn-danger">
-            delete
+          <button
+            type="button"
+            onClick={() => {
+              openDeleteAccount();
+            }}
+            className="btn btn-danger"
+          >
+            Delete account
           </button>
         </div>
-
-        {/* {errors?.errorApi && (
-          <span className="text-red-400 mt-3">{errors.errorApi.message}</span>
-        )} */}
       </form>
+      {openDeleteTab ? (
+        <div className="bg-[rgba(153,153,153,0.6)] absolute top-0 left-0 bottom-0 right-0 text-white z-[100] flex items-center justify-center">
+          <div className="bg-black  px-4 py-5 gap-3 flex flex-col rounded-lg">
+            <h5>Delete this account?</h5>
+            <span>
+              *Confirm both passwords to delete the account permanently.
+            </span>
+            <form action="submit" className="flex items-center gap-3">
+              {" "}
+              <PasswordField
+                className=" form-control w-[300px] bg-white rounded-md"
+                label="Password..."
+                placeholder="Confim your password 2"
+                // {...registerFormPw2("confirm_private_password")}
+              />
+              {/* {errorsForm2?.confirm_private_password && (
+                <span className="text-red-400 mt-3">
+                  {errorsForm2.confirm_private_password.message}
+                </span>
+              )} */}
+              <PasswordField
+                className=" form-control w-[300px] bg-white rounded-md"
+                label="Password 2..."
+                placeholder="Confim your password 2"
+                // {...registerFormPw2("confirm_private_password")}
+              />
+              {/* {errorsForm2?.confirm_private_password && (
+                <span className="text-red-400 mt-3">
+                  {errorsForm2.confirm_private_password.message}
+                </span>
+              )} */}
+            </form>
+            <div className="flex w-full justify-end gap-3 mt-7">
+              {" "}
+              <button type="submit" className="btn btn-danger">
+                Delete account
+              </button>
+              <button
+                type="submit"
+                onClick={() => {
+                  openDeleteAccount();
+                }}
+                className="btn bg-white"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
     </div>
   );
 };

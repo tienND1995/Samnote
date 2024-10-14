@@ -46,10 +46,10 @@ const UserSetting = () => {
   }, [user]);
 
   return (
-    <div className="bg-black w-full overflow-y-scroll h-[100vh] text-white">
+    <div className="bg-black w-full overflow-y-hidden relative text-white py-4">
       {" "}
       {userInfo && (
-        <Container className=" pb-[300px]">
+        <Container>
           <h1 className="uppercase">setting</h1>
           <UpdateAvatar />
           <UpdatePassword data={userInfo} />

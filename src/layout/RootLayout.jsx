@@ -6,10 +6,10 @@ const RootLayout = () => {
 
   return isLogin ? (
     <section className="w-full vh-100 flex flex-col lg:flex-row">
-      <div className="lg:w-[100px] w-full">
+      <div className="lg:w-[100px] w-full static z-[1000]">
         <UserPanel />
       </div>
-      <div className="w-full flex flex-grow-1">
+      <div className="w-full flex flex-grow-1 mt-[100px] lg:mt-0">
         <Outlet />
       </div>
     </section>

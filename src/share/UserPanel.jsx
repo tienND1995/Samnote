@@ -2,16 +2,23 @@ import { Outlet, useNavigate, useParams } from "react-router-dom";
 import IconChatUnknow from "../assets/iconChatUnknow";
 import IconCreateNewNote from "../assets/iconCreateNewNote";
 import IconLogout from "../assets/iconLogout";
-import DeleteIcon from "@mui/icons-material/Delete";
+import CloseIcon from "@mui/icons-material/Close";
 import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutline";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import GroupIcon from "@mui/icons-material/Group";
 import HomeIcon from "@mui/icons-material/Home";
-import NoteAddIcon from "@mui/icons-material/NoteAdd";
+import MenuIcon from "@mui/icons-material/Menu";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import SearchIcon from "@mui/icons-material/Search";
 import SettingsIcon from "@mui/icons-material/Settings";
-import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Slide,
+  Button,
+  IconButton,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import api from "../api";
 import { NavLink } from "react-router-dom";
@@ -25,8 +32,40 @@ const UserPanel = () => {
   const { user, setUser } = appContext;
   const [userInfomations, setUserInformations] = useState(null);
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
+  const handleToggle = () => {
+    setOpen(!open);
+  };
   const navbarItems = [
+    {
+      name: "Profile",
+      icon: (
+        <img
+          src={userInfomations ? userInfomations.Avarta : avatarDefault}
+          alt=""
+          className="img-user-panel rounded-full size-[80px]"
+        />
+      ),
+      url: `/profile/${user.id}`,
+    },
+    {
+      name: "Find Note",
+      icon: (
+        <SearchIcon className="mr-1 text-white md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
+      ),
+      url: "/",
+    },
+    {
+      name: "Create Note",
+      icon: (
+        <div className="bg-[#198E39] rounded-full w-[100px] h-[50px] items-center flex justify-center">
+          <IconCreateNewNote className=" md:size-[20px] xl:size-[25px]" />
+          <span className="text-[20px] xl:text-[25px] pl-1">new</span>
+        </div>
+      ),
+      url: "/create-note",
+    },
     {
       name: "Home Page",
       icon: (
@@ -109,34 +148,22 @@ const UserPanel = () => {
         id="navbar"
         // className="bg-gray-700 text-white w-full pt-3 flex items-lg-center flex-col gap-3"
       >
-        <Box
-          className="flex items-center cursor-pointer"
+        <NavLink
+          to={`/profile/${user.id}`}
+          className="flex items-center cursor-pointer lg:hidden block"
           onClick={() => navigate(`/profile/${user.id}`)}
         >
           <img
             src={userInfomations ? userInfomations.Avarta : avatarDefault}
             alt=""
-            className="rounded-full size-[80px]  hidden md:block"
+            className="rounded-full size-[80px]"
           />
-        </Box>
-
-        <Box className="flex items-end text-white hidden md:block whitespace-nowrap ">
-          <SearchIcon className="mr-1 text-white md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
-        </Box>
-        <Button
-          variant="contained"
-          className="bg-[#198E39] rounded-full  "
-          onClick={() => navigate(`/create-note`)}
-        >
-          <IconCreateNewNote className=" md:size-[15px] xl:size-[20px]" />
-          <span className="hidden lg:block text-[10px] xl:text-[15px] pl-1">
-            new
-          </span>
-        </Button>
+        </NavLink>
         {navbarItems.map((item, idx) => (
           <NavLink
+            to={item.url}
             key={idx}
-            className="flex cursor-pointer"
+            className="cursor-pointer item-navbar lg:block"
             title={item.name}
             onClick={() => {
               if (item.state) {
@@ -146,11 +173,12 @@ const UserPanel = () => {
               }
             }}
           >
-            {item.icon}
+            <span className="item-icon-panel  text-white">{item.icon}</span>
+            <span className="item-name-panel text-[30px]">{item.name}</span>
           </NavLink>
         ))}
         <Button
-          className="hidden md:block"
+          className="hidden lg:block"
           onClick={() => {
             const submit = confirm("Do you want to logout?");
             if (submit) {
@@ -159,8 +187,101 @@ const UserPanel = () => {
             }
           }}
         >
-          <IconLogout className="md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
+          <IconLogout className="md:size-[25px] lg:size-[30px] xl:size-[35px] " />
         </Button>
+        <MenuIcon
+          onClick={handleToggle}
+          className="lg:hidden block text-black text-[35px] cursor-pointer"
+        />
+        <Slide
+          timeout={1000}
+          direction="right"
+          in={open}
+          mountOnEnter
+          unmountOnExit
+          id="navbar-mobile"
+        >
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0,0,0,0.4)",
+            }}
+            onClick={handleToggle}
+          >
+            <div
+              className=" relative bg-gray-700 text-white w-[120px] h-[100vh] pt-5 px-2 flex items-lg-center flex-col gap-3"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+            >
+              {/* <span
+                style={{
+                  position: "absolute",
+                  top: 10,
+                  right: 1,
+                  backgroundColor: "#fff",
+                  color: "#000",
+                }}
+                onClick={handleToggle}
+              >
+                <CloseIcon />
+              </span> */}
+              {navbarItems.map((item, idx) => (
+                <NavLink
+                  to={item.url}
+                  key={idx}
+                  className="cursor-pointer lg:block items-center flex w-full justify-center"
+                  title={item.name}
+                  onClick={() => {
+                    if (item.state) {
+                      navigate(item.url, { state: item.state });
+                    } else {
+                      navigate(item.url);
+                    }
+                  }}
+                >
+                  <span className="text-white">{item.icon}</span>
+                </NavLink>
+              ))}
+              {/* {navbarItems.slice(3).map((item, idx) => (
+                <NavLink
+                  to={item.url}
+                  key={idx}
+                  className="cursor-pointer lg:block"
+                  title={item.name}
+                  onClick={() => {
+                    if (item.state) {
+                      navigate(item.url, { state: item.state });
+                    } else {
+                      navigate(item.url);
+                    }
+                  }}
+                >
+                  <span className="text-white">{item.icon}</span>
+                  <span className="name-icon-navbar-mobile text-[25px] ml-3 text-white">
+                    {item.name}
+                  </span>
+                </NavLink>
+              ))} */}
+              <Button
+                className=""
+                onClick={() => {
+                  const submit = confirm("Do you want to logout?");
+                  if (submit) {
+                    setUser(null);
+                    handleLogOut();
+                  }
+                }}
+              >
+                <IconLogout className="md:size-[25px] lg:size-[30px] xl:size-[35px] " />
+              </Button>
+            </div>
+          </div>
+        </Slide>
       </Box>
     </>
   );

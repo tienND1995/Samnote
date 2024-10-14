@@ -119,7 +119,7 @@ export const forgotSchema = Joi.object({
 export const settingSchema = Joi.object({
   name: Joi.string().required().min(3).messages({
     "string.empty": "Please enter a name",
-    "string.min": "Ít nhất 3 ký tự",
+    "string.min": "at least 3 characters",
   }),
 
   gmail: Joi.string().allow("").allow(null),
@@ -151,7 +151,7 @@ export const SettingChangePwSchemaPw2 = Joi.object({
 });
 
 export const SettingEditPw2Schema = Joi.object({
-  old_private_password: Joi.string().min(6).required().messages({
+  old_private_password: Joi.string().required().messages({
     "string.empty": "Please enter old password",
   }),
   new_private_password: Joi.string().min(6).required().messages({

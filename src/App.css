@@ -113,21 +113,41 @@ li {
   background-color: rgb(55 65 81);
   color: #fff;
   width: 100%;
+  height: 100vh;
   padding-top: 10px;
   display: flex;
   align-items: center;
   flex-direction: column;
   gap: 15px;
 }
+#navbar .cursor-pointer .item-name-panel,
+#navbar-mobile {
+  display: none;
+}
+
 @media (max-width: 992px) {
   #navbar {
-    background-color: rgb(55 65 81);
+    position: fixed;
+    background-color: #f56852;
     color: #fff;
     width: 100%;
+    height: 100px;
+    padding: 10px 25px;
     padding-top: 10px;
     display: flex;
     align-items: center;
-    flex-direction: row;
+    justify-content: space-between;
+    flex-direction: row-reverse;
     gap: 15px;
+  }
+  #navbar .cursor-pointer .item-name-panel,
+  #navbar .cursor-pointer .item-icon-panel,
+  #navbar .item-navbar {
+    display: none;
+  }
+  #navbar .item-navbar.active .item-name-panel,
+  #navbar .item-navbar.active,
+  #navbar-mobile {
+    display: block;
   }
 }
