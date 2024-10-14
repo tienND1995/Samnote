@@ -1,111 +1,133 @@
 li {
- list-style-type: none;
+  list-style-type: none;
 }
 .saying .container .row .col-sm-4::after {
- height: 100%;
- content: '';
- width: 3px;
- background-color: #000;
- position: absolute;
- left: 0;
- top: 0;
+  height: 100%;
+  content: "";
+  width: 3px;
+  background-color: #000;
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 
 @media (max-width: 767px) {
- header {
-  justify-content: space-around !important;
- }
- .menu-mobile {
-  display: block !important;
- }
+  header {
+    justify-content: space-around !important;
+  }
+  .menu-mobile {
+    display: block !important;
+  }
 }
 .active#myElement {
- position: fixed;
- background-color: #fff;
- left: 0;
- right: 0;
- top: 0;
- z-index: 100;
+  position: fixed;
+  background-color: #fff;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 100;
 }
 .react-datepicker__input-container input {
- height: 39px;
- padding-left: 5px;
+  height: 39px;
+  padding-left: 5px;
 }
 .css-i9fmh8-MuiBackdrop-root-MuiModal-backdrop {
- background-color: none;
+  background-color: none;
 }
 .swiper-pagination-bullet.swiper-pagination-bullet-active {
- background-color: #fff !important;
+  background-color: #fff !important;
 }
 .swiper-pagination-bullet {
- background-color: #000 !important;
- z-index: 100;
- position: relative;
- display: block;
- width: 20px;
+  background-color: #000 !important;
+  z-index: 100;
+  position: relative;
+  display: block;
+  width: 20px;
 }
 
 .hover-message:hover button {
- display: block !important;
+  display: block !important;
 }
 
 /* * style text editor */
 .ql-container.ql-snow {
- border: none !important;
+  border: none !important;
 }
 
 .ql-container.ql-snow > .ql-editor {
- line-height: 1.2;
- overflow: auto;
- overflow-wrap: break-word;
- white-space: break-spaces;
- hyphens: manual;
- aspect-ratio: 5 auto;
- padding: 15px;
- max-width: 100%;
+  line-height: 1.2;
+  overflow: auto;
+  overflow-wrap: break-word;
+  white-space: break-spaces;
+  hyphens: manual;
+  aspect-ratio: 5 auto;
+  padding: 15px;
+  max-width: 100%;
 }
 
 .ql-container.ql-snow > .ql-editor::-webkit-scrollbar {
- width: 10px;
- border-radius: 8px;
- background-color: black;
+  width: 10px;
+  border-radius: 8px;
+  background-color: black;
 }
 
 .ql-container.ql-snow > .ql-editor::-webkit-scrollbar-thumb {
- background-color: #dedede;
- border-radius: 8px;
+  background-color: #dedede;
+  border-radius: 8px;
 }
 
 .ql-container.ql-snow > .ql-editor::-webkit-scrollbar-track-piece {
- background-color: black;
- border-radius: 8px;
+  background-color: black;
+  border-radius: 8px;
 }
 
 /* slider-btn-arrow */
 
 .slider-btn-arrow > .slick-arrow::before {
- content: '';
+  content: "";
 }
 
 .slider-btn-arrow > .slick-arrow {
- color: black;
- background-color: #d9d9d9;
- border-radius: 100%;
+  color: black;
+  background-color: #d9d9d9;
+  border-radius: 100%;
 
- display: flex !important;
- align-items: center;
- justify-content: center;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 .slider-btn-arrow > .slick-arrow > svg {
- font-size: 12px;
+  font-size: 12px;
 }
 
 .slider-btn-arrow > .slick-arrow.slick-prev > svg {
- transform: translateX(2px);
+  transform: translateX(2px);
 }
 
 .slider-btn-arrow > .slick-arrow:hover {
- color: #d9d9d9;
- background-color: black;
+  color: #d9d9d9;
+  background-color: black;
+}
+#navbar {
+  background-color: rgb(55 65 81);
+  color: #fff;
+  width: 100%;
+  padding-top: 10px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 15px;
+}
+@media (max-width: 992px) {
+  #navbar {
+    background-color: rgb(55 65 81);
+    color: #fff;
+    width: 100%;
+    padding-top: 10px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: 15px;
+  }
 }

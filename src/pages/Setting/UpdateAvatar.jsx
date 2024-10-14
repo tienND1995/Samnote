@@ -28,7 +28,6 @@ const UpdateAvatar = () => {
   const appContext = useContext(AppContext);
   const { user, setSnackbar, setUser } = appContext;
   const [checkChange, setCheckChange] = useState(false);
-  console.log("checkChange", checkChange);
 
   const {
     handleSubmit,
@@ -44,8 +43,6 @@ const UpdateAvatar = () => {
       gmail: "",
     },
   });
-  console.log("errors", errors);
-  console.log("dirtyFields", dirtyFields);
 
   const [avatarProfile, setAvatarProfile] = useState({
     thumb: "",
@@ -101,8 +98,6 @@ const UpdateAvatar = () => {
         `/upload_image/${user.id}`,
         imageFormData
       );
-
-      console.log("dataImage", dataImage);
 
       dataForm.Avarta = dataImage.imagelink;
     }
@@ -164,7 +159,7 @@ const UpdateAvatar = () => {
         variant="h5"
         sx={{
           marginTop: "20px",
-          color: "#6a53cc",
+          color: "#0FB7FF",
           fontSize: "22px",
           fontWeight: 700,
         }}
@@ -264,7 +259,7 @@ const UpdateAvatar = () => {
             disabled={!checkChange}
             variant={checkChange ? "contained" : "outlined"}
             type="submit"
-            className=" px-4 uppercase"
+            className=" px-4 uppercase bg-white"
           >
             Update
           </Button>
