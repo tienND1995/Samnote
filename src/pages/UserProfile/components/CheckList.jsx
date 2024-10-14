@@ -8,9 +8,9 @@ const Checklist = ({ data }) => {
     }, [data])
 
     return (
-        <div>
+        <div className='checklist'>
             {items.map((item, index) => (
-                <div key={index}>
+                <div key={`${item.content.trim().slice(0, 5)}${index}`}>
                     <input
                         style={{ marginRight: '5px' }}
                         type='checkbox'
@@ -19,6 +19,11 @@ const Checklist = ({ data }) => {
                     {item.content}
                 </div>
             ))}
+            {items.length > 3 && (
+                <div className='font-bold'>
+                    +{items.length - 3} item hidden
+                </div>
+            )}
         </div>
     )
 }
