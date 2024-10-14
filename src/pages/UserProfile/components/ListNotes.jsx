@@ -161,9 +161,13 @@ const ListNotes = (
                                         }}
                                     >
                                         <strong style={{ fontSize: '20px' }}>{info.title}</strong>
-                                        <div className='text-start truncate-text'>
-                                            {<Markdown rehypePlugins={[rehypeRaw]}>{info.data}</Markdown>}
-                                        </div>
+                                        {info.type.toLowerCase() === 'checklist' ? (
+                                            <Checklist data={info.data.slice(0, 3)} />
+                                        ) : (
+                                            <div className='text-start truncate-text'>
+                                                {<Markdown rehypePlugins={[rehypeRaw]}>{info.data}</Markdown>}
+                                            </div>
+                                        )}
                                     </Box>
                                     <Box
                                         component='div'
