@@ -486,6 +486,7 @@ const UpdateAvatar = () => {
               />
               {errorsFogotPassword?.gmail && (
                 <span className="text-red-400">
+                  
                   {errorsFogotPassword.gmail.message}
                 </span>
               )}
