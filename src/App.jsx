@@ -7,22 +7,22 @@ import { AppContext } from './context'
 
 import RootLayout from './layout/RootLayout'
 
-import {
- Photo,
- EditNote,
- CreateNote,
- Group,
- AnonymousMessage,
- Home,
- UserProfile,
- //  UserSetting,
- Sketch,
- Dustbin,
-} from './pages'
 import AuthLayout from './layout/AuthLayout/AuthLayout'
-import SignIn from './layout/AuthLayout/SignIn'
-import Register from './layout/AuthLayout/Register'
 import ForgotPassword from './layout/AuthLayout/ForgotPassword'
+import Register from './layout/AuthLayout/Register'
+import SignIn from './layout/AuthLayout/SignIn'
+import {
+    AnonymousMessage,
+    CreateNote,
+    Dustbin,
+    EditNote,
+    Group,
+    Home,
+    Photo,
+    //  UserSetting,
+    Sketch,
+    UserProfile,
+} from './pages'
 
 import UserSetting from './pages/Setting/UserSetting'
 
@@ -81,7 +81,9 @@ function App() {
      <Route path='/create-note' element={<CreateNote />} />
 
      <Route path='/sketch' element={<Sketch />} />
-     <Route path='/dustbin' element={<Dustbin />} />
+
+     <Route path='/dustbin' exact element={<Dustbin />} />
+     <Route path='/dustbin/:id' element={<Dustbin />} />
     </Route>
    </Routes>
   </main>

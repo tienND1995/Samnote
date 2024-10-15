@@ -259,10 +259,8 @@ const FormEdit = ({ onDispatchName }) => {
  const disableBtnSubmit = () => {
   const isChangeForm =
    Object.keys(dirtyFields).length === 0 &&
-   (textEditor?.trim() == '' ||
-    noteItem.data === dataContent.content ||
-    checklist.length === 0 ||
-    textEditor?.trim() === noteItem.data?.trim())
+   (noteItem.data === dataContent.content.trim() ||
+    noteItem.data === textEditor?.trim())
 
   const isNoteIdEdit = !id
   return isChangeForm || isNoteIdEdit
