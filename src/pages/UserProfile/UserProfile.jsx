@@ -7,6 +7,7 @@ import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 import 'swiper/css'
 import './UserProfile.css'
+import Loading from '../../share/Loading'
 
 import {
     UserIntro,
@@ -31,20 +32,20 @@ const UserProfile = () => {
     const params = useParams()
     const userID = params.id
 
-    useEffect(() => {
-        // let ignore = false
-        const getUserInformation = async (userID) => {
-            try {
-                const res = await api.get(
-                    `https://samnote.mangasocial.online/profile/${userID}`
-                )
-                setUserInformations(res.data.user)
-                setUserNotes(res.data.note)
-                setArchivedNotes(res.data.note.filter((note) => note.inArchived))
-            } catch (err) {
-                console.log(err)
-            }
+    const getUserInformation = async (userID) => {
+        try {
+            const res = await api.get(
+                `https://samnote.mangasocial.online/profile/${userID}`
+            )
+            setUserInformations(res.data.user)
+            setUserNotes(res.data.note)
+            setArchivedNotes(res.data.note.filter((note) => note.inArchived))
+        } catch (err) {
+            console.log(err)
         }
+    }
+
+    useEffect(() => {
         getUserInformation(userID)
     }, [userID, reload])
 
@@ -72,9 +73,9 @@ const UserProfile = () => {
     }
 
     return (
-        <Box className='w-full bg-[#4A4B51] h-auto overflow-y-auto'>
-            <Box className='w-full bg-[#4A4B51] h-auto'>
-                {userInfomations ? (
+        !userInfomations ? (
+            <Box className='w-full bg-[#4A4B51] h-auto overflow-y-auto'>
+                <Box className='w-full bg-[#4A4B51] h-auto'>
                     <>
                         <UserIntro
                             userInfomations={userInfomations}
@@ -95,13 +96,11 @@ const UserProfile = () => {
                         </div>
                         <Footer />
                     </>
-                ) : (
-                    <div className='flex justify-center items-center text-2xl font-bold'>
-                        Not found
-                    </div>
-                )}
+                </Box>
             </Box>
-        </Box>
+        ) : (
+            <Loading />
+        )
     )
 }
 
