@@ -6,9 +6,14 @@ const { API_SERVER_URL } = configs
 export const fetchApiSamenote = async (
  nameMethod = 'get',
  url = '',
- data = {}
+ data = {},
+ params = {}
 ) => {
  const isFormData = data instanceof FormData
+
+ if (Object.keys(params).length) {
+  url = url + '?' + new URLSearchParams(params).toString()
+ }
 
  const option = {
   method: nameMethod,
