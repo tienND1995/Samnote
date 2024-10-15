@@ -55,7 +55,7 @@ const FormNote = ({
  const handleShowModalFolder = () => setShowModalFolder(true)
 
  return (
-  <div className='grid grid-cols-2 gap-3'>
+  <div className='grid sm:grid-cols-2 grid-cols-1 2xl:gap-3 gap-2'>
    <ModalCreateFolder
     showModalFolder={showModalFolder}
     setShowModalFolder={setShowModalFolder}

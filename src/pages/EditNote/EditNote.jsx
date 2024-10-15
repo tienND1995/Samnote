@@ -42,7 +42,7 @@ const EditNote = () => {
  }, [user, nameEvent])
 
  return (
-  <div className='bg-[#181A1B] px-4 gap-4 pt-4 pb-2 flex flex-col w-full'>
+  <div className='bg-[#181A1B] px-4 gap-4 pt-4 pb-2 flex flex-col w-full overflow-y-auto style-scrollbar-y style-scrollbar-y-md'>
    <div className='flex justify-center items-start gap-3'>
     <div>
      <svg
@@ -62,15 +62,15 @@ const EditNote = () => {
     <h5 className='text-3xl text-white'>Edit Note(8)</h5>
    </div>
 
-   <div className='row row-cols-2 flex-grow-1'>
-    <div className='col flex flex-col'>
+   <div className='grid grid-cols-1 xl:grid-cols-2 gap-3 flex-grow-1'>
+    <div className='flex flex-col xl:order-1 order-2'>
      <NoteList
       noteList={noteList}
       onChangeNoteList={handleChangeNoteList}
       userID={user?.id}
      />
     </div>
-    <div className='col flex'>
+    <div className='flex xl:order-2 order-1'>
      {<FormEdit onDispatchName={disPatchNameEvent} />}
     </div>
    </div>

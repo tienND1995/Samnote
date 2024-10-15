@@ -9,21 +9,21 @@ const TextEditor = ({ setDataContent, onChangeTextEditor, value }) => {
  const modules = {
   toolbar: {
    container: [
-    [{ header: '1' }, { header: '2' }, { font: [] }],
+    // [{ header: '1' }, { header: '2' }, { font: [] }],
     [{ size: [] }],
-    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+   ['bold', 'italic', 'underline', 'strike'],
     [
      { list: 'ordered' },
      { list: 'bullet' },
-     { list: 'check' },
-     { indent: '-1' },
-     { indent: '+1' },
+    // { list: 'check' },
+    // { indent: '-1' },
+    // { indent: '+1' },
     ],
 
-    ['code-block'],
+    //['code-block'],
 
     ['clean'],
-    [{ color: [] }, { background: [] }],
+    //[{ color: [] }, { background: [] }],
    ],
   },
  }
@@ -37,6 +37,7 @@ const TextEditor = ({ setDataContent, onChangeTextEditor, value }) => {
      flexDirection: 'column',
      flexGrow: 1,
      maxWidth: '100%',
+     minHeight: '300px',
     }}
     modules={modules}
     theme='snow'

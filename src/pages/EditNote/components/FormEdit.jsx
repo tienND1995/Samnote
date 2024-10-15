@@ -41,7 +41,7 @@ const FormEdit = ({ onDispatchName }) => {
  const { user, setSnackbar } = appContext
  const { id } = useParams()
 
- const [noteItem, setNoteItem] = useState({})
+ const [noteItem, setNoteItem] = useState({ type: 'text' })
 
  const [checklist, setChecklist] = useState([])
  const [dataContent, setDataContent] = useState({
@@ -49,6 +49,7 @@ const FormEdit = ({ onDispatchName }) => {
   message: '',
   content: '',
  })
+
 
  const [colorList, setColorList] = useState([])
  const [folderList, setFolderList] = useState([])

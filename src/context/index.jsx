@@ -1,51 +1,53 @@
 // export default AppProvider;
-import { createContext, useState, useEffect } from 'react'
-import { USER } from '../utils/constant'
-import axios from 'axios'
+import { createContext, useState, useEffect } from 'react';
+import { USER } from '../utils/constant';
+import axios from 'axios';
 
-export const AppContext = createContext(null)
+export const AppContext = createContext(null);
 
 const AppProvider = ({ children }) => {
- const [user, setUser] = useState(null)
+ const [user, setUser] = useState(
+  JSON.parse(localStorage.getItem(USER)) || null
+ );
  const [snackbar, setSnackbar] = useState({
   isOpen: false,
   message: '',
   severity: '',
- })
+ });
 
- useEffect(() => {
-  // Lấy dữ liệu từ localStorage khi component mount
-  const localUser = JSON.parse(localStorage.getItem(USER))
+ //  useEffect(() => {
+ //   // Lấy dữ liệu từ localStorage khi component mount
+ //   const localUser = JSON.parse(localStorage.getItem(USER))
 
-  try {
-   if (localUser) {
-    setUser(localUser)
-   }
-  } catch (error) {
-   console.error('Error parsing user from localStorage:', error)
-  }
+ //   try {
+ //    if (localUser) {
+ //     setUser(localUser)
+ //    }
+ //   } catch (error) {
+ //    console.error('Error parsing user from localStorage:', error)
+ //   }
 
-  // Đăng ký sự kiện lắng nghe thay đổi trong localStorage
-  const handleStorageChange = (event) => {
-   if (event.key === USER) {
-    try {
-     const parseUser = JSON.parse(event.newValue)
-     if (parseUser) {
-      setUser(parseUser)
-     }
-    } catch (error) {
-     console.error('Error parsing user from localStorage:', error)
-    }
-   }
-  }
+ //   // Đăng ký sự kiện lắng nghe thay đổi trong localStorage
+ //   const handleStorageChange = (event) => {
+ //    if (event.key === USER) {
+ //     try {
+ //      const parseUser = JSON.parse(event.newValue)
+ //      if (parseUser) {
+ //       setUser(parseUser)
+ //      }
+ //     } catch (error) {
+ //      console.error('Error parsing user from localStorage:', error)
+ //     }
+ //    }
+ //   }
 
-  window.addEventListener('storage', handleStorageChange)
+ //   window.addEventListener('storage', handleStorageChange)
 
-  // Clean up function để loại bỏ sự kiện lắng nghe khi component unmount
-  return () => {
-   window.removeEventListener('storage', handleStorageChange)
-  }
- }, [])
+ //   // Clean up function để loại bỏ sự kiện lắng nghe khi component unmount
+ //   return () => {
+ //    window.removeEventListener('storage', handleStorageChange)
+ //   }
+ //  }, [])
 
  useEffect(() => {
   if (user && user.id) {
@@ -54,29 +56,29 @@ const AppProvider = ({ children }) => {
     axios
      .get(`https://samnote.mangasocial.online/check-status/${user.id}`)
      .then((response) => {
-      console.log('API called successfully')
+      console.log('API called successfully');
      })
      .catch((error) => {
-      console.error('Error calling API:', error)
-     })
-   }, 60000)
+      console.error('Error calling API:', error);
+     });
+   }, 60000);
 
    // Clean up function để xóa interval khi component unmount
-   return () => clearInterval(interval)
+   return () => clearInterval(interval);
   }
- }, [user])
+ }, [user]);
 
  const updateUserInLocalStorage = (newUserData) => {
   try {
    // Cập nhật dữ liệu mới vào localStorage
-   localStorage.setItem(USER, JSON.stringify(newUserData))
+   localStorage.setItem(USER, JSON.stringify(newUserData));
 
    // Cập nhật state `user` ngay tại đây nếu cần
-   setUser(newUserData)
+   setUser(newUserData);
   } catch (error) {
-   console.error('Error updating user in localStorage:', error)
+   console.error('Error updating user in localStorage:', error);
   }
- }
+ };
 
  return (
   <AppContext.Provider
@@ -90,7 +92,7 @@ const AppProvider = ({ children }) => {
   >
    {children}
   </AppContext.Provider>
- )
-}
+ );
+};
 
-export default AppProvider
+export default AppProvider;
