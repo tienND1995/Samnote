@@ -213,12 +213,12 @@ const UserPanel = () => {
             onClick={handleToggle}
           >
             <div
-              className=" relative bg-gray-700 text-white w-[120px] h-[100vh] pt-5 px-2 flex items-lgEqual-center flex-col gap-3"
+              className=" relative bg-[#F56852] text-white w-[120px] h-[100vh] pt-5 px-2 flex items-lgEqual-center flex-col gap-3"
               onClick={(event) => {
                 event.stopPropagation();
               }}
             >
-              {/* <span
+              <span
                 style={{
                   position: "absolute",
                   top: 10,
@@ -229,7 +229,7 @@ const UserPanel = () => {
                 onClick={handleToggle}
               >
                 <CloseIcon />
-              </span> */}
+              </span>
               {navbarItems.map((item, idx) => (
                 <NavLink
                   to={item.url}
