@@ -18,14 +18,11 @@ import {
 
 const UserProfile = () => {
     const appContext = useContext(AppContext)
-    const { setSnackbar, user } = appContext
+    const { user } = appContext
     const [userInfomations, setUserInformations] = useState(null)
-    const [lastUsers, setLastUsers] = useState([])
 
     //data note
-    const [allNotePublic, setAllNotePublic] = useState([])
     const [userNotes, setUserNotes] = useState([])
-    const [archivedNotes, setArchivedNotes] = useState([])
 
     const [reload, setReload] = useState(0)
 
@@ -39,7 +36,6 @@ const UserProfile = () => {
             )
             setUserInformations(res.data.user)
             setUserNotes(res.data.note)
-            setArchivedNotes(res.data.note.filter((note) => note.inArchived))
         } catch (err) {
             console.log(err)
         }
@@ -49,31 +45,8 @@ const UserProfile = () => {
         getUserInformation(userID)
     }, [userID, reload])
 
-    useEffect(() => {
-        fetchLastUsers()
-        fetchAllNotePublic()
-    }, [])
-
-    const fetchLastUsers = async () => {
-        const response = await api.get('/lastUser')
-        if (response && response.data.status === 200) {
-            setLastUsers(response.data.data)
-        }
-    }
-
-    const fetchAllNotePublic = async () => {
-        try {
-            const response = await api.get('/notes_public')
-            if (response && response.data.message === 'success') {
-                setAllNotePublic(response.data.public_note)
-            }
-        } catch (err) {
-            console.log(err)
-        }
-    }
-
     return (
-        !userInfomations ? (
+        userInfomations ? (
             <Box className='w-full bg-[#4A4B51] h-auto overflow-y-auto'>
                 <Box className='w-full bg-[#4A4B51] h-auto'>
                     <>
@@ -84,13 +57,10 @@ const UserProfile = () => {
                         <div className='container-content w-[98%] flex flex-col lg:flex-row justify-between m-auto'>
                             <LeftsideContent
                                 userInfomations={userInfomations}
-                                archivedNotes={archivedNotes}
                                 setReload={setReload}
                             />
                             <RightsideContent
                                 userInfomations={userInfomations}
-                                lastUsers={lastUsers}
-                                allNotePublic={allNotePublic}
                                 setReload={setReload}
                             />
                         </div>
