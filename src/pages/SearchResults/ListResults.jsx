@@ -8,19 +8,26 @@ const ListResults = ({ results }) => {
     return (
         <div className="tab-pane active w-full">
             {
-                results.map((item) => (
+                results && results.map((item) => (
                     <div key={uniqid()} className="card mb-3 bg-transparent">
                         <div className="card-body d-flex justify-center p-0">
                             <div className="avatar mr-3">
-                                <img src={item.avatar_user_create}
+                                <img src={item.avatar_user_create
+                                    || item.linkAvatar
+                                    || '/src/assets/avatar-default.png'
+                                }
                                     alt={item.username_user_create}
                                     className="w-16 h-16 rounded-full"
                                 />
                             </div>
                             <div className="content-wrapper w-[75%] bg-[#ffffff] px-3 py-2 rounded-2xl">
                                 <div className="d-flex justify-content-between align-items-center mb-1">
-                                    <h5 className="card-title font-bold mb-0">{item.username_user_create || 'Anonymous'}</h5>
-                                    <small className="text-muted">{moment(item.createAt || item.sendAt).format('DD/MM/YYYY HH:mm')}</small>
+                                    <h5 className="card-title font-bold mb-0 truncate-text">
+                                        {item.username_user_create || item.Name || 'Anonymous'}
+                                    </h5>
+                                    <small className="text-muted">
+                                        {moment(item.createAt || item.sendAt).format('DD/MM/YYYY HH:mm')}
+                                    </small>
                                 </div>
                                 <div className="card-text">
                                     <span className="font-bold">{item.title}</span>
@@ -31,7 +38,9 @@ const ListResults = ({ results }) => {
                                             WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
                                             wordWrap: 'break-word', whiteSpace: 'pre-wrap'
                                         }}>
-                                        <Markdown rehypePlugins={[rehypeRaw]}>{item.content || item.text}</Markdown>
+                                        <Markdown rehypePlugins={[rehypeRaw]}>
+                                            {item.content || item.text || item.describe}
+                                        </Markdown>
                                     </div>
                                 </div>
                                 {item.images && (

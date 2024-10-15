@@ -30,8 +30,7 @@ const SearchResults = () => {
                     'get',
                     `/public_notes_search?key=${searchText}&page=${currentPage}`
                 )
-                console.log('everyone', response.search_note)
-                setResults(response.search_note)
+                console.log('everyone', response.data)
                 break
             case 'anonymous':
                 response = await fetchApiSamenote(
@@ -39,23 +38,15 @@ const SearchResults = () => {
                     `/message/search_unknown_by_text/${user.id}/${searchText}?page=${currentPage}`
                 )
                 console.log('anonymous', response.data)
-                setResults(response.data)
-                break
-            case 'own':
-                response = await fetchApiSamenote('get',
-                    `/notes/${user.id}`
-                )
-                console.log('own', response.notes)
-                setResults(response.notes)
                 break
             case 'group':
                 response = await fetchApiSamenote('get',
-                    `/group/all/${user.id}`
+                    `/group/list_group_byUser/${user.id}?page=${currentPage}`
                 )
                 console.log('group', response.data)
-                setResults(response.data)
                 break
         }
+        setResults(response.data)
         if (response.number_page) setTotalPages(Math.ceil(response.number_page))
     }
 
@@ -93,15 +84,14 @@ const SearchResults = () => {
 
             <div className='content-container w-[95%] mx-auto my-5'>
                 <ul className="nav nav-tabs flex bg-[#000000]">
-                    {['everyone', 'anonymous', 'own', 'group'].map((tab) => (
+                    {['everyone', 'anonymous', 'group'].map((tab) => (
                         <li className="nav-item flex-1 text-center cursor-pointer" key={tab}>
                             <a
                                 className={`nav-link text-white text-xl ${activeTab === tab ? 'active bg-[#F56852]' : ''}`}
                                 onClick={() => setActiveTab(tab)}
                             >
                                 {tab === 'everyone' ? "Everyone's notes" :
-                                    tab === 'anonymous' ? "Anonymous chat" :
-                                        tab === 'own' ? "All your own" : "Group chat"}
+                                    tab === 'anonymous' ? "Anonymous chat" : "Group chat"}
                             </a>
                         </li>
                     ))}
