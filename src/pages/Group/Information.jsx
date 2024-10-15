@@ -19,22 +19,13 @@ const Information = (props) => {
  const informationRef = useRef()
  const btnBackRef = useRef()
 
- useEffect(() => {
-  groupItem.idGroup &&
-   fetchApiSamenote('get', `/group/allphoto/${groupItem.idGroup}`).then(
-    (response) => {
-     console.log('response', response)
-    }
-   )
- }, [groupItem.idGroup])
-
- const fetchAllImageGroup = async () => {
+ const fetchAllImageGroup = async (groupId, numberPage = 1) => {
   try {
    const response = await axios.get(
-    `https://samnote.mangasocial.online/group/allphoto/168`,
+    `https://samnote.mangasocial.online/group/allphoto/${groupId}`,
     {
      params: {
-      page: 1,
+      page: numberPage,
      },
     }
    )
@@ -47,8 +38,15 @@ const Information = (props) => {
  }
 
  useEffect(() => {
-  fetchAllImageGroup()
- }, [])
+  fetchApiSamenote(
+   'get',
+   `/group/allphoto/${groupItem.idGroup}`,
+   {},
+   { page: 1 }
+  ).then((data) => {
+   console.log('data', data)
+  })
+ }, [groupItem.idGroup])
 
  // hande click outside element
  useEffect(() => {
