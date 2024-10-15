@@ -52,7 +52,7 @@ const UserPanel = () => {
     {
       name: "Find Note",
       icon: (
-        <SearchIcon className="mr-1 text-white md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
+        <SearchIcon className="mr-1 text-white md:size-[25px] lgEqual:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
       ),
       url: "/",
     },
@@ -60,7 +60,7 @@ const UserPanel = () => {
       name: "Create Note",
       icon: (
         <div className="bg-[#198E39] rounded-full w-[100px] h-[50px] items-center flex justify-center">
-          <IconCreateNewNote className=" md:size-[20px] xl:size-[25px]" />
+          <IconCreateNewNote className="size-[20px] lg:size-[25px]" />
           <span className="text-[20px] xl:text-[25px] pl-1">new</span>
         </div>
       ),
@@ -69,28 +69,28 @@ const UserPanel = () => {
     {
       name: "Home Page",
       icon: (
-        <HomeIcon className="md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
+        <HomeIcon className="md:size-[25px] lgEqual:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
       ),
       url: "/",
     },
     {
       name: "Photos",
       icon: (
-        <PhotoLibraryIcon className="md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
+        <PhotoLibraryIcon className="md:size-[25px] lgEqual:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
       ),
       url: "/photo",
     },
     {
       name: "Note",
       icon: (
-        <EventNoteIcon className="md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
+        <EventNoteIcon className="md:size-[25px] lgEqual:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
       ),
       url: `/editnote`,
     },
     {
       name: "Group",
       icon: (
-        <GroupIcon className=" md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
+        <GroupIcon className=" md:size-[25px] lgEqual:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
       ),
       url: "/group",
     },
@@ -98,7 +98,7 @@ const UserPanel = () => {
     {
       name: "incognito",
       icon: (
-        <IconChatUnknow className="md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
+        <IconChatUnknow className="size-[25px] lgEqual:size-[30px] xl:size-[35px] " />
       ),
       url: "/user/incognito",
       state: { userInfomations: null },
@@ -106,14 +106,14 @@ const UserPanel = () => {
     {
       name: "Sketch",
       icon: (
-        <DriveFileRenameOutlineIcon className=" md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
+        <DriveFileRenameOutlineIcon className=" md:size-[25px] lgEqual:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
       ),
       url: "/user/sketch",
     },
     {
       name: "setting",
       icon: (
-        <SettingsIcon className="  md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
+        <SettingsIcon className="  md:size-[25px] lgEqual:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
       ),
       url: "/user/setting",
     },
@@ -146,11 +146,11 @@ const UserPanel = () => {
       {" "}
       <Box
         id="navbar"
-        // className="bg-gray-700 text-white w-full pt-3 flex items-lg-center flex-col gap-3"
+        // className="bg-gray-700 text-white w-full pt-3 flex items-lgEqual-center flex-col gap-3"
       >
         <NavLink
           to={`/profile/${user.id}`}
-          className="flex items-center cursor-pointer lg:hidden block"
+          className="flex items-center cursor-pointer lgEqual:hidden block"
           onClick={() => navigate(`/profile/${user.id}`)}
         >
           <img
@@ -163,7 +163,7 @@ const UserPanel = () => {
           <NavLink
             to={item.url}
             key={idx}
-            className="cursor-pointer item-navbar lg:block"
+            className="cursor-pointer item-navbar lgEqual:block"
             title={item.name}
             onClick={() => {
               if (item.state) {
@@ -178,7 +178,7 @@ const UserPanel = () => {
           </NavLink>
         ))}
         <Button
-          className="hidden lg:block"
+          className="hidden lgEqual:block"
           onClick={() => {
             const submit = confirm("Do you want to logout?");
             if (submit) {
@@ -187,11 +187,11 @@ const UserPanel = () => {
             }
           }}
         >
-          <IconLogout className="md:size-[25px] lg:size-[30px] xl:size-[35px] " />
+          <IconLogout className="size-[25px] lgEqual:size-[30px] xl:size-[35px] " />
         </Button>
         <MenuIcon
           onClick={handleToggle}
-          className="lg:hidden block text-black text-[35px] cursor-pointer"
+          className="lgEqual:hidden block text-black text-[35px] cursor-pointer"
         />
         <Slide
           timeout={1000}
@@ -213,7 +213,7 @@ const UserPanel = () => {
             onClick={handleToggle}
           >
             <div
-              className=" relative bg-gray-700 text-white w-[120px] h-[100vh] pt-5 px-2 flex items-lg-center flex-col gap-3"
+              className=" relative bg-gray-700 text-white w-[120px] h-[100vh] pt-5 px-2 flex items-lgEqual-center flex-col gap-3"
               onClick={(event) => {
                 event.stopPropagation();
               }}
@@ -234,7 +234,7 @@ const UserPanel = () => {
                 <NavLink
                   to={item.url}
                   key={idx}
-                  className="cursor-pointer lg:block items-center flex w-full justify-center"
+                  className="cursor-pointer lgEqual:block items-center flex w-full justify-center"
                   title={item.name}
                   onClick={() => {
                     if (item.state) {
@@ -247,27 +247,7 @@ const UserPanel = () => {
                   <span className="text-white">{item.icon}</span>
                 </NavLink>
               ))}
-              {/* {navbarItems.slice(3).map((item, idx) => (
-                <NavLink
-                  to={item.url}
-                  key={idx}
-                  className="cursor-pointer lg:block"
-                  title={item.name}
-                  onClick={() => {
-                    if (item.state) {
-                      navigate(item.url, { state: item.state });
-                    } else {
-                      navigate(item.url);
-                    }
-                  }}
-                >
-                  <span className="text-white">{item.icon}</span>
-                  <span className="name-icon-navbar-mobile text-[25px] ml-3 text-white">
-                    {item.name}
-                  </span>
-                </NavLink>
-              ))} */}
-              <Button
+              <button
                 className=""
                 onClick={() => {
                   const submit = confirm("Do you want to logout?");
@@ -277,8 +257,8 @@ const UserPanel = () => {
                   }
                 }}
               >
-                <IconLogout className="md:size-[25px] lg:size-[30px] xl:size-[35px] " />
-              </Button>
+                <IconLogout className="size-[25px] lgEqual:size-[30px] xl:size-[35px] " />
+              </button>
             </div>
           </div>
         </Slide>

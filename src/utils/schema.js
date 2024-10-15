@@ -176,3 +176,22 @@ export const SettingForgotPw2Schema = Joi.object({
       "string.email": "Please enter a valid email address",
     }),
 });
+
+export const SettingDeleteAccountSchema = Joi.object({
+  user_name: Joi.string().required().messages({
+    "string.empty": "Please enter a email or user name",
+  }),
+
+  password: Joi.string().required().messages({
+    "string.empty": "Please enter a password",
+  }),
+});
+export const SettingForgotPwSchema = Joi.object({
+  gmail: Joi.string()
+    .required()
+    .email({ tlds: { allow: false } })
+    .messages({
+      "string.empty": "Please enter an gmail",
+      "string.email": "Please enter a valid gmail address",
+    }),
+});
