@@ -114,37 +114,84 @@ export const forgotSchema = Joi.object({
  }),
 })
 
+//setting avatar
 
-// * schema settings
 export const settingSchema = Joi.object({
- name: Joi.string().required().min(3).messages({
-  'string.empty': 'Please enter a name',
-  'string.min': 'Ít nhất 3 ký tự',
- }),
+  name: Joi.string().required().min(3).messages({
+    "string.empty": "Please enter a name",
+    "string.min": "at least 3 characters",
+  }),
 
  gmail: Joi.string().allow('').allow(null),
 })
+
+///setting password
 
 export const SettingChangePwSchema = Joi.object({
  password: Joi.string().required().messages({
   'string.empty': 'Please enter a password',
  }),
 
- new_password: Joi.string().min(6).required().messages({
-  'string.empty': 'Please enter a new password',
-  'string.min': 'New password at least 6 characters',
- }),
-
- private_password: Joi.string().min(6).allow('').allow(null).messages({
-  'string.empty': 'Please enter a new password',
-  'string.min': 'New password at least 6 characters',
- }),
-
- confirm_private_password: Joi.any()
-  .valid(Joi.ref('private_password'))
-  .allow('')
-  .allow(null)
-  .messages({
-   'any.only': 'Password must match',
+  new_password: Joi.string().min(6).required().messages({
+    "string.empty": "Please enter a new password",
+    "string.min": "New password at least 6 characters",
   }),
-})
+});
+export const SettingChangePwSchemaPw2 = Joi.object({
+  private_password: Joi.string().min(6).required().messages({
+    "string.empty": "Please enter a new password",
+    "string.min": "New password at least 6 characters",
+  }),
+  confirm_private_password: Joi.any()
+    .valid(Joi.ref("private_password"))
+    .required()
+    .messages({
+      "any.only": "Password must match",
+    }),
+});
+
+export const SettingEditPw2Schema = Joi.object({
+  old_private_password: Joi.string().required().messages({
+    "string.empty": "Please enter old password",
+  }),
+  new_private_password: Joi.string().min(6).required().messages({
+    "string.empty": "Please enter a new password",
+    "string.min": "New password at least 6 characters",
+  }),
+  confirm_private_password: Joi.any()
+    .valid(Joi.ref("new_private_password"))
+    .required()
+    .messages({
+      "string.empty": "Please enter a new password",
+      "any.only": "Password must match",
+    }),
+});
+
+export const SettingForgotPw2Schema = Joi.object({
+  email: Joi.string()
+    .required()
+    .email({ tlds: { allow: false } })
+    .messages({
+      "string.empty": "Please enter an email",
+      "string.email": "Please enter a valid email address",
+    }),
+});
+
+export const SettingDeleteAccountSchema = Joi.object({
+  user_name: Joi.string().required().messages({
+    "string.empty": "Please enter a email or user name",
+  }),
+
+  password: Joi.string().required().messages({
+    "string.empty": "Please enter a password",
+  }),
+});
+export const SettingForgotPwSchema = Joi.object({
+  gmail: Joi.string()
+    .required()
+    .email({ tlds: { allow: false } })
+    .messages({
+      "string.empty": "Please enter an gmail",
+      "string.email": "Please enter a valid gmail address",
+    }),
+});

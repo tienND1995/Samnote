@@ -18,31 +18,52 @@ import api from '../../api' // Make sure to import the API instance
 
 import avatarDefault from '../../assets/avatar-default.png'
 
-import { useForm } from 'react-hook-form'
-import { joiResolver } from '@hookform/resolvers/joi'
-import { settingSchema } from '../../utils/schema'
-import axios from 'axios'
-import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
+import { useForm } from "react-hook-form";
+import { joiResolver } from "@hookform/resolvers/joi";
+import { settingSchema } from "../../utils/schema";
+import { SettingDeleteAccountSchema } from "../../utils/schema";
+import axios from "axios";
+import { SettingForgotPwSchema } from "../../utils/schema";
+import { fetchApiSamenote } from "../../utils/fetchApiSamnote";
 
 const UpdateAvatar = () => {
- const appContext = useContext(AppContext)
- const { user, setSnackbar, setUser } = appContext
- const [checkChange, setCheckChange] = useState(false)
+  const appContext = useContext(AppContext);
+  const { user, setSnackbar, setUser } = appContext;
+  const [checkChange, setCheckChange] = useState(false);
+  const [openDeleteTab, setOpenDeleteTab] = useState(false);
+  const [loading, setLoading] = useState({
+    loadingDeleteAccount: false,
+    loadingFogotPassword: false,
+  });
+  const { loadingDeleteAccount, loadingFogotPassword } = loading;
+  // Hook useForm cho form tạo pw2
+  const {
+    handleSubmit: handleDeleteAccount,
+    register: registerDeleteAccount,
+    formState: { errors: errorsDeleteAccount },
+  } = useForm({
+    resolver: joiResolver(SettingDeleteAccountSchema),
+    defaultValues: {
+      password: "",
+      user_name: "",
+    },
+  });
+  console.log("errorsDeleteAccount", errorsDeleteAccount);
 
- const {
-  handleSubmit,
-  register,
-  setValue,
-  formState: { errors, dirtyFields },
-  reset,
-  watch,
- } = useForm({
-  resolver: joiResolver(settingSchema),
-  defaultValues: {
-   name: '',
-   gmail: '',
-  },
- })
+  const {
+    handleSubmit,
+    register,
+    setValue,
+    formState: { errors, dirtyFields },
+    reset,
+    watch,
+  } = useForm({
+    resolver: joiResolver(settingSchema),
+    defaultValues: {
+      name: "",
+      gmail: "",
+    },
+  });
 
  const [avatarProfile, setAvatarProfile] = useState({
   thumb: '',
@@ -86,8 +107,14 @@ const UpdateAvatar = () => {
   fetchUserData()
  }, [user, reset])
 
- const onSubmit = async (data) => {
-  const dataForm = { name: data.name }
+  const openDeleteAccount = () => {
+    setOpenDeleteTab(!openDeleteTab);
+
+    console.log("mở màn xóa", openDeleteTab);
+  };
+
+  const onSubmit = async (data) => {
+    const dataForm = { name: data.name };
 
   if (avatarProfile.isChange) {
    const imageFormData = new FormData()

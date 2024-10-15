@@ -22,6 +22,9 @@ import avatarDefault from "../../assets/avatar-default.png";
 import { useForm } from "react-hook-form";
 import { joiResolver } from "@hookform/resolvers/joi";
 import { SettingChangePwSchema } from "../../utils/schema";
+import { SettingChangePwSchemaPw2 } from "../../utils/schema";
+import { SettingEditPw2Schema } from "../../utils/schema";
+import { SettingForgotPw2Schema } from "../../utils/schema";
 import axios from "axios";
 import { fetchApiSamenote } from "../../utils/fetchApiSamnote";
 
@@ -44,27 +47,59 @@ const UpdatePassword = ({ data }) => {
 
   const { openChangePW, openPw2, openCreatePw2, openForgotpw2 } = status;
   const { loadingChangePW, loadingPw2, loadingFogotPw2 } = loading;
-  console.log("data", data);
 
   const {
-    handleSubmit,
-    register,
-    setValue,
-    clearErrors,
-    formState: { errors },
-    reset,
-    watch,
+    handleSubmit: handleSubmitFormpw,
+    register: registerFormpw,
+    formState: { errors: errorsForm1 },
   } = useForm({
     resolver: joiResolver(SettingChangePwSchema),
     defaultValues: {
       password: "",
       new_password: "",
-      //private_password: "",
-      //confirm_private_password: "",
     },
   });
 
-  console.log("errors", errors);
+  // Hook useForm cho form tạo pw2
+  const {
+    handleSubmit: handleSubmitFormPw2,
+    register: registerFormPw2,
+    formState: { errors: errorsForm2 },
+  } = useForm({
+    resolver: joiResolver(SettingChangePwSchemaPw2),
+    defaultValues: {
+      private_password: "",
+      confirm_private_password: "",
+    },
+  });
+
+  // Hook useForm cho form sửa pw2
+  const {
+    handleSubmit: handleEditPw2,
+    register: registerEditPw2,
+    formState: { errors: errorsEditPw2 },
+  } = useForm({
+    resolver: joiResolver(SettingEditPw2Schema),
+    defaultValues: {
+      old_private_password: "",
+      new_private_password: "",
+      confirm_private_password: "",
+    },
+  });
+
+  // Hook useForm cho form reset pw2
+  const {
+    handleSubmit: handleFogotPw2,
+    register: registerFogotPw2,
+    formState: { errors: errorsFogotPw2 },
+  } = useForm({
+    resolver: joiResolver(SettingForgotPw2Schema),
+    defaultValues: {
+      email: "",
+    },
+  });
+  console.log("errorsEditPw2", errorsEditPw2);
+
   const toggleOpenChangePw2 = () => {
     setStatus((prev) => ({ ...prev, openPw2: !openPw2 }));
   };
@@ -74,8 +109,143 @@ const UpdatePassword = ({ data }) => {
   const toggleOpenForgotpw2 = () => {
     setStatus((prev) => ({ ...prev, openForgotpw2: !openForgotpw2 }));
   };
+  const registerPw2 = async (data) => {
+    console.log("đã nhận đăng kí pw2");
 
-  const onSubmit = async (data) => {
+    const payload = {
+      id_user: user.id,
+      private_password: data.private_password,
+      confirm_private_password: data.confirm_private_password,
+    };
+    console.log("dataForm", payload);
+
+    setLoading((prev) => ({ ...prev, loadingChangePW: true }));
+    fetchApiSamenote("post", `/create_password_2`, payload)
+      .then((response) => {
+        if (response?.error) {
+          console.log("trả về ");
+          setSnackbar({
+            isOpen: true,
+            message: response?.error,
+            severity: "error",
+          });
+        } else {
+          console.log("trả về ", response);
+          if (response?.status === 500) {
+            Swal.fire({
+              title: "Error!",
+              text: response.message,
+              icon: "error",
+            });
+          } else {
+            Swal.fire({
+              title: "Success",
+              text: response.message,
+              icon: "success",
+            });
+            setUser(response);
+          }
+        }
+      })
+      .catch((error) => {
+        return;
+      })
+      .finally(() => {
+        setLoading((prev) => ({ ...prev, loadingChangePW: false }));
+      });
+  };
+  
+  const editPw2 = async (data) => {
+    console.log("đã nhận editpw2");
+
+    const payload = {
+      id_user: user.id,
+      old_private_password: data.old_private_password,
+      new_private_password: data.new_private_password,
+      confirm_private_password: data.confirm_private_password,
+    };
+    console.log("data", data);
+
+    setLoading((prev) => ({ ...prev, loadingChangePW: true }));
+    fetchApiSamenote("post", `/reset_password_2`, payload)
+      .then((response) => {
+        if (response?.error) {
+          console.log("trả về ");
+          setSnackbar({
+            isOpen: true,
+            message: response?.error,
+            severity: "error",
+          });
+        } else {
+          console.log("trả về ", response);
+          if (response?.status === 500) {
+            Swal.fire({
+              title: "Error!",
+              text: response.message,
+              icon: "error",
+            });
+          } else {
+            Swal.fire({
+              title: "Success",
+              text: response.message,
+              icon: "success",
+            });
+            setUser(response);
+          }
+        }
+      })
+      .catch((error) => {
+        return;
+      })
+      .finally(() => {
+        setLoading((prev) => ({ ...prev, loadingChangePW: false }));
+      });
+  };
+
+  const FogotPw2 = async (data) => {
+    console.log("đã nhận fogotpw2");
+
+    const payload = {
+      email: data.gmail,
+    };
+
+    setLoading((prev) => ({ ...prev, loadingChangePW: true }));
+    fetchApiSamenote("post", `/forgot_password_2`, payload)
+      .then((response) => {
+        if (response?.error) {
+          console.log("trả về ");
+          setSnackbar({
+            isOpen: true,
+            message: response?.error,
+            severity: "error",
+          });
+        } else {
+          console.log("trả về ", response);
+          if (response?.status === 500) {
+            Swal.fire({
+              title: "Error!",
+              text: response.message,
+              icon: "error",
+            });
+          } else {
+            Swal.fire({
+              title: "Success",
+              text: response.message,
+              icon: "success",
+            });
+            setUser(response);
+          }
+        }
+      })
+      .catch((error) => {
+        return;
+      })
+      .finally(() => {
+        setLoading((prev) => ({ ...prev, loadingChangePW: false }));
+      });
+  };
+
+  const onSubmitPw = async (data) => {
     const payload = {
       gmail: user.gmail,
       password: data.password,
@@ -132,7 +302,7 @@ const UpdatePassword = ({ data }) => {
           variant="h5"
           sx={{
             marginTop: "20px",
-            color: "#6a53cc",
+            color: "#0FB7FF",
             fontSize: "22px",
             fontWeight: 700,
           }}
@@ -145,7 +315,11 @@ const UpdatePassword = ({ data }) => {
           <Typography className="w-[300px]">Password:</Typography>
           {!openChangePW ? (
             <Box className="flex flex-col sm:flex-row  mt-[10px]">
-              <TextField disabled sx={{ width: "300px" }} value="********" />
+              <TextField
+                disabled
+                className="w-[300px] bg-white rounded-md"
+                value="********"
+              />
               <Button
                 variant="outlined"
                 sx={{ margin: "10px 10px  0", height: "35px", width: "90px" }}
@@ -156,7 +330,7 @@ const UpdatePassword = ({ data }) => {
             </Box>
           ) : (
             <form
-              onSubmit={handleSubmit(onSubmit)}
+              onSubmit={handleSubmitFormpw(onSubmitPw)}
               action="submit"
               className="gap-3 flex flex-col"
             >
@@ -164,12 +338,12 @@ const UpdatePassword = ({ data }) => {
                 {" "}
                 <PasswordField
                   placeholder="Enter current password"
-                  className="sm:w-[300px] form-control w-[200px]"
-                  {...register("password")}
+                  className=" form-control w-[300px] bg-white rounded-md"
+                  {...registerFormpw("password")}
                 />
-                {errors?.password && (
+                {errorsForm1?.password && (
                   <span className="text-red-400 mt-3">
-                    {errors.password.message}
+                    {errorsForm1.password.message}
                   </span>
                 )}
               </div>{" "}
@@ -178,25 +352,26 @@ const UpdatePassword = ({ data }) => {
                 <PasswordField
                   placeholder="Enter new password"
                   className="sm:w-[300px] form-control w-[200px]"
-                  {...register("new_password")}
+                  {...registerFormpw("new_password")}
                 />
-                {errors?.new_password && (
+                {errorsForm1?.new_password && (
                   <span className="text-red-400 mt-3">
-                    {errors.new_password.message}
+                    {errorsForm1.new_password.message}
                   </span>
                 )}
               </div>
               <div className="flex gap-4 ">
                 <Button
+                  variant="outlined"
+                  className=" w-[110px] h-[40px]"
+                  onClick={toggleOpenChangePw}
+                >
+                  cancel
+                </Button>
+                <Button
                   variant="contained"
                   type="submit"
                   className="btn btn-primary px-4 py-2 uppercase w-[110px] h-[40px]"
-                  onClick={() =>
-                    clearErrors([
-                      "private_password",
-                      "confirm_private_password",
-                    ])
-                  }
                 >
                   {loadingChangePW ? (
                     <CircularProgress size={24} color="#fff" />
@@ -216,97 +391,149 @@ const UpdatePassword = ({ data }) => {
         2-layer security, for example, your wife holds your phone but they also
         cannot access your secure notes information.
       </p>
-      <Box className="flex mt-[20px] flex-col sm:flex-row ">
-        <Typography className="sm:w-[200px] mb-[10px] sm:mb-0">
+      <Box className="flex mt-[20px] flex-col sm:flex-row">
+        <Typography className="w-[300px] mb-[10px] sm:mb-0">
           Password 2:
         </Typography>
         {data.password_2 !== null ? (
-          openPw2 ? (
+          !openPw2 ? (
             //quên pw2
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <TextField required sx={{ width: "300px" }} value="********" />
-              <Box>
-                {" "}
-                <Button
-                  variant="outlined"
-                  sx={{ margin: "10px 0", height: "35px" }}
-                  onClick={toggleOpenChangePw2}
-                >
-                  change
-                </Button>{" "}
-                <Button
-                  variant="outlined"
-                  sx={{ margin: "10px 0", height: "35px" }}
-                  onClick={toggleOpenForgotpw2}
-                >
-                  fogot password
-                </Button>
-                {openForgotpw2 ? (
-                  <Box className="fixed inset-0 z-50 bg-[rgba(0,0,0,0.4)] flex items-center justify-center flex-col">
-                    <Box className="flex flex-col relative items-center justify-center bg-white h-[120px] w-[500px] pt-[30px] rounded-lg">
-                      Are you want to reset password 2
-                      <Box className="flex items-center justify-center flex-row pt-[30px] pb-[10px]">
-                        <Button
-                          variant="outlined"
-                          sx={{ margin: "10px " }}
-                          onClick={() => toggleOpenForgotpw2()}
-                        >
-                          cancel
-                        </Button>
-                        <Button
-                          variant="contained"
-                          disabled={loadingFogotPw2}
-                          sx={{ margin: "10px" }}
-                          // onClick={() => FogotPw2()}
-                        >
-                          {loadingFogotPw2 ? (
-                            <CircularProgress size={24} />
-                          ) : (
-                            "ok"
-                          )}
-                        </Button>
-                      </Box>
-                    </Box>
+            <Box className="flex flex-col gap-3">
+              {!openForgotpw2 && (
+                <>
+                  <TextField
+                    required
+                    disabled
+                    className=" form-control w-[300px] bg-white rounded-md"
+                    value="********"
+                  />
+                  <Box className="flex gap-3">
+                    <Button
+                      variant="outlined"
+                      sx={{ height: "35px" }}
+                      onClick={toggleOpenChangePw2}
+                    >
+                      change
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      sx={{ height: "35px" }}
+                      onClick={toggleOpenForgotpw2}
+                    >
+                      forgot password
+                    </Button>
                   </Box>
-                ) : (
-                  ""
-                )}
-              </Box>
+                </>
+              )}
+              {openForgotpw2 && (
+                <form
+                  onSubmit={handleFogotPw2(FogotPw2)}
+                  action="submit"
+                  className="flex flex-col relative items-start gap-3"
+                >
+                  Enter gmail to reset your private password?
+                  <div className="flex flex-col">
+                    {" "}
+                    <TextField
+                      className=" form-control w-[300px] bg-white rounded-md"
+                      label="Enter your gmail..."
+                      placeholder="Enter current password 2"
+                      {...registerFogotPw2("email")}
+                    />
+                    {errorsFogotPw2?.email && (
+                      <span className="text-red-400 mt-3">
+                        {errorsFogotPw2.email.message}
+                      </span>
+                    )}
+                  </div>
+                  <Box className="flex items-center justify-center flex-row pb-[10px]">
+                    <Button variant="outlined" onClick={toggleOpenForgotpw2}>
+                      cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      disabled={loadingFogotPw2}
+                      className="ml-[10px]"
+                    >
+                      {loadingFogotPw2 ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        "reset password 2"
+                      )}
+                    </Button>
+                  </Box>
+                </form>
+              )}
             </Box>
           ) : (
             //sửa pw2
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <PasswordField
-                label="Current Password 2"
-                placeholder="Enter current password 2"
-              />
-
-              <PasswordField
-                label="New Password 2"
-                placeholder="Enter new password 2"
-              />
-              <PasswordField
-                label="Confim new password 2"
-                placeholder="Confim new password 2"
-              />
+            <form
+              onSubmit={handleEditPw2(editPw2)}
+              action="submit"
+              className="flex flex-col gap-3"
+            >
+              <div className="flex flex-col">
+                {" "}
+                <PasswordField
+                  className=" form-control w-[300px] bg-white rounded-md"
+                  label="Current Password 2"
+                  placeholder="Enter current password 2"
+                  {...registerEditPw2("old_private_password")}
+                />
+                {errorsEditPw2?.old_private_password && (
+                  <span className="text-red-400 mt-3">
+                    {errorsEditPw2.old_private_password.message}
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-col">
+                {" "}
+                <PasswordField
+                  className=" form-control w-[300px] bg-white rounded-md"
+                  label="New Password 2"
+                  placeholder="Enter new password 2"
+                  {...registerEditPw2("new_private_password")}
+                />
+                {errorsEditPw2?.new_private_password && (
+                  <span className="text-red-400 mt-3">
+                    {errorsEditPw2.new_private_password.message}
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-col">
+                {" "}
+                <PasswordField
+                  className=" form-control w-[300px] bg-white rounded-md"
+                  label="Confim new password 2"
+                  placeholder="Confim new password 2"
+                  {...registerEditPw2("confirm_private_password")}
+                />
+                {errorsEditPw2?.confirm_private_password && (
+                  <span className="text-red-400 mt-3">
+                    {errorsEditPw2.confirm_private_password.message}
+                  </span>
+                )}
+              </div>
               <Box>
                 {" "}
                 <Button
                   variant="outlined"
-                  sx={{ margin: "10px 10px 0 0" }}
+                  sx={{ margin: "0px 10px 0 0" }}
                   onClick={toggleOpenChangePw2}
                 >
                   cancel
                 </Button>
                 <Button
+                  type="submit"
                   variant="contained"
-                  sx={{ marginTop: "10px", width: "90px" }}
+                  sx={{ width: "90px" }}
                   disabled={loadingPw2}
                 >
                   {loadingPw2 ? <CircularProgress size={24} /> : "UPDATE"}
                 </Button>
               </Box>
-            </Box>
+            </form>
           )
         ) : !openCreatePw2 ? (
           //tạo pw2
@@ -319,16 +546,34 @@ const UpdatePassword = ({ data }) => {
           </Button>
         ) : (
           //box tạo pw2
-          <Box className="gap-3 flex flex-col">
+          <form
+            onSubmit={handleSubmitFormPw2(registerPw2)}
+            action="submit"
+            className="gap-3 flex flex-col"
+          >
             {" "}
             <PasswordField
+              className=" form-control w-[300px] bg-white rounded-md"
               label="New Password 2"
               placeholder="Enter your password 2"
+              {...registerFormPw2("private_password")}
             />
+            {errorsForm2?.private_password && (
+              <span className="text-red-400 mt-3">
+                {errorsForm2.private_password.message}
+              </span>
+            )}
             <PasswordField
+              className=" form-control w-[300px] bg-white rounded-md"
               label="Confim Password 2"
               placeholder="Confim your password 2"
+              {...registerFormPw2("confirm_private_password")}
             />
+            {errorsForm2?.confirm_private_password && (
+              <span className="text-red-400 mt-3">
+                {errorsForm2.confirm_private_password.message}
+              </span>
+            )}
             <Box>
               {" "}
               <Button
@@ -339,6 +584,7 @@ const UpdatePassword = ({ data }) => {
                 cancel
               </Button>
               <Button
+                type="submit"
                 disabled={loadingPw2}
                 variant="contained"
                 sx={{ margin: "0px 10px 0", width: "90px" }}
@@ -347,7 +593,7 @@ const UpdatePassword = ({ data }) => {
                 {loadingPw2 ? <CircularProgress size={24} /> : "Create"}
               </Button>
             </Box>
-          </Box>
+          </form>
         )}
       </Box>
     </>
