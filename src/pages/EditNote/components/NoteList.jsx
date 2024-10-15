@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 
 import { fetchNoteList } from '../fetchApiEditNote'
-import NoteItem from './NoteItem'
 
 import SearchIcon from '@mui/icons-material/Search'
 import SkipNextIcon from '@mui/icons-material/SkipNext'
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious'
 import axios from 'axios'
+import NoteCard from '../../../share/NoteCard'
 
 const NoteList = ({
  noteList,
@@ -128,7 +128,8 @@ const NoteList = ({
     <ul className='bg-[#dedede] flex flex-col flex-grow-1 gap-3 rounded-lg overflow-y-auto h-[60vh] p-2 editnote-notelist style-scrollbar-y style-scrollbar-y-sm'>
      {noteList.length > 0 ? (
       noteList.map((note) => (
-       <NoteItem note={note} noteList={noteList} key={note.idNote} />
+    //    <NoteItem note={note} noteList={noteList} key={note.idNote} />
+       <NoteCard type='edit' note={note} noteList={noteList} key={note.idNote} />
       ))
      ) : (
       <h3>There are no notes!</h3>

@@ -6,14 +6,16 @@ import Slider from 'react-slick'
 import TextTruncate from 'react-text-truncate'
 import rehypeRaw from 'rehype-raw'
 
-import { convertTimeApiNoteToHtml, isLightColor } from '../../../utils/utils'
-import deleteNote from '../../../assets/delete-note.png'
+import { convertTimeApiNoteToHtml, isLightColor } from '../utils/utils'
+import deleteNote from '../assets/delete-note.png'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
+import HistoryIcon from '@mui/icons-material/History'
 import axios from 'axios'
+import { fetchApiSamenote } from '../utils/fetchApiSamnote'
 
-const NoteItem = ({ note, noteList }) => {
+const NoteCard = ({ note, noteList, type }) => {
  const navigate = useNavigate()
  const settings = {
   dots: false,
@@ -34,27 +36,42 @@ const NoteItem = ({ note, noteList }) => {
   ),
  }
 
+ // delete
  const deleteNoteId = async (id, indexNoteNext) => {
   try {
    const response = await axios.delete(
-    `https://samnote.mangasocial.online/notes/${id}`
+    `https://samnote.mangasocial.online/${
+     type === 'edit' ? 'notes' : 'trunc-notes'
+    }/${id}`
    )
 
    //  handle after delete note
 
    if (noteList.length === 1) {
-    return navigate(`/editnote`, { state: 'Delete note' })
-   }
-
-   if (indexNoteNext === noteList.length - 1) {
-    return navigate(`/editnote/${noteList[indexNoteNext - 1].idNote}`, {
+    return navigate(`${type === 'edit' ? '/editnote' : '/dustbin'}`, {
      state: 'Delete note',
     })
    }
 
-   return navigate(`/editnote/${noteList[indexNoteNext + 1].idNote}`, {
-    state: 'Delete note',
-   })
+   if (indexNoteNext === noteList.length - 1) {
+    return navigate(
+     `${type === 'edit' ? '/editnote' : '/dustbin'}/${
+      noteList[indexNoteNext - 1].idNote
+     }`,
+     {
+      state: 'Delete note',
+     }
+    )
+   }
+
+   return navigate(
+    `${type === 'edit' ? '/editnote' : '/dustbin'}/${
+     noteList[indexNoteNext + 1].idNote
+    }`,
+    {
+     state: 'Delete note',
+    }
+   )
   } catch (error) {
    console.error(error)
   }
@@ -67,7 +84,10 @@ const NoteItem = ({ note, noteList }) => {
 
   Swal.fire({
    title: 'Are you sure?',
-   text: "You won't be able to revert this!",
+   text:
+    type === 'edit'
+     ? 'This note will be placed in the trash'
+     : "You won't be able to revert this!",
    icon: 'warning',
    showCancelButton: true,
    confirmButtonColor: '#3085d6',
@@ -79,7 +99,55 @@ const NoteItem = ({ note, noteList }) => {
 
     Swal.fire({
      title: 'Deleted!',
-     text: `Your image has been deleted.`,
+     text: `Your note has been deleted.`,
+     icon: 'success',
+    })
+   }
+  })
+ }
+
+ // restore
+ const restoreNote = async (idNote, indexNoteNext) => {
+  fetchApiSamenote('post', `/trash-res/${idNote}`).then((result) => {
+   //  handle after delete note
+   if (noteList.length === 1) {
+    return navigate('/dustbin', {
+     state: 'Restore note',
+    })
+   }
+
+   if (indexNoteNext === noteList.length - 1) {
+    return navigate(`${'/dustbin'}/${noteList[indexNoteNext - 1].idNote}`, {
+     state: 'Restore note',
+    })
+   }
+
+   return navigate(`${'/dustbin'}/${noteList[indexNoteNext + 1].idNote}`, {
+    state: 'Restore note',
+   })
+  })
+ }
+
+ const handleRestoreNote = async (idNote) => {
+  if (!idNote || noteList.length === 0) return
+
+  const indexNoteNext = noteList?.findIndex((note) => note.idNote === idNote)
+
+  Swal.fire({
+   title: 'Are you sure?',
+   text: 'This note will return to your inventory!',
+   icon: 'warning',
+   showCancelButton: true,
+   confirmButtonColor: '#3085d6',
+   cancelButtonColor: '#d33',
+   confirmButtonText: 'Yes, delete it!',
+  }).then((result) => {
+   if (result.isConfirmed) {
+    restoreNote(idNote, indexNoteNext)
+
+    Swal.fire({
+     title: 'Deleted!',
+     text: `Restored successfully.`,
      icon: 'success',
     })
    }
@@ -90,16 +158,16 @@ const NoteItem = ({ note, noteList }) => {
  if (Object.keys(note).length === 0) return
 
  return (
-  <li key={note.idNote}>
+  <li className='flex flex-col' key={note.idNote}>
    <NavLink
-    to={`/editnote/${note.idNote}`}
+    to={`/${type === 'edit' ? 'editnote' : 'dustbin'}/${note.idNote}`}
     style={{
      boxShadow: '0px 4px 10px 0px #00000040',
      backgroundColor: `rgb(${note.color.r}, ${note.color.g}, ${note.color.b})`,
      color: isLightColor(note.color) ? 'black' : 'white',
     }}
     className={({ isActive, isPending }) =>
-     `row row-cols-4 justify-between rounded-lg mx-0 p-2 position-relative cursor-pointer text-decoration-none border-2 ${
+     `row row-cols-4 flex-grow-1 justify-between rounded-lg mx-0 p-2 position-relative cursor-pointer text-decoration-none border-2 ${
       isPending
        ? 'pending'
        : isActive
@@ -155,20 +223,40 @@ const NoteItem = ({ note, noteList }) => {
      ) : null}
     </div>
 
-    <time className='col font-semibold text-center'>
-     {convertTimeApiNoteToHtml(note.createAt)}
-    </time>
+    <div className='col flex flex-col justify-between items-end gap-2'>
+     <div>
+      <time className=' font-semibold text-center'>
+       {convertTimeApiNoteToHtml(
+        type === 'edit' ? note.createAt : note.updateAt
+       )}
+      </time>
+     </div>
 
-    <button
-     className='position-absolute right-2 top-1/2 -translate-y-1/2 w-max z-20'
-     type='button'
-     onClick={() => handleDeleteNote(note.idNote)}
-    >
-     <img src={deleteNote} alt='delete note' />
-    </button>
+     <div className=''>
+      {type !== 'edit' && (
+       <button
+        onClick={() => handleRestoreNote(note.idNote)}
+        type='button'
+        className=''
+       >
+        <HistoryIcon className='text-[40px]' />
+       </button>
+      )}
+     </div>
+
+     <div className='flex flex-grow-1 items-start'>
+      <button
+       className='w-max'
+       type='button'
+       onClick={() => handleDeleteNote(note.idNote)}
+      >
+       <img src={deleteNote} alt='delete note' />
+      </button>
+     </div>
+    </div>
    </NavLink>
   </li>
  )
 }
 
-export default NoteItem
+export default NoteCard
