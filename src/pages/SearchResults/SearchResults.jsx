@@ -22,6 +22,7 @@ const SearchResults = () => {
             setResults([])
             return
         }
+        setResults([])
         let response
         switch (activeTab) {
             case 'everyone':
@@ -35,7 +36,7 @@ const SearchResults = () => {
             case 'anonymous':
                 response = await fetchApiSamenote(
                     'get',
-                    `/message/search_unknown_by_text/${user.id}/${searchText}`
+                    `/message/search_unknown_by_text/${user.id}/${searchText}?page=${currentPage}`
                 )
                 console.log('anonymous', response.data)
                 setResults(response.data)

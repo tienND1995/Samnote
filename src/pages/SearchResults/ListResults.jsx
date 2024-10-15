@@ -19,8 +19,8 @@ const ListResults = ({ results }) => {
                             </div>
                             <div className="content-wrapper w-[75%] bg-[#ffffff] px-3 py-2 rounded-2xl">
                                 <div className="d-flex justify-content-between align-items-center mb-1">
-                                    <h5 className="card-title font-bold mb-0">{item.username_user_create}</h5>
-                                    <small className="text-muted">{moment(item.createAt).format('DD/MM/YYYY HH:mm')}</small>
+                                    <h5 className="card-title font-bold mb-0">{item.username_user_create || 'Anonymous'}</h5>
+                                    <small className="text-muted">{moment(item.createAt || item.sendAt).format('DD/MM/YYYY HH:mm')}</small>
                                 </div>
                                 <div className="card-text">
                                     <span className="font-bold">{item.title}</span>
@@ -31,7 +31,7 @@ const ListResults = ({ results }) => {
                                             WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
                                             wordWrap: 'break-word', whiteSpace: 'pre-wrap'
                                         }}>
-                                        <Markdown rehypePlugins={[rehypeRaw]}>{item.content}</Markdown>
+                                        <Markdown rehypePlugins={[rehypeRaw]}>{item.content || item.text}</Markdown>
                                     </div>
                                 </div>
                                 {item.images && (
