@@ -1,21 +1,21 @@
-import axios from 'axios'
-import { useContext, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import axios from 'axios';
+import { useContext, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
-import { joiResolver } from '@hookform/resolvers/joi'
-import { useForm } from 'react-hook-form'
-import { schemaNoteEdit } from '../../../utils/schema'
+import { joiResolver } from '@hookform/resolvers/joi';
+import { useForm } from 'react-hook-form';
+import { schemaNoteEdit } from '../../../utils/schema';
 
 import {
  convertApiToTime,
  convertColorNoteToApi,
  convertTimeToApi,
  isLightColor,
-} from '../../../utils/utils'
+} from '../../../utils/utils';
 
-import { AppContext } from '../../../context'
-import { fetchAllFolder, fetchNoteList } from '../fetchApiEditNote'
-import DeleteImages from './DeleteImages'
+import { AppContext } from '../../../context';
+import { fetchAllFolder, fetchNoteList } from '../fetchApiEditNote';
+import DeleteImages from './DeleteImages';
 
 import {
  Checkbox,
@@ -25,43 +25,43 @@ import {
  MenuItem,
  Select,
  TextField,
-} from '@mui/material'
+} from '@mui/material';
 
-import AddIcon from '@mui/icons-material/Add'
+import AddIcon from '@mui/icons-material/Add';
 
-import configs from '../../../configs/configs.json'
-import ModalCreateFolder from '../../../share/ModalCreateFolder'
-import TextEditor from '../../../share/TextEditor'
-import AddImages from './AddImages'
-import ChecklistNote from '../../../share/ChecklistNote'
-const { API_SERVER_URL } = configs
+import configs from '../../../configs/configs.json';
+import ModalCreateFolder from '../../../share/ModalCreateFolder';
+import TextEditor from '../../../share/TextEditor';
+import AddImages from './AddImages';
+import ChecklistNote from '../../../share/ChecklistNote';
+const { API_SERVER_URL } = configs;
 
 const FormEdit = ({ onDispatchName }) => {
- const appContext = useContext(AppContext)
- const { user, setSnackbar } = appContext
- const { id } = useParams()
+ const appContext = useContext(AppContext);
+ const { user, setSnackbar } = appContext;
+ const { id } = useParams();
 
- const [noteItem, setNoteItem] = useState({})
+ const [noteItem, setNoteItem] = useState({ type: 'text' });
 
- const [checklist, setChecklist] = useState([])
+ const [checklist, setChecklist] = useState([]);
  const [dataContent, setDataContent] = useState({
   isError: false,
   message: '',
   content: '',
- })
+ });
 
- const [colorList, setColorList] = useState([])
- const [folderList, setFolderList] = useState([])
+ const [colorList, setColorList] = useState([]);
+ const [folderList, setFolderList] = useState([]);
  const [color, setColor] = useState({
   b: 250,
   g: 250,
   r: 255,
   name: 'snow',
- })
+ });
 
- const [textEditor, setTextEditor] = useState('')
+ const [textEditor, setTextEditor] = useState('');
 
- const handleChangeTextEditor = (text) => setTextEditor(text)
+ const handleChangeTextEditor = (text) => setTextEditor(text);
 
  // Declare variables for the form
  const {
@@ -85,51 +85,51 @@ const FormEdit = ({ onDispatchName }) => {
    type: 'text',
    idFolder: '',
   },
- })
+ });
 
- const notePublicForm = watch('notePublic')
- const colorForm = watch('color')
- const folderForm = watch('idFolder')
- const pinnedForm = watch('pinned')
- const typeForm = watch('type')
+ const notePublicForm = watch('notePublic');
+ const colorForm = watch('color');
+ const folderForm = watch('idFolder');
+ const pinnedForm = watch('pinned');
+ const typeForm = watch('type');
 
  const getDataNoteId = async () => {
-  const noteList = await fetchNoteList(user?.id)
-  const noteId = noteList.filter((note) => note.idNote === Number.parseInt(id))
+  const noteList = await fetchNoteList(user?.id);
+  const noteId = noteList.filter((note) => note.idNote === Number.parseInt(id));
 
-  if (!noteId || noteId.length === 0 || !id) return reset()
+  if (!noteId || noteId.length === 0 || !id) return reset();
 
-  setNoteItem(noteId[0])
+  setNoteItem(noteId[0]);
 
   // set values form default
-  setValue('title', noteId[0].title)
-  setValue('pinned', noteId[0].pinned)
-  setValue('type', noteId[0].type)
-  setValue('dueAt', convertApiToTime(noteId[0].dueAt))
-  setValue('remindAt', convertApiToTime(noteId[0].remindAt))
-  setValue('notePublic', noteId[0].notePublic)
-  setValue('idFolder', noteId[0].idFolder)
+  setValue('title', noteId[0].title);
+  setValue('pinned', noteId[0].pinned);
+  setValue('type', noteId[0].type);
+  setValue('dueAt', convertApiToTime(noteId[0].dueAt));
+  setValue('remindAt', convertApiToTime(noteId[0].remindAt));
+  setValue('notePublic', noteId[0].notePublic);
+  setValue('idFolder', noteId[0].idFolder);
 
   if (noteId[0].type === 'text') {
    setDataContent((prev) => ({
     ...prev,
     content: noteId[0].data,
     isError: false,
-   }))
+   }));
   } else {
-   setChecklist(noteId[0].data)
+   setChecklist(noteId[0].data);
   }
- }
+ };
 
  // reset content
  useEffect(() => {
   if (typeForm === 'text') {
-   setChecklist([])
-   setDataContent((prev) => ({ ...prev, isError: false }))
+   setChecklist([]);
+   setDataContent((prev) => ({ ...prev, isError: false }));
   } else {
-   setDataContent((prev) => ({ ...prev, isError: false, content: '' }))
+   setDataContent((prev) => ({ ...prev, isError: false, content: '' }));
   }
- }, [typeForm])
+ }, [typeForm]);
 
  // reset errors
  useEffect(() => {
@@ -138,82 +138,85 @@ const FormEdit = ({ onDispatchName }) => {
    typeForm === 'text' &&
    textEditor?.trim() === ''
   )
-   return
-  if (checklist.length === 0 && typeForm === 'checklist') return
+   return;
+  if (checklist.length === 0 && typeForm === 'checklist') return;
 
   if (
    checklist.length > 0 ||
    (typeForm === 'text' && dataContent.content.trim() !== '<p><br></p>')
   )
-   setDataContent((prev) => ({ ...prev, isError: false, message: '' }))
- }, [textEditor, checklist.length, dataContent.content])
+   setDataContent((prev) => ({ ...prev, isError: false, message: '' }));
+ }, [textEditor, checklist.length, dataContent.content]);
 
  useEffect(() => {
   const fetchAllColor = async () => {
    try {
-    const response = await axios.get(`${API_SERVER_URL}/get_all_color`)
-    setColorList(response.data.data)
+    const response = await axios.get(`${API_SERVER_URL}/get_all_color`);
+    setColorList(response.data.data);
    } catch (error) {
-    console.error(error)
+    console.error(error);
    }
-  }
+  };
 
   const getFolders = async () => {
-   const folders = await fetchAllFolder(user?.id)
-   setFolderList(folders)
-  }
+   const folders = await fetchAllFolder(user?.id);
+   setFolderList(folders);
+  };
 
-  if (!user?.id) return
+  if (!user?.id) return;
 
-  getDataNoteId()
-  getFolders()
-  fetchAllColor()
- }, [user?.id, id])
+  getDataNoteId();
+  getFolders();
+  fetchAllColor();
+ }, [user?.id, id]);
 
  useEffect(() => {
   // render color when component mounted
   const handleColor = () => {
-   if (colorList.length < 1 || !noteItem.color) return
+   if (colorList.length < 1 || !noteItem.color) return;
 
    const colorMatch = colorList?.filter(
     (item) =>
      item.r === noteItem?.color.r &&
      item.g === noteItem?.color.g &&
      item.b === noteItem?.color.b
-   )
-   setValue('color', colorMatch[0]?.name)
-   setColor(colorMatch[0])
-  }
+   );
+   setValue('color', colorMatch[0]?.name);
+   setColor(colorMatch[0]);
+  };
 
-  handleColor()
- }, [colorList, noteItem, id])
+  handleColor();
+ }, [colorList, noteItem, id]);
 
  useEffect(() => {
   // check color form change?
-  if (!dirtyFields.color) return
+  if (!dirtyFields.color) return;
 
   // handle change color
-  const colorMatch = colorList?.filter((color) => color.name === colorForm)
-  setColor(colorMatch[0])
- }, [colorForm])
+  const colorMatch = colorList?.filter((color) => color.name === colorForm);
+  setColor(colorMatch[0]);
+ }, [colorForm]);
 
  const pacthNote = async (noteId, data) => {
   try {
-   const response = await axios.patch(`${API_SERVER_URL}/notes/${noteId}`, data)
-   onDispatchName('patch note')
+   const response = await axios.patch(
+    `${API_SERVER_URL}/notes/${noteId}`,
+    data
+   );
+   onDispatchName('patch note');
 
    setSnackbar({
     isOpen: true,
     message: `Update note complete!`,
     severity: 'success',
-   })
+   });
   } catch (error) {
-   console.error(error)
+   console.error(error);
   }
- }
+ };
 
  const onSubmit = async (data) => {
-  if (color.name !== data.color || !noteItem.idNote || !id) return
+  if (color.name !== data.color || !noteItem.idNote || !id) return;
 
   // set errors when text empty
   if (typeForm === 'text') {
@@ -225,7 +228,7 @@ const FormEdit = ({ onDispatchName }) => {
      ...prev,
      isError: true,
      message: 'Not content yet!',
-    }))
+    }));
   }
 
   // set errors when checkbox empty
@@ -235,13 +238,13 @@ const FormEdit = ({ onDispatchName }) => {
      ...prev,
      isError: true,
      message: 'Not content yet!',
-    }))
+    }));
   }
 
   const newChecklist = checklist?.map((item) => {
-   delete item.id
-   return item
-  })
+   delete item.id;
+   return item;
+  });
 
   const dataForm = {
    ...data,
@@ -250,26 +253,26 @@ const FormEdit = ({ onDispatchName }) => {
    dueAt: convertTimeToApi(data.dueAt),
    remindAt: convertTimeToApi(data.remindAt),
    type: noteItem.type,
-  }
+  };
 
-  pacthNote(noteItem.idNote, dataForm)
- }
+  pacthNote(noteItem.idNote, dataForm);
+ };
 
  // disable btn
  const disableBtnSubmit = () => {
   const isChangeForm =
    Object.keys(dirtyFields).length === 0 &&
    (noteItem.data === dataContent.content.trim() ||
-    noteItem.data === textEditor?.trim())
+    noteItem.data === textEditor?.trim());
 
-  const isNoteIdEdit = !id
-  return isChangeForm || isNoteIdEdit
- }
+  const isNoteIdEdit = !id;
+  return isChangeForm || isNoteIdEdit;
+ };
 
  // create folder
 
- const [showModalFolder, setShowModalFolder] = useState(false)
- const handleShowModalFolder = () => setShowModalFolder(true)
+ const [showModalFolder, setShowModalFolder] = useState(false);
+ const handleShowModalFolder = () => setShowModalFolder(true);
 
  return (
   <div className='p-2 bg-[#3A3F42] rounded-lg flex flex-col flex-grow-1'>
@@ -506,7 +509,7 @@ const FormEdit = ({ onDispatchName }) => {
     </div>
    </form>
   </div>
- )
-}
+ );
+};
 
-export default FormEdit
+export default FormEdit;
