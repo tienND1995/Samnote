@@ -162,7 +162,7 @@ const Register = () => {
 
    return setSnackbar({
     isOpen: true,
-    message: data.message,
+    message: 'Resend confirmation email successfully',
     severity: 'success',
    })
   })

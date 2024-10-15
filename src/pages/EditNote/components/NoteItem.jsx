@@ -1,19 +1,19 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2'
 
-import moment from 'moment'
 import Markdown from 'react-markdown'
 import Slider from 'react-slick'
 import TextTruncate from 'react-text-truncate'
 import rehypeRaw from 'rehype-raw'
 
+import { convertTimeApiNoteToHtml, isLightColor } from '../../../utils/utils'
 import deleteNote from '../../../assets/delete-note.png'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import axios from 'axios'
 
-const NoteItem = ({ note, onDispatchEventName, noteList }) => {
+const NoteItem = ({ note, noteList }) => {
  const navigate = useNavigate()
  const settings = {
   dots: false,
@@ -34,23 +34,27 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
   ),
  }
 
- const markdown = `<img src="http://samnote.mangasocial.online/get-image/127/127_note_612976.jpg" alt="img upload" style="width: 100px; height: 100px;">`
-
- const convertTime = (time) =>
-  moment(`${time}+0700`).subtract(10, 'days').calendar()
-
  const deleteNoteId = async (id, indexNoteNext) => {
   try {
    const response = await axios.delete(
     `https://samnote.mangasocial.online/notes/${id}`
    )
 
-   if (noteList.length === 1) navigate(`/editnote`)
-   if (indexNoteNext === noteList.length - 1)
-    return navigate(`/editnote/${noteList[indexNoteNext - 1].idNote}`)
-   navigate(`/editnote/${noteList[indexNoteNext + 1].idNote}`)
+   //  handle after delete note
 
-   onDispatchEventName('Delete note')
+   if (noteList.length === 1) {
+    return navigate(`/editnote`, { state: 'Delete note' })
+   }
+
+   if (indexNoteNext === noteList.length - 1) {
+    return navigate(`/editnote/${noteList[indexNoteNext - 1].idNote}`, {
+     state: 'Delete note',
+    })
+   }
+
+   return navigate(`/editnote/${noteList[indexNoteNext + 1].idNote}`, {
+    state: 'Delete note',
+   })
   } catch (error) {
    console.error(error)
   }
@@ -72,6 +76,7 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
   }).then((result) => {
    if (result.isConfirmed) {
     deleteNoteId(idNote, indexNoteNext)
+
     Swal.fire({
      title: 'Deleted!',
      text: `Your image has been deleted.`,
@@ -79,8 +84,6 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
     })
    }
   })
-
-  //   confirmDelete('note', idNote, deleteNoteId)
  }
 
  //  *__________________________
@@ -93,21 +96,43 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
     style={{
      boxShadow: '0px 4px 10px 0px #00000040',
      backgroundColor: `rgb(${note.color.r}, ${note.color.g}, ${note.color.b})`,
+     color: isLightColor(note.color) ? 'black' : 'white',
     }}
-    className='row row-cols-4 justify-between rounded-lg mx-0 p-2 position-relative cursor-pointer text-decoration-none text-black'
+    className={({ isActive, isPending }) =>
+     `row row-cols-4 justify-between rounded-lg mx-0 p-2 position-relative cursor-pointer text-decoration-none border-2 ${
+      isPending
+       ? 'pending'
+       : isActive
+       ? 'border-2 border-green-600 border-solid'
+       : ''
+     }`
+    }
    >
     <h6 className='col font-semibold'>{note.title}</h6>
 
     <div className='col-6 px-0'>
      <div className='max-h-[100px] overflow-y-auto style-scrollbar-y style-scrollbar-y-sm'>
-      {typeof note.data == 'string' && (
+      {note.type === 'text' && (
        <TextTruncate
         line={3}
         element='p'
         truncateText='…'
         text={<Markdown rehypePlugins={[rehypeRaw]}>{note.data}</Markdown>}
-        containerClassName='text-center'
+        containerClassName='flex justify-center'
        />
+      )}
+
+      {note.type === 'checklist' && (
+       <ul>
+        {note.data?.map(({ content, status }) => {
+         return (
+          <li key={content}>
+           <input checked={status} type='checkbox' />
+           <span className='ms-2'>{content}</span>
+          </li>
+         )
+        })}
+       </ul>
       )}
      </div>
 
@@ -131,7 +156,7 @@ const NoteItem = ({ note, onDispatchEventName, noteList }) => {
     </div>
 
     <time className='col font-semibold text-center'>
-     {convertTime(note.createAt)}
+     {convertTimeApiNoteToHtml(note.createAt)}
     </time>
 
     <button

@@ -20,17 +20,21 @@ export const schemaGroup = Joi.object({
 })
 
 export const schemaNoteEdit = Joi.object({
- data: Joi.string().min(5).required().messages({
-  'string.min': 'At least 5 character!',
-  'string.empty': 'Not content yet!',
- }),
  title: Joi.string().min(5).max(100).required().messages({
   'string.min': 'At least 5 character!',
   'string.empty': 'Not title yet!',
  }),
- dueAt: Joi.date().max('now').allow('').allow(null).messages({
-  'date.max': 'Current maximum date',
+ dueAt: Joi.date().greater('now').allow('').allow(null).messages({
+  'date.greater': 'Greater current date now',
  }),
+ remindAt: Joi.date()
+  .greater('now')
+  .max(Joi.ref('dueAt'))
+  .allow(null)
+  .messages({
+   'date.greater': 'Greater current date now',
+   'date.max': 'Less than or equal to due at',
+  }),
 
  idFolder: Joi.number().integer().allow(null),
  type: Joi.string().allow('').allow(null),
@@ -41,9 +45,8 @@ export const schemaNoteEdit = Joi.object({
 })
 
 export const schemaNoteCreate = Joi.object({
- data: Joi.string().min(5).required().messages({
-  'string.min': 'At least 5 character!',
-  'string.empty': 'Not content yet!',
+ type: Joi.string().required().messages({
+  'string.empty': 'Not type yet!',
  }),
 
  title: Joi.string().min(5).max(100).required().messages({
@@ -57,11 +60,14 @@ export const schemaNoteCreate = Joi.object({
  }),
 
  // no require  .....................
-
- remindAt: Joi.date().min('now').allow(null).messages({
-  'date.max': 'Min Current date',
- }),
-
+ remindAt: Joi.date()
+  .greater('now')
+  .max(Joi.ref('dueAt'))
+  .allow(null)
+  .messages({
+   'date.greater': 'Greater current date now',
+   'date.max': 'Less than or equal to due at',
+  }),
  idFolder: Joi.number().integer().allow(null),
  color: Joi.string().allow('').allow(null),
  notePublic: Joi.number().integer().allow('').allow(null),

@@ -10,7 +10,6 @@ import axios from 'axios'
 
 const NoteList = ({
  noteList,
- onDispatchEventName,
  userID,
  onChangeNoteList,
 }) => {
@@ -129,12 +128,7 @@ const NoteList = ({
     <ul className='bg-[#dedede] flex flex-col flex-grow-1 gap-3 rounded-lg overflow-y-auto h-[60vh] p-2 editnote-notelist style-scrollbar-y style-scrollbar-y-sm'>
      {noteList.length > 0 ? (
       noteList.map((note) => (
-       <NoteItem
-        note={note}
-        noteList={noteList}
-        key={note.idNote}
-        onDispatchEventName={onDispatchEventName}
-       />
+       <NoteItem note={note} noteList={noteList} key={note.idNote} />
       ))
      ) : (
       <h3>There are no notes!</h3>

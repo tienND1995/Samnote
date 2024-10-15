@@ -1,12 +1,142 @@
-import React from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 
-import BrushIcon from '@mui/icons-material/Brush'
+import { useForm } from 'react-hook-form'
+import { joiResolver } from '@hookform/resolvers/joi'
+import { schemaNoteCreate } from '../../utils/schema'
+
+import { AppContext } from '../../context'
+import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
+
+import FormNote from '../../share/FormNote'
+import SketchCanvas from './SketchCanvas'
+
+import SketchBar from './SketchBar'
+import { convertColorNoteToApi, convertTimeToApi } from '../../utils/utils'
 
 const Sketch = () => {
+ const appContext = useContext(AppContext)
+ const { user, setSnackbar } = appContext
+
+ const [color, setColor] = useState({
+  b: 250,
+  g: 250,
+  r: 255,
+  name: 'snow',
+ })
+
+ const [dataContent, setDataContent] = useState({
+  isError: false,
+  message: '',
+  content: '',
+ })
+
+ // var canvas
+ const [strokeColor, setStrokeColor] = useState('red')
+ const [strokeWidth, setStrokeWidth] = useState(1)
+ const [fileImage, setFileImage] = useState(null)
+
+ const handleChangeColorCanvas = (color) => setStrokeColor(color)
+ const handleChangeStrokeWidth = (number) => setStrokeWidth(number)
+
+ const sketchCanvasRef = useRef()
+
+ const {
+  handleSubmit,
+  register,
+  watch,
+  reset,
+  formState: { errors, dirtyFields },
+ } = useForm({
+  resolver: joiResolver(schemaNoteCreate),
+  defaultValues: {
+   title: '',
+   dueAt: null,
+
+   remindAt: null,
+   pinned: false,
+   notePublic: 1,
+   lock: '',
+   color: '',
+   idFolder: null,
+  },
+ })
+
+ const handleChangeColor = (color) => setColor(color)
+
+ const propsFormNote = {
+  userID: user?.id,
+  register,
+  watch,
+  errors,
+  dirtyFields,
+  onChangeColor: handleChangeColor,
+  color,
+  setFileImage,
+ }
+
+ const onSubmitForm = (data) => {
+  if (dataContent.content.trim() === '')
+   return setDataContent((prev) => ({
+    ...prev,
+    isError: true,
+    message: 'Not content yet!',
+   }))
+
+  const dataForm = {
+   ...data,
+   data: dataContent.content,
+   color: convertColorNoteToApi(color),
+   dueAt: convertTimeToApi(data.dueAt),
+   remindAt: convertTimeToApi(data.remindAt),
+   type: 'text',
+   linkNoteShare: '',
+  }
+
+  postNote(dataForm)
+ }
+
+ const postNote = (data) => {
+  fetchApiSamenote('post', `/notes/${user?.id}`, data)
+   .then((data) => {
+    reset()
+    setFileImage(null)
+    setDataContent({
+     isError: false,
+     message: '',
+     content: '',
+    })
+    setColor({ b: 250, g: 250, r: 255, name: 'snow' })
+    setSnackbar({
+     isOpen: true,
+     message: `Create note success!`,
+     severity: 'success',
+    })
+
+    // post image sketch
+    const newFormData = new FormData()
+    newFormData.append('id_user', user?.id)
+    newFormData.append('id_note', data.note.idNote)
+    newFormData.append('image_note', fileImage)
+
+    fetchApiSamenote('post', '/add_image_note', newFormData)
+   })
+   .catch((error) => console.log('error', error))
+ }
+
+ const disableSubmit = () => {
+  return !fileImage
+ }
+
+ // reset errors
+ useEffect(() => {
+  if (dataContent.content.trim() === '') return
+  setDataContent((prev) => ({ ...prev, isError: false, message: '' }))
+ }, [dataContent.content])
+
  return (
-  <div className='flex'>
-   <div className='bg-black w-full text-white'>
-    <h2 className='font-Roboto font-bold text-[40px] flex justify-center items-end gap-2'>
+  <div className='flex flex-col w-full'>
+   <div className='bg-black w-full text-white p-4'>
+    <h2 className='font-Roboto font-bold mb-3 text-[40px] flex justify-center items-end gap-2'>
      Sketch
      <div className='h-[50px] flex'>
       <svg
@@ -23,6 +153,58 @@ const Sketch = () => {
       </svg>
      </div>
     </h2>
+
+    <div className='grid grid-cols-2 gap-[10%]'>
+     <form onSubmit={handleSubmit(onSubmitForm)}>
+      <FormNote {...propsFormNote} />
+
+      <div className='mt-3'>
+       <button
+        className={`text-white bg-[#1876D2] w-[100px] h-[40px] rounded-md uppercase ${
+         disableSubmit() ? 'opacity-70' : 'opacity-100'
+        }`}
+        type='submit'
+        disabled={disableSubmit()}
+       >
+        Create
+       </button>
+      </div>
+     </form>
+
+     <div>
+      <textarea
+       className='size-full relative max-h-[300px] mt-[23px] rounded-lg outline-none p-3'
+       placeholder='Content...'
+       value={dataContent.content}
+       onChange={(e) =>
+        setDataContent((prev) => ({ ...prev, content: e.target.value }))
+       }
+      ></textarea>
+
+      {dataContent?.isError && (
+       <span style={{ borderBottom: '1px solid red' }} className='text-red-600'>
+        {dataContent?.message}
+       </span>
+      )}
+     </div>
+    </div>
+   </div>
+
+   <div className='bg-white size-full flex'>
+    <SketchBar
+     onChangeColorCanvas={handleChangeColorCanvas}
+     onChangeStrokeWidth={handleChangeStrokeWidth}
+     strokeColor={strokeColor}
+     strokeWidth={strokeWidth}
+     sketchCanvasRef={sketchCanvasRef}
+     setFileImage={setFileImage}
+    />
+
+    <SketchCanvas
+     strokeColor={strokeColor}
+     strokeWidth={strokeWidth}
+     sketchCanvasRef={sketchCanvasRef}
+    />
    </div>
   </div>
  )

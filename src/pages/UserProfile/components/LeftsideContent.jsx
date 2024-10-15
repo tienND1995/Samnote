@@ -12,7 +12,9 @@ import Swal from 'sweetalert2'
 import ModalComments from './ModalComments'
 import { handleErrorAvatar, convertApiToTime, isLightColor } from '../../../utils/utils'
 import ListNotes from './ListNotes'
-
+import Markdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
+import { useNavigate } from 'react-router-dom'
 const LeftsideContent = ({
   userInfomations,
   archivedNotes,
@@ -29,6 +31,7 @@ const LeftsideContent = ({
   const [publicNotesTabValue, setPublicNotesTabValue] = useState('1')
   const [isShowModalComments, setIsShowModalComments] = useState(false)
   const [noteShowComments, setNoteShowComments] = useState(null)
+  const navigate = useNavigate()
 
   const handlePublicNotesTabChange = (event, newValue) => {
     setPublicNotesTabValue(newValue)
@@ -45,17 +48,27 @@ const LeftsideContent = ({
       }
 
     }))
+    setChecklistNotes(archivedNotes.filter((note) => {
+      if (user.id === userInfomations.id) {
+        return note.type === 'checklist';
+      } else {
+        return note.notePublic && note.type === 'checklist';
+      }
+
+    }))
   }, [archivedNotes])
 
   const deleteNote = async (index) => {
     try {
-      await api.delete(`/notes/${index}`)
-      setSnackbar({
-        isOpen: true,
-        message: `Remove note successfully ${index}`,
-        severity: 'success',
-      })
-      setReload((prev) => prev + 1) // Update the state to trigger useEffect
+      const res = await api.delete(`/notes/${index}`)
+      if (res && res.status == 200) {
+        setSnackbar({
+          isOpen: true,
+          message: `Remove note successfully ${index}`,
+          severity: 'success',
+        })
+        setReload((prev) => prev + 1)
+      }// Update the state to trigger useEffect
     } catch (err) {
       console.error(err)
       setSnackbar({
@@ -90,8 +103,11 @@ const LeftsideContent = ({
   const handleLikeNote = async (idNote, type) => {
     console.log(idNote, type)
     try {
-      await api.post(`/notes/favorite_notes/${idNote}`, { idUser: user.id, type })
-      setReload((prev) => prev + 1)
+      const res = await api.post(`/notes/favorite_notes/${idNote}`, { idUser: user.id, type })
+      if (res && res.status === 200) {
+        setReload((prev) => prev + 1)
+      }
+
     } catch (err) {
       console.error(err)
     }
@@ -150,7 +166,7 @@ const LeftsideContent = ({
                   spaceBetween={14}
                   slidesPerView={publicNotes.length > 2 ? 2.5 : publicNotes.length}
                   style={{
-                    height: `${publicNotes.length > 2 ? 900 : publicNotes.length * 360
+                    height: `${publicNotes.length > 2 ? 850 : publicNotes.length * 340
                       }px`,
                     width: '100%',
                   }}
@@ -160,10 +176,10 @@ const LeftsideContent = ({
                   }}
                   className='swiper-publicNotes overflow-y-auto'
                 >
-                  {publicNotes.map((info, index) => (
+                  {publicNotes.map((info) => (
                     <SwiperSlide
                       key={info.idNote}
-                      className={`w-[99.5%] p-2 border-[1px] rounded-xl border-black border-solid
+                      className={`w-[99.5%] py-2 border-[1px] rounded-xl border-black border-solid
                           ${isLightColor(info.color)
                           ? 'text-black'
                           : 'text-white'
@@ -176,7 +192,7 @@ const LeftsideContent = ({
                       <div
                         style={{
                           display: 'flex',
-                          margin: '10px 16px',
+                          margin: '10px 20px 0 20px',
                           alignItems: 'center',
                           justifyContent: 'space-between',
                         }}
@@ -201,7 +217,7 @@ const LeftsideContent = ({
                                 ? userInfomations.Avarta
                                 : '/src/assets/avatar-default.png'
                             }
-                            alt=''
+                            alt='avatar-user'
                             onError={handleErrorAvatar}
                           />
                           <Box sx={{ color: 'text.main' }}>
@@ -237,30 +253,26 @@ const LeftsideContent = ({
                           </svg>
                         </div>
                       </div>
-                      <Box
-                        component='div'
-                        sx={{
-                          color: 'text.main',
-                          margin: '10px 10px 0px',
-                          height: '160px',
-                          overflow: 'hidden',
-                        }}
+                      <div
+                        className={`h-[10rem] overflow-hidden px-4 py-2 rounded-lg
+                                    ${user.id === userInfomations.id ? 'cursor-pointer hover:bg-opacity-20 hover:bg-gray-500 transition-colors duration-200' : ''}`}
+                        onClick={() => user.id === userInfomations.id && navigate(`/editnote/${info.idNote}`)}
                       >
                         <strong style={{ fontSize: '20px' }}>{info.title}</strong>
-                        <div className='max-h-[100px] text-start overflow-hidden'>{info.data}</div>
-                      </Box>
-                      <Box
-                        component='div'
-                        sx={{
-                          textAlign: 'end',
-                          padding: '0 10px 0 0',
-                        }}
-                      >
-                        <p style={{ margin: 0, opacity: 0.8 }}>
+                        {info.type.toLowerCase() === 'checklist' ? (
+                          <Checklist data={info.data.slice(0, 3)} />
+                        ) : (
+                          <div className='text-start truncate-text'>
+                            {<Markdown rehypePlugins={[rehypeRaw]}>{info.data}</Markdown>}
+                          </div>
+                        )}
+                      </div>
+                      <div className='time-edit'>
+                        <p className='text-end mt-2 mr-3 opacity-80'>
                           Last edit at {convertApiToTime(info.updateAt)}
                         </p>
-                      </Box>
-                      <div className='interacted-note flex justify-end items-center gap-3 pr-2 mt-2'>
+                      </div>
+                      <div className='interacted-note flex justify-end items-center gap-3 pr-3 mt-2'>
                         <div
                           className='like flex items-center gap-1 cursor-pointer'
                           onClick={() => handleLikeNote(info.idNote, 'like')}
@@ -330,7 +342,7 @@ const LeftsideContent = ({
       </Box>
       <Box className='flex mb-4 pinned-notes'>
         <ListNotes
-          typeNotes={'Pinned notes'}
+          typeNotes={'pinned'}
           dataNotes={pinnedNotes}
           userInfomations={userInfomations}
           handleDeleteNote={handleDeleteNote}
@@ -338,10 +350,11 @@ const LeftsideContent = ({
           handleLikeNote={handleLikeNote}
         />
       </Box>
-      {user.id === userInfomations.id &&
+      {
+        user.id === userInfomations.id &&
         <Box className='flex mb-4 private-notes'>
           <ListNotes
-            typeNotes={'Privates notes'}
+            typeNotes={'private'}
             dataNotes={privateNotes}
             userInfomations={userInfomations}
             handleDeleteNote={handleDeleteNote}
@@ -352,7 +365,7 @@ const LeftsideContent = ({
       }
       <Box className='flex mb-4 checklist-notes'>
         <ListNotes
-          typeNotes={'Checklist'}
+          typeNotes={'checklist'}
           dataNotes={checklistNotes}
           userInfomations={userInfomations}
           handleDeleteNote={handleDeleteNote}
@@ -360,14 +373,16 @@ const LeftsideContent = ({
           handleLikeNote={handleLikeNote}
         />
       </Box>
-      {isShowModalComments && (
-        <ModalComments
-          infoNote={noteShowComments}
-          setIsShowModalComments={setIsShowModalComments}
-          setReload={setReload}
-        />
-      )}
-    </div>
+      {
+        isShowModalComments && (
+          <ModalComments
+            infoNote={noteShowComments}
+            setIsShowModalComments={setIsShowModalComments}
+            setReload={setReload}
+          />
+        )
+      }
+    </div >
   )
 }
 
