@@ -32,31 +32,31 @@ const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
 
     ws.on('connect', () => {
       console.log('Connected to WebSocket server')
-      // Join a room specific to this note
-      // ws.emit('join_note_room', idNote)
-    })
-
-    ws.on('new_comment', (newComment) => {
-      if (infoNote.idNote !== newComment.idNote) {
-        return
-      }
-      console.log('Received new comment:', newComment)
-      fetchAllDataComments()
-      setReload((prev) => prev + 1)
-    })
-
-    ws.on('favorite_comment', (favoriteComment) => {
-      if (favoriteComment.idNote !== infoNote.idNote) {
-        return
-      }
-      console.log('Received favorite comment:', favoriteComment)
-      fetchAllDataComments()
     })
 
     return () => {
       ws.disconnect()
     }
-  }, [infoNote])
+  }, [])
+
+  useEffect(() => {
+    if (!socket) return
+
+    fetchAllDataComments()
+
+    socket.on('favorite_notes_comment', (data) => {
+      if (infoNote.idNote === data.idNote) {
+        fetchAllDataComments()
+      }
+    })
+
+    socket.on('favorite_reply', (data) => {
+      if (infoNote.idNote === data.idNote) {
+        fetchAllDataComments()
+      }
+    })
+
+  }, [socket])
 
   const handleSubmitComment = async (parentsNoteId) => {
     const content = parentsNoteId ? contentReplyComment : contentComment
@@ -83,11 +83,10 @@ const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
   const handleLikeComment = async (idComment, type, isReply) => {
     try {
       if (isReply) {
-        const res = await api.post(`/notes/favorite_reply/${idComment}`, { idUser: user.id, type })
+        socket.emit('favorite_reply', { idReply: idComment, idUser: user.id, type })
       } else {
-        const res = await api.post(`/notes/favorite/${idComment}`, { idUser: user.id, type })
+        socket.emit('favorite_notes_comment', { idComment, idUser: user.id, type })
       }
-      fetchAllDataComments()
     } catch (err) {
       console.error(err)
     }
