@@ -11,7 +11,7 @@ import Swal from 'sweetalert2'
 
 const Photo = () => {
  const appContext = useContext(AppContext)
- const { user, setSnackbar } = appContext
+ const { user } = appContext
 
  const [photoList, setPhotoList] = useState([])
  const [imagesCheckList, setImagesCheckList] = useState([])
@@ -36,16 +36,17 @@ const Photo = () => {
   })
  }
 
+ console.log('photoList', photoList)
+
  useEffect(() => {
   if (!user?.id) return
 
   fetchPhotoList()
  }, [user])
 
- const handleDeleteImages = () => {
-  const slectedImages = [...checkedItems]
-  if (setCheckedItems.length < 1) return
+ const slectedImages = [...checkedItems]
 
+ const handleDeleteImages = () => {
   const imagesDelete = imagesCheckList.filter((item) =>
    slectedImages.some((id) => item.id_images === id)
   )
@@ -71,12 +72,6 @@ const Photo = () => {
        if (index === imagesDelete.length - 1) {
         fetchPhotoList()
         setCheckedItems(new Set())
-
-        setSnackbar({
-         isOpen: true,
-         message: `Delete images success!`,
-         severity: 'success',
-        })
        }
       }
      )
@@ -95,10 +90,10 @@ const Photo = () => {
    <div className='flex gap-2 justify-center items-center'>
     <PhotoIcon className='text-5xl' />
 
-    <h5 className='text-3xl'>All Photo({photoList.length})</h5>
+    <h5 className='text-3xl'>All Photo({imagesCheckList.length})</h5>
    </div>
 
-   {photoList.length > 1 ? (
+   {photoList.length > 0 ? (
     <>
      <div className='flex justify-end gap-3'>
       <div>
@@ -119,8 +114,13 @@ const Photo = () => {
 
       <div>
        <button
+        disabled={slectedImages.length < 1}
         onClick={handleDeleteImages}
-        className='flex items-center text-white text-3xl bg-[#ff0000] rounded-lg px-2 py-1 cursor-pointer ease-in duration-200 hover:bg-red-600'
+        className={`flex items-center text-white text-3xl bg-[#ff0000] rounded-lg px-2 py-1 ease-in duration-200 ${
+         slectedImages.length < 1
+          ? 'opacity-50 cursor-auto'
+          : 'opacity-100 cursor-pointer'
+        }`}
        >
         Delete <DeleteIcon className='text-3xl' />
        </button>

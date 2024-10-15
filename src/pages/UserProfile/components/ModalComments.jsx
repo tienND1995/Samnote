@@ -5,7 +5,7 @@ import SendIcon from '@mui/icons-material/Send';
 import { formatTimeAgo } from '../../../utils/utils';
 import { io } from 'socket.io-client'
 
-const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
+const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
   const [dataComments, setDataComments] = useState([])
   const [contentComment, setContentComment] = useState('')
   const [contentReplyComment, setContentReplyComment] = useState('')
@@ -15,12 +15,12 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
 
   const fetchAllDataComments = useCallback(async () => {
     try {
-      const res = await api.get(`/notes/notes-comment/${idNote}`)
+      const res = await api.get(`/notes/notes-comment/${infoNote.idNote}`)
       setDataComments(res.data.data)
     } catch (err) {
       console.error(err)
     }
-  }, [idNote])
+  }, [infoNote])
 
   useEffect(() => {
     fetchAllDataComments()
@@ -37,104 +37,38 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
     })
 
     ws.on('new_comment', (newComment) => {
-      if (idNote !== newComment.idNote) {
+      if (infoNote.idNote !== newComment.idNote) {
         return
       }
       console.log('Received new comment:', newComment)
       fetchAllDataComments()
       setReload((prev) => prev + 1)
-      // if (newComment.parent_id === 0) {
-      //   setDataComments(prevComments => [...prevComments, newComment])
-      // } else {
-      //   setDataComments(prevComments => {
-      //     const updatedComments = [...prevComments]
-      //     const parentCommentIndex = updatedComments.findIndex(comment => comment.id === newComment.parent_id)
-      //     if (parentCommentIndex !== -1) {
-      //       updatedComments[parentCommentIndex].reply_comments = [...updatedComments[parentCommentIndex].reply_comments, newComment]
-      //     }
-      //     return updatedComments
-      //   })
-      // }
     })
 
     ws.on('favorite_comment', (favoriteComment) => {
-      if (favoriteComment.idNote !== idNote) {
+      if (favoriteComment.idNote !== infoNote.idNote) {
         return
       }
       console.log('Received favorite comment:', favoriteComment)
       fetchAllDataComments()
-
-      // setDataComments(prevComments => {
-      //   const updatedComments = prevComments.map(comment => {
-      //     if (comment.id === favoriteComment.idComment) {
-      //       return updateFavoriteComment(comment, favoriteComment.type);
-      //     } else if (comment.reply_comments &&
-      //       comment.reply_comments.some(reply => reply.id === favoriteComment.idComment)) {
-      //       return {
-      //         ...comment,
-      //         reply_comments: comment.reply_comments.map(reply => {
-      //           if (reply.id === favoriteComment.idComment) {
-      //             return updateFavoriteComment(reply, favoriteComment.type);
-      //           }
-      //           return reply;
-      //         })
-      //       };
-      //     }
-      //     return comment;
-      //   });
-      //   return updatedComments;
-      // });
     })
-
-    // ws.onopen = (event) => {
-    //     console.log('Connected to WebSocket server')
-    // }
-
-    // ws.onmessage = (event) => {
-    //     console.log('Received from server:', event.data);
-    // }
 
     return () => {
       ws.disconnect()
     }
-  }, [idNote])
-
-  const updateFavoriteComment = (comment, type) => ({
-    ...comment,
-    [type]: comment[type] + 1,
-  });
-
-  const sendComment = (parentsNoteId, content) => {
-    try {
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-          action: 'create_comment',
-          parent_id: parentsNoteId,
-          sendAt: new Date().toISOString(),
-          content: content,
-          idNote: idNote,
-          idUser: user.id,
-        }));
-        setContentComment('')
-        setContentReplyComment('')
-      }
-    } catch (err) {
-      console.error(err)
-    }
-  };
+  }, [infoNote])
 
   const handleSubmitComment = async (parentsNoteId) => {
     const content = parentsNoteId ? contentReplyComment : contentComment
     if (content.trim() === '') {
       return
     }
-    //sendComment(parentsNoteId, content)
     try {
-      const res = await api.post(`/notes/notes-comment/${idNote}`, {
+      const res = await api.post(`/notes/notes-comment/${infoNote.idNote}`, {
         parent_id: parentsNoteId,
         sendAt: new Date().toISOString(),
         content: content,
-        idNote: idNote,
+        idNote: infoNote.idNote,
         idUser: user.id,
       })
       setContentComment('')
@@ -146,9 +80,13 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
     }
   }
 
-  const handleLikeComment = async (idComment, type) => {
+  const handleLikeComment = async (idComment, type, isReply) => {
     try {
-      await api.post(`/notes/favorite/${idComment}`, { idUser: user.id, type })
+      if (isReply) {
+        const res = await api.post(`/notes/favorite_reply/${idComment}`, { idUser: user.id, type })
+      } else {
+        const res = await api.post(`/notes/favorite/${idComment}`, { idUser: user.id, type })
+      }
       fetchAllDataComments()
     } catch (err) {
       console.error(err)
@@ -183,7 +121,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
         <div className="modal-dialog-container w-[45rem] max-w-[70%] max-h-[90vh] pointer-events-auto">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">Comments</h5>
+              <h5 className="modal-title font-bold truncate-text">{infoNote.title}'s Comments</h5>
               <button type="button" className="btn-close" onClick={() => setIsShowModalComments(false)}></button>
             </div>
             <div className="modal-body">
@@ -228,7 +166,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
                                                                             absolute top-[-100%] right-[7%]'>
                                 <div
                                   className='like cursor-pointer flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300'
-                                  onClick={() => handleLikeComment(comment.id, 'like')}
+                                  onClick={() => handleLikeComment(comment.id, 'like', false)}
                                 >
                                   <svg
                                     width='1rem'
@@ -240,7 +178,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
                                 </div>
                                 <div
                                   className='dislike cursor-pointer flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300'
-                                  onClick={() => handleLikeComment(comment.id, 'dislike')}
+                                  onClick={() => handleLikeComment(comment.id, 'dislike', false)}
                                 >
                                   <svg
                                     width='1rem'
@@ -272,7 +210,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
                             seeReplyStates[index] ? (
                               <div className="replies-list flex flex-col">
                                 {comment.reply_comments.map((reply) => (
-                                  <div key={reply.id} className='flex flex-row'>
+                                  <div key={reply.id_reply} className='flex flex-row'>
                                     <div className='line-reply-straight ml-[19px]'>
                                       <div className='bg-gray-200 h-full w-[2px]' />
                                     </div>
@@ -300,14 +238,14 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
                                         </div>
                                         <div className="reply-actions d-flex align-items-center mt-1 ml-2 relative">
                                           <div className='amount-like-dislike flex flex-row gap-1'>
-                                            <p className="text-sm mr-5 mb-0">Like: {reply.like || 0}</p>
-                                            <p className="text-sm mr-5 mb-0">Dislike: {reply.dislike || 0}</p>
+                                            <p className="text-sm mr-5 mb-0">Like: {reply.like_count || 0}</p>
+                                            <p className="text-sm mr-5 mb-0">Dislike: {reply.dislike_count || 0}</p>
                                           </div>
                                           <div className='interacted-rely flex justify-end items-center gap-2 opacity-80
                                                                                                 absolute top-[-100%] right-[7%]'>
                                             <div
                                               className='like cursor-pointer flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300'
-                                              onClick={() => handleLikeComment(reply.id, 'like')}
+                                              onClick={() => handleLikeComment(reply.id_reply, 'like', true)}
                                             >
                                               <svg
                                                 width='1rem'
@@ -319,7 +257,7 @@ const ModalComments = ({ idNote, setIsShowModalComments, setReload }) => {
                                             </div>
                                             <div
                                               className='dislike cursor-pointer flex items-center p-2 rounded-full bg-gray-200 hover:bg-gray-300'
-                                              onClick={() => handleLikeComment(reply.id, 'dislike')}
+                                              onClick={() => handleLikeComment(reply.id_reply, 'dislike', true)}
                                             >
                                               <svg
                                                 width='1rem'

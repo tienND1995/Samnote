@@ -1,11 +1,12 @@
 import { useContext, useEffect, useState } from 'react'
 
+import { useLocation } from 'react-router-dom'
+
 import { AppContext } from '../../context'
 import { fetchNoteList } from './fetchApiEditNote'
 
 import FormEdit from './components/FormEdit.jsx'
 import NoteList from './components/NoteList.jsx'
-import './EditNote.css'
 
 const EditNote = () => {
  const appContext = useContext(AppContext)
@@ -14,6 +15,8 @@ const EditNote = () => {
 
  const [nameEvent, setNameEvent] = useState(null)
 
+ const { state } = useLocation()
+
  //  .................................
 
  const disPatchNameEvent = (name) => setNameEvent(name)
@@ -21,9 +24,16 @@ const EditNote = () => {
 
  const getNoteList = async () => {
   const data = await fetchNoteList(user?.id)
+
   setNoteList(data)
   setNameEvent(null)
  }
+
+ useEffect(() => {
+  if (!state) return
+  if (!state.typeNoteId) return disPatchNameEvent(state)
+
+ }, [state])
 
  useEffect(() => {
   if (user?.id || nameEvent !== null) {
@@ -58,11 +68,10 @@ const EditNote = () => {
       noteList={noteList}
       onChangeNoteList={handleChangeNoteList}
       userID={user?.id}
-      onDispatchEventName={disPatchNameEvent}
      />
     </div>
     <div className='col flex'>
-     <FormEdit onDispatchName={disPatchNameEvent} />
+     {<FormEdit onDispatchName={disPatchNameEvent} />}
     </div>
    </div>
   </div>

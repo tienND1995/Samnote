@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Box, Typography, Tab, Avatar } from '@mui/material'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
@@ -7,10 +7,25 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import Checklist from './CheckList'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { handleErrorAvatar, convertApiToTime, isLightColor } from '../../../utils/utils'
+import Markdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
+import { useNavigate } from 'react-router-dom'
+import { AppContext } from '../../../context'
 
-const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, handleShowComments }) => {
-
+const ListNotes = (
+    {
+        typeNotes,
+        dataNotes,
+        userInfomations,
+        handleDeleteNote,
+        handleShowComments,
+        handleLikeNote,
+    }
+) => {
     const [tabValue, setTabValue] = useState('1')
+    const appContext = useContext(AppContext)
+    const { user } = appContext
+    const navigate = useNavigate()
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue)
@@ -31,7 +46,8 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                         }}
                     >
                         <Box component='h4' className='font-bold text-2xl mx-2'>
-                            {typeNotes}
+                            <span className='text-capitalize'>{typeNotes}</span>
+                            <span> notes</span>
                         </Box>
                         <MoreHorizIcon sx={{ cursor: 'pointer', color: 'text.main' }} />
                     </div>
@@ -58,22 +74,20 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                 <TabPanel value='1' className='w-full p-0'>
                     {dataNotes.length > 0 ? (
                         <Swiper
-                            spaceBetween={20}
-                            slidesPerView={2.5}
+                            spaceBetween={16}
+                            slidesPerView='auto'
                             navigation={{
                                 prevEl: '.swiper-button-prev',
                                 nextEl: '.swiper-button-next',
                             }}
                             className='swiper-privateNotes overflow-x-auto'
                         >
-                            {dataNotes.map((info, index) => (
+                            {dataNotes.map((info) => (
                                 <SwiperSlide
-                                    key={index}
-                                    className={`p-2 border-[1px] rounded-xl border-black border-solid mb-1
-                                                ${isLightColor(info.color)
-                                            ? 'text-black'
-                                            : 'text-white'
-                                        }`}
+                                    key={info.idNote}
+                                    className={`relative pb-3 border-[1px] rounded-xl border-black border-solid mb-2 min-w-[22rem]
+                                                ${isLightColor(info.color) ? 'text-black' : 'text-white'}
+                                                ${dataNotes.length === 1 ? 'w-full' : dataNotes.length === 2 ? `w-[49%]` : 'w-[22rem]'}`}
                                     style={{
                                         backgroundColor: `rgba(${info.color.r}, ${info.color.g}, ${info.color.b}, ${info.color.a})`,
                                     }}
@@ -81,7 +95,7 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                                     <div
                                         style={{
                                             display: 'flex',
-                                            margin: '10px 16px',
+                                            margin: '10px 20px 0 20px',
                                             alignItems: 'center',
                                             justifyContent: 'space-between',
                                         }}
@@ -106,11 +120,11 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                                                         ? userInfomations.Avarta
                                                         : '/src/assets/avatar-default.png'
                                                 }
-                                                alt=''
+                                                alt='avatar-user'
                                                 onError={handleErrorAvatar}
                                             />
                                             <Box sx={{ color: 'text.main' }}>
-                                                <p style={{ margin: 0, fontSize: '1.2rem' }}>
+                                                <p className='text-capitalize max-w-[150px] truncate-text' style={{ margin: 0, fontSize: '1.2rem' }}>
                                                     <strong>{userInfomations.name}</strong>
                                                 </p>
                                                 <p style={{ margin: 0, opacity: '0.8' }}>
@@ -142,47 +156,29 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                                             </svg>
                                         </div>
                                     </div>
-                                    <Box
-                                        component='div'
-                                        sx={{
-                                            color: 'text.main',
-                                            margin: '10px 10px 0px',
-                                            height: '160px',
-                                            overflow: 'hidden',
-                                        }}
+                                    <div
+                                        className={`h-[10rem] overflow-hidden px-4 py-2 rounded-lg
+                                                    ${user.id === userInfomations.id ? 'cursor-pointer hover:bg-opacity-20 hover:bg-gray-500 transition-colors duration-200' : ''}`}
+                                        onClick={() => user.id === userInfomations.id && navigate(`/editnote/${info.idNote}`)}
                                     >
                                         <strong style={{ fontSize: '20px' }}>{info.title}</strong>
-                                        {info.type === 'checkList' || info.type === 'checklist' ? (
-                                            <>
-                                                <Checklist data={info.data.slice(0, 3)} />
-                                                {info.data.length - 3 > 0 && (
-                                                    <div className='font-bold'>
-                                                        +{info.data.length - 3} item hidden
-                                                    </div>
-                                                )}
-                                            </>
+                                        {info.type.toLowerCase() === 'checklist' ? (
+                                            <Checklist data={info.data.slice(0, 3)} />
                                         ) : (
-                                            <div
-                                                className='max-h-[100px] text-start overflow-hidden'
-                                                dangerouslySetInnerHTML={{
-                                                    __html: info.data,
-                                                }}
-                                            />
+                                            <div className='text-start truncate-text'>
+                                                {<Markdown rehypePlugins={[rehypeRaw]}>{info.data}</Markdown>}
+                                            </div>
                                         )}
-                                    </Box>
-                                    <Box
-                                        component='div'
-                                        sx={{
-                                            textAlign: 'end',
-                                            padding: '0 10px 0 0',
-                                        }}
-                                    >
-                                        <p style={{ margin: 0, opacity: '0.8' }}>
+                                    </div>
+                                    <div className='time-edit'>
+                                        <p className='text-end mt-2 mr-3 opacity-80'>
                                             Last edit at {convertApiToTime(info.updateAt)}
                                         </p>
-                                    </Box>
-                                    <div className='interacted-note flex justify-end items-center gap-3 pr-2 mt-2'>
-                                        <div className='like flex items-center gap-1 cursor-pointer'>
+                                    </div>
+                                    <div className='interacted-note flex justify-end items-center gap-3 pr-3 mt-2'>
+                                        <div className='like flex items-center gap-1 cursor-pointer'
+                                            onClick={() => handleLikeNote(info.idNote, 'like')}
+                                        >
                                             <svg
                                                 width='1rem'
                                                 height='1rem'
@@ -194,7 +190,9 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                                             </svg>
                                             <span>{info.like_count}</span>
                                         </div>
-                                        <div className='dislike flex items-center gap-1 cursor-pointer'>
+                                        <div className='dislike flex items-center gap-1 cursor-pointer'
+                                            onClick={() => handleLikeNote(info.idNote, 'dislike')}
+                                        >
                                             <svg
                                                 width='1rem'
                                                 height='1rem'
@@ -208,7 +206,7 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                                         </div>
                                         <div
                                             className='comment flex items-center gap-1 cursor-pointer'
-                                            onClick={() => handleShowComments(info.idNote)}
+                                            onClick={() => handleShowComments(info)}
                                         >
                                             <svg
                                                 width='1rem'
@@ -222,6 +220,15 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                                             <span>{info.comment_count}</span>
                                         </div>
                                     </div>
+                                    {typeNotes === 'pinned' &&
+                                        <div className='pin-icon absolute left-[50%] top-[0.2rem]'>
+                                            <img
+                                                className='w-[1.8rem] h-[2.5rem]'
+                                                src='/src/assets/pin-icon.png'
+                                                alt='pin-icon'
+                                            />
+                                        </div>
+                                    }
                                 </SwiperSlide>
                             ))}
                         </Swiper>
@@ -240,8 +247,8 @@ const ListNotes = ({ typeNotes, dataNotes, userInfomations, handleDeleteNote, ha
                         </Typography>
                     </Box>
                 </TabPanel>
-            </TabContext>
-        </Box>
+            </TabContext >
+        </Box >
     )
 }
 

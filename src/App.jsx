@@ -1,61 +1,57 @@
-import { useContext } from "react";
+import { useContext } from 'react'
 
-import { Alert, Snackbar } from "@mui/material";
-import { Navigate, Route, Routes } from "react-router-dom";
-import "./App.css";
-import { AppContext } from "./context";
+import { Alert, Snackbar } from '@mui/material'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import './App.css'
+import { AppContext } from './context'
 
-import RootLayout from "./layout/RootLayout";
+import RootLayout from './layout/RootLayout'
 
-import {
- Photo,
- EditNote,
- CreateNote,
- Group,
- AnonymousMessage,
- Home,
- UserDustbin,
- UserProfile,
-//  UserSetting,
- UserSketch,
-} from './pages'
 import AuthLayout from './layout/AuthLayout/AuthLayout'
-import SignIn from './layout/AuthLayout/SignIn'
-import Register from './layout/AuthLayout/Register'
 import ForgotPassword from './layout/AuthLayout/ForgotPassword'
+import Register from './layout/AuthLayout/Register'
+import SignIn from './layout/AuthLayout/SignIn'
+import {
+    AnonymousMessage,
+    CreateNote,
+    Dustbin,
+    EditNote,
+    Group,
+    Home,
+    Photo,
+    //  UserSetting,
+    Sketch,
+    UserProfile,
+} from './pages'
 
-import UserSetting from "./pages/Setting/UserSetting";
+import UserSetting from './pages/Setting/UserSetting'
 
 const AppSnackbar = () => {
-  const appContext = useContext(AppContext);
-  const { snackbar, setSnackbar } = appContext;
-  const { isOpen, message, severity } = snackbar;
+ const appContext = useContext(AppContext)
+ const { snackbar, setSnackbar } = appContext
+ const { isOpen, message, severity } = snackbar
 
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
+ const handleCloseSnackbar = (event, reason) => {
+  if (reason === 'clickaway') {
+   return
+  }
 
-    setSnackbar({ isOpen: false, message: "", severity: "" });
-  };
+  setSnackbar({ isOpen: false, message: '', severity: '' })
+ }
 
-  return (
-    <Snackbar
-      open={isOpen}
-      autoHideDuration={1000}
-      onClose={handleCloseSnackbar}
-    >
-      <Alert
-        onClose={handleCloseSnackbar}
-        severity={severity}
-        variant="filled"
-        sx={{ width: "100%" }}
-      >
-        {message}
-      </Alert>
-    </Snackbar>
-  );
-};
+ return (
+  <Snackbar open={isOpen} autoHideDuration={1000} onClose={handleCloseSnackbar}>
+   <Alert
+    onClose={handleCloseSnackbar}
+    severity={severity}
+    variant='filled'
+    sx={{ width: '100%' }}
+   >
+    {message}
+   </Alert>
+  </Snackbar>
+ )
+}
 
 function App() {
  return (
@@ -70,23 +66,28 @@ function App() {
 
     <Route path='/' exact element={<Home />} />
     <Route path='*' element={<Navigate replace to='/' />} />
-    
+
     <Route element={<RootLayout />}>
      <Route path='/user/setting' element={<UserSetting />} />
-     <Route path='/user/sketch' element={<UserSketch />} />
-     <Route path='/user/dustbin' element={<UserDustbin />} />
+
      <Route path='/user/incognito' element={<AnonymousMessage />} />
      {/* ................................ */}
      <Route path='/photo' element={<Photo />} />
      <Route path='/group' element={<Group />} />
      <Route path='/profile/:id' element={<UserProfile />} />
+
      <Route path='/editnote/:id' element={<EditNote />} />
      <Route path='/editnote' exact element={<EditNote />} />
      <Route path='/create-note' element={<CreateNote />} />
+
+     <Route path='/sketch' element={<Sketch />} />
+
+     <Route path='/dustbin' exact element={<Dustbin />} />
+     <Route path='/dustbin/:id' element={<Dustbin />} />
     </Route>
    </Routes>
   </main>
  )
 }
 
-export default App;
+export default App

@@ -38,7 +38,7 @@ const ModalChat = ({ dataMess, setIsModalMessage, messageIconRef }) => {
 
   return (
     <div
-      className='absolute bg-white right-0 top-[125%] w-[400px] max-h-[450px] shadow-lg 
+      className='absolute bg-white right-0 top-[125%] w-[300px] md:w-[400px] max-h-[450px] shadow-lg 
                     flex flex-col justify-center rounded-3 z-10 overflow-hidden'
       ref={chatRef}
     >
