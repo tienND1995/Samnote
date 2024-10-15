@@ -1,54 +1,54 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react';
 
-import { AppContext } from '../../context'
-import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
+import { AppContext } from '../../context';
+import { fetchApiSamenote } from '../../utils/fetchApiSamnote';
 
-import DeleteIcon from '@mui/icons-material/Delete'
-import PhotoIcon from '@mui/icons-material/Photo'
+import DeleteIcon from '@mui/icons-material/Delete';
+import PhotoIcon from '@mui/icons-material/Photo';
 
-import { useChecklist } from 'react-checklist'
-import Swal from 'sweetalert2'
+import { useChecklist } from 'react-checklist';
+import Swal from 'sweetalert2';
 
 const Photo = () => {
- const appContext = useContext(AppContext)
- const { user, setSnackbar } = appContext
+ const appContext = useContext(AppContext);
+ const { user, setSnackbar } = appContext;
 
- const [photoList, setPhotoList] = useState([])
- const [imagesCheckList, setImagesCheckList] = useState([])
+ const [photoList, setPhotoList] = useState([]);
+ const [imagesCheckList, setImagesCheckList] = useState([]);
 
  const { handleCheck, isCheckedAll, checkedItems, setCheckedItems } =
   useChecklist(imagesCheckList, {
    key: 'id_images',
    keyType: 'number',
-  })
+  });
 
  const fetchPhotoList = () => {
   fetchApiSamenote('get', `/profile/image_history/${user.id}`).then((data) => {
-   setPhotoList(data)
+   setPhotoList(data);
 
    // convert photo list to images check list
-   let newImageList = []
+   let newImageList = [];
    data.forEach((item) => {
-    newImageList = [...newImageList, ...item.image]
-   })
+    newImageList = [...newImageList, ...item.image];
+   });
 
-   setImagesCheckList(newImageList)
-  })
- }
+   setImagesCheckList(newImageList);
+  });
+ };
 
  useEffect(() => {
-  if (!user?.id) return
+  if (!user?.id) return;
 
-  fetchPhotoList()
- }, [user])
+  fetchPhotoList();
+ }, [user]);
 
  const handleDeleteImages = () => {
-  const slectedImages = [...checkedItems]
-  if (setCheckedItems.length < 1) return
+  const slectedImages = [...checkedItems];
+  if (setCheckedItems.length < 1) return;
 
   const imagesDelete = imagesCheckList.filter((item) =>
    slectedImages.some((id) => item.id_images === id)
-  )
+  );
 
   Swal.fire({
    title: 'Are you sure?',
@@ -61,34 +61,34 @@ const Photo = () => {
   }).then((result) => {
    if (result.isConfirmed) {
     imagesDelete.forEach(({ id_images, idNote }, index) => {
-     const data = new FormData()
-     data.append('id_user', user?.id)
-     data.append('id_images', id_images)
-     data.append('id_note', idNote)
+     const data = new FormData();
+     data.append('id_user', user?.id);
+     data.append('id_images', id_images);
+     data.append('id_note', idNote);
 
      fetchApiSamenote('delete', '/profile/delete_image_profile', data).then(
       (response) => {
        if (index === imagesDelete.length - 1) {
-        fetchPhotoList()
-        setCheckedItems(new Set())
+        fetchPhotoList();
+        setCheckedItems(new Set());
 
         setSnackbar({
          isOpen: true,
          message: `Delete images success!`,
          severity: 'success',
-        })
+        });
        }
       }
-     )
-    })
+     );
+    });
     Swal.fire({
      title: 'Deleted!',
      text: 'Your image has been deleted.',
      icon: 'success',
-    })
+    });
    }
-  })
- }
+  });
+ };
 
  return (
   <div className='bg-[#181A1B] text-white w-full overflow-y-auto py-3 px-5'>
@@ -161,7 +161,7 @@ const Photo = () => {
     <h3>No photos available !</h3>
    )}
   </div>
- )
-}
+ );
+};
 
-export default Photo
+export default Photo;
