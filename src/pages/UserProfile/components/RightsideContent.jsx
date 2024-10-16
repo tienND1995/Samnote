@@ -56,7 +56,7 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userInfomations
     }
 
     return (
-        <div className='rightside col-lg-4 flex flex-column mb-4'>
+        <div className='rightside flex flex-column mb-4 w-full lg:w-[33%]'>
             <div className='quick-note-container w-[100%] h-[450px] bg-[#FFF4BA] rounded-xl p-4'>
                 <div className='flex justify-between w-full'>
                     <h2 className='font-bold text-gray-700 text-3xl'>Quick Note</h2>
@@ -79,79 +79,81 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userInfomations
                     onChange={(event) => setPayloadData(event.target.value)}
                 />
             </div>
-            <div className='new-users w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3'>
-                <span className='font-[700] text-[#888888] text-xl mb-3 ml-2'>New Users</span>
-                {lastUsers.length > 0 ? (
-                    <>
-                        <ul className='w-full overflow-y-auto flex-grow'>
-                            {lastUsers.slice(0, visibleMoreUsers).map(({ id, linkAvatar, user_name, createAt }) => (
-                                <li key={`${id}`} className="mb-2">
-                                    <Link
-                                        to={`/profile/${id}`}
-                                        className='w-full flex justify-around items-center my-1 link-dark text-decoration-none'
-                                    >
-                                        <div className='flex w-[60%] items-center gap-3'>
-                                            <img
-                                                className='w-[40px] h-[40px] rounded-xl object-cover'
-                                                src={linkAvatar || '/src/assets/avatar-default.png'}
-                                                alt='avatar'
-                                                onError={handleErrorAvatar}
-                                            />
-                                            <span className='truncate-text'>{user_name}</span>
+            <div className='flex flex-col md:flex-row lg:flex-col md:gap-3 lg:gap-0'>
+                <div className='new-users w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3'>
+                    <span className='font-[700] text-[#888888] text-xl mb-3 ml-2'>New Users</span>
+                    {lastUsers.length > 0 ? (
+                        <>
+                            <ul className='w-full overflow-y-auto flex-grow'>
+                                {lastUsers.slice(0, visibleMoreUsers).map(({ id, linkAvatar, user_name, createAt }) => (
+                                    <li key={`${id}`} className="mb-2">
+                                        <Link
+                                            to={`/profile/${id}`}
+                                            className='w-full flex justify-around items-center my-1 link-dark text-decoration-none'
+                                        >
+                                            <div className='flex w-[60%] items-center gap-3'>
+                                                <img
+                                                    className='w-[40px] h-[40px] rounded-full object-cover'
+                                                    src={linkAvatar || '/src/assets/avatar-default.png'}
+                                                    alt='avatar'
+                                                    onError={handleErrorAvatar}
+                                                />
+                                                <span className='truncate-text'>{user_name}</span>
+                                            </div>
+                                            <span className='text-sm'>
+                                                {createAt.split(' ').slice(1, 4).join(' ')}
+                                            </span>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                            {visibleMoreUsers < lastUsers.length && (
+                                <button
+                                    onClick={handleSeeMore(setVisibleMoreUsers)}
+                                    className='text-center text-blue-500 hover:text-blue-700 cursor-pointer mt-2'
+                                >
+                                    See more
+                                </button>
+                            )}
+                        </>
+                    ) : (
+                        <p className='text-center'>Not found new users</p>
+                    )}
+                </div>
+                <div className='new-notes w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3'>
+                    <span className='font-[700] text-[#888888] text-xl mb-[1.4rem] ml-2'>New Notes</span>
+                    {allNotePublic.length > 0 ? (
+                        <>
+                            <ul className='w-full overflow-y-auto flex-grow pl-3'>
+                                {allNotePublic.slice(0, visibleMoreNotes).map((item, index) => (
+                                    <li key={`notePublic ${index}`} className="mb-4">
+                                        <div className='w-full flex justify-around items-center'>
+                                            <span className='w-[25%] truncate-text'>
+                                                {item.author}
+                                            </span>
+                                            <span className='w-[50%] truncate-text'>
+                                                Create a new public note
+                                            </span>
+                                            <span className='text-xs w-[20%] truncate-text'>
+                                                {formatTimeAgo(item.update_at)}
+                                            </span>
                                         </div>
-                                        <span className='text-sm'>
-                                            {createAt.split(' ').slice(1, 4).join(' ')}
-                                        </span>
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                        {visibleMoreUsers < lastUsers.length && (
-                            <button
-                                onClick={handleSeeMore(setVisibleMoreUsers)}
-                                className='text-center text-blue-500 hover:text-blue-700 cursor-pointer mt-2'
-                            >
-                                See more
-                            </button>
-                        )}
-                    </>
-                ) : (
-                    <p className='text-center'>Not found new users</p>
-                )}
-            </div>
-            <div className='new-notes w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3'>
-                <span className='font-[700] text-[#888888] text-xl mb-[1.4rem] ml-2'>New Notes</span>
-                {allNotePublic.length > 0 ? (
-                    <>
-                        <ul className='w-full overflow-y-auto flex-grow px-3'>
-                            {allNotePublic.slice(0, visibleMoreNotes).map((item, index) => (
-                                <li key={`notePublic ${index}`} className="mb-4">
-                                    <div className='w-full flex justify-around items-center'>
-                                        <span className='w-[20%] truncate-text text-center'>
-                                            {item.author}
-                                        </span>
-                                        <span className='w-[55%] break-words truncate-text'>
-                                            Create a new public note
-                                        </span>
-                                        <span className='text-xs w-[15%] whitespace-nowrap'>
-                                            {formatTimeAgo(item.update_at)}
-                                        </span>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                        {visibleMoreNotes < allNotePublic.length && (
-                            <button
-                                onClick={handleSeeMore(setVisibleMoreNotes)}
-                                className='text-center text-blue-500 hover:text-blue-700 cursor-pointer mt-2'
-                            >
-                                See more
-                            </button>
-                        )}
-                    </>
-                ) : (
-                    <p className='text-center'>Not found new notes</p>
-                )}
+                                    </li>
+                                ))}
+                            </ul>
+                            {visibleMoreNotes < allNotePublic.length && (
+                                <button
+                                    onClick={handleSeeMore(setVisibleMoreNotes)}
+                                    className='text-center text-blue-500 hover:text-blue-700 cursor-pointer mt-2'
+                                >
+                                    See more
+                                </button>
+                            )}
+                        </>
+                    ) : (
+                        <p className='text-center'>Not found new notes</p>
+                    )}
+                </div>
             </div>
         </div >
     )

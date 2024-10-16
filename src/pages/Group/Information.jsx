@@ -28,18 +28,27 @@ const Information = (props) => {
    )
  }, [groupItem.idGroup])
 
- const fetchAllImageGroup = async (idGroup) => {
+ const fetchAllImageGroup = async () => {
   try {
    const response = await axios.get(
-    `https://samnote.mangasocial.online/group/allphoto/${idGroup}`
+    `https://samnote.mangasocial.online/group/allphoto/168`,
+    {
+     params: {
+      page: 1,
+     },
+    }
    )
 
    console.log('response', response)
    //    setImageList(response.data.data)
   } catch (error) {
-   console.log(error)
+   console.log('error', error)
   }
  }
+
+ useEffect(() => {
+  fetchAllImageGroup()
+ }, [])
 
  // hande click outside element
  useEffect(() => {

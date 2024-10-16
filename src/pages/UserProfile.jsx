@@ -442,7 +442,7 @@ const UserProfile = () => {
                         ({ id, linkAvatar, user_name, createAt }) => (
                           <li key={`${id}`}>
                             <Link
-                              to={`/other-user/${id}`}
+                              to={`/profile/${id}`}
                               className="w-full h-[15%] flex justify-between items-center my-1 ml-2 link-dark text-decoration-none"
                             >
                               <img

@@ -89,6 +89,7 @@ const Register = () => {
   register,
   handleSubmit,
   reset,
+  watch,
   formState: { errors },
  } = useForm({
   resolver: joiResolver(registerSchema),
@@ -137,13 +138,32 @@ const Register = () => {
      message: response.error,
      severity: 'error',
     })
+   } else {
+    setIsCreateAccount(true)
+    return setSnackbar({
+     isOpen: true,
+     message: response.error,
+     severity: 'error',
+    })
+   }
+  })
+ }
+
+ const handleResendConfirmMail = () => {
+  const gmail = watch('gmail')
+  fetchApiSamenote('post', '/resetPassword', { gmail }).then((data) => {
+   if (data?.error) {
+    return setSnackbar({
+     isOpen: true,
+     message: data.error,
+     severity: 'error',
+    })
    }
 
-   setIsCreateAccount(true)
    return setSnackbar({
     isOpen: true,
-    message: response.error,
-    severity: 'error',
+    message: 'Resend confirmation email successfully',
+    severity: 'success',
    })
   })
  }
@@ -184,6 +204,7 @@ const Register = () => {
 
       <div className='col-span-1'>
        <button
+        onClick={handleResendConfirmMail}
         type='button'
         className='bg-[#0E0F131C] w-full h-full text-[#08174E] cursor-pointer hover:bg-[#090c141c] ease-linear duration-200 rounded-lg flex justify-center items-center'
        >
