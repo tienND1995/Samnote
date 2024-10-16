@@ -33,6 +33,19 @@ const UserPanel = () => {
   const [userInfomations, setUserInformations] = useState(null);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [changeStatus, setChangeStatus] = useState(
+    window.innerWidth >= 992 ? "white" : "black"
+  );
+  useEffect(() => {
+    const handleResize = () => {
+      setChangeStatus(window.innerWidth >= 992 ? "white" : "black");
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+  console.log("changeStatus", changeStatus);
 
   const handleToggle = () => {
     setOpen(!open);
@@ -98,7 +111,10 @@ const UserPanel = () => {
     {
       name: "incognito",
       icon: (
-        <IconChatUnknow className="size-[25px] lgEqual:size-[30px] xl:size-[35px] " />
+        <IconChatUnknow
+          className="size-[25px] lgEqual:size-[30px] xl:size-[35px] "
+          fill={changeStatus}
+        />
       ),
       url: "/user/incognito",
       state: { userInfomations: null },
@@ -144,10 +160,7 @@ const UserPanel = () => {
   return (
     <>
       {" "}
-      <Box
-        id="navbar"
-        // className="bg-gray-700 text-white w-full pt-3 flex items-lgEqual-center flex-col gap-3"
-      >
+      <Box id="navbar">
         <NavLink
           to={`/profile/${user.id}`}
           className="flex items-center cursor-pointer lgEqual:hidden block"
@@ -213,7 +226,7 @@ const UserPanel = () => {
             onClick={handleToggle}
           >
             <div
-              className=" relative bg-[#F56852] text-white w-[120px] h-[100vh] pt-5 px-2 flex items-lgEqual-center flex-col gap-3"
+              className=" relative bg-[#F56852] text-white w-[200px] h-[100vh] pt-[80px] px-2 flex items-lgEqual-center flex-col gap-3"
               onClick={(event) => {
                 event.stopPropagation();
               }}
@@ -221,20 +234,21 @@ const UserPanel = () => {
               <span
                 style={{
                   position: "absolute",
-                  top: 10,
-                  right: 1,
+                  top: 5,
+                  right: 5,
                   backgroundColor: "#fff",
                   color: "#000",
+                  cursor: "pointer",
                 }}
                 onClick={handleToggle}
               >
                 <CloseIcon />
               </span>
-              {navbarItems.map((item, idx) => (
+              {navbarItems.slice(3).map((item, idx) => (
                 <NavLink
                   to={item.url}
                   key={idx}
-                  className="cursor-pointer lgEqual:block items-center flex w-full justify-center"
+                  className="cursor-pointer lgEqual:block items-center flex w-full justify-start"
                   title={item.name}
                   onClick={() => {
                     if (item.state) {
@@ -244,11 +258,14 @@ const UserPanel = () => {
                     }
                   }}
                 >
-                  <span className="text-white">{item.icon}</span>
+                  <span className="text-black mr-3 fw-bold">{item.icon}</span>
+                  <span className="text-black capitalize fw-bold">
+                    {item.name}
+                  </span>
                 </NavLink>
               ))}
               <button
-                className=""
+                className="flex text-black fw-bold"
                 onClick={() => {
                   const submit = confirm("Do you want to logout?");
                   if (submit) {
@@ -257,7 +274,11 @@ const UserPanel = () => {
                   }
                 }}
               >
-                <IconLogout className="size-[25px] lgEqual:size-[30px] xl:size-[35px] " />
+                <IconLogout
+                  className=" fw-bold size-[25px] lgEqual:size-[30px] xl:size-[35px] mr-3 "
+                  fill="black"
+                />
+                Logout
               </button>
             </div>
           </div>
