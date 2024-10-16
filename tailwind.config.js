@@ -15,6 +15,10 @@ export default {
    backgroundImage: {
     login: "url('/public/loginBackground.png')",
    },
+
+   colors: {
+    'red-rgba': 'rgba(255, 0, 0, .1)',
+  },
   },
  },
  plugins: [

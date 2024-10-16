@@ -63,14 +63,15 @@ const EditNote = () => {
    </div>
 
    <div className='grid grid-cols-1 xl:grid-cols-2 gap-3 flex-grow-1'>
-    <div className='flex flex-col xl:order-1 order-2'>
+    <div className='flex flex-col order-xl-1 order-2'>
      <NoteList
       noteList={noteList}
       onChangeNoteList={handleChangeNoteList}
       userID={user?.id}
      />
     </div>
-    <div className='flex xl:order-2 order-1'>
+
+    <div className='flex order-xl-2 order-1'>
      {<FormEdit onDispatchName={disPatchNameEvent} />}
     </div>
    </div>

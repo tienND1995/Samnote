@@ -15,7 +15,7 @@ const Dustbin = () => {
 
  const { state } = useLocation()
 
- console.log('state', state)
+ console.log('dustbinNotes', dustbinNotes)
 
  useEffect(() => {
   if (state || user) {

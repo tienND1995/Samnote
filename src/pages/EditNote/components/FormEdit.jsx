@@ -50,7 +50,6 @@ const FormEdit = ({ onDispatchName }) => {
   content: '',
  })
 
-
  const [colorList, setColorList] = useState([])
  const [folderList, setFolderList] = useState([])
  const [color, setColor] = useState({
