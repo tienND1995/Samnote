@@ -17,6 +17,7 @@ export default {
     login: "url('/public/loginBackground.png')",
    },
    screens: {
+    xsm: '500px',
     lgEqual: '992px',
    },
    colors: {
