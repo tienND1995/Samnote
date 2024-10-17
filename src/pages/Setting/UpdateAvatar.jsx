@@ -379,7 +379,7 @@ const UpdateAvatar = () => {
             disabled={!checkChange}
             variant={checkChange ? "contained" : "outlined"}
             type="submit"
-            className=" px-4 uppercase bg-white"
+            className=" px-4 uppercase bg-white text-black"
           >
             Update
           </Button>
