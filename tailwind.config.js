@@ -18,6 +18,7 @@ export default {
    },
    screens: {
     lgEqual: '992px',
+    
    },
    colors: {
     'red-rgba': 'rgba(255, 0, 0, .1)',

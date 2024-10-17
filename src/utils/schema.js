@@ -186,6 +186,7 @@ export const SettingDeleteAccountSchema = Joi.object({
     "string.empty": "Please enter a password",
   }),
 });
+
 export const SettingForgotPwSchema = Joi.object({
   gmail: Joi.string()
     .required()
