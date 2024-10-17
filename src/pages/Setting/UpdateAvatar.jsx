@@ -180,13 +180,106 @@ const UpdateAvatar = () => {
     setCheckChange(true);
   };
 
+  const deleteAccount = (data) => {
+    const payload = {
+      user_name: data.user_name,
+      password: data.password,
+    };
+
+    console.log("đã xóa", payload);
+    setLoading((prev) => ({ ...prev, loadingDeleteAccount: true }));
+    fetchApiSamenote("post", `/user/${user.id}`, payload)
+      .then((response) => {
+        if (response?.error) {
+          console.log("trả về ");
+          Swal.fire({
+            title: "Error!",
+            text: response.error,
+            icon: "error",
+          });
+        } else {
+          console.log("trả về ", response);
+          if (response?.status === 400) {
+            Swal.fire({
+              title: "Error!",
+              text: response.message,
+              icon: "error",
+            });
+          } else {
+            Swal.fire({
+              title: "Success",
+              text: response.message,
+              icon: "success",
+            });
+            setUser(response);
+          }
+        }
+      })
+      .catch((error) => {
+        return;
+      })
+      .finally(() => {
+        setLoading((prev) => ({ ...prev, loadingDeleteAccount: false }));
+      });
+  };
+  //quên mật khẩu
+  const [openForgotPassword, setOpenForgotPassword] = useState(false);
+
+  const {
+    handleSubmit: handleSubmitFogotPassword,
+    register: registerFogotPassword,
+    formState: { errors: errorsFogotPassword },
+  } = useForm({
+    resolver: joiResolver(SettingForgotPwSchema),
+    defaultValues: {
+      gmail: "",
+    },
+  });
+  console.log("lỗi quên mật khẩu ", errorsFogotPassword);
+
+  const handleForgotPassword = (data) => {
+    console.log("đã nhận quên mk");
+
+    const payload = {
+      gmail: data.gmail,
+    };
+    setLoading((prev) => ({ ...prev, loadingFogotPassword: true }));
+    fetchApiSamenote("post", "/resetPassword", payload)
+      .then((response) => {
+        if (response?.error) {
+          Swal.fire({
+            title: "Error!",
+            text: response.error,
+            icon: "error",
+          });
+        } else {
+          Swal.fire({
+            title: "Success",
+            text: response.message,
+            icon: "success",
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Lỗi:", error);
+        Swal.fire({
+          title: "Error!",
+          text: "An unexpected error occurred.",
+          icon: "error",
+        });
+      })
+      .finally(() => {
+        setLoading((prev) => ({ ...prev, loadingFogotPassword: false }));
+      });
+  };
+
   return (
     <div className="">
       <Typography
         variant="h5"
         sx={{
           marginTop: "20px",
-          color: "#6a53cc",
+          color: "#0FB7FF",
           fontSize: "22px",
           fontWeight: 700,
         }}
@@ -198,7 +291,7 @@ const UpdateAvatar = () => {
         action="submit"
         className="gap-3 flex flex-col"
       >
-        <div className="flex items-center">
+        <div className="flex items-md-center items-start flex-md-row flex-col gap-2">
           <label htmlFor="" className="w-[300px]">
             Avatar:
           </label>
@@ -227,14 +320,14 @@ const UpdateAvatar = () => {
           </div>
         </div>
 
-        <div className="flex items-center">
+        <div className="flex items-md-center items-start flex-md-row flex-col gap-2">
           <label className="w-[300px]">Name:</label>
 
           <div className="flex flex-col">
             <TextField
               type="text"
               placeholder="name..."
-              className="sm:w-[300px] form-control w-[200px]"
+              className="w-[300px] form-control"
               {...register("name")}
             />
             {errors?.name && (
@@ -243,17 +336,17 @@ const UpdateAvatar = () => {
           </div>
         </div>
 
-        <div className="flex items-center max-w">
+        <div className="flex items-md-center items-start flex-md-row flex-col gap-2">
           <label className="w-[300px]">Email:</label>
 
           <TextField
             disabled
             type="text"
-            className="sm:w-[300px] form-control w-[200px]"
+            className="w-[300px] form-control"
             value={watch("gmail")}
           />
         </div>
-        <div className="flex items-center">
+        <div className="flex items-md-center items-start flex-md-row flex-col gap-2">
           <label htmlFor="" className="w-[300px]">
             Avatar Profile:
           </label>
@@ -291,15 +384,131 @@ const UpdateAvatar = () => {
             Update
           </Button>
 
-          <button type="button" className="btn btn-danger">
-            delete
+          <button
+            type="button"
+            onClick={() => {
+              openDeleteAccount();
+            }}
+            className="btn btn-danger"
+          >
+            Delete account
           </button>
         </div>
-
-        {/* {errors?.errorApi && (
-          <span className="text-red-400 mt-3">{errors.errorApi.message}</span>
-        )} */}
       </form>
+      {openDeleteTab ? (
+        <div className="bg-[rgba(153,153,153,0.6)] fixed top-0 left-0 bottom-0 right-0 text-white z-[100] flex items-center justify-center">
+          <div className="bg-black  px-4 py-5 gap-3 flex flex-col rounded-lg">
+            <h5>Delete this account?</h5>
+            <span>
+              *Confirm both passwords to delete the account permanently.
+            </span>
+            <form
+              action="submit"
+              className="flex gap-3 flex-col"
+              onSubmit={handleDeleteAccount(deleteAccount)}
+            >
+              {" "}
+              <div className="flex gap-3 flex-md-row flex-col">
+                {" "}
+                <div className="flex flex-col">
+                  {" "}
+                  <TextField
+                    className=" form-control w-[300px] bg-white rounded-md"
+                    label="User Name..."
+                    placeholder="Confim your user name"
+                    {...registerDeleteAccount("user_name")}
+                  />
+                  {errorsDeleteAccount?.user_name && (
+                    <span className="text-red-400 mt-3">
+                      {errorsDeleteAccount.user_name.message}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  {" "}
+                  <PasswordField
+                    className=" form-control w-[300px] bg-white rounded-md"
+                    label="Password..."
+                    placeholder="Confim your password"
+                    {...registerDeleteAccount("password")}
+                  />
+                  {errorsDeleteAccount?.password && (
+                    <span className="text-red-400">
+                      {errorsDeleteAccount.password.message}
+                    </span>
+                  )}
+                  <span
+                    className="cursor-pointer"
+                    onClick={() => setOpenForgotPassword(!openForgotPassword)}
+                  >
+                    Forgot password
+                  </span>
+                </div>
+              </div>
+              <div className="flex w-full justify-end gap-3 mt-7">
+                {" "}
+                <button type="submit" className="btn btn-danger w-[135px]">
+                  {!loadingDeleteAccount ? (
+                    "Delete account"
+                  ) : (
+                    <CircularProgress size={24} color="#fff" />
+                  )}
+                </button>
+                <button
+                  type="reset"
+                  onClick={() => {
+                    openDeleteAccount();
+                  }}
+                  className="btn bg-white"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+      {openForgotPassword && (
+        <div className="bg-[rgba(153,153,153,0.6)] fixed top-0 left-0 bottom-0 right-0 text-white z-[100] flex items-center justify-center">
+          <div className="bg-black px-4 py-5 gap-3 flex flex-col rounded-lg">
+            <h5>Forgot Password</h5>
+            <form
+              onSubmit={handleSubmitFogotPassword(handleForgotPassword)}
+              className="flex gap-3 flex-col"
+            >
+              <TextField
+                className="form-control w-[300px] bg-white rounded-md"
+                label="User Name..."
+                placeholder="Enter your user name"
+                {...registerFogotPassword("gmail")} // Đăng ký trường
+              />
+              {errorsFogotPassword?.gmail && (
+                <span className="text-red-400">
+                  {errorsFogotPassword.gmail.message}
+                </span>
+              )}
+              <div className="flex w-full justify-end gap-3 mt-7">
+                <button type="submit" className="btn btn-danger w-[80px]">
+                  {!loadingFogotPassword ? (
+                    "Submit"
+                  ) : (
+                    <CircularProgress size={24} color="#fff" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOpenForgotPassword(false)}
+                  className="btn bg-white"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
