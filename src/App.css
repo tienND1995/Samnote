@@ -125,6 +125,20 @@ li {
   display: none;
 }
 
+#navbar .item-navbar.active .item-icon-panel {
+  color: #198e39 !important;
+  transform: scale(1.5);
+  fill: #198e39 !important;
+}
+
+#navbar-mobile .relative .active {
+  background-color: #fff;
+}
+
+#navbar-mobile .relative .item-mobile:hover {
+  background-color: #fff;
+}
+
 @media (max-width: 992px) {
   #navbar {
     position: fixed;

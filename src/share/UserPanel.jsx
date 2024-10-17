@@ -40,6 +40,7 @@ const UserPanel = () => {
   const handleResize = () => {
    setChangeStatus(window.innerWidth >= 992 ? 'white' : 'black')
   }
+  
   window.addEventListener('resize', handleResize)
   return () => {
    window.removeEventListener('resize', handleResize)
