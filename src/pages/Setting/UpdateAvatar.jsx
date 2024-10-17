@@ -291,7 +291,7 @@ const UpdateAvatar = () => {
         action="submit"
         className="gap-3 flex flex-col"
       >
-        <div className="flex items-center">
+        <div className="flex items-md-center items-start flex-md-row flex-col gap-2">
           <label htmlFor="" className="w-[300px]">
             Avatar:
           </label>
@@ -320,14 +320,14 @@ const UpdateAvatar = () => {
           </div>
         </div>
 
-        <div className="flex items-center">
+        <div className="flex items-md-center items-start flex-md-row flex-col gap-2">
           <label className="w-[300px]">Name:</label>
 
           <div className="flex flex-col">
             <TextField
               type="text"
               placeholder="name..."
-              className="sm:w-[300px] form-control w-[200px]"
+              className="w-[300px] form-control"
               {...register("name")}
             />
             {errors?.name && (
@@ -336,17 +336,17 @@ const UpdateAvatar = () => {
           </div>
         </div>
 
-        <div className="flex items-center max-w">
+        <div className="flex items-md-center items-start flex-md-row flex-col gap-2">
           <label className="w-[300px]">Email:</label>
 
           <TextField
             disabled
             type="text"
-            className="sm:w-[300px] form-control w-[200px]"
+            className="w-[300px] form-control"
             value={watch("gmail")}
           />
         </div>
-        <div className="flex items-center">
+        <div className="flex items-md-center items-start flex-md-row flex-col gap-2">
           <label htmlFor="" className="w-[300px]">
             Avatar Profile:
           </label>
@@ -408,7 +408,7 @@ const UpdateAvatar = () => {
               onSubmit={handleDeleteAccount(deleteAccount)}
             >
               {" "}
-              <div className="flex gap-3 flex-row">
+              <div className="flex gap-3 flex-md-row flex-col">
                 {" "}
                 <div className="flex flex-col">
                   {" "}
@@ -486,7 +486,6 @@ const UpdateAvatar = () => {
               />
               {errorsFogotPassword?.gmail && (
                 <span className="text-red-400">
-                  
                   {errorsFogotPassword.gmail.message}
                 </span>
               )}

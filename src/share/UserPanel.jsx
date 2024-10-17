@@ -207,7 +207,7 @@ const UserPanel = () => {
           className="lgEqual:hidden block text-black text-[35px] cursor-pointer"
         />
         <Slide
-          timeout={1000}
+          // timeout={1000}
           direction="right"
           in={open}
           mountOnEnter
@@ -221,12 +221,12 @@ const UserPanel = () => {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: "rgba(0,0,0,0.4)",
+              // backgroundColor: "rgba(0,0,0,0.4)",
             }}
             onClick={handleToggle}
           >
             <div
-              className=" relative bg-[#F56852] text-white w-[200px] h-[100vh] pt-[80px] px-2 flex items-lgEqual-center flex-col gap-3"
+              className=" relative bg-[#F56852] text-white w-[200px] h-[100vh] pt-[80px]  flex items-lgEqual-center flex-col "
               onClick={(event) => {
                 event.stopPropagation();
               }}
@@ -248,7 +248,7 @@ const UserPanel = () => {
                 <NavLink
                   to={item.url}
                   key={idx}
-                  className="cursor-pointer lgEqual:block items-center flex w-full justify-start"
+                  className="item-mobile cursor-pointer lgEqual:block items-center flex w-full justify-start py-[10px] px-[5px]"
                   title={item.name}
                   onClick={() => {
                     if (item.state) {
@@ -265,7 +265,7 @@ const UserPanel = () => {
                 </NavLink>
               ))}
               <button
-                className="flex text-black fw-bold"
+                className="item-mobile flex text-black fw-bold py-[10px] px-[5px]"
                 onClick={() => {
                   const submit = confirm("Do you want to logout?");
                   if (submit) {

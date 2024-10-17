@@ -8,6 +8,7 @@ import bg_chat from "../../assets/img-chat-an-danh.jpg";
 import MenuSelect from "../../assets/menuselect.jsx";
 import SearchUnknowMessage from "./SearchUnknowMessage.jsx";
 import InputMessage from "./InputMessage";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import DeleteIcon from "@mui/icons-material/Delete";
 import "./AnonymousMess.css";
 
@@ -200,7 +201,7 @@ const AnonymousMessage = () => {
   };
 
   return (
-    <Box className="text-white lg:flex bg-[#DFFFFE] w-full h-screen">
+    <Box className="text-white lg:flex bg-[#DFFFFE] w-full h-screen relative ">
       <Box
         className="w-[400px]"
         sx={{
@@ -396,24 +397,36 @@ const AnonymousMessage = () => {
         </Box>
       </Box>
       {info.length !== 0 && (
-        <div className="w-[100%] h-[100vh] shadow-[0_0_10px_rgba(0,0,0,0.2)]">
+        <div className="w-[100%] h-[100vh] shadow-[0_0_10px_rgba(0,0,0,0.2)] sm:fixed top-0 bottom-0 left-0 right-0 z-[1000]">
           {" "}
-          <div className="w-full h-[140px] shadow-[0_0_10px_rgba(0,0,0,0.2)] items-center flex justify-between px-4">
+          <div className="w-full h-[140px] bg-white shadow-[0_0_10px_rgba(0,0,0,0.2)] items-center flex justify-between px-4">
             <div className="w-full h-[140px] items-center flex">
+              <p
+                className="text-[50px] text-black"
+                onClick={() => {
+                  setShowChatBox((prev) => ({
+                    ...prev,
+                    info: [],
+                  }));
+                }}
+              >
+                <ChevronLeftIcon className="text-[50px] mr-[10px] cursor-pointer rounded-full size-[60px] hover:bg-[rgba(0,0,0,0.1)]" />
+              </p>
               <Avatar sx={{ width: "90px", height: "90px" }} src={avatar} />
               <p className="text-black text-[40px] font-bold capitalize ml-2">
                 {username}
               </p>
             </div>
             <div className="relative">
-              {/* Khi click vào MenuSelect sẽ bật/tắt menu */}
-              <div onClick={selectMenu}>
+              <div
+                onClick={selectMenu}
+                className="flex items-center text-[50px] justify-center cursor-pointer rounded-full size-[60px] hover:bg-[rgba(0,0,0,0.1)]"
+              >
                 <MenuSelect className="cursor-pointer" />
               </div>
 
               {status.showSelectMenu && (
                 <>
-                  {/* Lớp phủ full màn hình */}
                   <div
                     className="anonimuos-overlay"
                     onClick={() =>
@@ -421,7 +434,6 @@ const AnonymousMessage = () => {
                     }
                   ></div>
 
-                  {/* Dropdown menu */}
                   <div className="dropdown-menu-anonimuos">
                     <ul>
                       <li>
