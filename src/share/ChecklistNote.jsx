@@ -5,9 +5,11 @@ import CloseIcon from '@mui/icons-material/Close'
 const ChecklistNote = ({ checklist, setChecklist }) => {
  const [value, setValue] = useState('')
 
+ console.log('checklist', checklist)
+
  const handleChangeValue = (e) => setValue(e.target.value)
  const handleDeleteItem = (index) => {
-  setChecklist(checklist?.filter((_v, idx) => idx !== index))
+  setChecklist((prev) => prev?.filter((_v, idx) => idx !== index))
  }
 
  const handleAdd = (e) => {
@@ -31,10 +33,10 @@ const ChecklistNote = ({ checklist, setChecklist }) => {
  }
 
  return (
-  <div className='bg-white flex flex-col flex-grow-1'>
+  <div className='bg-white flex flex-col flex-grow-1 min-h-[300px]'>
    <div
     style={{ boxShadow: '0px 8px 10px 0px #00000026' }}
-    className='flex justify-center items-end p-3 gap-5'
+    className='flex justify-center items-end p-md-3 gap-md-5 p-1 py-2 gap-sm-3 gap-1'
    >
     <div>
      <input
@@ -50,7 +52,7 @@ const ChecklistNote = ({ checklist, setChecklist }) => {
     <button
      onClick={handleAdd}
      type='button'
-     className='btn btn-primary text-sm'
+     className='btn btn-primary sm:text-sm text-[10px]'
     >
      ADD
     </button>

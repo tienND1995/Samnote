@@ -179,7 +179,7 @@ export const SettingForgotPw2Schema = Joi.object({
 
 export const SettingDeleteAccountSchema = Joi.object({
   user_name: Joi.string().required().messages({
-    "string.empty": "Please enter your user name",
+    "string.empty": "Please enter a email or user name",
   }),
 
   password: Joi.string().required().messages({

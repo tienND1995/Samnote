@@ -16,7 +16,7 @@ import configs from '../../../configs/configs.json'
 
 const { API_SERVER_URL } = configs
 
-const AddImages = ({ userId, noteId, onDispatchName, onGetNoteId }) => {
+const AddImages = ({ userId, noteId, updateNotes, onGetNoteId }) => {
  const appContext = useContext(AppContext)
  const { setSnackbar } = appContext
 
@@ -79,7 +79,7 @@ const AddImages = ({ userId, noteId, onDispatchName, onGetNoteId }) => {
 
    // update affter add image
    handleHideModal()
-   onDispatchName('add images')
+   updateNotes && updateNotes()
    onGetNoteId()
   } catch (error) {
    console.error(error)
@@ -125,7 +125,7 @@ const AddImages = ({ userId, noteId, onDispatchName, onGetNoteId }) => {
        htmlFor='file-editnote-imageupload'
        className='flex cursor-pointer'
       >
-       <AddPhotoAlternateIcon className='text-[40px]' />
+       <AddPhotoAlternateIcon className='md:text-[40px] text-3xl' />
       </label>
      </div>
 
@@ -141,7 +141,7 @@ const AddImages = ({ userId, noteId, onDispatchName, onGetNoteId }) => {
         </button>
        </div>
 
-       <ul className='row flex-nowrap row-cols-6 overflow-x-auto mx-0 style-scrollbar-x style-scrollbar-x-sm pb-2'>
+       <ul className='row flex-nowrap row-cols-3 row-cols-md-6 overflow-x-auto mx-0 style-scrollbar-x style-scrollbar-x-sm pb-2'>
         {uploadImageList?.map(({ id, thumb }) => (
          <li key={id} className='position-relative col px-1'>
           <img

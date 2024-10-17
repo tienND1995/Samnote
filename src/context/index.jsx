@@ -2,7 +2,6 @@
 import { createContext, useState, useEffect } from 'react'
 import { USER } from '../utils/constant'
 import axios from 'axios'
-import { fetchApiSamenote } from '../utils/fetchApiSamnote'
 
 export const AppContext = createContext(null)
 
@@ -17,7 +16,7 @@ const AppProvider = ({ children }) => {
  })
 
  useEffect(() => {
-  if (user) {
+  if (user && user.id) {
    // Gọi API mỗi 6 giây
    const interval = setInterval(() => {
     axios
