@@ -1,59 +1,66 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
-import api from '../../../api';
-import { AppContext } from '../../../context';
-import SendIcon from '@mui/icons-material/Send';
-import { formatTimeAgo } from '../../../utils/utils';
-import { io } from 'socket.io-client';
+import React, { useState, useEffect, useContext, useCallback } from 'react'
+import api from '../../../api'
+import { AppContext } from '../../../context'
+import SendIcon from '@mui/icons-material/Send'
+import { formatTimeAgo } from '../../../utils/utils'
+import { io } from 'socket.io-client'
 
 const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
- const [dataComments, setDataComments] = useState([]);
- const [contentComment, setContentComment] = useState('');
- const [contentReplyComment, setContentReplyComment] = useState('');
- const appContext = useContext(AppContext);
- const { user } = appContext;
- const [socket, setSocket] = useState(null);
+ const [dataComments, setDataComments] = useState([])
+ const [contentComment, setContentComment] = useState('')
+ const [contentReplyComment, setContentReplyComment] = useState('')
+ const appContext = useContext(AppContext)
+ const { user } = appContext
+ const [socket, setSocket] = useState(null)
 
  const fetchAllDataComments = useCallback(async () => {
   try {
-   const res = await api.get(`/notes/notes-comment/${infoNote.idNote}`);
-   setDataComments(res.data.data);
+   const res = await api.get(`/notes/notes-comment/${infoNote.idNote}`)
+   setDataComments(res.data.data)
   } catch (err) {
-   console.error(err);
+   console.error(err)
   }
- }, [infoNote]);
+ }, [infoNote])
 
  useEffect(() => {
-  fetchAllDataComments();
- }, [fetchAllDataComments]);
-
- console.log('dataComments', dataComments);
- console.log('infoNote', infoNote);
+  fetchAllDataComments()
+ }, [fetchAllDataComments])
 
  useEffect(() => {
-  const ws = io('https://samnote.mangasocial.online');
+  const ws = io('https://samnote.mangasocial.online')
+  setSocket(ws)
 
   ws.on('connect', () => {
-   console.log('Connected to WebSocket server');
-   setSocket(ws);
-  });
- }, []);
+   console.log('Connected to WebSocket server')
+  })
+
+  return () => {
+   ws.disconnect()
+  }
+ }, [])
 
  useEffect(() => {
-  if (!socket) return;
+  if (!socket) return
+
+  fetchAllDataComments()
 
   socket.on('favorite_notes_comment', (data) => {
-   console.log('data', data);
-  });
+   if (infoNote.idNote === data.idNote) {
+    fetchAllDataComments()
+   }
+  })
 
-  socket.on('favorite_notes', (data) => {
-    console.log('data', data);
-   });
- }, [socket]);
+  socket.on('favorite_reply', (data) => {
+   if (infoNote.idNote === data.idNote) {
+    fetchAllDataComments()
+   }
+  })
+ }, [socket])
 
  const handleSubmitComment = async (parentsNoteId) => {
-  const content = parentsNoteId ? contentReplyComment : contentComment;
+  const content = parentsNoteId ? contentReplyComment : contentComment
   if (content.trim() === '') {
-   return;
+   return
   }
   try {
    const res = await api.post(`/notes/notes-comment/${infoNote.idNote}`, {
@@ -62,59 +69,52 @@ const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
     content: content,
     idNote: infoNote.idNote,
     idUser: user.id,
-   });
-   setContentComment('');
-   setContentReplyComment('');
-   fetchAllDataComments();
-   setReload((prev) => prev + 1);
+   })
+   setContentComment('')
+   setContentReplyComment('')
+   fetchAllDataComments()
+   setReload((prev) => prev + 1)
   } catch (err) {
-   console.error(err);
+   console.error(err)
   }
- };
+ }
 
  const handleLikeComment = async (idComment, type, isReply) => {
   try {
    if (isReply) {
-    const res = await api.post(`/notes/favorite_reply/${idComment}`, {
-     idUser: user.id,
-     type,
-    });
+    socket.emit('favorite_reply', { idReply: idComment, idUser: user.id, type })
    } else {
-    const res = await api.post(`/notes/favorite/${idComment}`, {
-     idUser: user.id,
-     type,
-    });
+    socket.emit('favorite_notes_comment', { idComment, idUser: user.id, type })
    }
-   fetchAllDataComments();
   } catch (err) {
-   console.error(err);
+   console.error(err)
   }
- };
+ }
 
  const [seeReplyStates, setSeeReplyStates] = useState(
   new Array(dataComments.length).fill(false)
- );
+ )
  const [isCreateReply, setIsCreateReply] = useState(
   new Array(dataComments.length).fill(false)
- );
+ )
 
  const handleSeeAllReply = (index, isShow) => {
-  setContentComment('');
-  setContentReplyComment('');
-  const newSeeReplyStates = [...seeReplyStates];
-  newSeeReplyStates[index] = isShow;
-  setSeeReplyStates(newSeeReplyStates);
- };
+  setContentComment('')
+  setContentReplyComment('')
+  const newSeeReplyStates = [...seeReplyStates]
+  newSeeReplyStates[index] = isShow
+  setSeeReplyStates(newSeeReplyStates)
+ }
 
  const handleShowCreateReply = (index) => {
-  setContentComment('');
-  setContentReplyComment('');
-  const newIsCreateReply = new Array(dataComments.length).fill(false);
+  setContentComment('')
+  setContentReplyComment('')
+  const newIsCreateReply = new Array(dataComments.length).fill(false)
   if (index !== -1) {
-   newIsCreateReply[index] = true;
+   newIsCreateReply[index] = true
   }
-  setIsCreateReply(newIsCreateReply);
- };
+  setIsCreateReply(newIsCreateReply)
+ }
 
  return (
   <>
@@ -396,7 +396,7 @@ const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
              </div>
             )}
            </div>
-          );
+          )
          })
         ) : (
          <p className='text-center'>No comments yet</p>
@@ -428,7 +428,7 @@ const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
     </div>
    </div>
   </>
- );
-};
+ )
+}
 
-export default ModalComments;
+export default ModalComments

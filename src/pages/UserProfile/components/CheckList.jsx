@@ -15,6 +15,7 @@ const Checklist = ({ data }) => {
                         style={{ marginRight: '5px' }}
                         type='checkbox'
                         checked={item.status}
+                        readOnly
                     />
                     {item.content}
                 </div>

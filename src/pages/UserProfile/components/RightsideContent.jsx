@@ -1,19 +1,44 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { Button, TextField } from '@mui/material'
 import { Link } from 'react-router-dom'
 import { handleErrorAvatar, formatTimeAgo } from '../../../utils/utils'
 import { AppContext } from '../../../context'
 import api from '../../../api'
 
-const RightsideContent = ({ lastUsers, allNotePublic, setReload, userInfomations }) => {
+const RightsideContent = ({ setReload, userInfomations }) => {
     const [payloadData, setPayloadData] = useState('')
     const appContext = useContext(AppContext)
     const { setSnackbar, user } = appContext
+    const [lastUsers, setLastUsers] = useState([])
+    const [allNotePublic, setAllNotePublic] = useState([])
     const [visibleMoreUsers, setVisibleMoreUsers] = useState(7)
     const [visibleMoreNotes, setVisibleMoreNotes] = useState(7)
 
     const handleSeeMore = (setter) => () => {
         setter((prevVisible) => prevVisible + 7)
+    }
+
+    useEffect(() => {
+        fetchLastUsers()
+        fetchAllNotePublic()
+    }, [])
+
+    const fetchLastUsers = async () => {
+        const response = await api.get('/lastUser')
+        if (response && response.data.status === 200) {
+            setLastUsers(response.data.data)
+        }
+    }
+
+    const fetchAllNotePublic = async () => {
+        try {
+            const response = await api.get('/notes_public')
+            if (response && response.data.message === 'success') {
+                setAllNotePublic(response.data.public_note)
+            }
+        } catch (err) {
+            console.log(err)
+        }
     }
 
     const handleCreateNote = async () => {
