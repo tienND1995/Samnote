@@ -2,8 +2,7 @@
 const Undo = () => {
  return (
   <svg
-   width='50'
-   height='50'
+   className="xsm:size-[50px] size-[40px]"
    viewBox='0 0 50 50'
    fill='none'
    xmlns='http://www.w3.org/2000/svg'
@@ -14,12 +13,10 @@ const Undo = () => {
     maskUnits='userSpaceOnUse'
     x='0'
     y='0'
-    width='50'
-    height='50'
+    className="xsm:size-[50px] size-[40px]"
    >
     <rect
-     width='50'
-     height='50'
+     className="xsm:size-[50px] size-[40px]"
      transform='matrix(-1 0 0 1 50 0)'
      fill='#D9D9D9'
     />

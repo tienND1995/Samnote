@@ -173,7 +173,7 @@ const Sketch = () => {
       </div>
      </form>
 
-     <div className='xl:col-span-1 md:col-span-1 md:max-h-[300px] min-h-[200px] mt-[23px] relative'>
+     <div className='xl:col-span-1 md:col-span-1 md:max-h-[300px] xsm:min-h-[200px] h-[150px] mt-[23px] relative'>
       <textarea
        className='size-full xl:text-xl md:text-[16px] text-[14px] relative lg:rounded-lg rounded-md outline-none p-xl-3 p-2'
        placeholder='Content...'
@@ -194,7 +194,7 @@ const Sketch = () => {
     </div>
    </div>
 
-   <div className='bg-white size-full flex'>
+   <div className='bg-white size-full flex xsm:flex-row flex-col'>
     <SketchBar
      onChangeColorCanvas={handleChangeColorCanvas}
      onChangeStrokeWidth={handleChangeStrokeWidth}
