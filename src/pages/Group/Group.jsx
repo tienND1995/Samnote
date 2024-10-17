@@ -139,6 +139,8 @@ const Group = () => {
    fetchUpdateSeenMessage(otherUser.idMessage)
   }
 
+  inputMessageFormRef.current.focus()
+
   getMessageList(user.id, otherUser.user.id)
   setInfoOtherUser(otherUser.user)
   resetGroup()
@@ -219,13 +221,14 @@ const Group = () => {
 
   inputMessageFormRef.current.focus()
 
-  fetchApiSamenote(
-   'get',
-   `/seen_message_group/${group.id_lastest_message_in_group}/${user?.id}`
-  ).then((response) => {
-   if (response.error) return
-   getAllMessageList()
-  })
+  group.id_lastest_message_in_group &&
+   fetchApiSamenote(
+    'get',
+    `/seen_message_group/${group.id_lastest_message_in_group}/${user?.id}`
+   ).then((response) => {
+    if (response.error) return
+    getAllMessageList()
+   })
  }
 
  //  handle setting group

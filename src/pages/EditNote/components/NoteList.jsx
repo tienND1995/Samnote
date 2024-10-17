@@ -8,11 +8,7 @@ import SkipPreviousIcon from '@mui/icons-material/SkipPrevious'
 import axios from 'axios'
 import NoteCard from '../../../share/NoteCard'
 
-const NoteList = ({
- noteList,
- userID,
- onChangeNoteList,
-}) => {
+const NoteList = ({ noteList, userID, onChangeNoteList, updateNotes }) => {
  const [noteListInitial, setNoteListInitial] = useState([])
 
  useEffect(() => {
@@ -53,25 +49,26 @@ const NoteList = ({
      style={{ boxShadow: '4px 8px 10px 0px #00000073' }}
      className='bg-white rounded-3xl w-1/2 flex items-center px-3 py-[5px] gap-2'
     >
-     <SearchIcon className='text-3xl' />
+     <SearchIcon className='md:text-3xl text-2xl' />
      <input
       onChange={handleChangeSearchNote}
-      className='w-full'
+      className='w-full md:text-2xl text-xl'
       type='text'
       placeholder='Search note'
      />
     </div>
 
     <nav aria-label='Page navigation'>
-     <ul className='pagination items-center gap-2'>
+     <ul className='pagination items-center gap-1 gap-md-2'>
       <li className='page-item'>
        <a className='text-white text-decoration-none ' href='#'>
-        <SkipPreviousIcon className='text-2xl' />
+        <SkipPreviousIcon className='md:text-2xl text-xl' />
        </a>
       </li>
       <li className='page-item'>
        <a
-        className='text-black text-center w-[25px] rounded-sm block bg-white text-decoration-none text-xl'
+        className='text-black text-center md:w-[25px] w-[20px] rounded-sm block bg-white text-decoration-none md:text-xl text-sm'
+        text-sm
         href='#'
        >
         1
@@ -79,7 +76,7 @@ const NoteList = ({
       </li>
       <li className='page-item'>
        <a
-        className='text-black text-center w-[25px] rounded-sm  block bg-white text-decoration-none text-xl'
+        className='text-black text-center md:w-[25px] w-[20px] rounded-sm  block bg-white text-decoration-none md:text-xl text-sm'
         href='#'
        >
         2
@@ -87,7 +84,7 @@ const NoteList = ({
       </li>
       <li className='page-item'>
        <a
-        className='text-black text-center w-[25px] rounded-sm  block bg-white text-decoration-none text-xl'
+        className='text-black text-center md:w-[25px] w-[20px] rounded-sm  block bg-white text-decoration-none md:text-xl text-sm'
         href='#'
        >
         3
@@ -96,7 +93,7 @@ const NoteList = ({
 
       <li className='page-item'>
        <a
-        className='text-black text-center w-[25px] rounded-sm  block bg-white text-decoration-none text-xl'
+        className='text-black text-center md:w-[25px] w-[20px] rounded-sm  block bg-white text-decoration-none md:text-xl text-sm'
         href='#'
        >
         ...
@@ -105,7 +102,7 @@ const NoteList = ({
 
       <li className='page-item'>
        <a className='text-white text-decoration-none ' href='#'>
-        <SkipNextIcon className='text-2xl' />
+        <SkipNextIcon className='md:text-2xl text-xl' />
        </a>
       </li>
      </ul>
@@ -115,21 +112,26 @@ const NoteList = ({
    <div className='mt-3 flex flex-col flex-grow-1'>
     <div className='row row-cols-4 text-white'>
      <div className='col'>
-      <h6 className='text-2xl'>Name</h6>
+      <h6 className='md:text-2xl text-xl'>Name</h6>
      </div>
      <div className='col-6'>
-      <h6 className='text-2xl text-center'>Content</h6>
+      <h6 className='md:text-2xl text-xl text-center'>Content</h6>
      </div>
      <div className='col'>
-      <h6 className='text-2xl text-right'>Date</h6>
+      <h6 className='md:text-2xl text-xl text-right'>Date</h6>
      </div>
     </div>
 
     <ul className='bg-[#dedede] flex flex-col flex-grow-1 gap-3 rounded-lg overflow-y-auto h-[60vh] p-2 editnote-notelist style-scrollbar-y style-scrollbar-y-sm'>
      {noteList.length > 0 ? (
       noteList.map((note) => (
-    //    <NoteItem note={note} noteList={noteList} key={note.idNote} />
-       <NoteCard type='edit' note={note} noteList={noteList} key={note.idNote} />
+       <NoteCard
+        updateNotes={updateNotes}
+        type='edit'
+        note={note}
+        noteList={noteList}
+        key={note.idNote}
+       />
       ))
      ) : (
       <h3>There are no notes!</h3>

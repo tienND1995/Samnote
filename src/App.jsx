@@ -12,16 +12,18 @@ import ForgotPassword from './layout/AuthLayout/ForgotPassword'
 import Register from './layout/AuthLayout/Register'
 import SignIn from './layout/AuthLayout/SignIn'
 import {
-    AnonymousMessage,
-    CreateNote,
-    Dustbin,
-    EditNote,
-    Group,
-    Home,
-    Photo,
-    //  UserSetting,
-    Sketch,
-    UserProfile,
+ AnonymousMessage,
+ CreateNote,
+ Dustbin,
+ FormEdit,
+ EditNote,
+ EditNoteLayout,
+ Group,
+ Home,
+ Photo,
+ //  UserSetting,
+ Sketch,
+ UserProfile,
 } from './pages'
 
 import UserSetting from './pages/Setting/UserSetting'
@@ -76,9 +78,13 @@ function App() {
      <Route path='/group' element={<Group />} />
      <Route path='/profile/:id' element={<UserProfile />} />
 
-     <Route path='/editnote/:id' element={<EditNote />} />
-     <Route path='/editnote' exact element={<EditNote />} />
      <Route path='/create-note' element={<CreateNote />} />
+
+     <Route path='/editnote' exact element={<EditNoteLayout />}>
+      <Route index element={<EditNote />} />
+      <Route path=':id' element={<EditNote />} />
+      <Route path='form/:id' element={<FormEdit />} />
+     </Route>
 
      <Route path='/sketch' element={<Sketch />} />
 

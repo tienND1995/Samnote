@@ -124,7 +124,7 @@ const UserPanel = () => {
    icon: (
     <DriveFileRenameOutlineIcon className=' md:size-[25px] lgEqual:size-[30px] xl:size-[35px] 2xl:size-[40px]' />
    ),
-   url: '/user/sketch',
+   url: '/sketch',
   },
   {
    name: 'setting',
