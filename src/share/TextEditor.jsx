@@ -11,13 +11,13 @@ const TextEditor = ({ setDataContent, onChangeTextEditor, value }) => {
    container: [
     // [{ header: '1' }, { header: '2' }, { font: [] }],
     [{ size: [] }],
-   ['bold', 'italic', 'underline', 'strike'],
+    ['bold', 'italic', 'underline', 'strike'],
     [
      { list: 'ordered' },
      { list: 'bullet' },
-    // { list: 'check' },
-    // { indent: '-1' },
-    // { indent: '+1' },
+     // { list: 'check' },
+     // { indent: '-1' },
+     // { indent: '+1' },
     ],
 
     //['code-block'],
@@ -46,6 +46,7 @@ const TextEditor = ({ setDataContent, onChangeTextEditor, value }) => {
      setDataContent((prev) => ({ ...prev, content: newValue }))
      const textEditor = reactQuillRef.current?.getEditor().getText(0, 1000)
      onChangeTextEditor(textEditor)
+
     }}
     placeholder='Start writting...'
    />

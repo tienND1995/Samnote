@@ -84,6 +84,8 @@ const CreateNote = () => {
     severity: 'success',
    })
 
+   console.log('data', data)
+
    setUploadImageList([])
    // post image list
    const newFormData = new FormData()
@@ -116,6 +118,8 @@ const CreateNote = () => {
   if (checklist.length > 0 || typeForm === 'text')
    setDataContent((prev) => ({ ...prev, isError: false, message: '' }))
  }, [textEditor, checklist.length])
+
+ console.log('errors', errors)
 
  const onSubmit = async (data) => {
   // set errors when text empty

@@ -1,5 +1,4 @@
 function IconChatUnknow({ className, fill }) {
- console.log('className', className)
  return (
   <svg
    className={`${className}`}

@@ -45,7 +45,6 @@ const UserPanel = () => {
    window.removeEventListener('resize', handleResize)
   }
  }, [])
- console.log('changeStatus', changeStatus)
 
  const handleToggle = () => {
   setOpen(!open)
