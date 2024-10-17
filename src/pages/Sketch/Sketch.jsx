@@ -134,14 +134,13 @@ const Sketch = () => {
  }, [dataContent.content])
 
  return (
-  <div className='flex flex-col w-full'>
-   <div className='bg-black w-full text-white p-4'>
-    <h2 className='font-Roboto font-bold mb-3 text-[40px] flex justify-center items-end gap-2'>
+  <div className='flex flex-col w-full overflow-y-auto style-scrollbar-y style-scrollbar-y-md'>
+   <div className='bg-black w-full text-white p-md-4 p-2'>
+    <h2 className='font-Roboto font-bold mb-md-3 mb-2 xl:text-[40px] md:text-3xl text-2xl flex justify-center items-center gap-2'>
      Sketch
-     <div className='h-[50px] flex'>
+     <div className='flex'>
       <svg
-       width='40'
-       height='38'
+       className='xl:size-[40px] md:size-[30px] size-[20px]'
        viewBox='0 0 40 38'
        fill='none'
        xmlns='http://www.w3.org/2000/svg'
@@ -154,13 +153,16 @@ const Sketch = () => {
      </div>
     </h2>
 
-    <div className='grid grid-cols-2 gap-[10%]'>
-     <form onSubmit={handleSubmit(onSubmitForm)}>
+    <div className='grid md:grid-cols-3 xl:grid-cols-2 md:gap-[30px]'>
+     <form
+      className='xl:col-span-1 md:col-span-2'
+      onSubmit={handleSubmit(onSubmitForm)}
+     >
       <FormNote {...propsFormNote} />
 
       <div className='mt-3'>
        <button
-        className={`text-white bg-[#1876D2] w-[100px] h-[40px] rounded-md uppercase ${
+        className={`text-white bg-[#1876D2] w-max md:text-xl text-[14px] p-2  rounded-md uppercase ${
          disableSubmit() ? 'opacity-70' : 'opacity-100'
         }`}
         type='submit'
@@ -171,9 +173,9 @@ const Sketch = () => {
       </div>
      </form>
 
-     <div>
+     <div className='xl:col-span-1 md:col-span-1 md:max-h-[300px] min-h-[200px] mt-[23px] relative'>
       <textarea
-       className='size-full relative max-h-[300px] mt-[23px] rounded-lg outline-none p-3'
+       className='size-full xl:text-xl md:text-[16px] text-[14px] relative lg:rounded-lg rounded-md outline-none p-xl-3 p-2'
        placeholder='Content...'
        value={dataContent.content}
        onChange={(e) =>
@@ -182,7 +184,9 @@ const Sketch = () => {
       ></textarea>
 
       {dataContent?.isError && (
-       <span style={{ borderBottom: '1px solid red' }} className='text-red-600'>
+       <span
+        className='text-red-600 md:text-[16px] text-sm w-max absolute top-[50px] left-5'
+       >
         {dataContent?.message}
        </span>
       )}

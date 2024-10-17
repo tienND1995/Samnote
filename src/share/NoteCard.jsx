@@ -14,9 +14,9 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import HistoryIcon from '@mui/icons-material/History'
 import axios from 'axios'
 import { fetchApiSamenote } from '../utils/fetchApiSamnote'
+import { useEffect, useState } from 'react'
 
-const NoteCard = ({ note, noteList, type }) => {
- const navigate = useNavigate()
+const NoteCard = ({ note, noteList, type, updateNotes }) => {
  const settings = {
   dots: false,
   infinite: false,
@@ -34,10 +34,27 @@ const NoteCard = ({ note, noteList, type }) => {
     <ArrowBackIosIcon />
    </button>
   ),
+
+  responsive: [
+   {
+    breakpoint: 600,
+    settings: {
+     slidesToShow: 2,
+     slidesToScroll: 1,
+    },
+   },
+  ],
+ }
+
+ const styleNoteCard = {
+  boxShadow: '0px 4px 10px 0px #00000040',
+  backgroundColor: `rgb(${note.color.r}, ${note.color.g}, ${note.color.b})`,
+  color: isLightColor(note.color) ? 'black' : 'white',
+  minHeight: type !== 'edit' ? '130px' : '80px',
  }
 
  // delete
- const deleteNoteId = async (id, indexNoteNext) => {
+ const deleteNoteId = async (id) => {
   try {
    const response = await axios.delete(
     `https://samnote.mangasocial.online/${
@@ -45,33 +62,8 @@ const NoteCard = ({ note, noteList, type }) => {
     }/${id}`
    )
 
-   //  handle after delete note
-
-   if (noteList.length === 1) {
-    return navigate(`${type === 'edit' ? '/editnote' : '/dustbin'}`, {
-     state: 'Delete note',
-    })
-   }
-
-   if (indexNoteNext === noteList.length - 1) {
-    return navigate(
-     `${type === 'edit' ? '/editnote' : '/dustbin'}/${
-      noteList[indexNoteNext - 1].idNote
-     }`,
-     {
-      state: 'Delete note',
-     }
-    )
-   }
-
-   return navigate(
-    `${type === 'edit' ? '/editnote' : '/dustbin'}/${
-     noteList[indexNoteNext + 1].idNote
-    }`,
-    {
-     state: 'Delete note',
-    }
-   )
+   // update note
+   updateNotes()
   } catch (error) {
    console.error(error)
   }
@@ -79,8 +71,6 @@ const NoteCard = ({ note, noteList, type }) => {
 
  const handleDeleteNote = async (idNote) => {
   if (!idNote || noteList.length === 0) return
-
-  const indexNoteNext = noteList?.findIndex((note) => note.idNote === idNote)
 
   Swal.fire({
    title: 'Are you sure?',
@@ -95,7 +85,7 @@ const NoteCard = ({ note, noteList, type }) => {
    confirmButtonText: 'Yes, delete it!',
   }).then((result) => {
    if (result.isConfirmed) {
-    deleteNoteId(idNote, indexNoteNext)
+    deleteNoteId(idNote)
 
     Swal.fire({
      title: 'Deleted!',
@@ -107,31 +97,16 @@ const NoteCard = ({ note, noteList, type }) => {
  }
 
  // restore
- const restoreNote = async (idNote, indexNoteNext) => {
+ const restoreNote = async (idNote) => {
   fetchApiSamenote('post', `/trash-res/${idNote}`).then((result) => {
    //  handle after delete note
-   if (noteList.length === 1) {
-    return navigate('/dustbin', {
-     state: 'Restore note',
-    })
-   }
 
-   if (indexNoteNext === noteList.length - 1) {
-    return navigate(`${'/dustbin'}/${noteList[indexNoteNext - 1].idNote}`, {
-     state: 'Restore note',
-    })
-   }
-
-   return navigate(`${'/dustbin'}/${noteList[indexNoteNext + 1].idNote}`, {
-    state: 'Restore note',
-   })
+   updateNotes()
   })
  }
 
  const handleRestoreNote = async (idNote) => {
   if (!idNote || noteList.length === 0) return
-
-  const indexNoteNext = noteList?.findIndex((note) => note.idNote === idNote)
 
   Swal.fire({
    title: 'Are you sure?',
@@ -143,7 +118,7 @@ const NoteCard = ({ note, noteList, type }) => {
    confirmButtonText: 'Yes, delete it!',
   }).then((result) => {
    if (result.isConfirmed) {
-    restoreNote(idNote, indexNoteNext)
+    restoreNote(idNote)
 
     Swal.fire({
      title: 'Deleted!',
@@ -154,21 +129,31 @@ const NoteCard = ({ note, noteList, type }) => {
   })
  }
 
+ const [isScreenXl, setIsScreenXl] = useState(true)
+
+ useEffect(() => {
+  const bodyElement = document.querySelector('body')
+  const widthScreen = bodyElement.offsetWidth
+
+  widthScreen >= 1280 ? setIsScreenXl(true) : setIsScreenXl(false)
+ }, [])
+
+ const optionLink = () =>
+  `/${
+   type === 'edit' ? (isScreenXl ? 'editnote' : 'editnote/form') : 'dustbin'
+  }/${note.idNote}`
+
  //  *__________________________
  if (Object.keys(note).length === 0) return
 
  return (
-  <li key={note.idNote}>
-   <div className='flex flex-col relative'>
+  <li className='flex flex-col' key={note.idNote}>
+   <div className='flex flex-col flex-grow-1 relative'>
     <NavLink
-     to={`/${type === 'edit' ? 'editnote' : 'dustbin'}/${note.idNote}`}
-     style={{
-      boxShadow: '0px 4px 10px 0px #00000040',
-      backgroundColor: `rgb(${note.color.r}, ${note.color.g}, ${note.color.b})`,
-      color: isLightColor(note.color) ? 'black' : 'white',
-     }}
+     to={optionLink()}
+     style={styleNoteCard}
      className={({ isActive, isPending }) =>
-      `row row-cols-4 flex-grow-1 justify-between rounded-lg mx-0 p-2 position-relative cursor-pointer text-decoration-none border-2 ${
+      `grid grid-cols-4 flex-grow-1 p-md-2 p-1 justify-between rounded-lg position-relative cursor-pointer text-decoration-none border-2 ${
        isPending
         ? 'pending'
         : isActive
@@ -177,8 +162,8 @@ const NoteCard = ({ note, noteList, type }) => {
       }`
      }
     >
-     <h6 className='col font-semibold'>{note.title}</h6>
-     <div className='col-6 px-0'>
+     <h6 className='text-sm md:text-[16px] md:font-semibold'>{note.title}</h6>
+     <div className='col-span-2 px-0'>
       <div className='max-h-[100px] overflow-y-auto style-scrollbar-y style-scrollbar-y-sm'>
        {note.type === 'text' && (
         <TextTruncate
@@ -186,12 +171,12 @@ const NoteCard = ({ note, noteList, type }) => {
          element='p'
          truncateText='…'
          text={<Markdown rehypePlugins={[rehypeRaw]}>{note.data}</Markdown>}
-         containerClassName='flex justify-center'
+         containerClassName='flex justify-center text-sm md:text-[16px]'
         />
        )}
 
        {note.type === 'checklist' && (
-        <ul>
+        <ul className='text-sm md:text-[16px]'>
          {note.data?.map(({ content, status }) => {
           return (
            <li key={content}>
@@ -223,32 +208,28 @@ const NoteCard = ({ note, noteList, type }) => {
       ) : null}
      </div>
 
-     <div className='col flex flex-col justify-between items-end gap-2 pb-5'>
-      <div>
-       <time className=' font-semibold text-center'>
-        {convertTimeApiNoteToHtml(
-         type === 'edit' ? note.createAt : note.updateAt
-        )}
-       </time>
-      </div>
-
-      <div className=''>
-       {type !== 'edit' && (
-        <button
-         onClick={() => handleRestoreNote(note.idNote)}
-         type='button'
-         className=''
-        >
-         <HistoryIcon className='text-[40px]' />
-        </button>
+     <div className='flex flex-col justify-between items-end'>
+      <time className='text-sm md:text-[16px] md:font-semibold text-center'>
+       {convertTimeApiNoteToHtml(
+        type === 'edit' ? note.createAt : note.updateAt
        )}
-      </div>
+      </time>
      </div>
     </NavLink>
 
-    <div className='flex flex-grow-1 items-start absolute z-10 right-3 bottom-3'>
+    <div className='absolute z-10 flex flex-col justify-between right-1 right-md-3 top-2/3 -translate-y-1/2'>
+     {type !== 'edit' && (
+      <button
+       onClick={() => handleRestoreNote(note.idNote)}
+       type='button'
+       className='hover:bg-red-rgba ease-in-out duration-150 rounded-md'
+      >
+       <HistoryIcon className='text-[40px]' />
+      </button>
+     )}
+
      <button
-      className='w-max p-2 hover:bg-red-rgba ease-in-out duration-150 rounded-md'
+      className='w-max p-1 p-md-2 hover:bg-red-rgba ease-in-out duration-150 rounded-md'
       type='button'
       onClick={() => handleDeleteNote(note.idNote)}
      >

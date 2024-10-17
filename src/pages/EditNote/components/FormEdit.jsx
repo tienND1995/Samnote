@@ -36,7 +36,8 @@ import AddImages from './AddImages'
 import ChecklistNote from '../../../share/ChecklistNote'
 const { API_SERVER_URL } = configs
 
-const FormEdit = ({ onDispatchName }) => {
+const FormEdit = (props) => {
+ const { updateNotes } = props
  const appContext = useContext(AppContext)
  const { user, setSnackbar } = appContext
  const { id } = useParams()
@@ -200,7 +201,7 @@ const FormEdit = ({ onDispatchName }) => {
  const pacthNote = async (noteId, data) => {
   try {
    const response = await axios.patch(`${API_SERVER_URL}/notes/${noteId}`, data)
-   onDispatchName('patch note')
+   updateNotes && updateNotes()
 
    setSnackbar({
     isOpen: true,
@@ -285,7 +286,7 @@ const FormEdit = ({ onDispatchName }) => {
     className='flex flex-col flex-grow-1 gap-3'
     action=''
    >
-    <div className='grid grid-cols-3 gap-3 text-white'>
+    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 gap-sm-3 text-white'>
      <div>
       <InputLabel className='text-white'>Type</InputLabel>
       <TextField
@@ -436,7 +437,7 @@ const FormEdit = ({ onDispatchName }) => {
       </FormControl>
      </div>
 
-     <div className='flex justify-end items-end'>
+     <div className='flex justify-end items-end pt-sm-0 pt-2 sm:col-span-2 lg:col-span-1'>
       <button
        disabled={disableBtnSubmit()}
        type='submit'
@@ -451,7 +452,7 @@ const FormEdit = ({ onDispatchName }) => {
      images={noteItem?.image}
      userId={user?.id}
      noteId={noteItem.idNote}
-     onDispatchName={onDispatchName}
+     updateNotes={updateNotes || null}
      onGetNoteId={getDataNoteId}
     />
 
@@ -478,7 +479,7 @@ const FormEdit = ({ onDispatchName }) => {
       <AddImages
        userId={user?.id}
        noteId={id}
-       onDispatchName={onDispatchName}
+       updateNotes={updateNotes || null}
        onGetNoteId={getDataNoteId}
       />
      )}
