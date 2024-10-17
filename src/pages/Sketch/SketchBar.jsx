@@ -56,8 +56,8 @@ const SketchBar = ({
  }
 
  return (
-  <div className='max-w-[200px] flex flex-col flex-grow-1 bg-[#618EA9] px-2 overflow-y-auto aspect-[1/2] style-scrollbar-y style-scrollbar-y-sm'>
-   <div className='px-2 flex flex-col gap-2 mb-3'>
+  <div className='md:max-w-[200px] max-w-[150px] flex flex-col flex-grow-1 bg-[#618EA9] px-md-2 px-1 overflow-y-auto md:aspect-[1/2] style-scrollbar-y style-scrollbar-y-sm'>
+   <div className='px-md-2 px-1 flex flex-col gap-2 mb-3'>
     <div className='flex justify-between'>
      <button onClick={handleUndoClick} type='button'>
       <Undo />
@@ -131,7 +131,7 @@ const SketchBar = ({
        onClick={() => onChangeColorCanvas(color)}
        type='button'
        style={{ backgroundColor: color }}
-       className={`size-[30px] rounded-full border-solid border-white flex ${
+       className={`md:size-[30px] size-[25px] rounded-full border-solid border-white flex ${
         strokeColor === color ? 'border-4' : 'border'
        }`}
       ></button>
@@ -142,7 +142,7 @@ const SketchBar = ({
    <button
     onClick={handleSaveCanvas}
     type='button'
-    className='bg-red-600 opacity-90 duration-150 ease-out hover:opacity-100 text-white w-max mx-auto py-1 px-3 mt-2 rounded-md'
+    className='bg-red-600 opacity-90 duration-150 ease-out hover:opacity-100 text-white w-max mx-auto py-1 px-3 my-2 rounded-md xl:text-xl md:text-lg text-[14px]'
    >
     Save
    </button>

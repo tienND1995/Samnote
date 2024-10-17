@@ -38,13 +38,11 @@ const UpdatePassword = ({ data }) => {
     openCreatePw2: false,
     openForgotpw2: false,
   });
-
   const [loading, setLoading] = useState({
     loadingChangePW: false,
     loadingPw2: false,
     loadingFogotPw2: false,
   });
-
   const { openChangePW, openPw2, openCreatePw2, openForgotpw2 } = status;
   const { loadingChangePW, loadingPw2, loadingFogotPw2 } = loading;
 
@@ -154,7 +152,6 @@ const UpdatePassword = ({ data }) => {
         setLoading((prev) => ({ ...prev, loadingChangePW: false }));
       });
   };
-  
   const editPw2 = async (data) => {
     console.log("đã nhận editpw2");
 

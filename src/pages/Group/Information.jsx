@@ -1,14 +1,11 @@
-import axios from 'axios'
 import { useEffect, useRef, useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import avatarDefault from '../../assets/avatar-default.png'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
-import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import GroupsIcon from '@mui/icons-material/Groups'
 import ImageIcon from '@mui/icons-material/Image'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
 
 const Information = (props) => {
@@ -21,34 +18,16 @@ const Information = (props) => {
 
  useEffect(() => {
   groupItem.idGroup &&
-   fetchApiSamenote('get', `/group/allphoto/${groupItem.idGroup}`).then(
-    (response) => {
-     console.log('response', response)
-    }
-   )
+   fetchApiSamenote(
+    'get',
+    `/group/allphoto/${groupItem.idGroup}`,
+    {},
+    { page: 1 }
+   ).then((data) => {
+    console.log('data', data)
+    setImageList(data?.data || [])
+   })
  }, [groupItem.idGroup])
-
- const fetchAllImageGroup = async () => {
-  try {
-   const response = await axios.get(
-    `https://samnote.mangasocial.online/group/allphoto/168`,
-    {
-     params: {
-      page: 1,
-     },
-    }
-   )
-
-   console.log('response', response)
-   //    setImageList(response.data.data)
-  } catch (error) {
-   console.log('error', error)
-  }
- }
-
- useEffect(() => {
-  fetchAllImageGroup()
- }, [])
 
  // hande click outside element
  useEffect(() => {
@@ -104,20 +83,6 @@ const Information = (props) => {
      src={groupItem?.linkAvatar}
      alt='avatar'
     />
-
-    {/* <div className='position-absolute bg-[#d9d9d9] w-[30px] h-[30px] rounded-full right-0 bottom-0 flex items-center justify-center'>
-     <input
-      //   onChange={handleChangeAvatarGroup}
-      id='info-file'
-      type='file'
-      className='hidden m-0'
-      //  disabled={!(infoGroupItem.idOwner === user.id)}
-      //   disabled={!isLeaderTeam(infoGroupItem.idOwner)}
-     />
-     <label htmlFor='info-file' className='flex cursor-pointer'>
-      <CameraAltIcon className='text-[20px]' />
-     </label>
-    </div> */}
    </div>
 
    <div className='flex justify-between items-center'>
@@ -139,8 +104,7 @@ const Information = (props) => {
    </div>
 
    <ul
-    style={{ scrollbarWidth: 'none' }}
-    className={`flex flex-col gap-2 py-[20px] max-h-[30%] overflow-y-auto ${
+    className={`flex flex-col gap-2 my-[20px] max-h-[30%] overflow-y-auto style-scrollbar-y style-scrollbar-y-sm ${
      toggleMemberList ? null : 'hidden'
     }`}
    >
@@ -189,7 +153,7 @@ const Information = (props) => {
     <h3 className='text-[30px] font-medium'>Image</h3>
    </div>
 
-   <ul className='my-3 row row-cols-3 flex-grow-1 style-scrollbar-y style-scrollbar-y-sm'>
+   <ul className='my-3 row row-cols-3 flex-grow-1 overflow-y-auto style-scrollbar-y style-scrollbar-y-sm'>
     {imageList?.map((image) => {
      return (
       <li key={image.id} className='col p-1'>

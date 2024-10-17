@@ -1,4 +1,3 @@
-
 import Slider from 'react-slick'
 
 import { useChecklist } from 'react-checklist'
@@ -13,7 +12,7 @@ const AddImages = ({ imageList, onChangeUploadImages }) => {
   infinite: false,
   speed: 500,
   slidesToShow: 5,
-  slidesToScroll: 2,
+  slidesToScroll: 1,
   className: 'slider-btn-arrow',
   nextArrow: (
    <button type='button'>
@@ -25,6 +24,38 @@ const AddImages = ({ imageList, onChangeUploadImages }) => {
     <ArrowBackIosIcon />
    </button>
   ),
+
+  responsive: [
+   {
+    breakpoint: 1280,
+    settings: {
+     slidesToShow: 8,
+     slidesToScroll: 1,
+    },
+   },
+   {
+    breakpoint: 1000,
+    settings: {
+     slidesToShow: 6,
+     slidesToScroll: 1,
+    },
+   },
+
+   {
+    breakpoint: 800,
+    settings: {
+     slidesToShow: 4,
+     slidesToScroll: 1,
+    },
+   },
+   {
+    breakpoint: 600,
+    settings: {
+     slidesToShow: 3,
+     slidesToScroll: 1,
+    },
+   },
+  ],
  }
 
  const { handleCheck, isCheckedAll, checkedItems, setCheckedItems } =
@@ -62,7 +93,10 @@ const AddImages = ({ imageList, onChangeUploadImages }) => {
       type='checkbox'
       hidden
      />
-     <label className='btn btn-primary' htmlFor='checked-list'>
+     <label
+      className='btn btn-primary text-sm 2xl:text-lg'
+      htmlFor='checked-list'
+     >
       {isCheckedAll ? 'Cancel' : 'Select All'}
      </label>
     </div>
@@ -71,7 +105,7 @@ const AddImages = ({ imageList, onChangeUploadImages }) => {
      <button
       onClick={handleDeleteImageList}
       type='button'
-      className='btn btn-danger'
+      className='btn btn-danger text-sm 2xl:text-lg'
      >
       Delete
      </button>

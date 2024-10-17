@@ -11,6 +11,7 @@ import { fetchApiSamenote } from '../utils/fetchApiSamnote'
 
 import AddIcon from '@mui/icons-material/Add'
 import ModalCreateFolder from './ModalCreateFolder'
+import { isLightColor } from '../utils/utils'
 
 const FormNote = ({
  register,
@@ -55,7 +56,7 @@ const FormNote = ({
  const handleShowModalFolder = () => setShowModalFolder(true)
 
  return (
-  <div className='grid grid-cols-2 gap-3'>
+  <div className='grid sm:grid-cols-2 grid-cols-1 2xl:gap-3 gap-2'>
    <ModalCreateFolder
     showModalFolder={showModalFolder}
     setShowModalFolder={setShowModalFolder}
@@ -72,7 +73,7 @@ const FormNote = ({
     />
 
     {errors.title && (
-     <p className='text-red-600 border-b border-red-600'>
+     <p className='text-red-600 md:text-[16px] text-sm border-b border-red-600 mt-1'>
       {errors.title.message}
      </p>
     )}
@@ -102,7 +103,7 @@ const FormNote = ({
     </FormControl>
 
     {errors.type && (
-     <p className='text-red-600 border-b border-red-600'>
+     <p className='text-red-600 border-b border-red-600 md:text-[16px] text-sm mt-1'>
       {errors.type.message}
      </p>
     )}
@@ -152,7 +153,10 @@ const FormNote = ({
     <FormControl className=' bg-white rounded-1 w-full'>
      <Select
       value={colorForm}
-      style={{ background: `rgb(${color?.r}, ${color?.g}, ${color?.b})` }}
+      style={{
+       background: `rgb(${color?.r}, ${color?.g}, ${color?.b})`,
+       color: isLightColor(color) ? 'black' : 'white',
+      }}
       {...register('color')}
       labelId='select-color-form'
       size='small'
@@ -209,7 +213,7 @@ const FormNote = ({
     </div>
 
     {errors.remindAt && (
-     <p style={{ borderBottom: '1px solid red' }} className='text-red-600'>
+     <p style={{ borderBottom: '1px solid red' }} className='text-red-600 md:text-[16px] text-sm mt-1'>
       {errors.remindAt.message}
      </p>
     )}
@@ -227,7 +231,7 @@ const FormNote = ({
     </div>
 
     {errors.dueAt && (
-     <p style={{ borderBottom: '1px solid red' }} className='text-red-600'>
+     <p style={{ borderBottom: '1px solid red' }} className='text-red-600 md:text-[16px] text-sm mt-1'>
       {errors.dueAt.message}
      </p>
     )}

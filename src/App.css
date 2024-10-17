@@ -125,10 +125,9 @@ li {
   display: none;
 }
 
-#navbar .item-navbar.active .item-icon-panel {
-  color: #198e39 !important;
-  transform: scale(1.5);
-  fill: #198e39 !important;
+#navbar .item-navbar.active .item-icon-panel svg {
+  color: #198e39;
+  fill: #198e39;
 }
 
 #navbar-mobile .relative .active {
