@@ -9,7 +9,7 @@ const RootLayout = () => {
       <div className="lgEqual:w-[100px] w-full static z-[1000]">
         <UserPanel />
       </div>
-      <div className="w-full flex flex-grow-1 mt-[100px] lgEqual:mt-0">
+      <div className="w-full flex flex-grow-1 mt-[80px] lgEqual:mt-[0px]">
         <Outlet />
       </div>
     </section>

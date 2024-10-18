@@ -313,6 +313,7 @@ const UpdatePassword = ({ data }) => {
           {!openChangePW ? (
             <Box className="flex flex-col sm:flex-row  mt-[10px]">
               <TextField
+                size="small"
                 disabled
                 className="w-[300px] bg-white rounded-md"
                 value="********"
@@ -399,6 +400,7 @@ const UpdatePassword = ({ data }) => {
               {!openForgotpw2 && (
                 <>
                   <TextField
+                    size="small"
                     required
                     disabled
                     className=" form-control w-[300px] bg-white rounded-md"
@@ -432,6 +434,7 @@ const UpdatePassword = ({ data }) => {
                   <div className="flex flex-col">
                     {" "}
                     <TextField
+                      size="small"
                       className=" form-control w-[300px] bg-white rounded-md"
                       label="Enter your gmail..."
                       placeholder="Enter current password 2"

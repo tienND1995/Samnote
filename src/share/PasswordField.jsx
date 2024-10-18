@@ -14,6 +14,7 @@ const PasswordField = forwardRef((props, ref) => {
 
   return (
     <TextField
+      size="small"
       type={showPassword ? "text" : "password"}
       {...props}
       inputRef={ref} // Đảm bảo rằng bạn truyền ref ở đây

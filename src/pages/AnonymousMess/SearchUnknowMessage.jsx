@@ -305,21 +305,8 @@ const SearchUnknowMessage = ({ onUserSelect }) => {
   return (
     <Box>
       <Box
+        className="flex items-center bg-white rounded-[30px] h-[60px] text-black my-[10px] mx-[20px] px-[20px] lg:text-[15px] xxl:text-[20px] w-[90%] justify-between"
         onClick={() => setState({ ...state, status: true })} // Mở khi nhấp vào Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          background: "#fff",
-          borderRadius: "30px",
-          height: "60px",
-          color: "#000",
-          margin: "10px auto",
-          padding: "0 20px",
-          fontSize: "20px",
-          width: "90%",
-          justifyContent: "space-between",
-          cursor: "pointer", // Thêm con trỏ để chỉ ra đây là nút
-        }}
       >
         Search User
         <SearchIcon />
@@ -333,12 +320,12 @@ const SearchUnknowMessage = ({ onUserSelect }) => {
           onClick={clearSearch}
         >
           <div
-            className="pb-[30px] max-h-[550px] w-[400px] overflow-hidden absolute bg-white px-1 z-[10] rounded-md left-[100px] top-20"
+            className="pb-[30px] bottom-5 lg:w-[350px] xxl:w-[400px] overflow-hidden absolute bg-white px-1 z-[10] rounded-md left-3 xxl:left-[100px] top-3 xxl:top-20"
             onClick={handleClick}
           >
             <div className="h-[140px]">
               <div className="my-[15px] px-[10px] flex items-center justify-between">
-                <h2 className="text-black capitalize">search user</h2>
+                <h3 className="text-black capitalize">search user</h3>
                 <CloseIcon
                   className="bg-black cursor-pointer"
                   onClick={clearSearch}
@@ -349,22 +336,28 @@ const SearchUnknowMessage = ({ onUserSelect }) => {
                   id="outlined-basic"
                   placeholder="User Name"
                   value={searchData}
+                  size="small"
                   onChange={handleSearchChange}
                   sx={{
                     width: "90%",
+                    padding: 0,
                     margin: "0 0 0px 15px",
                     input: { color: "#000" },
                   }}
                   InputLabelProps={{ style: { color: "#000" } }}
                 />
-                <IconButton className="w-[100px]">
+                <IconButton className="w-[100px] h-[20px]">
                   {loading ? (
                     <CircularProgress size={24} />
                   ) : (
                     <Button
                       disabled={!searchData}
                       variant="contained"
-                      className={`${searchData ? "bg-black" : ""}`}
+                      className={`${
+                        searchData
+                          ? "bg-black lg:h-[30px] lg:text-[12px] xxl:h-[40px] xxl:text-[14px]"
+                          : ""
+                      }`}
                       onClick={SearchMessage}
                     >
                       Search
@@ -396,9 +389,8 @@ const SearchUnknowMessage = ({ onUserSelect }) => {
                       }}
                     >
                       <Avatar
+                        className="size-[40px] xxl:size-[60px]"
                         sx={{
-                          width: "60px",
-                          height: "60px",
                           margin: "0 4px",
                         }}
                         src={item.linkAvatar}
@@ -420,7 +412,7 @@ const SearchUnknowMessage = ({ onUserSelect }) => {
                     </Box>
                     <Button
                       variant="contained"
-                      className="bg-[#F56852]"
+                      className="bg-[#F56852]  lg:h-[30px] lg:text-[12px] xxl:h-[40px] xxl:text-[14px]"
                       onClick={() => {
                         onUserSelect(item); // Gọi hàm truyền thông tin user
                         clearSearch(); // Xóa tìm kiếm

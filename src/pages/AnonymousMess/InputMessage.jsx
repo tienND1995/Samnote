@@ -101,6 +101,7 @@ const GiphySearch = ({ onGifSelect }) => {
         >
           <TextField
             type="text"
+            size="small"
             value={searchTerm}
             id="standard-basic"
             variant="standard"

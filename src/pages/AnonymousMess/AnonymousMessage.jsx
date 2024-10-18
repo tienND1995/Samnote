@@ -201,9 +201,15 @@ const AnonymousMessage = () => {
   };
 
   return (
-    <Box className="text-white lg:flex bg-[#DFFFFE] w-full h-screen relative ">
+    <Box
+      className={`text-white lg:flex bg-[#DFFFFE] w-full h-screen relative ${
+        info.length >= 0
+          ? ""
+          : "overflow-hidden h-[1px] lg:overflow-y-auto lg:h-full"
+      }`}
+    >
       <Box
-        className="w-[400px]"
+        className="w-full lg:w-[400px]"
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -211,27 +217,27 @@ const AnonymousMessage = () => {
           alignItems: "center",
         }}
       >
-        <Box className="bg-[#B6F6FF] h-[180px] uppercase text-black w-full pt-[40px] text-center text-4xl font-bold">
+        <p className="bg-[#B6F6FF] h-[100px] lg:h-[150px] xxl:h-[180px] uppercase text-black w-full flex justify-center items-center lg:text-2xl xl:text-3xl font-bold">
           Chat
-        </Box>
+        </p>
 
         <Box
-          className="w-[90%] h-[10vh]"
+          className="w-[100%] h-[10vh]"
           style={{
-            margin: "0 10px",
+            margin: "0 0 15px",
           }}
         >
           <SearchUnknowMessage onUserSelect={handleUserSelect} />
         </Box>
 
         {/* Tabs for filtering */}
-        <Box className="h-full w-[400px] overflow-hidden scrollbar-none text-black font-bold flex flex-col flex-grow-1">
+        <Box className="h-full w-full lg:w-[400px] overflow-hidden scrollbar-none text-black font-bold flex flex-col flex-grow-1">
           <div className="flex gap-[10px] justify-evenly px-4 pb-3 pt-1 h-[60px]">
             <Button
               className={`${
                 activeTab === "all"
-                  ? "bg-black text-white font-bold text-[16px]"
-                  : "text-black font-bold text-[16px]"
+                  ? "bg-black h-[30px] text-white font-bold text-[12px] xxl:text-[16px]"
+                  : "text-black h-[30px] font-bold text-[12px] xxl:text-[16px]"
               }`}
               onClick={() => setActiveTab("all")}
             >
@@ -241,8 +247,8 @@ const AnonymousMessage = () => {
             <Button
               className={
                 activeTab === "unread"
-                  ? "bg-black text-white font-bold text-[16px]"
-                  : "text-black font-bold text-[16px]"
+                  ? "bg-black h-[30px] text-white font-bold text-[12px] xxl:text-[16px]"
+                  : "text-black h-[30px] font-bold text-[12px] xxl:text-[16px]"
               }
               onClick={() => setActiveTab("unread")}
             >
@@ -251,8 +257,8 @@ const AnonymousMessage = () => {
             <Button
               className={
                 activeTab === "read"
-                  ? "bg-black text-white font-bold text-[16px]"
-                  : "text-black font-bold text-[16px]"
+                  ? "bg-black h-[30px] text-white font-bold text-[12px] xxl:text-[16px]"
+                  : "text-black h-[30px] font-bold text-[12px] xxl:text-[16px]"
               }
               onClick={() => setActiveTab("read")}
             >
@@ -280,7 +286,6 @@ const AnonymousMessage = () => {
                     alignItems: "center",
                     borderRadius: "30px",
                     margin: "5px 6px",
-                    height: "70px",
                     width: "95%",
                     color: "black",
                     textDecoration: "none",
@@ -303,10 +308,11 @@ const AnonymousMessage = () => {
                       display: "flex",
                       alignItems: "center",
                       width: "85%",
+                      margin: "auto",
                     }}
                   >
                     <Avatar
-                      sx={{ width: "60px", height: "60px", marginLeft: "4px" }}
+                      className="size-[50px] xxl:size-[60px]"
                       src={item.user.avatar}
                     />
                     <Box
@@ -317,44 +323,22 @@ const AnonymousMessage = () => {
                       }}
                     >
                       {item.user === "Unknow" ? (
-                        <span style={{ fontWeight: "700", fontSize: "40px" }}>
+                        <span className="font-bold lg:text-[20px] xxl:text-[40px]">
+                          {" "}
                           User name
                         </span>
                       ) : (
                         <Typography
                           variant="body1"
-                          sx={{
-                            fontWeight: "700",
-                            fontSize: "24px",
-                            overflow: "hidden",
-                            width: "82%",
-                            textOverflow: "ellipsis",
-                            textTransform: "capitalize",
-                          }}
+                          className="font-bold text-[20px] xxl:text-[24px] overflow-hidden w-[82%] overflow-ellipsis capitalize"
                         >
                           {item.user.username}
                         </Typography>
                       )}
                       <Typography
-                        sx={
-                          item.unReadCount > 0
-                            ? {
-                                overflow: "hidden",
-                                width: "90%",
-                                fontSize: "20px",
-                                whiteSpace: "nowrap",
-                                textOverflow: "ellipsis",
-                                fontWeight: "700",
-                              }
-                            : {
-                                overflow: "hidden",
-                                width: "90%",
-                                fontSize: "20px",
-                                whiteSpace: "nowrap",
-                                textOverflow: "ellipsis",
-                                fontWeight: "400",
-                              }
-                        }
+                        className={`overflow-hidden w-[90%] text-[16px] xxl:text-[20px] whitespace-nowrap overflow-ellipsis ${
+                          item.unReadCount > 0 ? "font-bold" : "font-normal"
+                        }`}
                         variant="body2"
                       >
                         {convertLastText(item.last_text, item.idSend)}
@@ -397,10 +381,10 @@ const AnonymousMessage = () => {
         </Box>
       </Box>
       {info.length !== 0 && (
-        <div className="w-[100%] h-[100vh] shadow-[0_0_10px_rgba(0,0,0,0.2)] sm:fixed top-0 bottom-0 left-0 right-0 z-[1000]">
+        <div className="flex flex-col w-[100%] h-[100vh] shadow-[0_0_10px_rgba(0,0,0,0.2)] fixed lg:static top-0 bottom-0 left-0 right-0 z-[1000] lg:z-[0]">
           {" "}
-          <div className="w-full h-[140px] bg-white shadow-[0_0_10px_rgba(0,0,0,0.2)] items-center flex justify-between px-4">
-            <div className="w-full h-[140px] items-center flex">
+          <div className="w-full h-[100px] lg:h-[100px] xxl:h-[140px] bg-white shadow-[0_0_10px_rgba(0,0,0,0.2)] items-center flex justify-between px-2">
+            <div className=" w-[95%] lg:w-full h-[100px] lg:h-[140px] items-center flex">
               <p
                 className="text-[50px] text-black"
                 onClick={() => {
@@ -410,17 +394,20 @@ const AnonymousMessage = () => {
                   }));
                 }}
               >
-                <ChevronLeftIcon className="text-[50px] mr-[10px] cursor-pointer rounded-full size-[60px] hover:bg-[rgba(0,0,0,0.1)]" />
+                <ChevronLeftIcon className="mr-[10px] cursor-pointer rounded-full size-[34px] hover:bg-[rgba(0,0,0,0.1)]" />
               </p>
-              <Avatar sx={{ width: "90px", height: "90px" }} src={avatar} />
-              <p className="text-black text-[40px] font-bold capitalize ml-2">
+              <Avatar
+                className=" size-[40px] lg:size-[50px] xxl:size-[90px]"
+                src={avatar}
+              />
+              <p className="text-black text-[20px] lg:text-[25px] xxl:text-[34px] font-bold capitalize ml-2 w-full truncate ">
                 {username}
               </p>
             </div>
-            <div className="relative">
+            <div className="relative w-[13px]">
               <div
                 onClick={selectMenu}
-                className="flex items-center text-[50px] justify-center cursor-pointer rounded-full size-[60px] hover:bg-[rgba(0,0,0,0.1)]"
+                className="flex items-center justify-center cursor-pointer rounded-full  hover:bg-[rgba(0,0,0,0.1)] mr-[8px]"
               >
                 <MenuSelect className="cursor-pointer" />
               </div>
@@ -449,17 +436,9 @@ const AnonymousMessage = () => {
             </div>
           </div>
           <div
-            className="scrollbar shadow-[0_0_10px_rgba(0,0,0,0.2)]"
+            className="bg-cover bg-center scrollbar w-full overflow-y-auto flex-grow shadow-[0_0_10px_rgba(0,0,0,0.2)]"
             style={{
-              width: "100%",
               backgroundImage: `url(${bg_chat})`,
-              overflow: "auto",
-
-              height: `calc(100% - 220px)`,
-              // scrollbarWidth: "none",
-              backgroundPosition: "bottom center",
-              backgroundSize: "200%",
-              backgroundRepeat: "no-repeat",
             }}
           >
             {Array.isArray(message) &&
@@ -552,7 +531,7 @@ const AnonymousMessage = () => {
               ))}
             <div id="lastmessage" />
           </div>
-          <div className="w-full relative shadow-[0_0_15px_rgba(0,0,0,0.2)]">
+          <div className="w-full h-[80px] relative shadow-[0_0_15px_rgba(0,0,0,0.2)]">
             {" "}
             <InputMessage data={info} onReload={handleReload} />
           </div>
