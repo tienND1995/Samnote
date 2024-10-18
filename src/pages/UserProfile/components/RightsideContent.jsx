@@ -105,11 +105,11 @@ const RightsideContent = ({ setReload, userInfomations }) => {
                 />
             </div>
             <div className='flex flex-col md:flex-row lg:flex-col md:gap-3 lg:gap-0'>
-                <div className='new-users w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3'>
+                <div className='new-users w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3 pr-1'>
                     <span className='font-[700] text-[#888888] text-xl mb-3 ml-2'>New Users</span>
                     {lastUsers.length > 0 ? (
                         <>
-                            <ul className='w-full overflow-y-auto flex-grow'>
+                            <ul className='w-full overflow-y-auto flex-grow style-scrollbar-y'>
                                 {lastUsers.slice(0, visibleMoreUsers).map(({ id, linkAvatar, user_name, createAt }) => (
                                     <li key={`${id}`} className="mb-2">
                                         <Link
@@ -145,11 +145,11 @@ const RightsideContent = ({ setReload, userInfomations }) => {
                         <p className='text-center'>Not found new users</p>
                     )}
                 </div>
-                <div className='new-notes w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3'>
+                <div className='new-notes w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3 pr-1'>
                     <span className='font-[700] text-[#888888] text-xl mb-[1.4rem] ml-2'>New Notes</span>
                     {allNotePublic.length > 0 ? (
                         <>
-                            <ul className='w-full overflow-y-auto flex-grow pl-3'>
+                            <ul className='w-full overflow-y-auto flex-grow pl-3 style-scrollbar-y'>
                                 {allNotePublic.slice(0, visibleMoreNotes).map((item, index) => (
                                     <li key={`notePublic ${index}`} className="mb-4">
                                         <div className='w-full flex justify-around items-center'>
