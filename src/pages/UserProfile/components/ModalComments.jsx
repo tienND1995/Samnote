@@ -44,6 +44,13 @@ const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
 
     fetchAllDataComments()
 
+    socket.on('post_comment_note', (data) => {
+      if (infoNote.idNote === data.data.idNote) {
+        fetchAllDataComments()
+        setReload((prev) => prev + 1)
+      }
+    })
+
     socket.on('favorite_notes_comment', (data) => {
       if (infoNote.idNote === data.idNote) {
         fetchAllDataComments()
@@ -64,17 +71,17 @@ const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
       return
     }
     try {
-      const res = await api.post(`/notes/notes-comment/${infoNote.idNote}`, {
-        parent_id: parentsNoteId,
-        sendAt: new Date().toISOString(),
-        content: content,
-        idNote: infoNote.idNote,
-        idUser: user.id,
+      socket.emit('post_comment_note', {
+        data: {
+          parent_id: parentsNoteId,
+          sendAt: new Date().toISOString(),
+          content: content,
+          idNote: infoNote.idNote,
+          idUser: user.id,
+        }
       })
       setContentComment('')
       setContentReplyComment('')
-      fetchAllDataComments()
-      setReload((prev) => prev + 1)
     } catch (err) {
       console.error(err)
     }
@@ -104,13 +111,23 @@ const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
   }
 
   const handleShowCreateReply = (index) => {
-    setContentComment('')
     setContentReplyComment('')
     const newIsCreateReply = new Array(dataComments.length).fill(false);
     if (index !== -1) {
       newIsCreateReply[index] = true;
+      setContentComment('')
     }
     setIsCreateReply(newIsCreateReply);
+  }
+
+  const adjustTextareaHeight = (element) => {
+    element.style.height = 'auto';
+    element.style.height = `${element.scrollHeight}px`;
+  }
+
+  const handleOnChangeContentComment = (e) => {
+    setContentComment(e.target.value);
+    adjustTextareaHeight(e.target);
   }
 
   return (
@@ -286,7 +303,7 @@ const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
                                   </div>
                                 ))}
                                 <div className={`hide-reply-container flex flex-row 
-                                                                        ${isCreateReply[index] ? 'ml-[19px]' : 'ml-[21px]'}`}>
+                                        ${isCreateReply[index] ? 'ml-[19px]' : 'ml-[21px]'}`}>
                                   {isCreateReply[index] && (
                                     <div className='line-reply-straight'>
                                       <div className='bg-gray-200 h-full w-[2px]' />
@@ -303,7 +320,7 @@ const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
                               </div>
                             ) : (
                               <div className={`show-reply-container flex flex-row
-                                                                ${isCreateReply[index] ? 'ml-[19px]' : 'ml-[21px]'}`}>
+                                    ${isCreateReply[index] ? 'ml-[19px]' : 'ml-[21px]'}`}>
                                 {isCreateReply[index] && (
                                   <div className='line-reply-straight'>
                                     <div className='bg-gray-200 h-full w-[2px]' />
@@ -360,10 +377,12 @@ const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
                 <textarea
                   className="form-control rounded-4"
                   value={contentComment}
-                  onChange={(e) => setContentComment(e.target.value)}
+                  onChange={handleOnChangeContentComment}
                   placeholder="Write a comment..."
                   rows={1}
                   onFocus={() => handleShowCreateReply(-1)}
+                  style={{ resize: 'vertical', maxHeight: '5rem', overflowY: 'scroll' }}
+                  ref={(el) => el && adjustTextareaHeight(el)}
                 />
                 <div
                   className='cursor-pointer hover:bg-gray-200 rounded-full p-1.5 pl-3'
