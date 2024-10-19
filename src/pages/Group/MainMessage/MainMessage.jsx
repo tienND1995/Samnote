@@ -11,11 +11,11 @@ import avatarDefault from '../../../assets/avatar-default.png'
 import bgMessage from '../../../assets/img-chat-an-danh.jpg'
 
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
-import DeleteIcon from '@mui/icons-material/Delete'
 
 import { fetchApiSamenote } from '../../../utils/fetchApiSamnote'
-import { convertTimeMessage } from '../../../utils/utils'
 import MessageChatCard from './MessageChatCard'
+import MessageComponent from './MessageComponent'
+import MessageGroupCard from './MessageGroupCard'
 
 const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
  const appContent = useContext(AppContext)
@@ -501,111 +501,127 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
    >
     <div className='flex-grow-1 p-[20px] h-[30vh] overflow-auto style-scrollbar-y style-scrollbar-y-md'>
      <ul id='message-content'>
-      {typeMessage === 'chat' &&
-       messagesChat?.map((item) => (
-        <MessageChatCard
-         key={item.id}
-         message={item}
-         userID={user?.id}
-         onDeleteMessage={handleDeleteMessage}
-         avatar={infoMessageChat.avatar}
-        />
-       ))}
+      {typeMessage === 'chat' && (
+       <MessageComponent
+        data={messagesChat}
+        renderItem={(message) => (
+         <MessageChatCard
+          key={message.id}
+          message={message}
+          userID={user?.id}
+          onDeleteMessage={handleDeleteMessage}
+          avatar={infoMessageChat.avatar}
+         />
+        )}
+       />
+      )}
 
-      {typeMessage === 'group' &&
-       messagesGroup?.map((item) =>
-        item.idSend === user?.id ? (
-         <div key={item.id} className='h-auto mb-2 flex flex-col items-end'>
-          <div className='flex gap-2 mb-1'>
-           <div className='flex items-center hover-message gap-1'>
-            <div className='flex flex-col gap-1 items-end'>
-             {item.image.trim() !== '' && (
-              <div>
-               <img
-                className={`h-auto rounded-md ${
-                 item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
-                }`}
-                src={item.image}
-               />
-              </div>
-             )}
+      {typeMessage === 'group' && (
+       //  messagesGroup?.map((item) =>
+       //   item.idSend === user?.id ? (
+       //    <div key={item.id} className='h-auto mb-2 flex flex-col items-end'>
+       //     <div className='flex gap-2 mb-1'>
+       //      <div className='flex items-center gap-1'>
+       //       <div className='flex flex-col gap-1 items-end'>
+       //        {item.image.trim() !== '' && (
+       //         <div>
+       //          <img
+       //           className={`h-auto rounded-md ${
+       //            item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
+       //           }`}
+       //           src={item.image}
+       //          />
+       //         </div>
+       //        )}
 
-             {item.content && (
-              <p
-               style={{
-                width: 'max-content',
-                overflowWrap: 'anywhere',
-                maxWidth: '250px',
-               }}
-               className='break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto'
-              >
-               {item.content}
-              </p>
-             )}
-            </div>
-           </div>
-          </div>
+       //        {item.content && (
+       //         <p
+       //          style={{
+       //           width: 'max-content',
+       //           overflowWrap: 'anywhere',
+       //           maxWidth: '250px',
+       //          }}
+       //          className='break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto'
+       //         >
+       //          {item.content}
+       //         </p>
+       //        )}
+       //       </div>
+       //      </div>
+       //     </div>
 
-          <time className='text-xs text-black-50'>
-           {convertTimeMessage(item.sendAt)}
-          </time>
-         </div>
-        ) : (
-         <div key={item.id} className='h-auto mb-2'>
-          <div className='flex gap-2 mb-1'>
-           <div className='flex gap-1 items-end'>
-            <img
-             className='object-fit-cover rounded-circle'
-             style={{ width: '40px', height: '40px' }}
-             src={item.avt}
-             alt='avatar other_user'
-             onError={(e) => (e.target.src = avatarDefault)}
-            />
-           </div>
+       //     <time className='text-xs text-black-50'>
+       //      {convertTimeMessage(item.sendAt)}
+       //     </time>
+       //    </div>
+       //   ) : (
+       //    <div key={item.id} className='h-auto mb-2'>
+       //     <div className='flex gap-2 mb-1'>
+       //      <div className='flex gap-1 items-end'>
+       //       <img
+       //        className='object-fit-cover rounded-circle'
+       //        style={{ width: '40px', height: '40px' }}
+       //        src={item.avt}
+       //        alt='avatar other_user'
+       //        onError={(e) => (e.target.src = avatarDefault)}
+       //       />
+       //      </div>
 
-           <div className='flex items-center hover-message gap-1'>
-            <div className='flex flex-col gap-1'>
-             {item.image.trim() !== '' && (
-              <div>
-               <h3 className='mb-1 text-[12px] font-light capitalize'>
-                {item.name}
-               </h3>
-               <div>
-                <img
-                 className={`h-auto rounded-md ${
-                  item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
-                 }`}
-                 src={item.image}
-                />
-               </div>
-              </div>
-             )}
+       //      <div className='flex items-center gap-1'>
+       //       <div className='flex flex-col gap-1'>
+       //        {item.image.trim() !== '' && (
+       //         <div>
+       //          <h3 className='mb-1 text-[12px] font-light capitalize'>
+       //           {item.name}
+       //          </h3>
+       //          <div>
+       //           <img
+       //            className={`h-auto rounded-md ${
+       //             item.type === 'image' ? 'w-[100px]' : 'w-[30px]'
+       //            }`}
+       //            src={item.image}
+       //           />
+       //          </div>
+       //         </div>
+       //        )}
 
-             {item.content && (
-              <div
-               style={{
-                width: 'max-content',
-                overflowWrap: 'anywhere',
-                maxWidth: '250px',
-               }}
-               className='break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto'
-              >
-               <h3 className='mb-1 text-[12px] font-light capitalize'>
-                {item.name}
-               </h3>
-               <p className='font-semibold'>{item.content}</p>
-              </div>
-             )}
-            </div>
-           </div>
-          </div>
+       //        {item.content && (
+       //         <div
+       //          style={{
+       //           width: 'max-content',
+       //           overflowWrap: 'anywhere',
+       //           maxWidth: '250px',
+       //          }}
+       //          className='break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto'
+       //         >
+       //          <h3 className='mb-1 text-[12px] font-light capitalize'>
+       //           {item.name}
+       //          </h3>
+       //          <p className='font-semibold'>{item.content}</p>
+       //         </div>
+       //        )}
+       //       </div>
+       //      </div>
+       //     </div>
 
-          <time className='text-xs text-black-50'>
-           {convertTimeMessage(item.sendAt)}
-          </time>
-         </div>
-        )
-       )}
+       //     <time className='text-xs text-black-50'>
+       //      {convertTimeMessage(item.sendAt)}
+       //     </time>
+       //    </div>
+       //   )
+       //  )
+
+       <MessageComponent
+        data={messagesGroup}
+        renderItem={(message) => (
+         <MessageGroupCard
+          key={message.id}
+          message={message}
+          userID={user?.id}
+         />
+        )}
+       />
+      )}
 
       <span ref={scrollViewRef}></span>
      </ul>
