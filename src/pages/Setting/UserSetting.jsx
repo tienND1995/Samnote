@@ -67,7 +67,10 @@ const UserSetting = () => {
           <Box>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Typography className="sm:w-[200px]">Default screen:</Typography>
-              <Select sx={{ minWidth: "150px" }}>
+              <Select
+                size="small"
+                sx={{ minWidth: "150px", backgroundColor: "#fff" }}
+              >
                 <MenuItem value="calendar">Calendar</MenuItem>
                 <MenuItem value="archived">Archived</MenuItem>
                 <MenuItem value="deleted">Deleted</MenuItem>

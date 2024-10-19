@@ -1,10 +1,9 @@
 import { useState, forwardRef } from "react";
-import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
-// Sử dụng forwardRef để truyền ref vào TextField
+// Sử dụng forwardRef để truyền ref vào input
 const PasswordField = forwardRef((props, ref) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -13,20 +12,25 @@ const PasswordField = forwardRef((props, ref) => {
   };
 
   return (
-    <TextField
-      size="small"
-      type={showPassword ? "text" : "password"}
-      {...props}
-      inputRef={ref} // Đảm bảo rằng bạn truyền ref ở đây
-      sx={{ width: "300px" }}
-      InputProps={{
-        endAdornment: (
-          <IconButton onClick={handleClickShowPassword}>
-            {showPassword ? <Visibility /> : <VisibilityOff />}
-          </IconButton>
-        ),
-      }}
-    />
+    <div style={{ position: "relative", width: "300px" }}>
+      <input
+        {...props}
+        ref={ref} // Đảm bảo rằng bạn truyền ref ở đây
+        type={showPassword ? "text" : "password"}
+        style={{ width: "100%", paddingRight: "40px" }}
+      />
+      <IconButton
+        onClick={handleClickShowPassword}
+        style={{
+          position: "absolute",
+          right: 0,
+          top: "50%",
+          transform: "translateY(-50%)",
+        }}
+      >
+        {showPassword ? <Visibility /> : <VisibilityOff />}
+      </IconButton>
+    </div>
   );
 });
 

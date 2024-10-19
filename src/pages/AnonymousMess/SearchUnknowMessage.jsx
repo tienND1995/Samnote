@@ -305,7 +305,7 @@ const SearchUnknowMessage = ({ onUserSelect }) => {
   return (
     <Box>
       <Box
-        className="flex items-center bg-white rounded-[30px] h-[60px] text-black my-[10px] mx-[20px] px-[20px] lg:text-[15px] xxl:text-[20px] w-[90%] justify-between"
+        className="flex items-center bg-white rounded-[30px] h-[40px] xl:h-[60px] text-black my-[10px] mx-[20px] px-[20px] lg:text-[15px] xl:text-[20px] w-[90%] justify-between"
         onClick={() => setState({ ...state, status: true })} // Mở khi nhấp vào Box
       >
         Search User

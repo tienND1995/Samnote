@@ -202,11 +202,13 @@ const AnonymousMessage = () => {
 
   return (
     <Box
-      className={`text-white lg:flex bg-[#DFFFFE] w-full h-screen relative ${
-        info.length >= 0
-          ? ""
-          : "overflow-hidden h-[1px] lg:overflow-y-auto lg:h-full"
-      }`}
+      className={`text-white lg:flex 
+     bg-[#DFFFFE] 
+         w-full h-full relative ${
+           info.length >= 0
+             ? ""
+             : "overflow-hidden h-[1px] lg:overflow-y-auto lg:h-full"
+         }`}
     >
       <Box
         className="w-full lg:w-[400px]"
@@ -469,14 +471,9 @@ const AnonymousMessage = () => {
                       </div>
                       {item.type === "text" ? (
                         <Box
-                          sx={{
-                            backgroundColor: "#fff",
-                            borderRadius: "10px",
-                            padding: "5px",
-                            fontSize: "20px",
-                            maxWidth: "70%",
-                            marginBottom: "5px",
-                          }}
+                          className="bg-white rounded-[10px] p-[5px] xl:text-[20px]
+                        max-w-[70%] mb-[5px]
+                        "
                         >
                           {item.content}
                         </Box>
@@ -499,14 +496,8 @@ const AnonymousMessage = () => {
                       {" "}
                       {item.type === "text" ? (
                         <Box
-                          sx={{
-                            backgroundColor: "#1EC0F2",
-                            borderRadius: "10px",
-                            fontSize: "20px",
-                            padding: "5px",
-                            margin: "5px 10px",
-                            maxWidth: "70%",
-                          }}
+                          className="rounded-[10px] p-[5px] xl:text-[20px]
+                        max-w-[70%] mb-[5px] bg-[#1EC0F2]"
                         >
                           {item.content}
                         </Box>
@@ -531,7 +522,7 @@ const AnonymousMessage = () => {
               ))}
             <div id="lastmessage" />
           </div>
-          <div className="w-full h-[80px] relative shadow-[0_0_15px_rgba(0,0,0,0.2)]">
+          <div className="w-full h-[50px] xl:h-[80px] relative shadow-[0_0_15px_rgba(0,0,0,0.2)]">
             {" "}
             <InputMessage data={info} onReload={handleReload} />
           </div>

@@ -1,4 +1,4 @@
-import { Button, CircularProgress, TextField, Typography } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { AppContext } from "../../context";
@@ -302,7 +302,7 @@ const UpdateAvatar = () => {
               />
               <label
                 htmlFor="setting-upload-avatar"
-                className="border border-primary text-primary cursor-pointer py-1 px-2 py-lg-2 px-lg-4 uppercase rounded-md"
+                className="border h-[35px] flex items-center border-primary text-primary cursor-pointer py-1 px-3 uppercase rounded-md"
               >
                 change
               </label>
@@ -314,11 +314,10 @@ const UpdateAvatar = () => {
           <label className="w-[300px]">Name:</label>
 
           <div className="flex flex-col">
-            <TextField
+            <input
               type="text"
-              size="small"
               placeholder="name..."
-              className="w-[300px] form-control p-0"
+              className="w-[300px] form-control "
               {...register("name")}
             />
             {errors?.name && (
@@ -330,8 +329,7 @@ const UpdateAvatar = () => {
         <div className="flex items-md-center items-start flex-md-row flex-col gap-2">
           <label className="w-[300px]">Email:</label>
 
-          <TextField
-            size="small"
+          <input
             disabled
             type="text"
             className="w-[300px] form-control"
@@ -345,7 +343,7 @@ const UpdateAvatar = () => {
 
           <div className="flex items-center gap-3">
             <img
-              className="size-[60px] object-cover rounded-lg"
+              className="size-[60px] lg:size-[50px] object-cover rounded-lg"
               src={backgroundProfile.thumb || avatarDefault}
               alt="avatar default"
             />
@@ -359,7 +357,7 @@ const UpdateAvatar = () => {
               />
               <label
                 htmlFor="setting-upload-avatarProfile"
-                className="border border-primary text-primary cursor-pointer py-1 px-2 py-lg-2 px-lg-4 uppercase rounded-md"
+                className="border h-[35px] flex items-center border-primary text-primary cursor-pointer py-1 px-3 uppercase rounded-md"
               >
                 change
               </label>
@@ -371,7 +369,7 @@ const UpdateAvatar = () => {
             disabled={!checkChange}
             variant={checkChange ? "contained" : "outlined"}
             type="submit"
-            className=" px-4 uppercase bg-white text-black"
+            className=" px-4 uppercase border-[1px] border-white text-white h-[35px]"
           >
             Update
           </Button>
@@ -381,7 +379,7 @@ const UpdateAvatar = () => {
             onClick={() => {
               openDeleteAccount();
             }}
-            className="btn btn-danger"
+            className="btn btn-danger h-[35px]"
           >
             Delete account
           </button>
@@ -404,10 +402,8 @@ const UpdateAvatar = () => {
                 {" "}
                 <div className="flex flex-col">
                   {" "}
-                  <TextField
-                    size="small"
+                  <input
                     className=" form-control w-[300px] bg-white rounded-md"
-                    label="User Name..."
                     placeholder="Confim your user name"
                     {...registerDeleteAccount("user_name")}
                   />
@@ -421,7 +417,6 @@ const UpdateAvatar = () => {
                   {" "}
                   <PasswordField
                     className=" form-control w-[300px] bg-white rounded-md"
-                    label="Password..."
                     placeholder="Confim your password"
                     {...registerDeleteAccount("password")}
                   />
@@ -440,7 +435,10 @@ const UpdateAvatar = () => {
               </div>
               <div className="flex w-full justify-end gap-3 mt-7">
                 {" "}
-                <button type="submit" className="btn btn-danger w-[135px]">
+                <button
+                  type="submit"
+                  className="btn btn-danger w-[135px] h-[35px]"
+                >
                   {!loadingDeleteAccount ? (
                     "Delete account"
                   ) : (
@@ -452,7 +450,7 @@ const UpdateAvatar = () => {
                   onClick={() => {
                     openDeleteAccount();
                   }}
-                  className="btn bg-white"
+                  className="btn bg-white h-[35px]"
                 >
                   Cancel
                 </button>
@@ -471,10 +469,8 @@ const UpdateAvatar = () => {
               onSubmit={handleSubmitFogotPassword(handleForgotPassword)}
               className="flex gap-3 flex-col"
             >
-              <TextField
-                size="small"
-                className="form-control w-[300px] bg-white rounded-md"
-                label="User Name..."
+              <input
+                className="form-control w-[300px] h-[35px] bg-white rounded-md"
                 placeholder="Enter your user name"
                 {...registerFogotPassword("gmail")} // Đăng ký trường
               />
@@ -484,7 +480,10 @@ const UpdateAvatar = () => {
                 </span>
               )}
               <div className="flex w-full justify-end gap-3 mt-7">
-                <button type="submit" className="btn btn-danger w-[80px]">
+                <button
+                  type="submit"
+                  className="btn btn-danger w-[80px] h-[35px]"
+                >
                   {!loadingFogotPassword ? (
                     "Submit"
                   ) : (
@@ -494,7 +493,7 @@ const UpdateAvatar = () => {
                 <button
                   type="button"
                   onClick={() => setOpenForgotPassword(false)}
-                  className="btn bg-white"
+                  className="btn bg-white h-[35px]"
                 >
                   Cancel
                 </button>

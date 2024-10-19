@@ -201,10 +201,10 @@ const ImageUploader = ({ onImageSelect, onImageRemove, OpenSelectImage }) => {
           <div className="relative w-fit flex pl-6 items-center">
             <div className="mr-6">
               <button
-                className="bg-[#000] text-[#fff] rounded-md w-[25px] h-[25px] flex p-3 items-center justify-center"
+                className="bg-[#000] text-[#fff] rounded-md size-[25px] flex p-2 items-center justify-center"
                 onClick={handleIconClick}
               >
-                <AddIcon sx={{ fontSize: "30px" }} />
+                <AddIcon className="text-[20px] xl:text-[30px]" />
               </button>
               {/* <input
                 type="file"
@@ -227,22 +227,9 @@ const ImageUploader = ({ onImageSelect, onImageRemove, OpenSelectImage }) => {
             />
             <button
               onClick={handleRemoveImage}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                position: "absolute",
-                marginTop: "10px",
-                height: "35px",
-                top: -10,
-                right: -13,
-                width: "35px",
-                borderRadius: "50%",
-                backgroundColor: "#000",
-                color: "white",
-                border: "none",
-                cursor: "pointer",
-              }}
+              className="flex items-center justify-center 
+              absolute mt-[10px] size-[25px] xl:size-[35px] top-[-10px] right-[-13px]
+              rounded-full bg-black text-white border-0 cursor-pointer"
             >
               <CloseIcon />
             </button>
@@ -251,7 +238,7 @@ const ImageUploader = ({ onImageSelect, onImageRemove, OpenSelectImage }) => {
       )}
       <div>
         <IconButton sx={{ p: "5px" }} onClick={handleIconClick}>
-          <ImageLogo width={30} height={30} />
+          <ImageLogo />
         </IconButton>
         <input
           type="file"
@@ -491,11 +478,8 @@ const InputMessage = ({ data, onReload }) => {
     <div className="relative">
       {giphySearch && <GiphySearch onGifSelect={handleGifSelect} />}
       <Box
+        className="flex justify-between items-center xl:h-[80px] h-[50px] "
         sx={{
-          display: "flex",
-          height: "80px",
-          justifyContent: "space-between",
-          alignItems: "center",
           padding: "10px 10px 0 10px",
           backgroundColor: "#F4F4F4",
         }}
@@ -528,23 +512,15 @@ const InputMessage = ({ data, onReload }) => {
           >
             {giphySearch ? (
               <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "30px",
-                  width: "33px",
-                  borderRadius: "3px",
-                  backgroundColor: "#000",
-                  color: "white",
-                  border: "none",
-                  cursor: "pointer",
-                }}
+                className="flex items-center justify-center
+              xl:size-[30px] size-[25px] rounded-[3px] bg-black text-white 
+              border-0 cursor-pointer
+              "
               >
                 <CloseIcon />
               </div>
             ) : (
-              <GifIcon width={32} height={35} />
+              <GifIcon />
             )}{" "}
           </IconButton>
 
@@ -557,7 +533,7 @@ const InputMessage = ({ data, onReload }) => {
             onChange={handleInputChange}
           />
         </Box>
-        <div className="w-[50px]">
+        <div className="w-[30px] xl:w-[50px]">
           {" "}
           {sending ? (
             <CircularProgress size={24} />
@@ -566,6 +542,7 @@ const InputMessage = ({ data, onReload }) => {
               onClick={() => {
                 handleSendMessage();
               }}
+              className="xl:text-[40px]"
               sx={{
                 cursor:
                   payLoadData.content || payLoadData.gif || payLoadData.img
@@ -575,7 +552,6 @@ const InputMessage = ({ data, onReload }) => {
                   payLoadData.content || payLoadData.gif || payLoadData.img
                     ? "#0095FF"
                     : "#999",
-                fontSize: "40px",
               }}
             />
           )}

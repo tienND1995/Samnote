@@ -1,8 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import {
   Button,
-  Container,
-  TextField,
   Typography,
   Box,
   CircularProgress,
@@ -311,16 +309,16 @@ const UpdatePassword = ({ data }) => {
           {" "}
           <Typography className="w-[300px]">Password:</Typography>
           {!openChangePW ? (
-            <Box className="flex flex-col sm:flex-row  mt-[10px]">
-              <TextField
-                size="small"
+            <Box className="flex flex-col sm:flex-row lg:items-center mt-[10px]">
+              <input
+                required
                 disabled
-                className="w-[300px] bg-white rounded-md"
-                value="********"
+                className="h-[37px] w-[300px] bg-white rounded-md"
+                value="  ********"
               />
               <Button
                 variant="outlined"
-                sx={{ margin: "10px 10px  0", height: "35px", width: "90px" }}
+                sx={{ margin: "0 10px  0", height: "35px", width: "90px" }}
                 onClick={toggleOpenChangePw}
               >
                 change
@@ -399,8 +397,7 @@ const UpdatePassword = ({ data }) => {
             <Box className="flex flex-col gap-3">
               {!openForgotpw2 && (
                 <>
-                  <TextField
-                    size="small"
+                  <input
                     required
                     disabled
                     className=" form-control w-[300px] bg-white rounded-md"
@@ -433,10 +430,9 @@ const UpdatePassword = ({ data }) => {
                   Enter gmail to reset your private password?
                   <div className="flex flex-col">
                     {" "}
-                    <TextField
+                    <input
                       size="small"
-                      className=" form-control w-[300px] bg-white rounded-md"
-                      label="Enter your gmail..."
+                      className=" form-control  w-[300px] bg-white rounded-md"
                       placeholder="Enter current password 2"
                       {...registerFogotPw2("email")}
                     />
@@ -477,8 +473,7 @@ const UpdatePassword = ({ data }) => {
                 {" "}
                 <PasswordField
                   className=" form-control w-[300px] bg-white rounded-md"
-                  label="Current Password 2"
-                  placeholder="Enter current password 2"
+                  placeholder="Current Password 2"
                   {...registerEditPw2("old_private_password")}
                 />
                 {errorsEditPw2?.old_private_password && (
@@ -491,8 +486,7 @@ const UpdatePassword = ({ data }) => {
                 {" "}
                 <PasswordField
                   className=" form-control w-[300px] bg-white rounded-md"
-                  label="New Password 2"
-                  placeholder="Enter new password 2"
+                  placeholder="New Password 2"
                   {...registerEditPw2("new_private_password")}
                 />
                 {errorsEditPw2?.new_private_password && (
@@ -504,8 +498,7 @@ const UpdatePassword = ({ data }) => {
               <div className="flex flex-col">
                 {" "}
                 <PasswordField
-                  className=" form-control w-[300px] bg-white rounded-md"
-                  label="Confim new password 2"
+                  className="form-control  bg-white rounded-md"
                   placeholder="Confim new password 2"
                   {...registerEditPw2("confirm_private_password")}
                 />
@@ -554,7 +547,6 @@ const UpdatePassword = ({ data }) => {
             {" "}
             <PasswordField
               className=" form-control w-[300px] bg-white rounded-md"
-              label="New Password 2"
               placeholder="Enter your password 2"
               {...registerFormPw2("private_password")}
             />
@@ -565,7 +557,6 @@ const UpdatePassword = ({ data }) => {
             )}
             <PasswordField
               className=" form-control w-[300px] bg-white rounded-md"
-              label="Confim Password 2"
               placeholder="Confim your password 2"
               {...registerFormPw2("confirm_private_password")}
             />
