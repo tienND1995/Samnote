@@ -1,18 +1,17 @@
-import React, { useRef, useState, useEffect } from 'react'
-import Swal from 'sweetalert2'
-import axios from 'axios'
+import { useEffect, useRef, useState } from 'react'
 import Modal from 'react-bootstrap/Modal'
+import Swal from 'sweetalert2'
 
-import avatarDefault from '../../assets/avatar-default.png'
-import { fetchAllMemberGroup } from './fetchApiGroup'
+import avatarDefault from '../../../assets/avatar-default.png'
+import { fetchAllMemberGroup } from '../fetchApiGroup'
 
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import LogoutIcon from '@mui/icons-material/Logout'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 import InfoIcon from '@mui/icons-material/Info'
+import LogoutIcon from '@mui/icons-material/Logout'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
-import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
+import { fetchApiSamenote } from '../../../utils/fetchApiSamnote'
 
 const SettingGroup = (props) => {
  const {
@@ -50,6 +49,7 @@ const SettingGroup = (props) => {
   return null
  }
 
+
  const fetchQuitGroup = (idMem) => {
   fetchApiSamenote('delete', `/group/quit/${idMem}`)
    .then(() => {
@@ -65,7 +65,7 @@ const SettingGroup = (props) => {
  const handleQuitGroup = () => {
   setTypeButtonGroup('quit')
 
-  const memberQuit = groupItem.member.find((member) => member.idUser === userID)
+  const memberQuit = groupItem.members.find((member) => member.idUser === userID)
 
   Swal.fire({
    title: 'Are you sure?',
@@ -206,7 +206,7 @@ const SettingGroup = (props) => {
    </Modal>
 
    <button ref={showSettingGroupRef} onClick={handleShowSettingsGroup}>
-    <MoreVertIcon className='text-[40px]' />
+    <MoreVertIcon className='xl:text-[40px] text-[35px]' />
    </button>
 
    <ul

@@ -105,6 +105,8 @@ export const convertTimeToApi = (time) =>
 export const convertTimeApiNoteToHtml = (time) =>
  `${moment(time).format('DD/MM/YYYY')}`
 
+export const convertTimeMessage = (time) => moment(`${time}+0700`).calendar()
+
 // ** color
 export const isLightColor = (colorObj) => {
  const luminance = getLuminance(

@@ -10,7 +10,7 @@ import ImageIcon from '@mui/icons-material/Image'
 import SendIcon from '@mui/icons-material/Send'
 import AddBoxIcon from '@mui/icons-material/AddBox'
 
-import configs from '../../configs/configs.json'
+import configs from '../../../configs/configs.json'
 const { BASE64_URL } = configs
 
 const FormMessage = ({
@@ -18,7 +18,6 @@ const FormMessage = ({
  otherUserID,
  socket,
  formName,
- inputMessageFormRef,
  idGroup,
 }) => {
  const [messageForm, setMessageForm] = useState({
@@ -176,13 +175,13 @@ const FormMessage = ({
     return
    }
 
-//    if (images.length > 1) {
-//     dataForm.type = 'image'
-//     dataForm.metaData = images[0]
+   //    if (images.length > 1) {
+   //     dataForm.type = 'image'
+   //     dataForm.metaData = images[0]
 
-//     sendMessage(roomID, dataForm)
-//     return
-//    }
+   //     sendMessage(roomID, dataForm)
+   //     return
+   //    }
 
    if (emoji) {
     dataForm.type = 'icon-image'
@@ -219,7 +218,7 @@ const FormMessage = ({
  return (
   <div className='form-message'>
    {images.length > 0 ? (
-    <ul className='my-2 row row-cols-5 mx-0 overflow-hidden'>
+    <ul className='xl:my-2 row row-cols-5 mx-0 overflow-hidden'>
      <li className='position-relative'>
       <input
        type='file'
@@ -237,7 +236,7 @@ const FormMessage = ({
        }}
        htmlFor='add-image-form'
       >
-       <AddBoxIcon className='text-[40px] cursor-pointer' />
+       <AddBoxIcon className='xl:text-4xl text-3xl cursor-pointer' />
       </label>
      </li>
 
@@ -269,7 +268,7 @@ const FormMessage = ({
         <img
          src={`${BASE64_URL}${image}`}
          alt='anh message'
-         className='rounded-[8px] object-cover aspect-[3/2] w-full'
+         className='rounded-[8px] object-cover aspect-[5/3] xl:aspect-[3/2] w-full'
         />
        </li>
       )
@@ -277,22 +276,21 @@ const FormMessage = ({
     </ul>
    ) : null}
    <form
-    className='flex items-center gap-[30px] flex-grow-1 position-relative'
+    className='flex items-center justify-between gap-[20px] xl:gap-[30px] flex-grow-1 position-relative'
     onSubmit={handleSubmitMessage}
    >
     <div className='w-100'>
      <input
       onChange={handleChangeValueMsg}
       type='text'
-      className='w-100 h-[80px] bg-white rounded-[54px] px-[22px]'
+      className='w-100 py-[20px] px-[15px] xl:py-[30px] xl:px-[22px] bg-white rounded-[54px] '
       placeholder='Enter chat content...'
       value={content}
-      ref={inputMessageFormRef}
      />
     </div>
 
     <button type='submit'>
-     <SendIcon className='text-[40px] text-[#0095ff]' />
+     <SendIcon className='xl:text-4xl text-3xl text-[#0095ff]' />
     </button>
 
     <div>
@@ -303,12 +301,12 @@ const FormMessage = ({
       className='hidden m-0'
      />
      <label htmlFor='file-message-form'>
-      <ImageIcon className='text-[40px] text-[#0095ff]' />
+      <ImageIcon className='xl:text-4xl text-3xl text-[#0095ff]' />
      </label>
     </div>
 
     <button type='button' onClick={handleToggleEmoji}>
-     <EmojiEmotionsIcon className='text-[40px] text-[#0095ff]' />
+     <EmojiEmotionsIcon className='xl:text-4xl text-3xl text-[#0095ff]' />
     </button>
 
     {showEmoji && (

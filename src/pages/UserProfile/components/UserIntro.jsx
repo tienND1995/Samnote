@@ -184,7 +184,7 @@ const UserIntro = ({ userInfomations, user }) => {
               variant='contained'
               color='primary'
               style={{ textTransform: 'none' }}
-              onClick={() => navigate('/group', { state: userInfomations })}
+              onClick={() => navigate('/messages', { state: userInfomations })}
             >
               <svg
                 className='mr-2'

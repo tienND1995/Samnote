@@ -10,7 +10,7 @@ const SearchUser = ({
  showModalSearch,
  searchUserFormName,
  setShowModalSearch,
- setGroupMemberList,
+//  setGroupMemberList,
 
  setSnackbar,
  idGroup,
@@ -101,7 +101,7 @@ const SearchUser = ({
    // update members group
    handleHideModalSearch()
    const groupMemberList = await fetchAllMemberGroup(idGroup)
-   setGroupMemberList(groupMemberList)
+   //setGroupMemberList(groupMemberList)
 
    setSnackbar({
     isOpen: true,

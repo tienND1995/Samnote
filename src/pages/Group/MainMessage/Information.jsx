@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import avatarDefault from '../../assets/avatar-default.png'
+import avatarDefault from '../../../assets/avatar-default.png'
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import GroupsIcon from '@mui/icons-material/Groups'
 import ImageIcon from '@mui/icons-material/Image'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
+import { fetchApiSamenote } from '../../../utils/fetchApiSamnote'
 
 const Information = (props) => {
  const { showInfo, onHide, groupItem, groupMemberList } = props.data
@@ -20,11 +20,10 @@ const Information = (props) => {
   groupItem.idGroup &&
    fetchApiSamenote(
     'get',
-    `/group/allphoto/${groupItem.idGroup}`,
-    {},
-    { page: 1 }
+    `/group/allphoto/${groupItem.idGroup}`
+    // {},
+    // { page: 1 }
    ).then((data) => {
-    console.log('data', data)
     setImageList(data?.data || [])
    })
  }, [groupItem.idGroup])

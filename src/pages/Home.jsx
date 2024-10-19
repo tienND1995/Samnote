@@ -275,7 +275,7 @@ const Home = () => {
             fontWeight: '500',
            }
        }
-       onClick={() => navigate(`/group`)}
+       onClick={() => navigate(`/messages`)}
       >
        Group
       </li>

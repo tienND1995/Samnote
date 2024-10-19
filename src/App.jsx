@@ -75,11 +75,16 @@ function App() {
      <Route path='/user/incognito' element={<AnonymousMessage />} />
      {/* ................................ */}
      <Route path='/photo' element={<Photo />} />
-     <Route path='/group' element={<Group />} />
+
+     <Route path='/messages'>
+      <Route index element={<Group />} />
+      <Route path='chat/:id' element={<Group />} />
+      <Route path='group/:id' element={<Group />} />
+     </Route>
+
      <Route path='/profile/:id' element={<UserProfile />} />
 
      <Route path='/create-note' element={<CreateNote />} />
-
      <Route path='/editnote' exact element={<EditNoteLayout />}>
       <Route index element={<EditNote />} />
       <Route path=':id' element={<EditNote />} />

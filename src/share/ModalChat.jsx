@@ -50,7 +50,7 @@ const ModalChat = ({ dataMess, setIsModalMessage, messageIconRef }) => {
           chatList.slice(0, visibleMoreChat).map((item) => (
             <li key={item.idMessage} className='list-none'>
               <NavLink
-                to={`/group`}
+                to={`/messages`}
                 state={item.user}
                 className='flex items-center hover:bg-gray-100 p-3 no-underline text-black'
               >
