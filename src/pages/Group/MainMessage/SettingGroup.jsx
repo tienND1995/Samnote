@@ -49,7 +49,6 @@ const SettingGroup = (props) => {
   return null
  }
 
-
  const fetchQuitGroup = (idMem) => {
   fetchApiSamenote('delete', `/group/quit/${idMem}`)
    .then(() => {
@@ -65,7 +64,9 @@ const SettingGroup = (props) => {
  const handleQuitGroup = () => {
   setTypeButtonGroup('quit')
 
-  const memberQuit = groupItem.members.find((member) => member.idUser === userID)
+  const memberQuit = groupItem.members.find(
+   (member) => member.idUser === userID
+  )
 
   Swal.fire({
    title: 'Are you sure?',

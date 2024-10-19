@@ -68,12 +68,3 @@
  width: 400px;
 }
 
-ul.list-chat > li {
- transition: all 0.3s;
- background: #fff;
-}
-/* 
-ul.list-chat > li > a:hover,
-ul.list-chat > li > a.active {
- background: #70ffff;
-} */

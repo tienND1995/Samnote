@@ -1,5 +1,5 @@
-import avatarDefault from '../../../assets/avatar-default.png'
-import { convertTimeMessage } from '../../../utils/utils'
+import avatarDefault from '../../../../assets/avatar-default.png'
+import { convertTimeMessage } from '../../../../utils/utils'
 
 const MessageGroupCard = ({ message, userID }) => {
  return message.idSend === userID ? (
@@ -55,7 +55,9 @@ const MessageGroupCard = ({ message, userID }) => {
      <div className='flex flex-col gap-1'>
       {message.image?.trim() !== '' && (
        <div>
-        <h3 className='mb-1 text-[12px] font-light capitalize'>{message.name}</h3>
+        <h3 className='mb-1 text-[12px] font-light capitalize'>
+         {message.name}
+        </h3>
         <div>
          <img
           className={`h-auto rounded-md ${
@@ -76,7 +78,9 @@ const MessageGroupCard = ({ message, userID }) => {
         }}
         className='break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto'
        >
-        <h3 className='mb-1 text-[12px] font-light capitalize'>{message.name}</h3>
+        <h3 className='mb-1 text-[12px] font-light capitalize'>
+         {message.name}
+        </h3>
         <p className='font-semibold'>{message.content}</p>
        </div>
       )}

@@ -132,20 +132,21 @@ const Register = () => {
   }
 
   fetchApiSamenote('post', '/register', dataForm).then((response) => {
-   if (response?.error) {
-    return setSnackbar({
-     isOpen: true,
-     message: response.error,
-     severity: 'error',
-    })
-   } else {
-    setIsCreateAccount(true)
-    return setSnackbar({
-     isOpen: true,
-     message: response.error,
-     severity: 'error',
-    })
-   }
+   console.log('response', response)
+//    if (response?.error) {
+//     return setSnackbar({
+//      isOpen: true,
+//      message: response.error,
+//      severity: 'error',
+//     })
+//    } else {
+//     setIsCreateAccount(true)
+//     return setSnackbar({
+//      isOpen: true,
+//      message: response.error,
+//      severity: 'error',
+//     })
+//    }
   })
  }
 

@@ -1,30 +1,24 @@
 import { useState } from 'react'
+
+import { useNavigate } from 'react-router-dom'
 import Modal from 'react-bootstrap/Modal'
 
-import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
-import { fetchAllMemberGroup } from './fetchApiGroup'
+import { fetchApiSamenote } from '../../../utils/fetchApiSamnote'
+// import { fetchAllMemberGroup } from '../fetchApiGroup'
 
-import avatarDefault from '../../assets/avatar-default.png'
+import avatarDefault from '../../../assets/avatar-default.png'
 
 const SearchUser = ({
- showModalSearch,
- searchUserFormName,
- setShowModalSearch,
-//  setGroupMemberList,
-
- setSnackbar,
- idGroup,
  userID,
  socket,
-
- clickUserSearch,
+ showModalSearch,
+ setShowModalSearch,
 }) => {
+ const navigate = useNavigate()
+
  const [searchUserName, setSearchUserName] = useState('')
  const [searchUserResult, setSearchUserResult] = useState([])
  const [messageNotifi, setMessageNotifi] = useState('')
-
- const { getMessageList, resetGroup, setInfoOtherUser, setFormName } =
-  clickUserSearch
 
  const roomSplit = (idUser, idOther) =>
   idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
@@ -47,30 +41,28 @@ const SearchUser = ({
    start_name: searchUserName,
   })
    .then((response) => {
-    setSearchUserResult(response.data || [])
-    setMessageNotifi(response?.data ? '' : 'Not found')
+    if (response?.data) {
+     setSearchUserResult(response.data.filter((item) => item.idUser !== userID))
+     setMessageNotifi('')
+    } else {
+     setSearchUserResult([])
+     setMessageNotifi('Not found')
+    }
    })
    .catch((error) => console.log(error))
  }
 
- const handleClickUserSearch = (otherUser) => {
-  if (!otherUser) return
-  const newInfoOtherUser = {
-   id: otherUser.idUser,
-   Avarta: otherUser.linkAvatar,
-   name: otherUser.userName,
-  }
+ const handleClickUserSearch = (otherUserID) => {
+  if (!otherUserID) return
 
-  const roomID = roomSplit(userID, otherUser.idUser)
+  const roomID = roomSplit(userID, otherUserID)
   socket.emit('join_room', { room: roomID })
 
-  setFormName('chat')
-  setInfoOtherUser(newInfoOtherUser)
-  resetGroup()
+  postRelation(userID, otherUserID)
 
-  postRelation(userID, otherUser.idUser)
-  getMessageList(userID, otherUser.idUser)
-
+  setTimeout(() => {
+    navigate(`/messages/chat/${otherUserID}`)
+  }, 300)
   handleHideModalSearch()
  }
 
@@ -84,38 +76,39 @@ const SearchUser = ({
   setSearchUserName(e.target.value)
  }
 
- const handleAddUserSearch = (userId) => {
-  const idMemberList = [userId]
-  if (!idMemberList || !idGroup) return
+ //  const handleAddUserSearch = (userId) => {
+ //   const idMemberList = [userId]
+ //   if (!idMemberList || !idGroup) return
 
-  postMembersGroup(idMemberList, idGroup)
- }
+ //   postMembersGroup(idMemberList, idGroup)
+ //  }
 
- const postMembersGroup = (idMemberList, idGroup) => {
-  fetchApiSamenote('post', `/group/add/${idGroup}`, {
-   idMembers: idMemberList,
-   idUserAddMe: userID,
-  }).then(async (response) => {
-   if (response.error) return
+ //  const postMembersGroup = (idMemberList, idGroup) => {
+ //   fetchApiSamenote('post', `/group/add/${idGroup}`, {
+ //    idMembers: idMemberList,
+ //    idUserAddMe: userID,
+ //   }).then(async (response) => {
+ //    if (response.error) return
 
-   // update members group
-   handleHideModalSearch()
-   const groupMemberList = await fetchAllMemberGroup(idGroup)
-   //setGroupMemberList(groupMemberList)
+ //    // update members group
+ //    handleHideModalSearch()
+ //    const groupMemberList = await fetchAllMemberGroup(idGroup)
+ //    //setGroupMemberList(groupMemberList)
 
-   setSnackbar({
-    isOpen: true,
-    message: `Add members successfully!`,
-    severity: 'success',
-   })
-  })
- }
+ //    setSnackbar({
+ //     isOpen: true,
+ //     message: `Add members successfully!`,
+ //     severity: 'success',
+ //    })
+ //   })
+ //  }
 
  return (
   <Modal show={showModalSearch} centered={true} onHide={handleHideModalSearch}>
    <div className='p-3'>
     <h3 className='text-[25px] font-bold'>
-     {searchUserFormName === 'chat' ? 'Search user' : 'Add member'}
+     {/* {searchUserFormName === 'chat' ? 'Search user' : 'Add member'} */}
+     Search user
     </h3>
 
     <form
@@ -163,25 +156,23 @@ const SearchUser = ({
         </div>
        </div>
 
-       {searchUserFormName === 'chat' && (
-        <button
-         onClick={() => handleClickUserSearch(user)}
-         type='button'
-         className='bg-[#F56852] text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
-        >
-         Chat
-        </button>
-       )}
+       <button
+        onClick={() => handleClickUserSearch(user.idUser)}
+        type='button'
+        className='bg-[#F56852] text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
+       >
+        Chat
+       </button>
 
-       {searchUserFormName === 'group' && (
-        <button
-         onClick={() => handleAddUserSearch(user.idUser)}
-         type='button'
-         className='bg-black text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
-        >
-         Add
-        </button>
-       )}
+       {/* {searchUserFormName === 'group' && (
+     <button
+      onClick={() => handleAddUserSearch(user.idUser)}
+      type='button'
+      className='bg-black text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
+     >
+      Add
+     </button>
+    )} */}
       </li>
      ))}
 

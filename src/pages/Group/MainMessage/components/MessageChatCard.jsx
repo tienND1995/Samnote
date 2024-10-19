@@ -1,5 +1,5 @@
-import avatarDefault from '../../../assets/avatar-default.png'
-import { convertTimeMessage } from '../../../utils/utils'
+import avatarDefault from '../../../../assets/avatar-default.png'
+import { convertTimeMessage } from '../../../../utils/utils'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 const MessageChatCard = ({ message, userID, onDeleteMessage, avatar }) => {
