@@ -80,6 +80,7 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
    {},
    { page: 1 }
   ).then((data) => {
+   console.log('data', data)
    const newMessagesChat = []
    data.data.map((item) => {
     return item.messages.map((message) => newMessagesChat.push(message))
@@ -133,40 +134,40 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
  }, [socket, typeFilterChat, typeMessage, pathname])
 
- // handle link profile to group
- //  useEffect(() => {
- //   if (!state || !socket) return
+ //  handle link profile to group
+ //   useEffect(() => {
+ //    if (!state || !socket) return
 
- //   const roomSplit = (idUser, idOther) =>
- //    idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
+ //    const roomSplit = (idUser, idOther) =>
+ //     idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
 
- //   setInfoMessageChat({ ...infoMessageChat, name: 'chat' })
- //   setInfoMessageChat(state || {})
+ //    setInfoMessageChat({ ...infoMessageChat, name: 'chat' })
+ //    setInfoMessageChat(state || {})
 
- //   // đặt mối quan hệ true vs user khác
- //   fetchApiSamenote('post', `/chatblock/${user?.id}`, {
- //    idReceive: state.id,
- //   })
-
- //   // join room chat
- //   socket.emit('join_room', { room: roomSplit(user?.id, state.id) })
- //   state?.id &&
- //    fetchApiSamenote(
- //     'get',
- //     `/message/list_message_chat1vs1/${user?.id}/${state?.id}`,
- //     {},
- //     { page: 1 }
- //    ).then((data) => {
- //     const newMessagesChat = []
- //     data.data.map((item) => {
- //      return item.messages.map((message) => newMessagesChat.push(message))
- //     })
-
- //     setMessagesChat(newMessagesChat)
+ //    đặt mối quan hệ true vs user khác
+ //    fetchApiSamenote('post', `/chatblock/${user?.id}`, {
+ //     idReceive: state.id,
  //    })
- //  }, [state, socket])
 
- //  ****************************************
+ //    join room chat
+ //    socket.emit('join_room', { room: roomSplit(user?.id, state.id) })
+ //    state?.id &&
+ //     fetchApiSamenote(
+ //      'get',
+ //      `/message/list_message_chat1vs1/${user?.id}/${state?.id}`,
+ //      {},
+ //      { page: 1 }
+ //     ).then((data) => {
+ //      const newMessagesChat = []
+ //      data.data.map((item) => {
+ //       return item.messages.map((message) => newMessagesChat.push(message))
+ //      })
+
+ //      setMessagesChat(newMessagesChat)
+ //     })
+ //   }, [state, socket])
+
+ //   ****************************************
 
  useEffect(() => {
   const isChat = pathname.includes('chat')
