@@ -1,4 +1,11 @@
-import { Box, Avatar, Typography, Button } from "@mui/material";
+import {
+  Box,
+  Avatar,
+  Typography,
+  Button,
+  IconButton,
+  InputBase,
+} from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../context";
 import { NavLink } from "react-router-dom";
@@ -6,6 +13,10 @@ import api from "../../api";
 import Swal from "sweetalert2";
 import bg_chat from "../../assets/img-chat-an-danh.jpg";
 import MenuSelect from "../../assets/menuselect.jsx";
+import unknowAvt from "../../assets/unknow-avt.png";
+import GifIcon from "../../assets/gifIcon.jsx";
+import ImageLogo from "../../assets/imagelogo.jsx";
+import SendIcon from "@mui/icons-material/Send";
 import SearchUnknowMessage from "./SearchUnknowMessage.jsx";
 import InputMessage from "./InputMessage";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -382,7 +393,7 @@ const AnonymousMessage = () => {
           </div>
         </Box>
       </Box>
-      {info.length !== 0 && (
+      {info.length !== 0 ? (
         <div className="flex flex-col w-[100%] h-[100vh] shadow-[0_0_10px_rgba(0,0,0,0.2)] fixed lg:static top-0 bottom-0 left-0 right-0 z-[1000] lg:z-[0]">
           {" "}
           <div className="w-full h-[100px] lg:h-[100px] xxl:h-[140px] bg-white shadow-[0_0_10px_rgba(0,0,0,0.2)] items-center flex justify-between px-2">
@@ -438,7 +449,7 @@ const AnonymousMessage = () => {
             </div>
           </div>
           <div
-            className="bg-cover bg-center scrollbar w-full overflow-y-auto flex-grow shadow-[0_0_10px_rgba(0,0,0,0.2)]"
+            className="bg-cover bg-center scrollbar w-full px-2 overflow-y-auto flex-grow shadow-[0_0_10px_rgba(0,0,0,0.2)]"
             style={{
               backgroundImage: `url(${bg_chat})`,
             }}
@@ -481,13 +492,13 @@ const AnonymousMessage = () => {
                         <img
                           src={item.img}
                           alt="image"
-                          className="w-[200px] h-[auto] m-2 rounded-md"
+                          className="w-[200px] h-[auto] my-2 rounded-md"
                         />
                       ) : item.type === "gif" ? (
                         <img
                           src={item.gif}
                           alt="GIF"
-                          className="w-[200px] h-[auto] m-2 rounded-md"
+                          className="w-[200px] h-[auto] my-2 rounded-md"
                         />
                       ) : null}
                     </>
@@ -505,13 +516,13 @@ const AnonymousMessage = () => {
                         <img
                           src={item.img}
                           alt="image"
-                          className="w-[200px] h-[auto] m-2 rounded-md"
+                          className="w-[200px] h-[auto] my-2 rounded-md"
                         />
                       ) : item.type === "gif" ? (
                         <img
                           src={item.gif}
                           alt="GIF"
-                          className="w-[200px] h-[auto] m-2 rounded-md"
+                          className="w-[200px] h-[auto] my-2 rounded-md"
                         />
                       ) : (
                         ""
@@ -525,6 +536,50 @@ const AnonymousMessage = () => {
           <div className="w-full h-[50px] xl:h-[60px] relative shadow-[0_0_15px_rgba(0,0,0,0.2)]">
             {" "}
             <InputMessage data={info} onReload={handleReload} />
+          </div>
+        </div>
+      ) : (
+        <div className=" lgEqual:hidden flex flex-col w-[100%] h-full shadow-[0_0_10px_rgba(0,0,0,0.2)] fixed lg:static top-0 bottom-0 left-0 right-0 z-[1000] lg:z-[0]">
+          {" "}
+          <div className="w-full h-[100px] lg:h-[100px] xxl:h-[140px] bg-white shadow-[0_0_10px_rgba(0,0,0,0.2)] items-center flex justify-between px-2">
+            <div className=" w-[95%] lg:w-full h-[100px] lg:h-[140px] items-center flex">
+              <Avatar
+                className=" size-[40px] lg:size-[50px] xxl:size-[90px]"
+                src={unknowAvt}
+              />
+              <p className="text-black text-[20px] lg:text-[25px] xxl:text-[34px] font-bold capitalize ml-2 w-full truncate ">
+                Anonymous chatter
+              </p>
+            </div>
+            <div className="relative w-[13px]">
+              <div className="flex items-center justify-center cursor-pointer rounded-full  hover:bg-[rgba(0,0,0,0.1)] mr-[8px]">
+                <MenuSelect className="cursor-pointer" />
+              </div>
+            </div>
+          </div>
+          <div
+            className="bg-cover bg-center scrollbar w-full px-2 flex-grow shadow-[0_0_10px_rgba(0,0,0,0.2)]"
+            style={{
+              backgroundImage: `url(${bg_chat})`,
+            }}
+          ></div>
+          <div className="w-full bg-white flex items-center px-2 h-[50px] xl:h-[60px] shadow-[0_0_15px_rgba(0,0,0,0.2)]">
+            <span className="p-[5px] gap-2 flex flex-row">
+              <ImageLogo />
+              <GifIcon />
+            </span>
+            <InputBase
+              disabled
+              sx={{ ml: 1, flex: 1, width: "90%" }}
+              placeholder="Type your message..."
+            />
+            <SendIcon
+              className="xl:text-[40px]"
+              sx={{
+                cursor: "not-allowed",
+                color: "#999",
+              }}
+            />
           </div>
         </div>
       )}

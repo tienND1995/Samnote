@@ -70,9 +70,9 @@ function App() {
     <Route path='*' element={<Navigate replace to='/' />} />
 
     <Route element={<RootLayout />}>
-     <Route path='/user/setting' element={<UserSetting />} />
+     <Route path='/setting' element={<UserSetting />} />
 
-     <Route path='/user/incognito' element={<AnonymousMessage />} />
+     <Route path='/incognito' element={<AnonymousMessage />} />
      {/* ................................ */}
      <Route path='/photo' element={<Photo />} />
      <Route path='/group' element={<Group />} />
