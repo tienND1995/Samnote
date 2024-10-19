@@ -4,16 +4,16 @@ import { convertTimeMessage } from '../../../utils/utils'
 import DeleteIcon from '@mui/icons-material/Delete'
 const MessageChatCard = ({ message, userID, onDeleteMessage, avatar }) => {
  return message.idSend === userID ? (
-  <div className='h-auto flex flex-col justify-center items-end'>
+  <div key={message.id} className='h-auto flex flex-col items-end'>
    <div className='flex gap-2 mb-1'>
-    <div className='flex messages-center group gap-1'>
+    <div className='flex items-center group gap-1'>
      <button
       style={{
        border: 'none',
        backgroundColor: 'transparent',
        transition: 'all .3s ease-in-out',
       }}
-      className='hidden group-hover:block '
+      className='hidden group-hover:block'
       onClick={() => {
        onDeleteMessage(message.id)
       }}
@@ -21,12 +21,12 @@ const MessageChatCard = ({ message, userID, onDeleteMessage, avatar }) => {
       <DeleteIcon />
      </button>
 
-     <div className='flex flex-col gap-1'>
+     <div className='flex flex-col gap-1 items-end'>
       {message.image && (
        <div>
         <img
          className={`h-auto rounded-md ${
-            message.type === 'image' ? 'w-[100px]' : 'w-[30px]'
+          message.type === 'image' ? 'w-[100px]' : 'w-[30px]'
          }`}
          src={message.image}
         />
@@ -54,9 +54,9 @@ const MessageChatCard = ({ message, userID, onDeleteMessage, avatar }) => {
    </time>
   </div>
  ) : (
-  <div className='h-auto mb-2 justify-center items-start'>
+  <div key={message.id} className='h-auto mb-2'>
    <div className='flex gap-2 mb-1'>
-    <div className='flex gap-1'>
+    <div className='flex gap-1 items-end'>
      <img
       className='object-fit-cover rounded-circle'
       style={{ width: '40px', height: '40px' }}
@@ -72,7 +72,7 @@ const MessageChatCard = ({ message, userID, onDeleteMessage, avatar }) => {
        <div>
         <img
          className={`h-auto rounded-md ${
-            message.type === 'image' ? 'w-[100px]' : 'w-[30px]'
+          message.type === 'image' ? 'w-[100px]' : 'w-[30px]'
          }`}
          src={message.image}
         />
