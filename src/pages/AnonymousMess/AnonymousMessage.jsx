@@ -522,7 +522,7 @@ const AnonymousMessage = () => {
               ))}
             <div id="lastmessage" />
           </div>
-          <div className="w-full h-[50px] xl:h-[80px] relative shadow-[0_0_15px_rgba(0,0,0,0.2)]">
+          <div className="w-full h-[50px] xl:h-[60px] relative shadow-[0_0_15px_rgba(0,0,0,0.2)]">
             {" "}
             <InputMessage data={info} onReload={handleReload} />
           </div>

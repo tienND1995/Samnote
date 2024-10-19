@@ -84,7 +84,7 @@ const GiphySearch = ({ onGifSelect }) => {
   const { gifs, selectedGif, loading, error } = state;
 
   return (
-    <div className="bg-white w-[600px] left-[1%] absolute top-0 transform -translate-y-[101%] h-[500px] rounded-[5px] shadow-[0_0_15px_rgba(0,0,0,0.8)]">
+    <div className="bg-white w-[50%] xl:w-[600px] left-[1%] absolute top-0 transform -translate-y-[101%] h-[300px] overflow-y-auto  overflow-x-hidden xl:h-[500px] rounded-[5px] shadow-[0_0_15px_rgba(0,0,0,0.8)]">
       <div className="flex flex-row w-full items-center justify-center relative">
         <div
           style={{
@@ -478,7 +478,7 @@ const InputMessage = ({ data, onReload }) => {
     <div className="relative">
       {giphySearch && <GiphySearch onGifSelect={handleGifSelect} />}
       <Box
-        className="flex justify-between items-center xl:h-[80px] h-[50px] "
+        className="flex justify-between items-center xl:h-[60px] h-[50px] "
         sx={{
           padding: "10px 10px 0 10px",
           backgroundColor: "#F4F4F4",

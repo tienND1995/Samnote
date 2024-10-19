@@ -1,6 +1,6 @@
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(4, 130px); /* 4 cột */
+  grid-template-columns: repeat(4, 1fr); /* 4 cột */
   grid-template-rows: repeat(3, 120px); /* Tự động điều chỉnh chiều cao hàng */
   gap: 10px; /* Khoảng cách giữa các ô */
   padding: 25px;
