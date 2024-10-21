@@ -6,6 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import SearchIcon from '@mui/icons-material/Search'
 import NoteCard from '../../share/NoteCard'
 import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
+import { debounce } from '../../utils/utils'
 
 const Dustbin = () => {
  const appContext = useContext(AppContext)
@@ -27,7 +28,6 @@ const Dustbin = () => {
  }, [user])
 
  let timeOut = null
-
  const handleChangeSearchNote = async (e) => {
   const textSearch = e.target.value
   clearTimeout(timeOut)

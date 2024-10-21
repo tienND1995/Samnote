@@ -121,3 +121,14 @@ export const convertColorNoteToApi = (color) => ({
  g: color.g,
  a: 1,
 })
+
+export const debounce = (callBack, delay) => {
+ let timeOut = null
+
+ return (...args) => {
+  clearTimeout(timeOut)
+  timeOut = setTimeout(() => {
+   callBack(...args)
+  }, delay)
+ }
+}
