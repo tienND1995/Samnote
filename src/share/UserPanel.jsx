@@ -101,7 +101,7 @@ const UserPanel = () => {
           fill={changeStatus}
         />
       ),
-      url: "/user/incognito",
+      url: "/incognito",
       state: { userInfomations: null },
     },
     {
@@ -114,7 +114,7 @@ const UserPanel = () => {
     {
       name: "setting",
       icon: <SettingsIcon className="size-[25px] lg:size-[30px]" />,
-      url: "/user/setting",
+      url: "/setting",
     },
   ];
 

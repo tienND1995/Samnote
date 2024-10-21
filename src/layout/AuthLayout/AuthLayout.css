@@ -1,15 +1,15 @@
-.auth-modal > .modal-content {
- background-color: #fbfcffe5;
+.auth-modal>.modal-content {
+    background-color: #fbfcffe5;
 
- margin: 0 auto;
- border-radius: 30px;
+    margin: 0 auto;
+    border-radius: 1.5rem;
 }
 
-.login-modal > .modal-content {
- width: 700px;
- padding: 60px 20px;
+.login-modal>.modal-content {
+    width: 700px;
+    padding: 60px 20px;
 }
 
-.register-modal > .modal-content {
- padding: 60px;
+.register-modal>.modal-content {
+    padding: 60px;
 }

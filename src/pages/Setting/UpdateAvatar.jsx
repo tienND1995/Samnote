@@ -281,7 +281,7 @@ const UpdateAvatar = () => {
         action="submit"
         className="gap-3 flex flex-col"
       >
-        <div className="flex items-md-center items-start flex-md-row flex-col gap-2">
+        <div className="flex items-md-center items-start md:flex-row flex-col gap-2">
           <label htmlFor="" className="w-[300px]">
             Avatar:
           </label>

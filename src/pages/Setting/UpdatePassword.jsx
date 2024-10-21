@@ -305,11 +305,11 @@ const UpdatePassword = ({ data }) => {
           Update Password
         </Typography>
 
-        <Box className="flex mt-[20px] flex-col sm:flex-row">
+        <Box className="flex mt-[20px] flex-col md:flex-row">
           {" "}
           <Typography className="w-[300px]">Password:</Typography>
           {!openChangePW ? (
-            <Box className="flex flex-col sm:flex-row lg:items-center mt-[10px]">
+            <Box className="flex flex-col sm:flex-row sm:items-center mt-[10px]">
               <input
                 required
                 disabled
@@ -318,7 +318,7 @@ const UpdatePassword = ({ data }) => {
               />
               <Button
                 variant="outlined"
-                sx={{ margin: "0 10px  0", height: "35px", width: "90px" }}
+                className="mx-[10px] h-[35px] w-[90px] mt-[10px] sm:mt-0"
                 onClick={toggleOpenChangePw}
               >
                 change
@@ -387,7 +387,7 @@ const UpdatePassword = ({ data }) => {
         2-layer security, for example, your wife holds your phone but they also
         cannot access your secure notes information.
       </p>
-      <Box className="flex mt-[20px] flex-col sm:flex-row">
+      <Box className="flex mt-[20px] flex-col md:flex-row">
         <Typography className="w-[300px] mb-[10px] sm:mb-0">
           Password 2:
         </Typography>

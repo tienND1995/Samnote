@@ -8,6 +8,7 @@ import {
   Button,
 } from "@mui/material";
 import "./AnonymousMess.css";
+import { useParams, useLocation } from "react-router-dom";
 import { AppContext } from "../../context";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -255,7 +256,9 @@ const ImageUploader = ({ onImageSelect, onImageRemove, OpenSelectImage }) => {
 const InputMessage = ({ data, onReload }) => {
   const appContext = useContext(AppContext);
   const { user } = appContext;
-  console.log("info truyền vào thanh input để gửi tin nhắn", data);
+  const params = useParams();
+  let { pathname } = useLocation();
+  let userID = params.id;
   const [status, setStatus] = useState({
     giphySearch: false,
     OpenSelectImage: false,
@@ -273,20 +276,23 @@ const InputMessage = ({ data, onReload }) => {
   });
 
   useEffect(() => {
-    // Cập nhật payloadData khi data thay đổi
+    let idRoom;
+    if (typeof pathname === "string" && pathname.includes("user")) {
+      idRoom = `${user.id}#${userID}`;
+    } else {
+      idRoom = `${userID}#${user.id}`;
+    }
+
     setPayLoadData((prev) => ({
       ...prev,
-      idRoom:
-        data.idRoom == undefined ? `${user.id}#${data.idUser}` : data.idRoom,
-      idReceive: data.idReceive == undefined ? data.idUser : data.idReceive,
+      idRoom,
+      idReceive: userID,
     }));
 
+
     handleReload({});
-  }, [data, user.id]);
-  console.log(
-    "info truyền vào thanh inptut để gửi tin nhắn",
-    payLoadData.idRoom
-  );
+  }, [pathname, userID, user.id]);
+
   const handleReload = (data) => {
     onReload(data);
   };
@@ -308,14 +314,14 @@ const InputMessage = ({ data, onReload }) => {
   };
 
   const handleSendMessage = () => {
-    console.log(
-      "điều kiện để gửi tin nhắn: payLoadData.content" +
-        payLoadData.content +
-        "gif" +
-        payLoadData.gif +
-        "img" +
-        payLoadData.img
-    );
+    // console.log(
+    //   "điều kiện để gửi tin nhắn: payLoadData.content" +
+    //     payLoadData.content +
+    //     "gif" +
+    //     payLoadData.gif +
+    //     "img" +
+    //     payLoadData.img
+    // );
 
     if (payLoadData.content || payLoadData.gif || payLoadData.img) {
       sendMessage();
@@ -331,13 +337,9 @@ const InputMessage = ({ data, onReload }) => {
 
   const sendMessage = async () => {
     const { idReceive, idRoom, gif, type, img, content } = payLoadData;
-    const [num1, num2] = idRoom.split("#").map(Number);
-
-    // Cập nhật idReceive
-    const newIdReceive = user.id != num1 ? num1 : num2;
 
     const formData = new FormData();
-    formData.append("idReceive", newIdReceive);
+    formData.append("idReceive", idReceive);
     formData.append("idRoom", idRoom);
     formData.append("gif", gif);
     formData.append("type", type);
@@ -366,14 +368,11 @@ const InputMessage = ({ data, onReload }) => {
 
       const data = await response.json();
       handleReload(data.message);
-
-      // Reset payload data
       setPayLoadData((prevData) => ({
         ...prevData,
         img: "",
-        content: "", // Chỉ đặt lại content
+        content: "",
         gif: "",
-        // Không reset img ở đây
       }));
 
       setStatus((prevData) => ({
@@ -394,28 +393,14 @@ const InputMessage = ({ data, onReload }) => {
   };
 
   const handleGifSelect = (gif) => {
-    console.log("gif trả về ", data);
-    if (data?.idRoom) {
-      const [num1, num2] = data.idRoom.split("#").map(Number);
+    // console.log("gif trả về ", data);
 
-      setPayLoadData((prevData) => ({
-        ...prevData,
-        idReceive: user.id !== num1 ? num1 : num2,
-        idRoom: data.idRoom,
-        gif: gif.images.fixed_height.url,
-        type: "gif",
-        content: "",
-      }));
-    } else {
-      setPayLoadData((prevData) => ({
-        ...prevData,
-        idReceive: data?.idUser,
-        idRoom: `${user.id}#${data?.idUser}`,
-        gif: gif.images.fixed_height.url,
-        type: "gif",
-        content: "",
-      }));
-    }
+    setPayLoadData((prevData) => ({
+      ...prevData,
+      gif: gif.images.fixed_height.url,
+      type: "gif",
+      content: "",
+    }));
 
     // Đóng ImageUploader khi chọn GIF
     setStatus((prevStatus) => ({
@@ -433,26 +418,12 @@ const InputMessage = ({ data, onReload }) => {
   }, [payLoadData.gif]);
 
   const handleImageSelect = (image) => {
-    if (data?.idRoom) {
-      const [num1, num2] = data.idRoom.split("#").map(Number);
-      setPayLoadData((prevData) => ({
-        ...prevData,
-        idReceive: user.id != num1 ? num1 : num2,
-        idRoom: data.idRoom,
-        img: image,
-        type: "image",
-        content: null,
-      }));
-    } else {
-      setPayLoadData((prevData) => ({
-        ...prevData,
-        idReceive: data?.idUser,
-        idRoom: `${user.id}#${data?.idUser}`,
-        img: image, // Gán hình ảnh được chọn vào payload
-        type: "image",
-        content: null,
-      }));
-    }
+    setPayLoadData((prevData) => ({
+      ...prevData,
+      img: image, // Gán hình ảnh được chọn vào payload
+      type: "image",
+      content: null,
+    }));
 
     // Đóng GIF khi chọn hình ảnh
     setStatus((prevStatus) => ({
