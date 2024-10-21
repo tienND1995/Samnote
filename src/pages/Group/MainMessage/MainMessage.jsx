@@ -15,6 +15,7 @@ import MessageChatCard from './components/MessageChatCard'
 import MessageComponent from './components/MessageComponent'
 import MessageGroupCard from './components/MessageGroupCard'
 import InfoMessageTop from './InfoMessageTop'
+import { fetchAllMessageList } from '../fetchApiGroup'
 
 const MainMessage = (props) => {
  const { typeFilterChat, getAllMessageList } = props
@@ -40,6 +41,7 @@ const MainMessage = (props) => {
   members: [],
  })
 
+ const [allMessageList, setAllMessageList] = useState([])
  const [messagesChat, setMessagesChat] = useState([])
  const [messagesGroup, setMessagesGroup] = useState([])
 
@@ -111,6 +113,8 @@ const MainMessage = (props) => {
      if (item.type_chat === 'chatgroup')
       return socket.emit('join_room', { room: item.idGroup })
     })
+
+    setAllMessageList(data.data)
    }
   )
 
@@ -139,39 +143,6 @@ const MainMessage = (props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
  }, [socket, typeFilterChat, typeMessage, pathname, infoMessageChat])
 
- //  handle link profile to group
- //   useEffect(() => {
- //    if (!state || !socket) return
-
- //    const roomSplit = (idUser, idOther) =>
- //     idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
-
- //    setInfoMessageChat({ ...infoMessageChat, name: 'chat' })
- //    setInfoMessageChat(state || {})
-
- //    đặt mối quan hệ true vs user khác
- //    fetchApiSamenote('post', `/chatblock/${user?.id}`, {
- //     idReceive: state.id,
- //    })
-
- //    join room chat
- //    socket.emit('join_room', { room: roomSplit(user?.id, state.id) })
- //    state?.id &&
- //     fetchApiSamenote(
- //      'get',
- //      `/message/list_message_chat1vs1/${user?.id}/${state?.id}`,
- //      {},
- //      { page: 1 }
- //     ).then((data) => {
- //      const newMessagesChat = []
- //      data.data.map((item) => {
- //       return item.messages.map((message) => newMessagesChat.push(message))
- //      })
-
- //      setMessagesChat(newMessagesChat)
- //     })
- //   }, [state, socket])
-
  //   ****************************************
 
  useEffect(() => {
@@ -195,6 +166,8 @@ const MainMessage = (props) => {
    })
 
    setTypeMessage(null)
+
+   return
   }
 
   if (isChat) {
@@ -208,6 +181,17 @@ const MainMessage = (props) => {
    })
 
    getInfoMessageChat()
+
+   // ********* handle link profile to group
+   //đặt mối quan hệ true vs user khác
+   fetchApiSamenote('post', `/chatblock/${user?.id}`, {
+    idReceive: id,
+   })
+
+   //join room chat
+   const roomSplit = (idUser, idOther) =>
+    idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
+   socket && socket.emit('join_room', { room: roomSplit(user?.id, id) })
   }
 
   if (isGroup) {

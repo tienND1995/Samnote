@@ -25,6 +25,10 @@ const AppProvider = ({ children }) => {
   socketIo.on('connect', () => {
    setSocket(socketIo)
   })
+
+  return () => {
+   socketIo.disconnect()
+  }
  }, [])
 
  useEffect(() => {
@@ -64,7 +68,7 @@ const AppProvider = ({ children }) => {
     user,
     setUser,
     socket,
-    
+
     snackbar,
     setSnackbar,
     updateUserInLocalStorage,

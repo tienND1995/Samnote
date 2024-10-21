@@ -4,7 +4,6 @@ import { convertTimeMessage } from '../../../../utils/utils'
 import DeleteIcon from '@mui/icons-material/Delete'
 
 const MessageChatCard = ({ message, userID, onDeleteMessage, avatar }) => {
- console.log(message)
  return message.idSend === userID ? (
   <div key={message.id} className='h-auto flex flex-col items-end'>
    <div className='flex gap-2 mb-1'>

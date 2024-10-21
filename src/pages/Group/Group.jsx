@@ -1,14 +1,11 @@
 import { useContext, useEffect, useState } from 'react'
 import './Group.css'
 
-import configs from '../../configs/configs.json'
 import { AppContext } from '../../context'
 import { fetchAllMessageList } from './fetchApiGroup'
 
 import ChatList from './ChatList/ChatList'
 import MainMessage from './MainMessage/MainMessage'
-
-const { API_SERVER_URL } = configs
 
 const Group = () => {
  const appContext = useContext(AppContext)
