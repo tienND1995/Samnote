@@ -8,6 +8,7 @@ import {
   Button,
 } from "@mui/material";
 import "./AnonymousMess.css";
+import { useParams, useLocation } from "react-router-dom";
 import { AppContext } from "../../context";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -84,7 +85,7 @@ const GiphySearch = ({ onGifSelect }) => {
   const { gifs, selectedGif, loading, error } = state;
 
   return (
-    <div className="bg-white w-[600px] left-[1%] absolute top-0 transform -translate-y-[101%] h-[500px] rounded-[5px] shadow-[0_0_15px_rgba(0,0,0,0.8)]">
+    <div className="bg-white w-[50%] xl:w-[600px] left-[1%] absolute top-0 transform -translate-y-[101%] h-[300px] overflow-y-auto  overflow-x-hidden xl:h-[500px] rounded-[5px] shadow-[0_0_15px_rgba(0,0,0,0.8)]">
       <div className="flex flex-row w-full items-center justify-center relative">
         <div
           style={{
@@ -101,6 +102,7 @@ const GiphySearch = ({ onGifSelect }) => {
         >
           <TextField
             type="text"
+            size="small"
             value={searchTerm}
             id="standard-basic"
             variant="standard"
@@ -200,10 +202,10 @@ const ImageUploader = ({ onImageSelect, onImageRemove, OpenSelectImage }) => {
           <div className="relative w-fit flex pl-6 items-center">
             <div className="mr-6">
               <button
-                className="bg-[#000] text-[#fff] rounded-md w-[25px] h-[25px] flex p-3 items-center justify-center"
+                className="bg-[#000] text-[#fff] rounded-md size-[25px] flex p-2 items-center justify-center"
                 onClick={handleIconClick}
               >
-                <AddIcon sx={{ fontSize: "30px" }} />
+                <AddIcon className="text-[20px] xl:text-[30px]" />
               </button>
               {/* <input
                 type="file"
@@ -226,22 +228,9 @@ const ImageUploader = ({ onImageSelect, onImageRemove, OpenSelectImage }) => {
             />
             <button
               onClick={handleRemoveImage}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                position: "absolute",
-                marginTop: "10px",
-                height: "35px",
-                top: -10,
-                right: -13,
-                width: "35px",
-                borderRadius: "50%",
-                backgroundColor: "#000",
-                color: "white",
-                border: "none",
-                cursor: "pointer",
-              }}
+              className="flex items-center justify-center 
+              absolute mt-[10px] size-[25px] xl:size-[35px] top-[-10px] right-[-13px]
+              rounded-full bg-black text-white border-0 cursor-pointer"
             >
               <CloseIcon />
             </button>
@@ -250,7 +239,7 @@ const ImageUploader = ({ onImageSelect, onImageRemove, OpenSelectImage }) => {
       )}
       <div>
         <IconButton sx={{ p: "5px" }} onClick={handleIconClick}>
-          <ImageLogo width={30} height={30} />
+          <ImageLogo />
         </IconButton>
         <input
           type="file"
@@ -267,7 +256,9 @@ const ImageUploader = ({ onImageSelect, onImageRemove, OpenSelectImage }) => {
 const InputMessage = ({ data, onReload }) => {
   const appContext = useContext(AppContext);
   const { user } = appContext;
-  console.log("info truyền vào thanh input để gửi tin nhắn", data);
+  const params = useParams();
+  let { pathname } = useLocation();
+  let userID = params.id;
   const [status, setStatus] = useState({
     giphySearch: false,
     OpenSelectImage: false,
@@ -285,20 +276,23 @@ const InputMessage = ({ data, onReload }) => {
   });
 
   useEffect(() => {
-    // Cập nhật payloadData khi data thay đổi
+    let idRoom;
+    if (typeof pathname === "string" && pathname.includes("user")) {
+      idRoom = `${user.id}#${userID}`;
+    } else {
+      idRoom = `${userID}#${user.id}`;
+    }
+
     setPayLoadData((prev) => ({
       ...prev,
-      idRoom:
-        data.idRoom == undefined ? `${user.id}#${data.idUser}` : data.idRoom,
-      idReceive: data.idReceive == undefined ? data.idUser : data.idReceive,
+      idRoom,
+      idReceive: userID,
     }));
 
+
     handleReload({});
-  }, [data, user.id]);
-  console.log(
-    "info truyền vào thanh inptut để gửi tin nhắn",
-    payLoadData.idRoom
-  );
+  }, [pathname, userID, user.id]);
+
   const handleReload = (data) => {
     onReload(data);
   };
@@ -320,14 +314,14 @@ const InputMessage = ({ data, onReload }) => {
   };
 
   const handleSendMessage = () => {
-    console.log(
-      "điều kiện để gửi tin nhắn: payLoadData.content" +
-        payLoadData.content +
-        "gif" +
-        payLoadData.gif +
-        "img" +
-        payLoadData.img
-    );
+    // console.log(
+    //   "điều kiện để gửi tin nhắn: payLoadData.content" +
+    //     payLoadData.content +
+    //     "gif" +
+    //     payLoadData.gif +
+    //     "img" +
+    //     payLoadData.img
+    // );
 
     if (payLoadData.content || payLoadData.gif || payLoadData.img) {
       sendMessage();
@@ -343,13 +337,9 @@ const InputMessage = ({ data, onReload }) => {
 
   const sendMessage = async () => {
     const { idReceive, idRoom, gif, type, img, content } = payLoadData;
-    const [num1, num2] = idRoom.split("#").map(Number);
-
-    // Cập nhật idReceive
-    const newIdReceive = user.id != num1 ? num1 : num2;
 
     const formData = new FormData();
-    formData.append("idReceive", newIdReceive);
+    formData.append("idReceive", idReceive);
     formData.append("idRoom", idRoom);
     formData.append("gif", gif);
     formData.append("type", type);
@@ -378,14 +368,11 @@ const InputMessage = ({ data, onReload }) => {
 
       const data = await response.json();
       handleReload(data.message);
-
-      // Reset payload data
       setPayLoadData((prevData) => ({
         ...prevData,
         img: "",
-        content: "", // Chỉ đặt lại content
+        content: "",
         gif: "",
-        // Không reset img ở đây
       }));
 
       setStatus((prevData) => ({
@@ -406,28 +393,14 @@ const InputMessage = ({ data, onReload }) => {
   };
 
   const handleGifSelect = (gif) => {
-    console.log("gif trả về ", data);
-    if (data?.idRoom) {
-      const [num1, num2] = data.idRoom.split("#").map(Number);
+    // console.log("gif trả về ", data);
 
-      setPayLoadData((prevData) => ({
-        ...prevData,
-        idReceive: user.id !== num1 ? num1 : num2,
-        idRoom: data.idRoom,
-        gif: gif.images.fixed_height.url,
-        type: "gif",
-        content: "",
-      }));
-    } else {
-      setPayLoadData((prevData) => ({
-        ...prevData,
-        idReceive: data?.idUser,
-        idRoom: `${user.id}#${data?.idUser}`,
-        gif: gif.images.fixed_height.url,
-        type: "gif",
-        content: "",
-      }));
-    }
+    setPayLoadData((prevData) => ({
+      ...prevData,
+      gif: gif.images.fixed_height.url,
+      type: "gif",
+      content: "",
+    }));
 
     // Đóng ImageUploader khi chọn GIF
     setStatus((prevStatus) => ({
@@ -445,26 +418,12 @@ const InputMessage = ({ data, onReload }) => {
   }, [payLoadData.gif]);
 
   const handleImageSelect = (image) => {
-    if (data?.idRoom) {
-      const [num1, num2] = data.idRoom.split("#").map(Number);
-      setPayLoadData((prevData) => ({
-        ...prevData,
-        idReceive: user.id != num1 ? num1 : num2,
-        idRoom: data.idRoom,
-        img: image,
-        type: "image",
-        content: null,
-      }));
-    } else {
-      setPayLoadData((prevData) => ({
-        ...prevData,
-        idReceive: data?.idUser,
-        idRoom: `${user.id}#${data?.idUser}`,
-        img: image, // Gán hình ảnh được chọn vào payload
-        type: "image",
-        content: null,
-      }));
-    }
+    setPayLoadData((prevData) => ({
+      ...prevData,
+      img: image, // Gán hình ảnh được chọn vào payload
+      type: "image",
+      content: null,
+    }));
 
     // Đóng GIF khi chọn hình ảnh
     setStatus((prevStatus) => ({
@@ -490,11 +449,8 @@ const InputMessage = ({ data, onReload }) => {
     <div className="relative">
       {giphySearch && <GiphySearch onGifSelect={handleGifSelect} />}
       <Box
+        className="flex justify-between items-center xl:h-[60px] h-[50px] "
         sx={{
-          display: "flex",
-          height: "80px",
-          justifyContent: "space-between",
-          alignItems: "center",
           padding: "10px 10px 0 10px",
           backgroundColor: "#F4F4F4",
         }}
@@ -527,23 +483,15 @@ const InputMessage = ({ data, onReload }) => {
           >
             {giphySearch ? (
               <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "30px",
-                  width: "33px",
-                  borderRadius: "3px",
-                  backgroundColor: "#000",
-                  color: "white",
-                  border: "none",
-                  cursor: "pointer",
-                }}
+                className="flex items-center justify-center
+              xl:size-[30px] size-[25px] rounded-[3px] bg-black text-white 
+              border-0 cursor-pointer
+              "
               >
                 <CloseIcon />
               </div>
             ) : (
-              <GifIcon width={32} height={35} />
+              <GifIcon />
             )}{" "}
           </IconButton>
 
@@ -556,7 +504,7 @@ const InputMessage = ({ data, onReload }) => {
             onChange={handleInputChange}
           />
         </Box>
-        <div className="w-[50px]">
+        <div className="w-[30px] xl:w-[50px]">
           {" "}
           {sending ? (
             <CircularProgress size={24} />
@@ -565,6 +513,7 @@ const InputMessage = ({ data, onReload }) => {
               onClick={() => {
                 handleSendMessage();
               }}
+              className="xl:text-[40px]"
               sx={{
                 cursor:
                   payLoadData.content || payLoadData.gif || payLoadData.img
@@ -574,7 +523,6 @@ const InputMessage = ({ data, onReload }) => {
                   payLoadData.content || payLoadData.gif || payLoadData.img
                     ? "#0095FF"
                     : "#999",
-                fontSize: "40px",
               }}
             />
           )}

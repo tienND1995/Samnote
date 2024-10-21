@@ -1,8 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import {
   Button,
-  Container,
-  TextField,
   Typography,
   Box,
   CircularProgress,
@@ -307,19 +305,20 @@ const UpdatePassword = ({ data }) => {
           Update Password
         </Typography>
 
-        <Box className="flex mt-[20px] flex-col sm:flex-row">
+        <Box className="flex mt-[20px] flex-col md:flex-row">
           {" "}
           <Typography className="w-[300px]">Password:</Typography>
           {!openChangePW ? (
-            <Box className="flex flex-col sm:flex-row  mt-[10px]">
-              <TextField
+            <Box className="flex flex-col sm:flex-row sm:items-center mt-[10px]">
+              <input
+                required
                 disabled
-                className="w-[300px] bg-white rounded-md"
-                value="********"
+                className="h-[37px] w-[300px] bg-white rounded-md"
+                value="  ********"
               />
               <Button
                 variant="outlined"
-                sx={{ margin: "10px 10px  0", height: "35px", width: "90px" }}
+                className="mx-[10px] h-[35px] w-[90px] mt-[10px] sm:mt-0"
                 onClick={toggleOpenChangePw}
               >
                 change
@@ -388,7 +387,7 @@ const UpdatePassword = ({ data }) => {
         2-layer security, for example, your wife holds your phone but they also
         cannot access your secure notes information.
       </p>
-      <Box className="flex mt-[20px] flex-col sm:flex-row">
+      <Box className="flex mt-[20px] flex-col md:flex-row">
         <Typography className="w-[300px] mb-[10px] sm:mb-0">
           Password 2:
         </Typography>
@@ -398,7 +397,7 @@ const UpdatePassword = ({ data }) => {
             <Box className="flex flex-col gap-3">
               {!openForgotpw2 && (
                 <>
-                  <TextField
+                  <input
                     required
                     disabled
                     className=" form-control w-[300px] bg-white rounded-md"
@@ -431,9 +430,9 @@ const UpdatePassword = ({ data }) => {
                   Enter gmail to reset your private password?
                   <div className="flex flex-col">
                     {" "}
-                    <TextField
-                      className=" form-control w-[300px] bg-white rounded-md"
-                      label="Enter your gmail..."
+                    <input
+                      size="small"
+                      className=" form-control  w-[300px] bg-white rounded-md"
                       placeholder="Enter current password 2"
                       {...registerFogotPw2("email")}
                     />
@@ -474,8 +473,7 @@ const UpdatePassword = ({ data }) => {
                 {" "}
                 <PasswordField
                   className=" form-control w-[300px] bg-white rounded-md"
-                  label="Current Password 2"
-                  placeholder="Enter current password 2"
+                  placeholder="Current Password 2"
                   {...registerEditPw2("old_private_password")}
                 />
                 {errorsEditPw2?.old_private_password && (
@@ -488,8 +486,7 @@ const UpdatePassword = ({ data }) => {
                 {" "}
                 <PasswordField
                   className=" form-control w-[300px] bg-white rounded-md"
-                  label="New Password 2"
-                  placeholder="Enter new password 2"
+                  placeholder="New Password 2"
                   {...registerEditPw2("new_private_password")}
                 />
                 {errorsEditPw2?.new_private_password && (
@@ -501,8 +498,7 @@ const UpdatePassword = ({ data }) => {
               <div className="flex flex-col">
                 {" "}
                 <PasswordField
-                  className=" form-control w-[300px] bg-white rounded-md"
-                  label="Confim new password 2"
+                  className="form-control  bg-white rounded-md"
                   placeholder="Confim new password 2"
                   {...registerEditPw2("confirm_private_password")}
                 />
@@ -551,7 +547,6 @@ const UpdatePassword = ({ data }) => {
             {" "}
             <PasswordField
               className=" form-control w-[300px] bg-white rounded-md"
-              label="New Password 2"
               placeholder="Enter your password 2"
               {...registerFormPw2("private_password")}
             />
@@ -562,7 +557,6 @@ const UpdatePassword = ({ data }) => {
             )}
             <PasswordField
               className=" form-control w-[300px] bg-white rounded-md"
-              label="Confim Password 2"
               placeholder="Confim your password 2"
               {...registerFormPw2("confirm_private_password")}
             />

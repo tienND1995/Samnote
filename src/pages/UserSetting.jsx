@@ -375,6 +375,7 @@ const UserSetting = () => {
         <TextField
           required
           value={name}
+          size="small"
           onChange={(e) => setName(e.target.value)}
           className="sm:w-[300px] w-[200px]"
         />
@@ -439,7 +440,12 @@ const UserSetting = () => {
           <Typography className="sm:w-[200px]">Password:</Typography>
           {openPw ? (
             <Box className="flex flex-col sm:flex-row  mt-[10px]">
-              <TextField required sx={{ width: "300px" }} value="********" />
+              <TextField
+                required
+                sx={{ width: "300px" }}
+                value="********"
+                size="small"
+              />
               <Button
                 variant="outlined"
                 sx={{ margin: "10px 10px  0", height: "35px", width: "90px" }}
@@ -501,7 +507,12 @@ const UserSetting = () => {
           {user.password_2 !== null ? (
             openPw2 ? (
               <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <TextField required sx={{ width: "300px" }} value="********" />
+                <TextField
+                  required
+                  sx={{ width: "300px" }}
+                  value="********"
+                  size="small"
+                />
                 <Box>
                   {" "}
                   <Button

@@ -1,8 +1,7 @@
-function GifIcon({ width = 36, height = 36 }) {
+function GifIcon() {
   return (
     <svg
-      width={width}
-      height={height}
+      className="size-[25px] xl:size-[30px]"
       viewBox="0 0 40 36"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
