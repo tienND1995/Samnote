@@ -279,10 +279,10 @@ const MainMessage = (props) => {
 
  return (
   <div className='col-md-8 col-xl-9 w-full px-0 flex flex-col relative overflow-x-hidden'>
-   <div className='flex justify-between items-center bg-[#dffffe] py-[20px] px-[15px] xl:py-[30px] xl:px-[20px]'>
+   <div className='flex justify-between items-center bg-[#dffffe] p-[10px] md:py-[20px] md:px-[15px] xl:py-[30px] xl:px-[20px]'>
     <div className='md:hidden'>
      <Link to='/messages'>
-      <ArrowBackIosIcon />
+      <ArrowBackIosIcon className='text-xl' />
      </Link>
     </div>
     <InfoMessageTop {...propsInfoMessage} />

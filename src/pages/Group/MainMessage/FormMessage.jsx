@@ -13,13 +13,7 @@ import AddBoxIcon from '@mui/icons-material/AddBox'
 import configs from '../../../configs/configs.json'
 const { BASE64_URL } = configs
 
-const FormMessage = ({
- userID,
- otherUserID,
- socket,
- formName,
- idGroup,
-}) => {
+const FormMessage = ({ userID, otherUserID, socket, formName, idGroup }) => {
  const [messageForm, setMessageForm] = useState({
   content: '',
   images: [],
@@ -215,74 +209,82 @@ const FormMessage = ({
  const roomSplit = (idUser, idOther) =>
   idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
 
+ const renderImageUpload = (rowNumber) => {
+  if (images.length === 0) return
+
+  const lengthImage = images.length
+  const displayMaxImage = rowNumber - 2
+  const indexMax = displayMaxImage - 1
+
+  return (
+   <ul className={`xl:my-2 row row-cols-${rowNumber-1} row-cols-lg-${rowNumber} mx-0 overflow-hidden`}>
+    <li className='relative'>
+     <input
+      type='file'
+      className='hidden'
+      id='add-image-form'
+      onChange={handleChangeImageMsg}
+     />
+
+     <label
+      style={{
+       position: 'absolute',
+       right: '10%',
+       top: '50%',
+       transform: 'translateY(-50%)',
+      }}
+      htmlFor='add-image-form'
+     >
+      <AddBoxIcon className='xl:text-4xl lg:text-3xl md:2xl xl cursor-pointer' />
+     </label>
+    </li>
+
+    {images?.map((image, index) => {
+     if (index >= displayMaxImage) return
+     return (
+      <li key={uniqid()} className='col p-2 relative'>
+       <button
+        className='delete-image -top-1 right-0 absolute'
+        onClick={() =>
+         setMessageForm({
+          ...messageForm,
+          images: images.filter((image, idx) => idx !== index),
+         })
+        }
+       >
+        <CancelIcon className='text-[13px] md:text-[16px]' />
+       </button>
+
+       {lengthImage > displayMaxImage && index === indexMax && (
+        <div className='text-2xl md:text-3xl lg:text-4xl xl:text-[xxx-large] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold'>
+         +{lengthImage - (index + 1)}
+        </div>
+       )}
+
+       <img
+        src={`${BASE64_URL}${image}`}
+        alt='anh message'
+        className='rounded-[4px] md:rounded-[8px] object-cover aspect-[5/3] xl:aspect-[3/2] w-full'
+       />
+      </li>
+     )
+    })}
+   </ul>
+  )
+ }
+
  return (
   <div className='form-message'>
-   {images.length > 0 ? (
-    <ul className='xl:my-2 row row-cols-5 mx-0 overflow-hidden'>
-     <li className='relative'>
-      <input
-       type='file'
-       className='hidden'
-       id='add-image-form'
-       onChange={handleChangeImageMsg}
-      />
-
-      <label
-       style={{
-        position: 'absolute',
-        right: '10%',
-        top: '50%',
-        transform: 'translateY(-50%)',
-       }}
-       htmlFor='add-image-form'
-      >
-       <AddBoxIcon className='xl:text-4xl text-3xl cursor-pointer' />
-      </label>
-     </li>
-
-     {images?.map((image, index) => {
-      if (index >= 3) return
-      return (
-       <li key={uniqid()} className='col p-2 relative'>
-        <button
-         className='delete-image -top-1 right-0 absolute'
-         onClick={() =>
-          setMessageForm({
-           ...messageForm,
-           images: images.filter((image, idx) => idx !== index),
-          })
-         }
-        >
-         <CancelIcon />
-        </button>
-
-        {images.length > 3 && index === 2 && (
-         <div
-          className='text-3xl lg:text-4xl xl:text-[xxx-large] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold'
-         >
-          +{images.length - (index + 1)}
-         </div>
-        )}
-
-        <img
-         src={`${BASE64_URL}${image}`}
-         alt='anh message'
-         className='rounded-[8px] object-cover aspect-[5/3] xl:aspect-[3/2] w-full'
-        />
-       </li>
-      )
-     })}
-    </ul>
-   ) : null}
+   {renderImageUpload(5)}
    <form
-    className='flex items-center justify-between gap-[20px] xl:gap-[30px] flex-grow-1 relative'
+    className='flex items-center justify-between gap-[10px] md:gap-[20px] xl:gap-[30px] flex-grow-1 relative'
     onSubmit={handleSubmitMessage}
    >
     <div className='w-100'>
      <input
       onChange={handleChangeValueMsg}
       type='text'
-      className='w-100 py-[20px] px-[15px] xl:py-[30px] xl:px-[22px] bg-white rounded-[54px] '
+      className='w-100 p-[10px] md:px-[15px] md:py-[20px] xl:py-[30px] xl:px-[22px] bg-white rounded-[54px] '
       placeholder='Enter chat content...'
       value={content}
      />

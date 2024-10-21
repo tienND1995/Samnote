@@ -25,7 +25,7 @@ const MessageGroupCard = ({ message, userID }) => {
          overflowWrap: 'anywhere',
          maxWidth: '250px',
         }}
-        className='break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto'
+        className='break-words text-[14px] lg:text-[16px] bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto'
        >
         {message.content}
        </p>
@@ -34,7 +34,7 @@ const MessageGroupCard = ({ message, userID }) => {
     </div>
    </div>
 
-   <time className='text-xs text-black-50'>
+   <time className='text-[10px] lg:text-xs text-black-50'>
     {convertTimeMessage(message.sendAt)}
    </time>
   </div>
@@ -81,14 +81,14 @@ const MessageGroupCard = ({ message, userID }) => {
         <h3 className='mb-1 text-[12px] font-light capitalize'>
          {message.name}
         </h3>
-        <p className='font-semibold'>{message.content}</p>
+        <p className='font-semibold text-[14px] lg:text-[16px] '>{message.content}</p>
        </div>
       )}
      </div>
     </div>
    </div>
 
-   <time className='text-xs text-black-50'>
+   <time className='text-[10px] lg:text-xs text-black-50'>
     {convertTimeMessage(message.sendAt)}
    </time>
   </div>

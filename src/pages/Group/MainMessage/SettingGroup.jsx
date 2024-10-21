@@ -238,48 +238,51 @@ const SettingGroup = (props) => {
    >
     <li>
      <button
-      className={`text-[25px] flex items-center ${
+      className={`text-[16px] md:text-xl lg:text-[25px] flex items-center ${
        typeButtonGroup === 'quit' ? 'active' : null
       }`}
       onClick={handleQuitGroup}
      >
-      <LogoutIcon className='me-2 text-[30px]' /> Quit group
+      <LogoutIcon className='me-2 text-[20px] md:text-[25px] lg:text-[30px]' />{' '}
+      Quit group
      </button>
     </li>
 
     <li>
      <button
-      className={`text-[25px] flex items-center ${
+      className={`text-[16px] md:text-xl lg:text-[25px] flex items-center ${
        typeButtonGroup === 'add' ? 'active' : null
       }`}
       onClick={() => setShowModalSearch(true)}
      >
-      <AddCircleOutlineIcon className='me-2 text-[30px]' /> Add member
+      <AddCircleOutlineIcon className='me-2 text-[20px] md:text-[25px] lg:text-[30px]' />{' '}
+      Add member
      </button>
     </li>
 
     {isLeaderTeam(infoMessageGroup?.idOwner) && (
      <li>
       <button
-       className={`text-[25px] flex items-center ${
+       className={`text-[16px] md:text-xl lg:text-[25px] flex items-center ${
         typeButtonGroup === 'delete' ? 'active' : null
        }`}
        onClick={handleShowAllMembers}
       >
-       <HighlightOffIcon className='me-2 text-[30px]' /> Delete member
+       <HighlightOffIcon className='me-2 text-[20px] md:text-[25px] lg:text-[30px]' />{' '}
+       Delete member
       </button>
      </li>
     )}
 
     <li>
      <button
-      className={`text-[25px] flex items-center ${
+      className={`text-[16px] md:text-xl lg:text-[25px] flex items-center ${
        typeButtonGroup === 'add' ? 'active' : null
       }`}
       onClick={handleShowInformation}
       id='show-information'
      >
-      <InfoIcon className='me-2 text-[30px]' />
+      <InfoIcon className='me-2 text-[20px] md:text-[25px] lg:text-[30px]' />
       Information
      </button>
     </li>

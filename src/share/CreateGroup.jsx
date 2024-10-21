@@ -229,8 +229,10 @@ const CreateGroup = ({ onGetAllMessageList, showModal, setShowModal }) => {
    onHide={handleHideModalCreateGroup}
    size='lg'
   >
-   <Modal.Header closeButton className='border-none p-[20px]'>
-    <Modal.Title className='text-[30px]'>Create group</Modal.Title>
+   <Modal.Header closeButton className='border-none p-[10px] lg:p-[20px]'>
+    <Modal.Title className='text-[20px] font-semibold lg:font-medium lg:text-[30px]'>
+     Create group
+    </Modal.Title>
    </Modal.Header>
 
    <Modal.Body className='px-[20px] py-0'>
@@ -275,7 +277,7 @@ const CreateGroup = ({ onGetAllMessageList, showModal, setShowModal }) => {
          <input
           type='text'
           className='w-full rounded-[30px] px-3 h-[40px] lg:h-[50px] bg-white lg:placeholder:text-[20px] placeholder:text-[14px]'
-          placeholder='Enter the group name...'
+          placeholder='Group Name...'
           {...register('groupName')}
          />
         </div>
@@ -292,7 +294,7 @@ const CreateGroup = ({ onGetAllMessageList, showModal, setShowModal }) => {
          <input
           className='w-full rounded-[30px] px-3 h-[40px] lg:h-[50px] bg-white lg:placeholder:text-[20px] placeholder:text-[14px]'
           type='text'
-          placeholder='Group description...'
+          placeholder='Group desc...'
           {...register('desc')}
          />
         </div>
