@@ -87,9 +87,9 @@ const UserPanel = () => {
       url: `/editnote`,
     },
     {
-      name: "Group",
+      name: "Message",
       icon: <GroupIcon className="size-[25px] lg:size-[30px]" />,
-      url: "/group",
+      url: "/messages",
     },
 
     {

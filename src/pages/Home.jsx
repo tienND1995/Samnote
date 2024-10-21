@@ -264,7 +264,7 @@ const Home = () => {
                      }
                      onClick={() => navigate(`/messages`)}
                   >
-                     Group
+                     Message
                   </li>
                   <li
                      className='hover:text-gray-100'

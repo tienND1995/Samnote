@@ -14,7 +14,6 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import HistoryIcon from '@mui/icons-material/History'
 import axios from 'axios'
 import { fetchApiSamenote } from '../utils/fetchApiSamnote'
-import { useEffect, useState } from 'react'
 
 const NoteCard = ({ note, noteList, type, updateNotes }) => {
  const settings = {
@@ -137,7 +136,7 @@ const NoteCard = ({ note, noteList, type, updateNotes }) => {
 
  return (
   <li className='flex flex-col' key={note.idNote}>
-   <div className='flex flex-col flex-grow-1 relative'>
+   <div className='flex flex-col relative'>
     <NavLink
      to={optionLink()}
      style={styleNoteCard}

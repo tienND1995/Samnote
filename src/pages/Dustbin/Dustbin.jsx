@@ -1,21 +1,22 @@
-import { useEffect, useState, useContext } from 'react'
-import axios from 'axios'
+import { useContext, useEffect, useState } from 'react'
 
 import { AppContext } from '../../context'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import SearchIcon from '@mui/icons-material/Search'
-import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
 import NoteCard from '../../share/NoteCard'
+import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
 
 const Dustbin = () => {
  const appContext = useContext(AppContext)
  const { user } = appContext
  const [dustbinNotes, setDustbinNotes] = useState([])
+ const [dustbinNotesInit, setDustbinNotesInit] = useState([])
 
  const getDustbinNotes = () => {
   return fetchApiSamenote('get', `/trash/${user?.id}`).then((data) => {
    setDustbinNotes(data.notes)
+   setDustbinNotesInit(data.notes)
   })
  }
 
@@ -25,34 +26,26 @@ const Dustbin = () => {
   getDustbinNotes()
  }, [user])
 
- //  const noteListInitial = [...dustbinNotes]
+ let timeOut = null
 
- //  const handleChangeSearchNote = async (e) => {
- //   const textSearch = e.target.value
+ const handleChangeSearchNote = async (e) => {
+  const textSearch = e.target.value
+  clearTimeout(timeOut)
 
- //   console.log('textSearch', textSearch)
+  if (textSearch.trim() === '') return setDustbinNotes(dustbinNotesInit)
 
- //   if (textSearch.trim() === '') {
- //    // return setDustbinNotes(noteListInitial)
- //   }
+  timeOut = setTimeout(() => {
+   fetchApiSamenote('get', `/searchTrash/${user?.id}?key=${textSearch}`).then(
+    (data) => {
+     const newNoteList = dustbinNotesInit.filter((note) =>
+      data.data.some((item) => note.idNote === item.idNote)
+     )
 
- //   try {
- //    const response = await axios.get(
- //     `https://samnote.mangasocial.online/notes_search_user/${user.id}/${textSearch}`
- //    )
-
- //    const data = response.data.search_note
- //    const filterNoteList = noteListInitial.filter((note) =>
- //     data.some((item) => note.idNote === item.idNote)
- //    )
-
- //    console.log('data', data)
-
- //    // setDustbinNotes(filterNoteList)
- //   } catch (error) {
- //    console.error(error)
- //   }
- //  }
+     setDustbinNotes(newNoteList)
+    }
+   )
+  }, 1000)
+ }
 
  return (
   <div className='flex flex-col flex-grow-1 px-lg-4 py-lg-3 px-2 py-2 bg-[#181A1B] text-white'>
@@ -73,7 +66,7 @@ const Dustbin = () => {
 
      <div className='w-full'>
       <input
-       //    onChange={handleChangeSearchNote}
+       onChange={handleChangeSearchNote}
        className='w-full'
        type='Search note'
        placeholder='Search note'
@@ -86,7 +79,7 @@ const Dustbin = () => {
     </h5>
    </div>
 
-   <ul className='grid grid-cols-1 md:grid-cols-2 my-lg-4 my-2 my-md-3 gap-lg-3 gap-2 flex-grow-1 overflow-y-auto style-scrollbar-y style-scrollbar-y-sm'>
+   <ul className='grid grid-cols-1 md:grid-cols-2 my-lg-4 my-2 my-md-3 gap-lg-3 gap-2 flex-grow-1 pr-1 overflow-y-auto style-scrollbar-y style-scrollbar-y-sm'>
     {dustbinNotes?.map((note) => (
      <NoteCard
       type='delete'

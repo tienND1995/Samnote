@@ -50,33 +50,16 @@ const AppProvider = ({ children }) => {
   }
  }, [user])
 
- const updateUserInLocalStorage = (newUserData) => {
-  try {
-   // Cập nhật dữ liệu mới vào localStorage
-   localStorage.setItem(USER, JSON.stringify(newUserData))
+ const store = {
+  user,
+  setUser,
+  socket,
 
-   // Cập nhật state `user` ngay tại đây nếu cần
-   setUser(newUserData)
-  } catch (error) {
-   console.error('Error updating user in localStorage:', error)
-  }
+  snackbar,
+  setSnackbar,
  }
 
- return (
-  <AppContext.Provider
-   value={{
-    user,
-    setUser,
-    socket,
-
-    snackbar,
-    setSnackbar,
-    updateUserInLocalStorage,
-   }}
-  >
-   {children}
-  </AppContext.Provider>
- )
+ return <AppContext.Provider value={store}>{children}</AppContext.Provider>
 }
 
 export default AppProvider

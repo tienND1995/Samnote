@@ -21,9 +21,6 @@ const UserProfile = () => {
  const { user } = appContext
  const [userInfomations, setUserInformations] = useState(null)
 
- //data note
- const [userNotes, setUserNotes] = useState([])
-
  const [reload, setReload] = useState(0)
 
  const params = useParams()
@@ -35,7 +32,6 @@ const UserProfile = () => {
     `https://samnote.mangasocial.online/profile/${userID}`
    )
    setUserInformations(res.data.user)
-   setUserNotes(res.data.note)
   } catch (err) {
    console.log(err)
   }
