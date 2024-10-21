@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 import Modal from 'react-bootstrap/Modal'
 import Swal from 'sweetalert2'
+import TextTruncate from 'react-text-truncate'
 
 import avatarDefault from '../../../assets/avatar-default.png'
-import { fetchAllMemberGroup } from '../fetchApiGroup'
 
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
@@ -12,18 +14,20 @@ import LogoutIcon from '@mui/icons-material/Logout'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import { fetchApiSamenote } from '../../../utils/fetchApiSamnote'
+import ModalSearchUserAddGroup from './components/ModalSearchUserAddGroup'
 
 const SettingGroup = (props) => {
  const {
   userID,
-  onShowModalSearch,
+  infoMessageGroup,
+  typeMessage,
+
   setShowInforMation,
-  groupItem,
-  formName,
-  groupMemberList,
-  setGroupMemberList,
   getAllMessageList,
+  getInfoMesssageGroup,
  } = props.data
+
+ const navigate = useNavigate()
 
  const [showSettingGroup, setShowSettingGroup] = useState(false)
  const [typeButtonGroup, setTypeButtonGroup] = useState(null)
@@ -38,33 +42,21 @@ const SettingGroup = (props) => {
  }
 
  const handleShowSettingsGroup = () => {
-  if (formName === 'group') {
+  if (typeMessage === 'group') {
    setShowSettingGroup((prevState) => !prevState)
    setTypeButtonGroup(null)
   }
 
-  if (formName === 'chat') {
+  if (typeMessage === 'chat') {
    console.log('chat')
   }
   return null
  }
 
- const fetchQuitGroup = (idMem) => {
-  fetchApiSamenote('delete', `/group/quit/${idMem}`)
-   .then(() => {
-    fetchAllMemberGroup(groupItem.idGroup).then((data) =>
-     setGroupMemberList(data)
-    )
-
-    getAllMessageList()
-   })
-   .catch((err) => console.error(err))
- }
-
  const handleQuitGroup = () => {
   setTypeButtonGroup('quit')
 
-  const memberQuit = groupItem.members.find(
+  const memberQuit = infoMessageGroup.members.find(
    (member) => member.idUser === userID
   )
 
@@ -78,7 +70,15 @@ const SettingGroup = (props) => {
    confirmButtonText: 'Yes',
   }).then((result) => {
    if (result.isConfirmed) {
-    fetchQuitGroup(memberQuit.idMem)
+    fetchApiSamenote('delete', `/group/quit/${memberQuit.idMember}`).then(
+     () => {
+      // update members and chat list
+      getAllMessageList && getAllMessageList()
+      getInfoMesssageGroup(infoMessageGroup.idGroup)
+      navigate('/messages')
+     }
+    )
+
     Swal.fire({
      title: 'Quitted!',
      text: 'You have left the group.',
@@ -101,11 +101,13 @@ const SettingGroup = (props) => {
    confirmButtonText: 'Yes',
   }).then((result) => {
    if (result.isConfirmed) {
-    fetchQuitGroup(idMember)
-    Swal.fire({
-     title: 'Delete!',
-     text: 'This member has been removed from the group.',
-     icon: 'success',
+    fetchApiSamenote('delete', `/group/quit/${idMember}`).then(() => {
+     // hidden modalMembers
+     if (infoMessageGroup.members?.length === 2) setShowModalMemberList(false)
+
+     // update members and chat list
+     getAllMessageList && getAllMessageList()
+     getInfoMesssageGroup(infoMessageGroup.idGroup)
     })
    }
   })
@@ -126,6 +128,9 @@ const SettingGroup = (props) => {
   setShowSettingGroup(false)
  }
 
+ const [showModalSearch, setShowModalSearch] = useState(false)
+
+ // handle click outside
  useEffect(() => {
   if (!ulElementSettingGroupRef.current || !showSettingGroupRef.current) return
 
@@ -159,39 +164,47 @@ const SettingGroup = (props) => {
      <h3 className='text-[25px] font-medium'>All member</h3>
 
      <ul className='flex flex-col gap-2 py-[20px] max-h-[60vh] overflow-y-auto'>
-      {groupMemberList?.map((user) => (
-       <li
-        key={user.idMember}
-        className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
-       >
-        <div className='flex gap-2 items-center'>
-         <div>
-          <img
-           onError={(e) => {
-            e.target.src = avatarDefault
-           }}
-           src={user.avt}
-           alt='avatar '
-           className='w-[50px] h-[50px] object-cover rounded-[100%]'
-          />
-         </div>
-
-         <div>
-          <h5 className='text-lg font-extrabold capitalize'>{user.name}</h5>
-         </div>
-        </div>
-
-        <button
-         onClick={() => {
-          handleDeleteMemberGroup(user.idMember)
-         }}
-         type='button'
-         className='text-red-500 rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
+      {infoMessageGroup.members?.map((user) =>
+       user.idUser === userID ? null : (
+        <li
+         key={user.idMember}
+         className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
         >
-         <RemoveCircleIcon className='text-[30px]' />
-        </button>
-       </li>
-      ))}
+         <div className='flex gap-2 items-center'>
+          <div>
+           <img
+            onError={(e) => {
+             e.target.src = avatarDefault
+            }}
+            src={user.avt}
+            alt='avatar '
+            className='w-[50px] h-[50px] object-cover rounded-[100%]'
+           />
+          </div>
+
+          <div>
+           <TextTruncate
+            line={1}
+            element='h6'
+            truncateText='…'
+            text={user.name}
+            containerClassName='text-lg font-extrabold capitalize break-all'
+           />
+          </div>
+         </div>
+
+         <button
+          onClick={() => {
+           handleDeleteMemberGroup(user.idMember)
+          }}
+          type='button'
+          className='text-red-500 rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
+         >
+          <RemoveCircleIcon className='text-[30px]' />
+         </button>
+        </li>
+       )
+      )}
      </ul>
 
      <div className='text-right'>
@@ -205,6 +218,13 @@ const SettingGroup = (props) => {
      </div>
     </div>
    </Modal>
+
+   <ModalSearchUserAddGroup
+    idGroup={infoMessageGroup.idGroup}
+    setShowModalSearch={setShowModalSearch}
+    showModalSearch={showModalSearch}
+    onGetInfoMesssageGroup={getInfoMesssageGroup}
+   />
 
    <button ref={showSettingGroupRef} onClick={handleShowSettingsGroup}>
     <MoreVertIcon className='xl:text-[40px] text-[35px]' />
@@ -232,13 +252,13 @@ const SettingGroup = (props) => {
       className={`text-[25px] flex items-center ${
        typeButtonGroup === 'add' ? 'active' : null
       }`}
-      onClick={onShowModalSearch}
+      onClick={() => setShowModalSearch(true)}
      >
       <AddCircleOutlineIcon className='me-2 text-[30px]' /> Add member
      </button>
     </li>
 
-    {isLeaderTeam(groupItem?.idOwner) && (
+    {isLeaderTeam(infoMessageGroup?.idOwner) && (
      <li>
       <button
        className={`text-[25px] flex items-center ${

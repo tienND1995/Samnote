@@ -6,12 +6,10 @@ import avatarDefault from '../../../../assets/avatar-default.png'
 import { fetchApiSamenote } from '../../../../utils/fetchApiSamnote'
 
 const ChatListUser = ({ message, onGetAllMessageList, userID }) => {
- const updateSeenMessageChat = (isSeend, messageId, idReceive) => {
-  if (isSeend === 0 && idReceive === userID) {
-   fetchApiSamenote('post', `/message/${messageId}`).then((response) => {
-    onGetAllMessageList()
-   })
-  }
+ const updateSeenMessageChat = (messageId) => {
+  fetchApiSamenote('post', `/message/${messageId}`).then((response) => {
+   onGetAllMessageList()
+  })
  }
 
  const convertLastText = (lastText, idSend) => {
@@ -28,11 +26,9 @@ const ChatListUser = ({ message, onGetAllMessageList, userID }) => {
      } `
     }
     onClick={() =>
-     updateSeenMessageChat(
-      message.is_seen,
-      message.idMessage,
-      message.idReceive
-     )
+     message.is_seen === 0 &&
+     message.idReceive === userID &&
+     updateSeenMessageChat(message.idMessage)
     }
    >
     <div className='flex gap-2 items-center'>

@@ -2,6 +2,7 @@
 import { createContext, useState, useEffect } from 'react'
 import { USER } from '../utils/constant'
 import axios from 'axios'
+import io from 'socket.io-client'
 
 export const AppContext = createContext(null)
 
@@ -14,6 +15,17 @@ const AppProvider = ({ children }) => {
   message: '',
   severity: '',
  })
+
+ const [socket, setSocket] = useState(null)
+
+ // set socket
+ useEffect(() => {
+  const socketIo = io('https://samnote.mangasocial.online')
+
+  socketIo.on('connect', () => {
+   setSocket(socketIo)
+  })
+ }, [])
 
  useEffect(() => {
   if (user && user.id) {
@@ -51,6 +63,8 @@ const AppProvider = ({ children }) => {
    value={{
     user,
     setUser,
+    socket,
+    
     snackbar,
     setSnackbar,
     updateUserInLocalStorage,

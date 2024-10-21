@@ -219,7 +219,7 @@ const FormMessage = ({
   <div className='form-message'>
    {images.length > 0 ? (
     <ul className='xl:my-2 row row-cols-5 mx-0 overflow-hidden'>
-     <li className='position-relative'>
+     <li className='relative'>
       <input
        type='file'
        className='hidden'
@@ -243,7 +243,7 @@ const FormMessage = ({
      {images?.map((image, index) => {
       if (index >= 3) return
       return (
-       <li key={uniqid()} className='col p-2 position-relative'>
+       <li key={uniqid()} className='col p-2 relative'>
         <button
          className='delete-image -top-1 right-0 absolute'
          onClick={() =>
@@ -258,8 +258,7 @@ const FormMessage = ({
 
         {images.length > 3 && index === 2 && (
          <div
-          style={{ fontSize: '-webkit-xxx-large' }}
-          className='position-absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold'
+          className='text-3xl lg:text-4xl xl:text-[xxx-large] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold'
          >
           +{images.length - (index + 1)}
          </div>
@@ -276,7 +275,7 @@ const FormMessage = ({
     </ul>
    ) : null}
    <form
-    className='flex items-center justify-between gap-[20px] xl:gap-[30px] flex-grow-1 position-relative'
+    className='flex items-center justify-between gap-[20px] xl:gap-[30px] flex-grow-1 relative'
     onSubmit={handleSubmitMessage}
    >
     <div className='w-100'>
@@ -310,7 +309,7 @@ const FormMessage = ({
     </button>
 
     {showEmoji && (
-     <div className='position-absolute bottom-[100%] left-0'>
+     <div className='absolute bottom-[100%] left-0'>
       <EmojiPicker
        width='20em'
        onEmojiClick={handleClickEmoji}

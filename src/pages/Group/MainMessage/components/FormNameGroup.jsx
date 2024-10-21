@@ -20,7 +20,7 @@ const FormNameGroup = ({
   }).then(() => {
    setDisableGroupName(true)
    setInfoMessageGroup((prev) => ({ ...prev, name: newName }))
-   onGetAllMessageList()
+   onGetAllMessageList && onGetAllMessageList()
   })
  }
 

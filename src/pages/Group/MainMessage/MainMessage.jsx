@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react'
-import { useLocation, useParams } from 'react-router-dom'
+import { useLocation, useParams, Link } from 'react-router-dom'
 
 import { AppContext } from '../../../context'
 
@@ -9,15 +9,17 @@ import SettingGroup from './SettingGroup'
 
 import bgMessage from '../../../assets/img-chat-an-danh.jpg'
 
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import { fetchApiSamenote } from '../../../utils/fetchApiSamnote'
 import MessageChatCard from './components/MessageChatCard'
 import MessageComponent from './components/MessageComponent'
 import MessageGroupCard from './components/MessageGroupCard'
-import InfoMessage from './InfoMessage'
+import InfoMessageTop from './InfoMessageTop'
 
-const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
+const MainMessage = (props) => {
+ const { typeFilterChat, getAllMessageList } = props
  const appContent = useContext(AppContext)
- const { user } = appContent
+ const { user, socket } = appContent
  const { id } = useParams()
  const { pathname } = useLocation()
 
@@ -44,7 +46,6 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
  //  var setting group
 
  const [showInforMation, setShowInforMation] = useState(false)
- const [groupMemberList, setGroupMemberList] = useState([])
 
  const handleHideInformation = () => {
   setShowInforMation(false)
@@ -80,7 +81,6 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
    {},
    { page: 1 }
   ).then((data) => {
-   console.log('data', data)
    const newMessagesChat = []
    data.data.map((item) => {
     return item.messages.map((message) => newMessagesChat.push(message))
@@ -101,19 +101,24 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
  useEffect(() => {
   if (!socket) return
 
-  socket.on('send_message', (result) => {
-   if (result.message === 'Error') return
-   getAllMessageList()
+  //join room
+  fetchApiSamenote('get', `/message/list_all_message/${user?.id}`).then(
+   (data) => {
+    data.data.map((item) => {
+     if (item.type_chat === '1chat1')
+      return socket.emit('join_room', { room: item.idRoom })
 
-   const { ReceivedID, SenderID, MessageID } = result?.data
-   if (SenderID === user?.id) {
-    fetchApiSamenote('post', `/message/${MessageID}`).then((data) => {
-     getAllMessageList()
+     if (item.type_chat === 'chatgroup')
+      return socket.emit('join_room', { room: item.idGroup })
     })
    }
+  )
 
-   console.log('infoMessageChat', infoMessageChat.id)
-   console.log('ReceivedID', ReceivedID)
+  socket.on('send_message', (result) => {
+   if (result.message === 'Error') return
+
+   getAllMessageList && getAllMessageList()
+   const { ReceivedID, SenderID, MessageID } = result?.data
 
    if (
     typeMessage === 'chat' &&
@@ -124,7 +129,7 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
   })
 
   socket.on('chat_group', (result) => {
-   getAllMessageList()
+   getAllMessageList && getAllMessageList()
 
    if (typeMessage === 'group') {
     const newIdGroup = result.data.idGroup
@@ -132,7 +137,7 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
    }
   })
   // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [socket, typeFilterChat, typeMessage, pathname])
+ }, [socket, typeFilterChat, typeMessage, pathname, infoMessageChat])
 
  //  handle link profile to group
  //   useEffect(() => {
@@ -173,7 +178,7 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
   const isChat = pathname.includes('chat')
   const isGroup = pathname.includes('group')
 
-  if (!isChat && !isGroup) {
+  if (!id) {
    // reset data
    setInfoMessageChat({
     name: '',
@@ -214,10 +219,6 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
    })
 
    getInfoMesssageGroup(id)
-   fetchApiSamenote('get', `/group/only/${id}`).then((data) => {
-    const memberList = data.data.members
-    setGroupMemberList(memberList)
-   })
   }
  }, [id, pathname])
 
@@ -229,21 +230,19 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
  // handle message chat
  const handleDeleteMessage = async (messageID) => {
   fetchApiSamenote('delete', `/message/${messageID}`).then(() => {
-   getAllMessageList()
+   getAllMessageList && getAllMessageList()
    getMessagesChat(user?.id, infoMessageChat.id)
   })
  }
 
  const propsSettingGroup = {
   userID: user?.id,
-  formName: typeMessage,
-  groupItem: infoMessageGroup,
-
-  groupMemberList,
-  setGroupMemberList,
+  typeMessage,
+  infoMessageGroup,
 
   setShowInforMation,
   getAllMessageList,
+  getInfoMesssageGroup,
  }
 
  const propsFormMessage = {
@@ -258,9 +257,7 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
  const propsInformation = {
   showInfo: showInforMation,
   onHide: handleHideInformation,
-
-  groupItem: infoMessageGroup,
-  groupMemberList,
+  infoMessageGroup,
  }
 
  const propsInfoMessage = {
@@ -271,6 +268,7 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
   infoMessageGroup,
   setInfoMessageGroup,
   infoMessageChat,
+  getInfoMesssageGroup,
  }
 
  // handle scroll content message
@@ -280,23 +278,25 @@ const MainMessage = ({ socket, typeFilterChat, getAllMessageList }) => {
  }, [messagesChat, messagesGroup])
 
  return (
-  <div
-   style={{ boxShadow: '0px 8px 10px 0px #00000040' }}
-   className='hidden col-md-8 col-xl-9 px-0 md:flex flex-col'
-  >
+  <div className='col-md-8 col-xl-9 w-full px-0 flex flex-col relative overflow-x-hidden'>
    <div className='flex justify-between items-center bg-[#dffffe] py-[20px] px-[15px] xl:py-[30px] xl:px-[20px]'>
-    <InfoMessage {...propsInfoMessage} />
+    <div className='md:hidden'>
+     <Link to='/messages'>
+      <ArrowBackIosIcon />
+     </Link>
+    </div>
+    <InfoMessageTop {...propsInfoMessage} />
     <SettingGroup data={propsSettingGroup} />
    </div>
 
    <div
     style={{
      background: `url(${bgMessage}) no-repeat center/cover`,
-     boxShadow: '10px 0px 10px 0px #00000040, 0px 1px 10px 0px #00000040',
+     boxShadow: '0 0px 10px 0px #00000040, 0px 1px 10px 0px #00000040',
     }}
-    className='flex-grow-1 flex flex-col position-relative'
+    className='flex-grow-1 flex flex-col md:relative'
    >
-    <div className='flex-grow-1 p-[20px] h-[30vh] overflow-auto style-scrollbar-y style-scrollbar-y-md'>
+    <div className='flex-grow-1 p-[20px] h-[30vh] overflow-y-auto style-scrollbar-y style-scrollbar-y-md'>
      <ul id='message-content'>
       {typeMessage === 'chat' && (
        <MessageComponent

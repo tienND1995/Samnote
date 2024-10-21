@@ -15,21 +15,13 @@ import SearchIcon from '@mui/icons-material/Search'
 
 import { AppContext } from '../context'
 import { schemaGroup } from '../utils/schema'
-import { fetchAllMessageList } from '../pages/Group/fetchApiGroup'
 import configs from '../configs/configs.json'
 
 import avatarDefault from '../assets/avatar-default.png'
 
 const { API_SERVER_URL, BASE64_URL } = configs
 
-const CreateGroup = ({
- data,
-
- showModal,
- setShowModal,
-}) => {
- const { setAllMessageList, socket, typeFilterChat } = data
-
+const CreateGroup = ({ onGetAllMessageList, showModal, setShowModal }) => {
  const appContext = useContext(AppContext)
  const { setSnackbar, user } = appContext
 
@@ -65,6 +57,7 @@ const CreateGroup = ({
     `${API_SERVER_URL}/group/create/${userID}`,
     dataGroup
    )
+
    setSnackbar({
     isOpen: true,
     message: `Create group complete`,
@@ -72,21 +65,14 @@ const CreateGroup = ({
    })
 
    //  cập nhật group list
-
-   const allMessageList = await fetchAllMessageList(
-    userID,
-    socket,
-    typeFilterChat
-   )
-   setAllMessageList(allMessageList)
+   onGetAllMessageList()
 
    // reset form create group
-
    resetModalCreateGroup()
   } catch (error) {
    setSnackbar({
     isOpen: true,
-    message: error.response.data.message,
+    message: error.response?.data?.message,
     severity: 'error',
    })
   }
@@ -249,18 +235,18 @@ const CreateGroup = ({
 
    <Modal.Body className='px-[20px] py-0'>
     <form onSubmit={handleSubmit(onSubmit)} action=''>
-     <div className='flex justify-between items-center gap-3 mb-3'>
+     <div className='lg:flex justify-between items-center gap-3 mb-3'>
       <div>
        <div className='position-relative w-max'>
         <div>
          <img
-          className='w-[90px] h-[90px] object-cover rounded-[100%]'
+          className='lg:w-[90px] lg:h-[90px] w-[60px] h-[60px] object-cover rounded-[100%]'
           src={avatarGroup ? `${BASE64_URL}${avatarGroup}` : avatarDefault}
           alt='avatar'
          />
         </div>
 
-        <div className='position-absolute bg-[#d9d9d9] w-[30px] h-[30px] rounded-full right-0 bottom-0 flex items-center justify-center'>
+        <div className='position-absolute bg-[#d9d9d9] w-[20px] h-[20px] lg:w-[30px] lg:h-[30px] rounded-full right-0 bottom-0 flex items-center justify-center'>
          <input
           onChange={handleChangeAvatarGroup}
           id='file-avatar-create-group'
@@ -271,36 +257,40 @@ const CreateGroup = ({
           htmlFor='file-avatar-create-group'
           className='flex cursor-pointer'
          >
-          <CameraAltIcon className='text-[20px]' />
+          <CameraAltIcon className='text-[16px] lg:text-[20px]' />
          </label>
         </div>
        </div>
 
        {!avatarGroup && errors.linkAvatar && (
-        <Box sx={{ color: 'red' }}>{errors.linkAvatar.message}</Box>
+        <span className='text-red-600 font-semibold text-sm lg:text-lg'>
+         {errors.linkAvatar.message}
+        </span>
        )}
       </div>
 
-      <div className='h-[50px] flex flex-grow-1 justify-between gap-3'>
+      <div className='h-[50px] flex flex-grow-1 justify-between gap-3 ld:mt-0 mt-2'>
        <div className='w-1/2'>
         <div>
          <input
           type='text'
-          className='w-full rounded-[30px] px-3 h-[50px] bg-white createGroup__groupName'
+          className='w-full rounded-[30px] px-3 h-[40px] lg:h-[50px] bg-white lg:placeholder:text-[20px] placeholder:text-[14px]'
           placeholder='Enter the group name...'
           {...register('groupName')}
          />
         </div>
 
         {errors.groupName && (
-         <Box sx={{ mt: 1, color: 'red' }}>{errors.groupName.message}</Box>
+         <span className='text-red-600 font-semibold mt-1 flex text-sm lg:text-lg'>
+          {errors.groupName.message}
+         </span>
         )}
        </div>
 
        <div className='w-1/2'>
         <div>
          <input
-          className='w-full rounded-[30px] px-3 h-[50px] bg-white createGroup__groupName'
+          className='w-full rounded-[30px] px-3 h-[40px] lg:h-[50px] bg-white lg:placeholder:text-[20px] placeholder:text-[14px]'
           type='text'
           placeholder='Group description...'
           {...register('desc')}
@@ -308,7 +298,9 @@ const CreateGroup = ({
         </div>
 
         {errors.desc && (
-         <Box sx={{ mt: 1, color: 'red' }}>{errors.desc.message}</Box>
+         <span className='text-red-600 font-semibold mt-1 flex text-sm lg:text-lg'>
+          {errors.desc.message}
+         </span>
         )}
        </div>
       </div>
@@ -323,15 +315,15 @@ const CreateGroup = ({
      </button>
     </form>
 
-    <div className='mx-[40px] mb-3 mt-5'>
+    <div className='lg:mx-[40px] mb-3 mt-[4px]'>
      <div className={usersSelected.length === 0 ? 'hidden' : null}>
       <h3 className='text-[25px] font-medium mb-2'>Selected</h3>
       <ul className='flex gap-[10px] flex-wrap'>
        {usersSelected?.map(({ idUser, linkAvatar, userName }) => (
         <li className='text-center max-w-[100px]' key={idUser}>
-         <div className='position-relative'>
+         <div className='position-relative w-max mx-auto'>
           <img
-           className='w-[80px] h-[80px] object-cover rounded-full'
+           className='w-[50px] h-[50px] lg:w-[80px] lg:h-[80px] object-cover rounded-full'
            src={linkAvatar}
            alt='avatar'
            onError={(e) => (e.target.src = avatarDefault)}
@@ -342,7 +334,7 @@ const CreateGroup = ({
            type='button'
            className='position-absolute top-0 right-1 flex'
           >
-           <ClearIcon className='text-[#34a6fa] text-[20px] bg-black rounded-full' />
+           <ClearIcon className='text-[#34a6fa] text-[14px] lg:text-[20px] bg-black rounded-full' />
           </button>
          </div>
 
@@ -351,38 +343,40 @@ const CreateGroup = ({
           element='h6'
           truncateText='…'
           text={userName}
-          containerClassName='text-[18px] font-[400] capitalize'
+          containerClassName='lg:text-[18px] text-[14px] font-[400] capitalize'
          />
         </li>
        ))}
       </ul>
      </div>
 
-     <div className='w-1/2 my-3'>
-      <div className='flex rounded-[30px] gap-[20px] items-center px-2 h-[50px]  bg-white border-secondary border'>
+     <div className='lg:w-1/2 py-3'>
+      <div className='flex rounded-[30px] gap-[10px] lg:gap-[20px] items-center px-2 h-[40px] lg:h-[50px]  bg-white border-secondary border'>
        <div>
-        <SearchIcon className='text-[30px]' />
+        <SearchIcon className='text-[20px] lg:text-[30px]' />
        </div>
 
        <input
-        className='w-100 createGroup__groupName'
+        className='w-100 lg:placeholder:text-[20px] placeholder:text-[14px]'
         type='text'
         placeholder='Enter username/email...'
         onChange={handleChangeSearchValue}
        />
       </div>
 
-      {usersSelected.length > 0 ? (
-       ''
-      ) : (
-       <Box sx={{ mt: 1, color: 'red' }}>{errors?.members?.message}</Box>
-      )}
+      {usersSelected.length > 0
+       ? ''
+       : errors.members && (
+          <span className='text-red-600 font-semibold mt-1 flex text-sm lg:text-lg'>
+           {errors.members.message}
+          </span>
+         )}
      </div>
     </div>
    </Modal.Body>
 
    {(searchUserResult.length > 0 || searchUserNotFound) && (
-    <div className='bg-white py-3 px-[60px] max-h-[45vh] overflow-y-auto createGroup-usersResult'>
+    <div className='bg-white py-3 px-[20px] lg:px-[60px] max-h-[45vh] overflow-y-auto createGroup-usersResult'>
      <h5
       className={`text-[25px] font-medium mb-2 ${
        searchUserNotFound ? 'text-red-500' : null
@@ -398,17 +392,17 @@ const CreateGroup = ({
         data-id={userResult.idUser}
         className='flex justify-between items-center'
        >
-        <div className='flex items-center gap-4'>
+        <div className='flex items-center gap-[10px] lg:gap-[15px'>
          <div>
           <img
-           className='w-[80px] h-[80px] object-cover rounded-full'
+           className='w-[50px] h-[50px] lg:w-[80px] lg:h-[80px] object-cover rounded-full'
            onError={(e) => (e.target.src = avatarDefault)}
            src={userResult.linkAvatar}
            alt='avatar'
           />
          </div>
 
-         <h6 className='text-[18px] font-normal capitalize'>
+         <h6 className='text-[14px] lg:text-[18px] font-normal capitalize'>
           {userResult.userName}
          </h6>
         </div>
@@ -426,7 +420,7 @@ const CreateGroup = ({
     </div>
    )}
 
-   <Modal.Footer className='p-[20px] border-none'>
+   <Modal.Footer className='p-[10px] lg:p-[20px] border-none'>
     <div>
      <button
       onClick={handleHideModalCreateGroup}

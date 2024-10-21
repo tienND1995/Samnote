@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 import { Alert, Snackbar } from '@mui/material'
 import { Navigate, Route, Routes } from 'react-router-dom'
@@ -27,6 +27,7 @@ import {
 } from './pages'
 
 import UserSetting from './pages/Setting/UserSetting'
+import MainMessage from './pages/Group/MainMessage/MainMessage'
 
 const AppSnackbar = () => {
  const appContext = useContext(AppContext)
@@ -56,6 +57,23 @@ const AppSnackbar = () => {
 }
 
 function App() {
+ const [isScreenMd, setIsScreenMd] = useState(
+  window.matchMedia('(min-width: 768px)').matches
+ )
+ const [isScreenXl, setIsScreenXl] = useState(
+  window.matchMedia('(min-width: 1280px)').matches
+ )
+
+ useEffect(() => {
+  window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => {
+   e.matches ? setIsScreenMd(true) : setIsScreenMd(false)
+  })
+
+  window.matchMedia('(min-width: 1280px)').addEventListener('change', (e) => {
+   e.matches ? setIsScreenXl(true) : setIsScreenXl(false)
+  })
+ }, [])
+
  return (
   <main>
    <AppSnackbar />
@@ -71,24 +89,30 @@ function App() {
 
     <Route element={<RootLayout />}>
      <Route path='/user/setting' element={<UserSetting />} />
-
      <Route path='/user/incognito' element={<AnonymousMessage />} />
      {/* ................................ */}
+
      <Route path='/photo' element={<Photo />} />
 
      <Route path='/messages'>
       <Route index element={<Group />} />
-      <Route path='chat/:id' element={<Group />} />
-      <Route path='group/:id' element={<Group />} />
+      <Route
+       path='chat/:id'
+       element={isScreenMd ? <Group /> : <MainMessage />}
+      />
+      <Route
+       path='group/:id'
+       element={isScreenMd ? <Group /> : <MainMessage />}
+      />
      </Route>
 
      <Route path='/profile/:id' element={<UserProfile />} />
 
      <Route path='/create-note' element={<CreateNote />} />
+
      <Route path='/editnote' exact element={<EditNoteLayout />}>
       <Route index element={<EditNote />} />
-      <Route path=':id' element={<EditNote />} />
-      <Route path='form/:id' element={<FormEdit />} />
+      <Route path=':id' element={isScreenXl ? <EditNote /> : <FormEdit />} />
      </Route>
 
      <Route path='/sketch' element={<Sketch />} />

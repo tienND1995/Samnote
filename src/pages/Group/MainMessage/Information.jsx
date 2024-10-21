@@ -9,7 +9,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { fetchApiSamenote } from '../../../utils/fetchApiSamnote'
 
 const Information = (props) => {
- const { showInfo, onHide, groupItem, groupMemberList } = props.data
+ const { showInfo, onHide, infoMessageGroup } = props.data
  const [toggleMemberList, setToggleMemberList] = useState(false)
 
  const [imageList, setImageList] = useState([])
@@ -17,21 +17,21 @@ const Information = (props) => {
  const btnBackRef = useRef()
 
  useEffect(() => {
-  groupItem.idGroup &&
+  infoMessageGroup.idGroup &&
    fetchApiSamenote(
     'get',
-    `/group/allphoto/${groupItem.idGroup}`
+    `/group/allphoto/${infoMessageGroup.idGroup}`
     // {},
     // { page: 1 }
    ).then((data) => {
     setImageList(data?.data || [])
    })
- }, [groupItem.idGroup])
+ }, [infoMessageGroup.idGroup])
 
  // hande click outside element
  useEffect(() => {
   const handleClickOutside = (element) => {
-   if (!informationRef.current || !btnBackRef.current || !showInfo) return
+   if (!informationRef.current) return
 
    const settingBtnItem = document.querySelector('#show-information')
 
@@ -57,11 +57,13 @@ const Information = (props) => {
   <div
    ref={informationRef}
    style={{
-    transition: 'all ease-in-out .3s',
+    transition: 'all ease-in-out .2s',
     boxShadow: '-1px 2px 2px 2px #00000040 ',
    }}
-   className={`p-3 position-absolute right-0 top-0 h-full bg-[#dffffe] overflow-hidden flex flex-col ${
-    showInfo ? 'opacity-100 visible w-[480px]' : 'opacity-0 invisible w-0'
+   className={`p-3 position-absolute w-[480px] top-0 h-full bg-[#dffffe] overflow-hidden flex flex-col max-w-[100%] ${
+    showInfo
+     ? 'opacity-100 visible right-0'
+     : 'opacity-0 invisible -right-[200px]'
    }`}
   >
    <div className='text-center position-relative'>
@@ -70,25 +72,27 @@ const Information = (props) => {
      onClick={onHide}
      ref={btnBackRef}
     >
-     <ArrowBackIosIcon className='text-[25px]' />
+     <ArrowBackIosIcon className='text-xl md:text-[25px]' />
     </button>
 
-    <h3 className='text-[30px] font-medium'>Group information</h3>
+    <h3 className='text-2xl md:text-[30px] font-semibold md:font-medium'>
+     Group information
+    </h3>
    </div>
 
-   <div className='position-relative w-max mx-auto my-[60px]'>
+   <div className='position-relative w-max mx-auto md:my-[60px] my-[20px]'>
     <img
      className='w-[90px] h-[90px] object-cover rounded-[100%]'
-     src={groupItem?.linkAvatar}
+     src={infoMessageGroup?.avatar}
      alt='avatar'
     />
    </div>
 
    <div className='flex justify-between items-center'>
     <div className='flex gap-2 items-center'>
-     <GroupsIcon className='text-[50px]' />
+     <GroupsIcon className='text-4xl md:text-[50px]' />
 
-     <h3 className='text-[30px] font-medium'>{`Group members(${groupMemberList?.length})`}</h3>
+     <h3 className='text-2xl md:text-[30px] font-medium'>{`Group members(${infoMessageGroup.members?.length})`}</h3>
     </div>
 
     <button
@@ -96,9 +100,9 @@ const Information = (props) => {
       transform: `rotate(${toggleMemberList ? 180 : 0}deg)`,
      }}
      onClick={() => setToggleMemberList((prevState) => !prevState)}
-     disabled={groupMemberList?.length < 1}
+     disabled={infoMessageGroup.members?.length < 1}
     >
-     <KeyboardArrowDownIcon className='text-[50px]' />
+     <KeyboardArrowDownIcon className='text-3xl md:text-[50px]' />
     </button>
    </div>
 
@@ -107,7 +111,7 @@ const Information = (props) => {
      toggleMemberList ? null : 'hidden'
     }`}
    >
-    {groupMemberList?.map((item) => (
+    {infoMessageGroup.members?.map((item) => (
      <li
       key={item.idMember}
       className='flex justify-between bg-white items-center rounded-[40px] cursor-pointer'
@@ -131,33 +135,23 @@ const Information = (props) => {
         <h5 className='text-lg font-extrabold capitalize'>{item.name}</h5>
        </div>
       </NavLink>
-
-      {/* <button
-       onClick={() => {
-        //   handleDeleteMemberGroup(item.idMember)
-       }}
-       type='button'
-       className='text-red-500 rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
-      >
-       <RemoveCircleIcon className='text-[30px]' />
-      </button> */}
      </li>
     ))}
    </ul>
 
    <div className='flex gap-2'>
     <div>
-     <ImageIcon className='text-[50px]' />
+     <ImageIcon className='text-4xl md:text-[50px]' />
     </div>
-    <h3 className='text-[30px] font-medium'>Image</h3>
+    <h3 className='text-2xl md:text-[30px] font-medium'>Image</h3>
    </div>
 
-   <ul className='my-3 row row-cols-3 flex-grow-1 overflow-y-auto style-scrollbar-y style-scrollbar-y-sm'>
+   <ul className='my-3 grid grid-cols-3 overflow-y-auto style-scrollbar-y style-scrollbar-y-sm'>
     {imageList?.map((image) => {
      return (
-      <li key={image.id} className='col p-1'>
+      <li key={image.id} className='p-1'>
        <img
-        className='w-full object-cover rounded-md border border-gray-400 aspect-square'
+        className='w-full object-cover rounded-md border border-gray-400 aspect-[4/3]'
         src={image.image}
         alt=''
        />

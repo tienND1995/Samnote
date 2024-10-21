@@ -1,19 +1,19 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import './ChatList.css'
 
 import GroupAddIcon from '@mui/icons-material/GroupAdd'
 import SearchIcon from '@mui/icons-material/Search'
 
-import CreateGroup from '../../../share/CreateGroup'
 import ChatListComponent from './components/ChatListComponent'
 import ChatListGroup from './components/ChatListGroup'
 import ChatListUser from './components/ChatListUser'
-import SearchUser from './SearchUser'
+
+import ModalSearchUserChat from './components/ModalSearchUserChat'
+import CreateGroup from '../../../share/CreateGroup'
 
 const ChatList = (props) => {
  const {
   userID,
-  socket,
   typeFilterChat,
   onChangeTypeFilter,
 
@@ -41,24 +41,20 @@ const ChatList = (props) => {
   setShowModalCreateGroup(true)
  }
 
- console.log('allMessageList', allMessageList)
-
  return (
   <div
    style={{ boxShadow: '4px -4px 10px 0px #00000040' }}
    className=' bg-[#dffffe] flex flex-col flex-grow-1 px-[12px] xl:px-[20px]'
   >
    <CreateGroup
-    data={{ getAllMessageList, socket, typeFilterChat }}
+    onGetAllMessageList={getAllMessageList}
     showModal={showModalCreateGroup}
     setShowModal={setShowModalCreateGroup}
    />
 
-   <SearchUser
+   <ModalSearchUserChat
     setShowModalSearch={setShowModalSearch}
     showModalSearch={showModalSearch}
-    userID={userID}
-    socket={socket}
    />
 
    <div className='flex my-[15px] xl:my-[20px] justify-between gap-2'>

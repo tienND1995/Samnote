@@ -4,30 +4,29 @@ import { Link } from 'react-router-dom'
 import { fetchApiSamenote } from '../../../utils/fetchApiSamnote'
 import FormNameGroup from './components/FormNameGroup'
 
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import avatarDefault from '../../../assets/avatar-default.png'
+import { useEffect, useState } from 'react'
 
-const InfoMessage = ({
- typeMessage,
- userID,
+const InfoMessageTop = (props) => {
+ const {
+  typeMessage,
+  userID,
 
- onGetAllMessageList,
- infoMessageGroup,
- setInfoMessageGroup,
- infoMessageChat,
-}) => {
+  onGetAllMessageList,
+  infoMessageGroup,
+  setInfoMessageGroup,
+  infoMessageChat,
+  getInfoMesssageGroup,
+ } = props
+ const [avatarInfoMessage, setAvatarInfoMessage] = useState(avatarDefault)
+
  const updateAvatarGroup = async (idGroup, newAvatar) => {
   fetchApiSamenote('patch', `/group/update/${idGroup}`, {
    linkAvatar: newAvatar,
   }).then((response) => {
-   onGetAllMessageList()
-
-   // render new avatar
-   setTimeout(() => {
-    const ulElement = document.querySelector('#list-chat')
-    const liElementActive = ulElement.querySelector('li.active')
-
-    liElementActive.click()
-   }, 300)
+   onGetAllMessageList && onGetAllMessageList()
+   getInfoMesssageGroup(infoMessageGroup.idGroup)
   })
  }
 
@@ -49,14 +48,29 @@ const InfoMessage = ({
   return idOwner === userID
  }
 
+ //set avatar info message
+ useEffect(() => {
+  if (infoMessageGroup.avatar) {
+   setAvatarInfoMessage(infoMessageGroup.avatar)
+  }
+
+  if (infoMessageChat.avatar) {
+   setAvatarInfoMessage(infoMessageChat.avatar)
+  }
+
+  if (typeMessage !== 'chat' && typeMessage !== 'group') {
+   setAvatarInfoMessage(avatarDefault)
+  }
+ }, [infoMessageGroup, infoMessageChat, typeMessage])
+
  return (
   <div className='flex gap-2 items-center'>
    <div className='position-relative'>
     <Link to={infoMessageChat.id && `/profile/${infoMessageChat.id}`}>
      <img
       className='xl:size-[90px] size-[60px] object-cover rounded-[100%]'
-      src={infoMessageGroup.avatar || infoMessageChat.avatar || avatarDefault}
-      alt='avatar'
+      src={avatarInfoMessage}
+      onError={(e) => (e.target.src = avatarDefault)}
      />
     </Link>
 
@@ -95,4 +109,4 @@ const InfoMessage = ({
  )
 }
 
-export default InfoMessage
+export default InfoMessageTop

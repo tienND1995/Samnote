@@ -129,19 +129,8 @@ const NoteCard = ({ note, noteList, type, updateNotes }) => {
   })
  }
 
- const [isScreenXl, setIsScreenXl] = useState(true)
-
- useEffect(() => {
-  const bodyElement = document.querySelector('body')
-  const widthScreen = bodyElement.offsetWidth
-
-  widthScreen >= 1280 ? setIsScreenXl(true) : setIsScreenXl(false)
- }, [])
-
  const optionLink = () =>
-  `/${
-   type === 'edit' ? (isScreenXl ? 'editnote' : 'editnote/form') : 'dustbin'
-  }/${note.idNote}`
+  `/${type === 'edit' ? 'editnote' : 'dustbin'}/${note.idNote}`
 
  //  *__________________________
  if (Object.keys(note).length === 0) return

@@ -1,8 +1,6 @@
 import { useContext, useEffect, useState } from 'react'
 import './Group.css'
 
-import io from 'socket.io-client'
-
 import configs from '../../configs/configs.json'
 import { AppContext } from '../../context'
 import { fetchAllMessageList } from './fetchApiGroup'
@@ -15,8 +13,6 @@ const { API_SERVER_URL } = configs
 const Group = () => {
  const appContext = useContext(AppContext)
  const { user } = appContext
-
- const [socket, setSocket] = useState(null)
 
  // var data message
  const [allMessageList, setAllMessageList] = useState([])
@@ -31,29 +27,19 @@ const Group = () => {
   const typeFilterLocal = window.localStorage.getItem('typeFilterChat')
   const messageList = await fetchAllMessageList(
    user.id,
-   socket,
    typeFilterLocal || typeFilterChat
   )
   setAllMessageList(messageList)
  }
 
  useEffect(() => {
-  const socketIo = io(API_SERVER_URL)
+  if (!user?.id) return
 
-  socketIo.on('connect', () => {
-   setSocket(socketIo)
-   console.log('Connected')
-  })
- }, [])
-
- useEffect(() => {
-  if (!socket) return
   getAllMessageList()
- }, [user?.id, socket, typeFilterChat])
+ }, [user?.id, typeFilterChat])
 
  const propsChatList = {
   userID: user?.id,
-  socket,
   typeFilterChat,
   allMessageList,
 
@@ -62,7 +48,6 @@ const Group = () => {
  }
 
  const propsMainMessage = {
-  socket,
   typeFilterChat,
   getAllMessageList,
  }
@@ -70,14 +55,19 @@ const Group = () => {
  return (
   <div className='flex flex-grow-1'>
    <div className='col col-md-4 col-xl-3 group-sidebar flex flex-col px-0'>
-    <h3 className='text-center xl:py-[60px] py-[30px] px-3 font-bold hidden md:block'>
+    <h3 className='text-center xl:py-[60px] py-[30px] px-3 font-bold'>
      Chat
     </h3>
 
     <ChatList data={propsChatList} />
    </div>
 
-   <MainMessage {...propsMainMessage} />
+   <div
+    style={{ boxShadow: '0px 8px 10px 0px #00000040' }}
+    className='hidden md:flex w-full'
+   >
+    <MainMessage {...propsMainMessage} />
+   </div>
   </div>
  )
 }
