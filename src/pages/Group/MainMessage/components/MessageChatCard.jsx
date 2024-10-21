@@ -2,7 +2,9 @@ import avatarDefault from '../../../../assets/avatar-default.png'
 import { convertTimeMessage } from '../../../../utils/utils'
 
 import DeleteIcon from '@mui/icons-material/Delete'
+
 const MessageChatCard = ({ message, userID, onDeleteMessage, avatar }) => {
+ console.log(message)
  return message.idSend === userID ? (
   <div key={message.id} className='h-auto flex flex-col items-end'>
    <div className='flex gap-2 mb-1'>
@@ -26,7 +28,9 @@ const MessageChatCard = ({ message, userID, onDeleteMessage, avatar }) => {
        <div>
         <img
          className={`h-auto rounded-md ${
-          message.type === 'image' ? 'w-[100px]' : 'w-[30px]'
+          message.type === 'image' || message.type === 'muti-image'
+           ? 'w-[100px]'
+           : 'w-[30px]'
          }`}
          src={message.image}
         />
@@ -40,7 +44,7 @@ const MessageChatCard = ({ message, userID, onDeleteMessage, avatar }) => {
          overflowWrap: 'anywhere',
          maxWidth: '250px',
         }}
-        className='break-words bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto'
+        className='break-words text-[14px] md:text-[16px] bg-[#007AFF] text-white h-auto rounded-[26.14px] p-2 my-auto'
        >
         {message.text}
        </p>
@@ -49,7 +53,7 @@ const MessageChatCard = ({ message, userID, onDeleteMessage, avatar }) => {
     </div>
    </div>
 
-   <time className='text-xs text-black-50'>
+   <time className='text-[10px] md:text-xs text-black-50'>
     {convertTimeMessage(message.sendAt)}
    </time>
   </div>
@@ -72,7 +76,9 @@ const MessageChatCard = ({ message, userID, onDeleteMessage, avatar }) => {
        <div>
         <img
          className={`h-auto rounded-md ${
-          message.type === 'image' ? 'w-[100px]' : 'w-[30px]'
+          message.type === 'image' || message.type === 'muti-image'
+           ? 'w-[100px]'
+           : 'w-[30px]'
          }`}
          src={message.image}
         />
@@ -86,7 +92,7 @@ const MessageChatCard = ({ message, userID, onDeleteMessage, avatar }) => {
          overflowWrap: 'anywhere',
          maxWidth: '250px',
         }}
-        className='break-words bg-[#F2F2F7] h-auto rounded-[26.14px] p-2 my-auto'
+        className='break-words text-[14px] md:text-[16px] bg-[#F2F2F7] h-auto rounded-[26px] p-2 my-auto'
        >
         {message.text}
        </p>
@@ -95,7 +101,7 @@ const MessageChatCard = ({ message, userID, onDeleteMessage, avatar }) => {
     </div>
    </div>
 
-   <time className='text-xs text-black-50'>
+   <time className='text-[10px] md:text-xs text-black-50'>
     {convertTimeMessage(message.sendAt)}
    </time>
   </div>

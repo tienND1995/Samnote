@@ -132,21 +132,20 @@ const Register = () => {
   }
 
   fetchApiSamenote('post', '/register', dataForm).then((response) => {
-   console.log('response', response)
-//    if (response?.error) {
-//     return setSnackbar({
-//      isOpen: true,
-//      message: response.error,
-//      severity: 'error',
-//     })
-//    } else {
-//     setIsCreateAccount(true)
-//     return setSnackbar({
-//      isOpen: true,
-//      message: response.error,
-//      severity: 'error',
-//     })
-//    }
+   if (response?.error) {
+    return setSnackbar({
+     isOpen: true,
+     message: response.error,
+     severity: 'error',
+    })
+   } else {
+    setIsCreateAccount(true)
+    return setSnackbar({
+     isOpen: true,
+     message: response.error,
+     severity: 'error',
+    })
+   }
   })
  }
 
@@ -178,7 +177,7 @@ const Register = () => {
    size={isCreateAccount ? 'lg' : null}
   >
    <h1
-    className={`font-semibold font-SourceSan capitalize text-5xl ${
+    className={`font-semibold font-SourceSan capitalize text-4xl lg:text-5xl ${
      isCreateAccount ? 'text-left' : 'text-center '
     }`}
    >

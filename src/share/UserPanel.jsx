@@ -11,6 +11,8 @@ import MenuIcon from '@mui/icons-material/Menu'
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary'
 import SearchIcon from '@mui/icons-material/Search'
 import SettingsIcon from '@mui/icons-material/Settings'
+import DeleteIcon from '@mui/icons-material/Delete'
+
 import {
  Box,
  Slide,
@@ -100,7 +102,7 @@ const UserPanel = () => {
    url: `/editnote`,
   },
   {
-   name: 'Group',
+   name: 'Messages',
    icon: (
     <GroupIcon className=' md:size-[25px] lgEqual:size-[30px] xl:size-[35px] 2xl:size-[40px]' />
    ),
@@ -118,6 +120,13 @@ const UserPanel = () => {
    ),
    url: '/user/incognito',
    state: { userInfomations: null },
+  },
+  {
+   name: 'dustbin',
+   icon: (
+    <DeleteIcon className=' md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]' />
+   ),
+   url: '/dustbin',
   },
   {
    name: 'Sketch',

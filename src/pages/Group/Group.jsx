@@ -55,7 +55,7 @@ const Group = () => {
  return (
   <div className='flex flex-grow-1'>
    <div className='col col-md-4 col-xl-3 group-sidebar flex flex-col px-0'>
-    <h3 className='text-center xl:py-[60px] py-[30px] px-3 font-bold'>
+    <h3 className='text-center xl:py-[60px] md:py-[30px] py-[15px] px-3 font-bold'>
      Chat
     </h3>
 
