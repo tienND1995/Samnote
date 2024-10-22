@@ -49,7 +49,6 @@ const ImageList = ({ photoList, imagesCheckList, onGetPhotoList, userID }) => {
    }
   })
  }
-
  const slectedImages = [...checkedItems]
 
  if (photoList.length < 1) return <h3>No photos available !</h3>

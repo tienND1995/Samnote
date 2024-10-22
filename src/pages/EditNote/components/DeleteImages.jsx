@@ -196,7 +196,7 @@ const DeleteImages = ({ images, userId, noteId, updateNotes, onGetNoteId }) => {
     </div>
    </div>
 
-   <div className='max-w-[80vw] mx-auto'>
+   <div className='xl:max-w-[40vw] max-w-[80vw] mx-auto'>
     <Slider {...settings}>
      {imageSort
       .sort((a, b) => b.id - a.id)
