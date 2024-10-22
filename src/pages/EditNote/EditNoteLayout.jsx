@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom'
 
 const EditNoteLayout = () => {
  return (
-  <div className='bg-[#181A1B] p-lg-4 p-2 gap-lg-4 gap-3 flex flex-col w-full overflow-y-auto style-scrollbar-y style-scrollbar-y-md'>
+  <div className='bg-[#181A1B] relative p-lg-4 p-2 gap-lg-4 gap-3 flex flex-col w-full overflow-y-auto style-scrollbar-y style-scrollbar-y-md'>
    <div className='flex justify-center items-start gap-2 xl:gap-3'>
     <div>
      <svg
@@ -22,7 +22,7 @@ const EditNoteLayout = () => {
 
     <h5 className='text-xl md:text-2xl xl:text-3xl text-white'>Edit Note(8)</h5>
    </div>
-   
+
    <Outlet />
   </div>
  )
