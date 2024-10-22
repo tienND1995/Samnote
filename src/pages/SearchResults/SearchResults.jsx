@@ -15,44 +15,67 @@ const SearchResults = () => {
 
     useEffect(() => {
         fetchResults()
-    }, [activeTab, currentPage])
+    }, [currentPage, activeTab])
 
     const fetchResults = async () => {
-        if (searchText.trim() === '') {
-            setResults([])
-            return
-        }
-        setResults([])
         let response
         switch (activeTab) {
             case 'everyone':
                 response = await fetchApiSamenote(
                     'get',
-                    `/public_notes_search?key=${searchText}&page=${currentPage}`
+                    `/public_notes_search`,
+                    {},
+                    {
+                        key: searchText,
+                        page: currentPage
+                    }
                 )
                 console.log('everyone', response.data)
                 break
             case 'anonymous':
                 response = await fetchApiSamenote(
                     'get',
-                    `/message/search_unknown_by_text/${user.id}/${searchText}?page=${currentPage}`
+                    `/message/search_unknown_by_id/${user.id}`,
+                    {},
+                    {
+                        search: searchText,
+                        page: currentPage
+                    }
                 )
                 console.log('anonymous', response.data)
                 break
             case 'group':
-                response = await fetchApiSamenote('get',
-                    `/group/list_group_byUser/${user.id}?page=${currentPage}`
+                response = await fetchApiSamenote(
+                    'get',
+                    `/group/search_group/${user.id}`,
+                    {},
+                    {
+                        text: searchText,
+                        page: currentPage
+                    }
                 )
                 console.log('group', response.data)
                 break
         }
-        setResults(response.data)
+        setResults(response.data || [])
         if (response.number_page) setTotalPages(Math.ceil(response.number_page))
     }
 
-    const handleSearch = () => {
+    const resetSearch = () => {
         setCurrentPage(1)
+        setTotalPages(0)
+        setResults([])
+    }
+
+    const handleSearch = () => {
+        resetSearch()
         fetchResults()
+    }
+
+    const handleTabChange = (tab) => {
+        setSearchText('')
+        resetSearch()
+        setActiveTab(tab)
     }
 
     return (
@@ -88,7 +111,7 @@ const SearchResults = () => {
                         <li className="nav-item flex-1 text-center cursor-pointer" key={tab}>
                             <a
                                 className={`nav-link text-white text-xl ${activeTab === tab ? 'active bg-[#F56852]' : ''}`}
-                                onClick={() => setActiveTab(tab)}
+                                onClick={() => handleTabChange(tab)}
                             >
                                 {tab === 'everyone' ? "Everyone's notes" :
                                     tab === 'anonymous' ? "Anonymous chat" : "Group chat"}
