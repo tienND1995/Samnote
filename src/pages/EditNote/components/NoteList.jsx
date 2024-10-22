@@ -7,6 +7,7 @@ import SkipNextIcon from '@mui/icons-material/SkipNext'
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious'
 import axios from 'axios'
 import NoteCard from '../../../share/NoteCard'
+import { debounce } from '../../../utils/utils'
 
 const NoteList = ({ noteList, userID, onChangeNoteList, updateNotes }) => {
  const [noteListInitial, setNoteListInitial] = useState([])
@@ -51,7 +52,7 @@ const NoteList = ({ noteList, userID, onChangeNoteList, updateNotes }) => {
     >
      <SearchIcon className='md:text-3xl text-2xl' />
      <input
-      onChange={handleChangeSearchNote}
+      onChange={debounce(handleChangeSearchNote, 1000)}
       className='w-full md:text-2xl text-xl'
       type='text'
       placeholder='Search note'

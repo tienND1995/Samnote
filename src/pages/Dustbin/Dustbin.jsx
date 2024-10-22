@@ -14,6 +14,8 @@ const Dustbin = () => {
  const [dustbinNotes, setDustbinNotes] = useState([])
  const [dustbinNotesInit, setDustbinNotesInit] = useState([])
 
+ const [messageNotifi, setMessageNottifi] = useState('')
+
  const getDustbinNotes = () => {
   return fetchApiSamenote('get', `/trash/${user?.id}`).then((data) => {
    setDustbinNotes(data.notes)
@@ -27,24 +29,30 @@ const Dustbin = () => {
   getDustbinNotes()
  }, [user])
 
- let timeOut = null
  const handleChangeSearchNote = async (e) => {
   const textSearch = e.target.value
-  clearTimeout(timeOut)
 
-  if (textSearch.trim() === '') return setDustbinNotes(dustbinNotesInit)
+  if (textSearch.trim() === '') {
+   setDustbinNotes(dustbinNotesInit)
+   setMessageNottifi('')
+   return
+  }
 
-  timeOut = setTimeout(() => {
-   fetchApiSamenote('get', `/searchTrash/${user?.id}?key=${textSearch}`).then(
-    (data) => {
-     const newNoteList = dustbinNotesInit.filter((note) =>
-      data.data.some((item) => note.idNote === item.idNote)
-     )
+  fetchApiSamenote('get', `/searchTrash/${user?.id}?key=${textSearch}`).then(
+   (data) => {
+    const newNoteList = dustbinNotesInit.filter((note) =>
+     data.data.some((item) => note.idNote === item.idNote)
+    )
 
-     setDustbinNotes(newNoteList)
+    if (!newNoteList.length) {
+     setMessageNottifi('Not Found !')
+    } else {
+     setMessageNottifi('')
     }
-   )
-  }, 1000)
+
+    setDustbinNotes(newNoteList)
+   }
+  )
  }
 
  return (
@@ -66,7 +74,7 @@ const Dustbin = () => {
 
      <div className='w-full'>
       <input
-       onChange={handleChangeSearchNote}
+       onChange={debounce(handleChangeSearchNote, 1000)}
        className='w-full'
        type='Search note'
        placeholder='Search note'
@@ -78,6 +86,12 @@ const Dustbin = () => {
      Auto-delete after 30 days
     </h5>
    </div>
+
+   {messageNotifi && (
+    <span className='text-center text-red-500 text-3xl font-semibold mt-3'>
+     {messageNotifi}
+    </span>
+   )}
 
    <ul className='grid grid-cols-1 md:grid-cols-2 my-lg-4 my-2 my-md-3 gap-lg-3 gap-2 flex-grow-1 pr-1 overflow-y-auto style-scrollbar-y style-scrollbar-y-sm'>
     {dustbinNotes?.map((note) => (
