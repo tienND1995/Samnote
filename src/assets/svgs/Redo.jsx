@@ -1,9 +1,7 @@
-
 const Redo = () => {
  return (
   <svg
-   width='50'
-   height='50'
+   className='xsm:size-[50px] size-[40px]'
    viewBox='0 0 50 50'
    fill='none'
    xmlns='http://www.w3.org/2000/svg'
@@ -14,10 +12,9 @@ const Redo = () => {
     maskUnits='userSpaceOnUse'
     x='0'
     y='0'
-    width='50'
-    height='50'
+    className='xsm:size-[50px] size-[40px]'
    >
-    <rect width='50' height='50' fill='#D9D9D9' />
+    <rect className='xsm:size-[50px] size-[40px]' fill='#D9D9D9' />
    </mask>
    <g mask='url(#mask0_1203_3307)'>
     <path

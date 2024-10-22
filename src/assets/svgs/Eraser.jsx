@@ -1,8 +1,7 @@
 const Eraser = () => {
  return (
   <svg
-   width='50'
-   height='50'
+   className="xsm:size-[50px] size-[40px]"
    viewBox='0 0 50 50'
    fill='none'
    xmlns='http://www.w3.org/2000/svg'

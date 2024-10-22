@@ -1,91 +1,142 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from "react";
 
-import { Alert, Snackbar } from '@mui/material'
-import { Navigate, Route, Routes } from 'react-router-dom'
-import './App.css'
-import { AppContext } from './context'
+import { Alert, Snackbar } from "@mui/material";
+import { Navigate, Route, Routes } from "react-router-dom";
+import "./App.css";
+import { AppContext } from "./context";
 
-import RootLayout from './layout/RootLayout'
+import RootLayout from "./layout/RootLayout";
 
+import AuthLayout from "./layout/AuthLayout/AuthLayout";
+import ForgotPassword from "./layout/AuthLayout/ForgotPassword";
+import Register from "./layout/AuthLayout/Register";
+import SignIn from "./layout/AuthLayout/SignIn";
 import {
-  Photo,
-  EditNote,
-  CreateNote,
-  Group,
   AnonymousMessage,
+  CreateNote,
+  Dustbin,
+  FormEdit,
+  EditNote,
+  EditNoteLayout,
+  Group,
   Home,
-  UserProfile,
+  Photo,
   //  UserSetting,
   Sketch,
-  Dustbin,
+  UserProfile,
   SearchResults,
-} from './pages'
-import AuthLayout from './layout/AuthLayout/AuthLayout'
-import SignIn from './layout/AuthLayout/SignIn'
-import Register from './layout/AuthLayout/Register'
-import ForgotPassword from './layout/AuthLayout/ForgotPassword'
+} from "./pages";
 
-import UserSetting from './pages/Setting/UserSetting'
+import UserSetting from "./pages/Setting/UserSetting";
+import MainMessage from "./pages/Group/MainMessage/MainMessage";
 
 const AppSnackbar = () => {
-  const appContext = useContext(AppContext)
-  const { snackbar, setSnackbar } = appContext
-  const { isOpen, message, severity } = snackbar
+  const appContext = useContext(AppContext);
+  const { snackbar, setSnackbar } = appContext;
+  const { isOpen, message, severity } = snackbar;
 
   const handleCloseSnackbar = (event, reason) => {
-    if (reason === 'clickaway') {
-      return
+    if (reason === "clickaway") {
+      return;
     }
 
-    setSnackbar({ isOpen: false, message: '', severity: '' })
-  }
+    setSnackbar({ isOpen: false, message: "", severity: "" });
+  };
 
   return (
-    <Snackbar open={isOpen} autoHideDuration={1000} onClose={handleCloseSnackbar}>
+    <Snackbar
+      open={isOpen}
+      autoHideDuration={1000}
+      onClose={handleCloseSnackbar}
+    >
       <Alert
         onClose={handleCloseSnackbar}
         severity={severity}
-        variant='filled'
-        sx={{ width: '100%' }}
+        variant="filled"
+        sx={{ width: "100%" }}
       >
         {message}
       </Alert>
     </Snackbar>
-  )
-}
+  );
+};
 
 function App() {
-  const isLogin = JSON.parse(localStorage.getItem('USER'))
+  const [isScreenMd, setIsScreenMd] = useState(
+    window.matchMedia("(min-width: 768px)").matches
+  );
+  const [isScreenXl, setIsScreenXl] = useState(
+    window.matchMedia("(min-width: 1280px)").matches
+  );
+
+  useEffect(() => {
+    window.matchMedia("(min-width: 768px)").addEventListener("change", (e) => {
+      e.matches ? setIsScreenMd(true) : setIsScreenMd(false);
+    });
+
+    window.matchMedia("(min-width: 1280px)").addEventListener("change", (e) => {
+      e.matches ? setIsScreenXl(true) : setIsScreenXl(false);
+    });
+  }, []);
 
   return (
     <main>
       <AppSnackbar />
-
       <Routes>
-        <Route path='/login' element={isLogin ? <Navigate to='/' /> : <Login />} />
-        <Route path='/' exact element={<Home />} />
-        <Route path='*' element={<Navigate replace to='/' />} />
+        <Route path="/auth" element={<AuthLayout />}>
+          <Route path="signin" element={<SignIn />} />
+          <Route path="register" element={<Register />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+        </Route>
+
+        <Route path="/" exact element={<Home />} />
+        <Route path="*" element={<Navigate replace to="/" />} />
 
         <Route element={<RootLayout />}>
-          <Route path='/user/setting' element={<UserSetting />} />
+          <Route path="/setting" element={<UserSetting />} />
 
-          <Route path='/user/incognito' element={<AnonymousMessage />} />
+          {/* <Route path='/incognito' element={<AnonymousMessage />} /> */}
+          <Route path="/incognito">
+            <Route index element={<AnonymousMessage />} />
+            <Route path="anonymous/:id" element={<AnonymousMessage />} />
+            <Route path="user/:id" element={<AnonymousMessage />} />
+          </Route>
           {/* ................................ */}
           <Route path='/search-results' element={<SearchResults />} />
-          <Route path='/photo' element={<Photo />} />
-          <Route path='/group' element={<Group />} />
-          <Route path='/profile/:id' element={<UserProfile />} />
+          <Route path="/photo" element={<Photo />} />
 
-          <Route path='/editnote/:id' element={<EditNote />} />
-          <Route path='/editnote' exact element={<EditNote />} />
-          <Route path='/create-note' element={<CreateNote />} />
+          <Route path="/messages">
+            <Route index element={<Group />} />
+            <Route
+              path="chat/:id"
+              element={isScreenMd ? <Group /> : <MainMessage />}
+            />
+            <Route
+              path="group/:id"
+              element={isScreenMd ? <Group /> : <MainMessage />}
+            />
+          </Route>
 
+          <Route path="/profile/:id" element={<UserProfile />} />
 
-          <Route path='/sketch' element={<Sketch />} />
+          <Route path="/create-note" element={<CreateNote />} />
+
+          <Route path="/editnote" exact element={<EditNoteLayout />}>
+            <Route index element={<EditNote />} />
+            <Route
+              path=":id"
+              element={isScreenXl ? <EditNote /> : <FormEdit />}
+            />
+          </Route>
+
+          <Route path="/sketch" element={<Sketch />} />
+
+          <Route path="/dustbin" exact element={<Dustbin />} />
+          <Route path="/dustbin/:id" element={<Dustbin />} />
         </Route>
       </Routes>
     </main>
-  )
+  );
 }
 
-export default App
+export default App;

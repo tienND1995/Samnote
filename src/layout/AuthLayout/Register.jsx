@@ -177,7 +177,7 @@ const Register = () => {
    size={isCreateAccount ? 'lg' : null}
   >
    <h1
-    className={`font-semibold font-SourceSan capitalize text-5xl ${
+    className={`font-semibold font-SourceSan capitalize text-4xl lg:text-5xl ${
      isCreateAccount ? 'text-left' : 'text-center '
     }`}
    >

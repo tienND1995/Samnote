@@ -1,19 +1,44 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { Button, TextField } from '@mui/material'
 import { Link } from 'react-router-dom'
 import { handleErrorAvatar, formatTimeAgo } from '../../../utils/utils'
 import { AppContext } from '../../../context'
 import api from '../../../api'
 
-const RightsideContent = ({ lastUsers, allNotePublic, setReload, userInfomations }) => {
+const RightsideContent = ({ setReload, userInfomations }) => {
     const [payloadData, setPayloadData] = useState('')
     const appContext = useContext(AppContext)
     const { setSnackbar, user } = appContext
+    const [lastUsers, setLastUsers] = useState([])
+    const [allNotePublic, setAllNotePublic] = useState([])
     const [visibleMoreUsers, setVisibleMoreUsers] = useState(7)
     const [visibleMoreNotes, setVisibleMoreNotes] = useState(7)
 
     const handleSeeMore = (setter) => () => {
         setter((prevVisible) => prevVisible + 7)
+    }
+
+    useEffect(() => {
+        fetchLastUsers()
+        fetchAllNotePublic()
+    }, [])
+
+    const fetchLastUsers = async () => {
+        const response = await api.get('/lastUser')
+        if (response && response.data.status === 200) {
+            setLastUsers(response.data.data)
+        }
+    }
+
+    const fetchAllNotePublic = async () => {
+        try {
+            const response = await api.get('/notes_public')
+            if (response && response.data.message === 'success') {
+                setAllNotePublic(response.data.public_note)
+            }
+        } catch (err) {
+            console.log(err)
+        }
     }
 
     const handleCreateNote = async () => {
@@ -80,11 +105,11 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userInfomations
                 />
             </div>
             <div className='flex flex-col md:flex-row lg:flex-col md:gap-3 lg:gap-0'>
-                <div className='new-users w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3'>
+                <div className='new-users w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3 pr-1'>
                     <span className='font-[700] text-[#888888] text-xl mb-3 ml-2'>New Users</span>
                     {lastUsers.length > 0 ? (
                         <>
-                            <ul className='w-full overflow-y-auto flex-grow'>
+                            <ul className='w-full overflow-y-auto flex-grow style-scrollbar-y'>
                                 {lastUsers.slice(0, visibleMoreUsers).map(({ id, linkAvatar, user_name, createAt }) => (
                                     <li key={`${id}`} className="mb-2">
                                         <Link
@@ -120,11 +145,11 @@ const RightsideContent = ({ lastUsers, allNotePublic, setReload, userInfomations
                         <p className='text-center'>Not found new users</p>
                     )}
                 </div>
-                <div className='new-notes w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3'>
+                <div className='new-notes w-full h-[450px] bg-[#fff] rounded-xl flex flex-col mt-3 py-3 pr-1'>
                     <span className='font-[700] text-[#888888] text-xl mb-[1.4rem] ml-2'>New Notes</span>
                     {allNotePublic.length > 0 ? (
                         <>
-                            <ul className='w-full overflow-y-auto flex-grow pl-3'>
+                            <ul className='w-full overflow-y-auto flex-grow pl-3 style-scrollbar-y'>
                                 {allNotePublic.slice(0, visibleMoreNotes).map((item, index) => (
                                     <li key={`notePublic ${index}`} className="mb-4">
                                         <div className='w-full flex justify-around items-center'>

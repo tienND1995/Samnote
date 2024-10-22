@@ -105,6 +105,8 @@ export const convertTimeToApi = (time) =>
 export const convertTimeApiNoteToHtml = (time) =>
  `${moment(time).format('DD/MM/YYYY')}`
 
+export const convertTimeMessage = (time) => moment(`${time}+0700`).calendar()
+
 // ** color
 export const isLightColor = (colorObj) => {
  const luminance = getLuminance(
@@ -119,3 +121,14 @@ export const convertColorNoteToApi = (color) => ({
  g: color.g,
  a: 1,
 })
+
+export const debounce = (callBack, delay) => {
+ let timeOut = null
+
+ return (...args) => {
+  clearTimeout(timeOut)
+  timeOut = setTimeout(() => {
+   callBack(...args)
+  }, delay)
+ }
+}

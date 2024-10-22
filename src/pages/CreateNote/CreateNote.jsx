@@ -84,6 +84,8 @@ const CreateNote = () => {
     severity: 'success',
    })
 
+   console.log('data', data)
+
    setUploadImageList([])
    // post image list
    const newFormData = new FormData()
@@ -116,6 +118,8 @@ const CreateNote = () => {
   if (checklist.length > 0 || typeForm === 'text')
    setDataContent((prev) => ({ ...prev, isError: false, message: '' }))
  }, [textEditor, checklist.length])
+
+ console.log('errors', errors)
 
  const onSubmit = async (data) => {
   // set errors when text empty
@@ -176,17 +180,18 @@ const CreateNote = () => {
  }
 
  return (
-  <div className='bg-[#181A1B] w-full p-4 flex flex-col gap-3 '>
+  <div className='bg-[#181A1B] w-full p-md-4 p-2 flex flex-col gap-3 overflow-y-auto style-scrollbar-y style-scrollbar-y-md'>
    <div className='flex justify-center items-end gap-2'>
     <img src={imageCreateNote} alt='' />
 
     <h3 className='text-white'>Create Note</h3>
    </div>
+
    <form
     onSubmit={handleSubmit(onSubmit)}
-    className='bg-[#3A3F42] grid grid-cols-2 flex-grow-1 rounded-t-[10px] overflow-hidden'
+    className='bg-[#3A3F42] grid grid-cols-1 xl:grid-cols-2 flex-grow-1 rounded-t-[10px]'
    >
-    <div className='p-4 flex flex-col justify-between'>
+    <div className='p-md-4 p-2 flex flex-col justify-between'>
      <div className='max-w-[600px] mx-auto w-full'>
       <FormNote
        userID={user?.id}
@@ -198,7 +203,7 @@ const CreateNote = () => {
        color={color}
       />
 
-      <div className='flex justify-between mt-4'>
+      <div className='flex justify-between 2xl:mt-4 mt-2'>
        <div className='flex justify-start items-center gap-3'>
         <FormControlLabel
          className=' text-white rounded-1 '
@@ -229,7 +234,7 @@ const CreateNote = () => {
        <div>
         <button
          disabled={disableBtnSubmit()}
-         className={`btn btn-primary text-white uppercase ${
+         className={`btn btn-primary text-white md:text-lg text-sm uppercase ${
           disableBtnSubmit() ? 'opacity-50' : 'opacity-100'
          }`}
         >
@@ -245,7 +250,7 @@ const CreateNote = () => {
      />
     </div>
 
-    <div className='flex relative'>
+    <div className='flex relative p-xl-0 p-md-4 p-2'>
      {dataContent.isError && (
       <p className='text-red-600 w-max absolute top-[120px] left-[15px]'>
        {dataContent.message}

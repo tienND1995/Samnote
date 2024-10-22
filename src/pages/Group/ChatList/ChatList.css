@@ -1,0 +1,40 @@
+.modal-create-group > .modal-dialog > .modal-content {
+ background: #84e6ff;
+ overflow: hidden;
+}
+
+.createGroup__groupName::placeholder {
+ color: #00000066;
+ font-size: 20px;
+ font-weight: 400;
+}
+
+input.createGroup-inputRadio[type='checkbox'] {
+ appearance: none;
+ width: 20px;
+ height: 20px;
+
+ border-radius: 100%;
+ background-color: #fff;
+ border: 1px solid #000;
+}
+
+input.createGroup-inputRadio[type='checkbox']:checked {
+ background: #03bd03;
+}
+
+.createGroup-usersResult::-webkit-scrollbar {
+ width: 10px;
+}
+
+.createGroup-usersResult::-webkit-scrollbar-thumb {
+ background-color: #000;
+ border-radius: 30px;
+}
+
+@media (max-width: 1023px) {
+ input.createGroup-inputRadio[type='checkbox'] {
+  width: 14px;
+  height: 14px;
+ }
+}

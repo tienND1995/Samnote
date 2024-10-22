@@ -1,39 +1,24 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import Modal from 'react-bootstrap/Modal'
+import TextTruncate from 'react-text-truncate'
 
-import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
-import { fetchAllMemberGroup } from './fetchApiGroup'
+import { fetchApiSamenote } from '../../../../utils/fetchApiSamnote'
+import avatarDefault from '../../../../assets/avatar-default.png'
 
-import avatarDefault from '../../assets/avatar-default.png'
+import { AppContext } from '../../../../context'
 
-const SearchUser = ({
+const ModalSearchUserAddGroup = ({
  showModalSearch,
- searchUserFormName,
  setShowModalSearch,
- setGroupMemberList,
-
- setSnackbar,
+ onGetInfoMesssageGroup,
  idGroup,
- userID,
- socket,
-
- clickUserSearch,
 }) => {
+ const appContext = useContext(AppContext)
+ const { user, setSnackbar } = appContext
+
  const [searchUserName, setSearchUserName] = useState('')
  const [searchUserResult, setSearchUserResult] = useState([])
  const [messageNotifi, setMessageNotifi] = useState('')
-
- const { getMessageList, resetGroup, setInfoOtherUser, setFormName } =
-  clickUserSearch
-
- const roomSplit = (idUser, idOther) =>
-  idUser > idOther ? `${idOther}#${idUser}` : `${idUser}#${idOther}`
-
- const postRelation = (userID, otherUserID) => {
-  fetchApiSamenote('post', `/chatblock/${userID}`, {
-   idReceive: otherUserID,
-  })
- }
 
  const handleSubmitSearchUser = (e) => {
   e.preventDefault()
@@ -47,31 +32,17 @@ const SearchUser = ({
    start_name: searchUserName,
   })
    .then((response) => {
-    setSearchUserResult(response.data || [])
-    setMessageNotifi(response?.data ? '' : 'Not found')
+    if (response?.data) {
+     setSearchUserResult(
+      response.data.filter((item) => item.idUser !== user?.id)
+     )
+     setMessageNotifi('')
+    } else {
+     setSearchUserResult([])
+     setMessageNotifi('Not found')
+    }
    })
    .catch((error) => console.log(error))
- }
-
- const handleClickUserSearch = (otherUser) => {
-  if (!otherUser) return
-  const newInfoOtherUser = {
-   id: otherUser.idUser,
-   Avarta: otherUser.linkAvatar,
-   name: otherUser.userName,
-  }
-
-  const roomID = roomSplit(userID, otherUser.idUser)
-  socket.emit('join_room', { room: roomID })
-
-  setFormName('chat')
-  setInfoOtherUser(newInfoOtherUser)
-  resetGroup()
-
-  postRelation(userID, otherUser.idUser)
-  getMessageList(userID, otherUser.idUser)
-
-  handleHideModalSearch()
  }
 
  const handleHideModalSearch = (e) => {
@@ -94,14 +65,13 @@ const SearchUser = ({
  const postMembersGroup = (idMemberList, idGroup) => {
   fetchApiSamenote('post', `/group/add/${idGroup}`, {
    idMembers: idMemberList,
-   idUserAddMe: userID,
+   idUserAddMe: user?.id,
   }).then(async (response) => {
    if (response.error) return
 
    // update members group
    handleHideModalSearch()
-   const groupMemberList = await fetchAllMemberGroup(idGroup)
-   setGroupMemberList(groupMemberList)
+   onGetInfoMesssageGroup(idGroup)
 
    setSnackbar({
     isOpen: true,
@@ -114,9 +84,7 @@ const SearchUser = ({
  return (
   <Modal show={showModalSearch} centered={true} onHide={handleHideModalSearch}>
    <div className='p-3'>
-    <h3 className='text-[25px] font-bold'>
-     {searchUserFormName === 'chat' ? 'Search user' : 'Add member'}
-    </h3>
+    <h3 className='text-[25px] font-bold'>Add member</h3>
 
     <form
      onSubmit={handleSubmitSearchUser}
@@ -140,7 +108,7 @@ const SearchUser = ({
      </button>
     </form>
 
-    <ul className='flex flex-col gap-2 max-h-[70vh] overflow-y-auto style-scrollbar-y style-scrollbar-y-md pe-2'>
+    <ul className='flex flex-col gap-2 max-h-[70vh] overflow-y-auto style-scrollbar-y style-scrollbar-y-sm pe-2'>
      {searchUserResult?.map((user) => (
       <li
        key={user.idUser}
@@ -159,29 +127,23 @@ const SearchUser = ({
         </div>
 
         <div>
-         <h5 className='text-lg font-extrabold capitalize'>{user.userName}</h5>
+         <TextTruncate
+          line={1}
+          element='h6'
+          truncateText='…'
+          text={user.userName}
+          containerClassName='text-lg font-extrabold capitalize break-all'
+         />
         </div>
        </div>
 
-       {searchUserFormName === 'chat' && (
-        <button
-         onClick={() => handleClickUserSearch(user)}
-         type='button'
-         className='bg-[#F56852] text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
-        >
-         Chat
-        </button>
-       )}
-
-       {searchUserFormName === 'group' && (
-        <button
-         onClick={() => handleAddUserSearch(user.idUser)}
-         type='button'
-         className='bg-black text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
-        >
-         Add
-        </button>
-       )}
+       <button
+        onClick={() => handleAddUserSearch(user.idUser)}
+        type='button'
+        className='bg-black text-white rounded-sm text-decoration-none px-3 py-2 text-xl font-medium'
+       >
+        Add
+       </button>
       </li>
      ))}
 
@@ -204,4 +166,4 @@ const SearchUser = ({
  )
 }
 
-export default SearchUser
+export default ModalSearchUserAddGroup

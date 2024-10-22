@@ -1,203 +1,278 @@
-// export default UserPanel;
-import { Outlet, useNavigate, useParams } from 'react-router-dom'
-import IconChatUnknow from '../assets/iconChatUnknow'
-import IconCreateNewNote from '../assets/iconCreateNewNote'
-import IconLogout from '../assets/iconLogout'
-import DeleteIcon from '@mui/icons-material/Delete'
-import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
-import EventNoteIcon from '@mui/icons-material/EventNote'
-import GroupIcon from '@mui/icons-material/Group'
-import HomeIcon from '@mui/icons-material/Home'
-import NoteAddIcon from '@mui/icons-material/NoteAdd'
-import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary'
-import SearchIcon from '@mui/icons-material/Search'
-import SettingsIcon from '@mui/icons-material/Settings'
-import { Box, Button, IconButton, TextField, Typography } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
-import api from '../api'
-import { AppContext } from '../context'
-import { handleLogOut } from '../utils/utils'
+import { useNavigate } from "react-router-dom";
+import IconChatUnknow from "../assets/iconChatUnknow";
+import IconCreateNewNote from "../assets/iconCreateNewNote";
+import IconLogout from "../assets/iconLogout";
+import CloseIcon from "@mui/icons-material/Close";
+import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutline";
+import EventNoteIcon from "@mui/icons-material/EventNote";
+import GroupIcon from "@mui/icons-material/Group";
+import HomeIcon from "@mui/icons-material/Home";
+import MenuIcon from "@mui/icons-material/Menu";
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
+import SearchIcon from "@mui/icons-material/Search";
+import SettingsIcon from "@mui/icons-material/Settings";
+import { Box, Slide, Button } from "@mui/material";
+import { useContext, useEffect, useState } from "react";
+import api from "../api";
+import { NavLink } from "react-router-dom";
+import "../App.css";
+import { AppContext } from "../context";
+import { handleLogOut } from "../utils/utils";
+import avatarDefault from "../assets/avatar-default.png";
 
 const UserPanel = () => {
-  const appContext = useContext(AppContext)
-  const { user, setUser } = appContext
-  const [userInfomations, setUserInformations] = useState(null)
-  const navigate = useNavigate()
+  const appContext = useContext(AppContext);
+  const { user, setUser } = appContext;
+  const [userInfomations, setUserInformations] = useState(null);
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [changeStatus, setChangeStatus] = useState(
+    window.innerWidth >= 992 ? "white" : "black"
+  );
+  useEffect(() => {
+    const handleResize = () => {
+      setChangeStatus(window.innerWidth >= 992 ? "white" : "black");
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
+  const handleToggle = () => {
+    setOpen(!open);
+  };
   const navbarItems = [
     {
-      name: 'Home Page',
+      name: "Profile",
       icon: (
-        <HomeIcon className='md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]' />
+        <img
+          src={userInfomations ? userInfomations.Avarta : avatarDefault}
+          alt=""
+          className="img-user-panel rounded-full size-[50px] xl:size-[70px]"
+        />
       ),
-      url: '/',
+      url: `/profile/${user.id}`,
     },
     {
-      name: 'Photos',
+      name: "Find Note",
       icon: (
-        <PhotoLibraryIcon className='md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]' />
+        <SearchIcon className="mr-1 text-white size-[25px] xl:size-[30px]" />
       ),
-      url: '/photo',
+      url: "/",
     },
     {
-      name: 'Note',
+      name: "Create Note",
       icon: (
-        <EventNoteIcon className='md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]' />
+        <div className="bg-[#198E39] rounded-full w-[100px] h-[50px] items-center flex justify-center">
+          <IconCreateNewNote className="size-[20px] xl:size-[25px]" />
+          <span className="text-[15px] xl:text-[20px] pl-1">new</span>
+        </div>
       ),
+      url: "/create-note",
+    },
+    {
+      name: "Home Page",
+      icon: <HomeIcon className="size-[25px] lg:size-[30px]" />,
+      url: "/",
+    },
+    {
+      name: "Photos",
+      icon: <PhotoLibraryIcon className="size-[25px] lg:size-[30px]" />,
+      url: "/photo",
+    },
+    {
+      name: "Note",
+      icon: <EventNoteIcon className="size-[25px] lg:size-[30px]" />,
       url: `/editnote`,
     },
     {
-      name: 'Group',
-      icon: (
-        <GroupIcon className=' md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]' />
-      ),
-      url: '/group',
+      name: "Message",
+      icon: <GroupIcon className="size-[25px] lg:size-[30px]" />,
+      url: "/messages",
     },
 
     {
-      name: 'incognito',
+      name: "incognito",
+
       icon: (
-        <IconChatUnknow className='md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]' />
+        <IconChatUnknow
+          className="size-[25px] lg:size-[30px] "
+          fill={changeStatus}
+        />
       ),
-      url: '/user/incognito',
+      url: "/incognito",
       state: { userInfomations: null },
     },
-
     {
-      name: 'dustbin',
+      name: "Sketch",
       icon: (
-        <DeleteIcon className=' md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]' />
+        <DriveFileRenameOutlineIcon className="size-[25px] lg:size-[30px]" />
       ),
-      url: '/dustbin',
+      url: "/sketch",
     },
-
     {
-      name: 'Sketch',
-      icon: (
-        <DriveFileRenameOutlineIcon className=' md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]' />
-      ),
-      url: '/sketch',
+      name: "setting",
+      icon: <SettingsIcon className="size-[25px] lg:size-[30px]" />,
+      url: "/setting",
     },
-
-    {
-      name: 'setting',
-      icon: (
-        <SettingsIcon className='  md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]' />
-      ),
-      url: '/user/setting',
-    },
-  ]
+  ];
 
   useEffect(() => {
-    let ignore = false
+    let ignore = false;
     const getUserInformation = async (userID) => {
       try {
         const res = await api.get(
           `https://samnote.mangasocial.online/profile/${userID}`
-        )
+        );
         if (!ignore) {
-          setUserInformations(res.data.user)
+          setUserInformations(res.data.user);
         }
       } catch (err) {
-        console.log(err)
+        console.log(err);
       }
-    }
+    };
 
-    user && getUserInformation(user.id)
+    user && getUserInformation(user.id);
 
     return () => {
-      ignore = true
-    }
-  }, [user])
-  // function AlertButton() {
-  //   // Hàm xử lý khi bấm nút
-  //   const handleClick = () => {
-  //     alert("Chiều rộng màn hình: " + window.innerWidth);
-  //   };
+      ignore = true;
+    };
+  }, [user]);
 
-  //   return (
-  //     <button
-  //       onClick={handleClick}
-  //       style={{
-  //         position: "fixed",
-  //         bottom: "20px", // Cách đáy màn hình 20px
-  //         right: "20px", // Cách phải màn hình 20px
-  //         padding: "10px 20px",
-  //         backgroundColor: "#4CAF50",
-  //         color: "white",
-  //         border: "none",
-  //         zIndex: 1000,
-  //         borderRadius: "5px",
-  //         cursor: "pointer",
-  //       }}
-  //     >
-  //       Bấm vào tôi
-  //     </button>
-  //   );
-  // }
-
-  return userInfomations ? (
-    <Box className='bg-gray-700 text-white w-full pt-3 flex items-center flex-col md:gap-2 xl:gap-3 2xl:gap-4 gap-3'>
-      {/* <AlertButton /> */}
-      <Box
-        className='flex items-center cursor-pointer'
-        onClick={() => navigate(`/profile/${user.id}`)}
-      >
-        <img
-          src={userInfomations.Avarta}
-          alt=''
-          className='rounded-full md:size-[50px] xl:size-[60px] 2xl:size-[80px] hidden md:block'
-        />
-      </Box>
-
-      {/* className="size-[12px]" */}
-      <Box
-        className="flex items-end text-white hidden md:block whitespace-nowrap cursor-pointer"
-        onClick={() => navigate(`/search-results`)}
-      >
-        <SearchIcon className="mr-1 text-white md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]" />
-      </Box>
-
-      <Button
-        variant='contained'
-        className='bg-[#198E39] rounded-full  '
-        onClick={() => navigate(`/create-note`)}
-      >
-        <IconCreateNewNote className=' md:size-[15px] xl:size-[20px]' />
-        <span className='hidden lg:block text-[10px] xl:text-[15px] pl-1'>new</span>
-      </Button>
-
-      {navbarItems.map((item, idx) => (
-        <Box
-          key={idx}
-          className='flex cursor-pointer'
-          title={item.name}
+  return (
+    <>
+      {" "}
+      <Box id="navbar" className="gap-[10px]">
+        <NavLink
+          to={`/profile/${user.id}`}
+          className="flex items-center cursor-pointer lgEqual:hidden block"
+          onClick={() => navigate(`/profile/${user.id}`)}
+        >
+          <img
+            src={userInfomations ? userInfomations.Avarta : avatarDefault}
+            alt=""
+            className="rounded-full size-[50px] lg:size-[60px] xl:size-[80px]"
+          />
+        </NavLink>
+        {navbarItems.map((item, idx) => (
+          <NavLink
+            to={item.url}
+            key={idx}
+            className="cursor-pointer item-navbar lgEqual:block"
+            title={item.name}
+            onClick={() => {
+              if (item.state) {
+                navigate(item.url, { state: item.state });
+              } else {
+                navigate(item.url);
+              }
+            }}
+          >
+            <span className="item-icon-panel  text-white">{item.icon}</span>
+            <span className="item-name-panel text-[25px] capitalize">
+              {item.name}
+            </span>
+          </NavLink>
+        ))}
+        <Button
+          className="hidden lgEqual:block"
           onClick={() => {
-            if (item.state) {
-              navigate(item.url, { state: item.state })
-            } else {
-              navigate(item.url)
+            const submit = confirm("Do you want to logout?");
+            if (submit) {
+              setUser(null);
+              handleLogOut();
             }
           }}
         >
-          {item.icon}
-        </Box>
-      ))}
+          <IconLogout className="size-[25px] lgEqual:size-[30px] xl:size-[35px] " />
+        </Button>
+        <MenuIcon
+          onClick={handleToggle}
+          className="lgEqual:hidden block text-black text-[25px] cursor-pointer"
+        />
+        {open && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0,0,0,0.4)",
+            }}
+            onClick={handleToggle}
+          ></div>
+        )}
+        <Slide
+          // timeout={1000}
+          direction="right"
+          in={open}
+          mountOnEnter
+          unmountOnExit
+          id="navbar-mobile"
+          className="fixed top-0 left-0 w-[200px] bottom-0 bg-[#F56852] pt-[80px]"
+        >
+          <div
+            className="relative  text-white  h-[100vh]  flex items-lgEqual-center flex-col "
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <span
+              style={{
+                position: "absolute",
+                top: 5,
+                right: 5,
+                backgroundColor: "#fff",
+                color: "#000",
+                cursor: "pointer",
+              }}
+              onClick={handleToggle}
+            >
+              <CloseIcon />
+            </span>
+            {navbarItems.slice(3).map((item, idx) => (
+              <NavLink
+                to={item.url}
+                key={idx}
+                className="item-mobile cursor-pointer lgEqual:block items-center flex w-full justify-start py-[10px] px-[5px]"
+                title={item.name}
+                onClick={() => {
+                  if (item.state) {
+                    navigate(item.url, { state: item.state });
+                  } else {
+                    navigate(item.url);
+                  }
+                }}
+              >
+                <span className="text-black mr-3 fw-bold">{item.icon}</span>
+                <span className="text-black capitalize fw-bold">
+                  {item.name}
+                </span>
+              </NavLink>
+            ))}
+            <button
+              className="item-mobile flex text-black fw-bold py-[10px] px-[5px]"
+              onClick={() => {
+                const submit = confirm("Do you want to logout?");
+                if (submit) {
+                  setUser(null);
+                  handleLogOut();
+                }
+              }}
+            >
+              <IconLogout
+                className=" fw-bold size-[25px] lgEqual:size-[30px] xl:size-[35px] mr-3 "
+                fill="black"
+              />
+              Logout
+            </button>
+          </div>
+        </Slide>
+      </Box>
+    </>
+  );
+};
 
-      <Button
-        className='hidden md:block'
-        onClick={() => {
-          const submit = confirm('Do you want to logout?')
-          if (submit) {
-            setUser(null)
-            handleLogOut()
-          }
-        }}
-      >
-        <IconLogout className='md:size-[25px] lg:size-[30px] xl:size-[35px] 2xl:size-[40px]' />
-      </Button>
-    </Box>
-  ) : null
-}
-
-export default UserPanel
+export default UserPanel;

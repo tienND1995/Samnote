@@ -10,13 +10,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import configs from '../../../configs/configs.json'
 const { API_SERVER_URL } = configs
 
-const DeleteImages = ({
- images,
- userId,
- noteId,
- onDispatchName,
- onGetNoteId,
-}) => {
+const DeleteImages = ({ images, userId, noteId, updateNotes, onGetNoteId }) => {
  const { handleCheck, isCheckedAll, checkedItems, setCheckedItems } =
   useChecklist(images, {
    key: 'id',
@@ -29,7 +23,7 @@ const DeleteImages = ({
   dots: false,
   infinite: false,
   speed: 500,
-  slidesToShow: 5,
+  slidesToShow: 8,
   slidesToScroll: 1,
   className: 'slider-btn-arrow',
   nextArrow: (
@@ -42,6 +36,39 @@ const DeleteImages = ({
     <ArrowBackIosIcon />
    </button>
   ),
+
+  responsive: [
+   {
+    breakpoint: 1500,
+    settings: {
+     slidesToShow: 7,
+     slidesToScroll: 1,
+    },
+   },
+   {
+    breakpoint: 1000,
+    settings: {
+     slidesToShow: 5,
+     slidesToScroll: 1,
+    },
+   },
+
+   {
+    breakpoint: 700,
+    settings: {
+     slidesToShow: 3,
+     slidesToScroll: 1,
+    },
+   },
+
+   {
+    breakpoint: 400,
+    settings: {
+     slidesToShow: 2,
+     slidesToScroll: 1,
+    },
+   },
+  ],
  }
 
  // checklist image
@@ -60,7 +87,7 @@ const DeleteImages = ({
     body: formData,
    })
 
-   onDispatchName('delete image')
+   updateNotes && updateNotes()
    onGetNoteId()
   } catch (error) {
    console.error(error)
@@ -120,7 +147,7 @@ const DeleteImages = ({
      await deleteImageList(id)
 
      if (idx === selectedImages.length - 1) {
-      onDispatchName('delete image')
+      updateNotes()
       onGetNoteId()
       setCheckedItems(new Set())
      }
@@ -140,7 +167,7 @@ const DeleteImages = ({
  const imageSort = images.sort((a, b) => a.id - b.id)
 
  return (
-  <div className='bg-white px-3 pt-2  rounded-md'>
+  <div className='bg-white px-2 pt-1 px-sm-3 pt-sm-2 rounded-sm sm:rounded-md'>
    <div className='flex justify-end gap-2 mb-2'>
     <div>
      <input
@@ -150,7 +177,10 @@ const DeleteImages = ({
       type='checkbox'
       hidden
      />
-     <label className='btn btn-primary' htmlFor='checked-list'>
+     <label
+      className='btn btn-primary md:text-lg text-sm'
+      htmlFor='checked-list'
+     >
       {isCheckedAll ? 'Cancel' : 'Select All'}
      </label>
     </div>
@@ -159,14 +189,14 @@ const DeleteImages = ({
      <button
       onClick={handleDeleteImageList}
       type='button'
-      className='btn btn-danger'
+      className='btn btn-danger md:text-lg text-sm'
      >
       Delete
      </button>
     </div>
    </div>
 
-   <div className='max-w-[35vw] mx-auto'>
+   <div className='max-w-[80vw] mx-auto'>
     <Slider {...settings}>
      {imageSort
       .sort((a, b) => b.id - a.id)

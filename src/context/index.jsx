@@ -2,48 +2,32 @@
 import { createContext, useState, useEffect } from 'react'
 import { USER } from '../utils/constant'
 import axios from 'axios'
+import io from 'socket.io-client'
 
 export const AppContext = createContext(null)
 
 const AppProvider = ({ children }) => {
- const [user, setUser] = useState(null)
+ const [user, setUser] = useState(
+  JSON.parse(localStorage.getItem(USER)) || null
+ )
  const [snackbar, setSnackbar] = useState({
   isOpen: false,
   message: '',
   severity: '',
  })
 
+ const [socket, setSocket] = useState(null)
+
+ // set socket
  useEffect(() => {
-  // Lấy dữ liệu từ localStorage khi component mount
-  const localUser = JSON.parse(localStorage.getItem(USER))
+  const socketIo = io('https://samnote.mangasocial.online')
 
-  try {
-   if (localUser) {
-    setUser(localUser)
-   }
-  } catch (error) {
-   console.error('Error parsing user from localStorage:', error)
-  }
+  socketIo.on('connect', () => {
+   setSocket(socketIo)
+  })
 
-  // Đăng ký sự kiện lắng nghe thay đổi trong localStorage
-  const handleStorageChange = (event) => {
-   if (event.key === USER) {
-    try {
-     const parseUser = JSON.parse(event.newValue)
-     if (parseUser) {
-      setUser(parseUser)
-     }
-    } catch (error) {
-     console.error('Error parsing user from localStorage:', error)
-    }
-   }
-  }
-
-  window.addEventListener('storage', handleStorageChange)
-
-  // Clean up function để loại bỏ sự kiện lắng nghe khi component unmount
   return () => {
-   window.removeEventListener('storage', handleStorageChange)
+   socketIo.disconnect()
   }
  }, [])
 
@@ -66,31 +50,16 @@ const AppProvider = ({ children }) => {
   }
  }, [user])
 
- const updateUserInLocalStorage = (newUserData) => {
-  try {
-   // Cập nhật dữ liệu mới vào localStorage
-   localStorage.setItem(USER, JSON.stringify(newUserData))
+ const store = {
+  user,
+  setUser,
+  socket,
 
-   // Cập nhật state `user` ngay tại đây nếu cần
-   setUser(newUserData)
-  } catch (error) {
-   console.error('Error updating user in localStorage:', error)
-  }
+  snackbar,
+  setSnackbar,
  }
 
- return (
-  <AppContext.Provider
-   value={{
-    user,
-    setUser,
-    snackbar,
-    setSnackbar,
-    updateUserInLocalStorage,
-   }}
-  >
-   {children}
-  </AppContext.Provider>
- )
+ return <AppContext.Provider value={store}>{children}</AppContext.Provider>
 }
 
 export default AppProvider

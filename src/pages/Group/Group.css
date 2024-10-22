@@ -22,7 +22,6 @@
  color: gray;
 }
 
-
 .form-message .delete-image > svg {
  font-size: 20px;
 }
@@ -69,12 +68,3 @@
  width: 400px;
 }
 
-ul.list-chat > li {
- transition: all 0.3s;
- background: #fff;
-}
-
-ul.list-chat > li:hover,
-ul.list-chat > li.active {
- background: #70ffff;
-}

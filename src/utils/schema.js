@@ -24,17 +24,17 @@ export const schemaNoteEdit = Joi.object({
   'string.min': 'At least 5 character!',
   'string.empty': 'Not title yet!',
  }),
- dueAt: Joi.date().greater('now').allow('').allow(null).messages({
+
+ dueAt: Joi.date().greater('now').required().messages({
   'date.greater': 'Greater current date now',
+  'date.empty': 'Not content yet!',
  }),
- remindAt: Joi.date()
-  .greater('now')
-  .max(Joi.ref('dueAt'))
-  .allow(null)
-  .messages({
-   'date.greater': 'Greater current date now',
-   'date.max': 'Less than or equal to due at',
-  }),
+
+ remindAt: Joi.date().min('now').allow(null).messages({
+  'date.min': 'Min Current date',
+ }),
+
+ // no require  .....................
 
  idFolder: Joi.number().integer().allow(null),
  type: Joi.string().allow('').allow(null),
@@ -45,10 +45,6 @@ export const schemaNoteEdit = Joi.object({
 })
 
 export const schemaNoteCreate = Joi.object({
- type: Joi.string().required().messages({
-  'string.empty': 'Not type yet!',
- }),
-
  title: Joi.string().min(5).max(100).required().messages({
   'string.min': 'At least 5 character!',
   'string.empty': 'Not title yet!',
@@ -58,16 +54,12 @@ export const schemaNoteCreate = Joi.object({
   'date.greater': 'Greater current date now',
   'date.empty': 'Not content yet!',
  }),
+ remindAt: Joi.date().min('now').allow(null).messages({
+  'date.min': 'Min Current date',
+ }),
 
  // no require  .....................
- remindAt: Joi.date()
-  .greater('now')
-  .max(Joi.ref('dueAt'))
-  .allow(null)
-  .messages({
-   'date.greater': 'Greater current date now',
-   'date.max': 'Less than or equal to due at',
-  }),
+ type: Joi.string().allow('').allow(null),
  idFolder: Joi.number().integer().allow(null),
  color: Joi.string().allow('').allow(null),
  notePublic: Joi.number().integer().allow('').allow(null),
@@ -120,11 +112,85 @@ export const forgotSchema = Joi.object({
  }),
 })
 
+//setting avatar
+
 export const settingSchema = Joi.object({
  name: Joi.string().required().min(3).messages({
   'string.empty': 'Please enter a name',
-  'string.min': 'Ít nhất 3 ký tự',
+  'string.min': 'at least 3 characters',
  }),
 
- avatar: Joi.string().uri().required(),
+ gmail: Joi.string().allow('').allow(null),
+})
+
+///setting password
+
+export const SettingChangePwSchema = Joi.object({
+ password: Joi.string().required().messages({
+  'string.empty': 'Please enter a password',
+ }),
+
+ new_password: Joi.string().min(6).required().messages({
+  'string.empty': 'Please enter a new password',
+  'string.min': 'New password at least 6 characters',
+ }),
+})
+export const SettingChangePwSchemaPw2 = Joi.object({
+ private_password: Joi.string().min(6).required().messages({
+  'string.empty': 'Please enter a new password',
+  'string.min': 'New password at least 6 characters',
+ }),
+ confirm_private_password: Joi.any()
+  .valid(Joi.ref('private_password'))
+  .required()
+  .messages({
+   'any.only': 'Password must match',
+  }),
+})
+
+export const SettingEditPw2Schema = Joi.object({
+ old_private_password: Joi.string().required().messages({
+  'string.empty': 'Please enter old password',
+ }),
+ new_private_password: Joi.string().min(6).required().messages({
+  'string.empty': 'Please enter a new password',
+  'string.min': 'New password at least 6 characters',
+ }),
+ confirm_private_password: Joi.any()
+  .valid(Joi.ref('new_private_password'))
+  .required()
+  .messages({
+   'string.empty': 'Please enter a new password',
+   'any.only': 'Password must match',
+  }),
+})
+
+export const SettingForgotPw2Schema = Joi.object({
+ email: Joi.string()
+  .required()
+  .email({ tlds: { allow: false } })
+  .messages({
+   'string.empty': 'Please enter an email',
+   'string.email': 'Please enter a valid email address',
+  }),
+})
+
+export const SettingDeleteAccountSchema = Joi.object({
+ user_name: Joi.string().required().messages({
+  'string.empty': 'Please enter a email or user name',
+ }),
+
+ password: Joi.string().required().messages({
+  'string.empty': 'Please enter a password',
+ }),
+})
+
+export const SettingForgotPwSchema = Joi.object({
+ gmail: Joi.string()
+  .required()
+  .email({ tlds: { allow: false } })
+  .messages({
+   'string.empty': 'Please enter an gmail',
+   'string.email': 'Please enter a valid gmail address',
+  }),
 })
