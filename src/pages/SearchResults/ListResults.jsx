@@ -16,7 +16,7 @@ const ListResults = ({ results }) => {
                             <div className="card-body d-flex justify-center p-0">
                                 <div className="avatar mr-3">
                                     <img src={item.avatar_user_create
-                                        || item.user.avatar
+                                        || item.user?.avatar
                                         || item.linkAvatar
                                         || '/src/assets/avatar-default.png'
                                     }
@@ -44,8 +44,8 @@ const ListResults = ({ results }) => {
                                             }}>
                                             <Markdown rehypePlugins={[rehypeRaw]}>
                                                 {
-                                                    `${item.idSend && user.id === item.idSend ? 'You: ' : ''}${item.content}`
-                                                    || item.describe
+                                                    item.content ? `${item.idSend && user.id === item.idSend ? 'You: ' : ''}${item.content}`
+                                                        : item.describe
                                                 }
                                             </Markdown>
                                         </div>
