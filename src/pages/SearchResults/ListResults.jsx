@@ -19,7 +19,7 @@ const ListResults = ({ results }) => {
                                 <img
                                     src={
                                         item?.avatar_user_create ||
-                                        item?.user.avatar ||
+                                        item?.user?.avatar ||
                                         item?.linkAvatar ||
                                         '/src/assets/avatar-default.png'
                                     }
