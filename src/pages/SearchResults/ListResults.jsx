@@ -8,7 +8,6 @@ import { AppContext } from '../../context'
 const ListResults = ({ results }) => {
     const { user } = useContext(AppContext)
 
-    console.log('results', results)
     return (
         <div className='tab-pane active w-full'>
             {results.length > 0 ? (
@@ -19,12 +18,12 @@ const ListResults = ({ results }) => {
                                 <img
                                     src={
                                         item?.avatar_user_create ||
-                                        item?.user?.avatar ||
+                                        item?.idReceive && `/src/assets/unknow-avt.png` ||
                                         item?.linkAvatar ||
                                         '/src/assets/avatar-default.png'
                                     }
                                     alt={item.username_user_create}
-                                    className='w-16 h-16 rounded-full'
+                                    className='w-16 h-16 rounded-full bg-white'
                                 />
                             </div>
                             <div className='content-wrapper w-[75%] bg-[#ffffff] px-3 py-2 rounded-2xl'>
