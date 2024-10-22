@@ -59,7 +59,7 @@ const UserPanel = () => {
       icon: (
         <SearchIcon className="mr-1 text-white size-[25px] xl:size-[30px]" />
       ),
-      url: "/",
+      url: "search-results",
     },
     {
       name: "Create Note",
