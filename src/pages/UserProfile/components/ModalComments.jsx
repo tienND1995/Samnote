@@ -3,15 +3,13 @@ import api from '../../../api'
 import { AppContext } from '../../../context'
 import SendIcon from '@mui/icons-material/Send'
 import { formatTimeAgo } from '../../../utils/utils'
-import { io } from 'socket.io-client'
 
 const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
   const [dataComments, setDataComments] = useState([])
   const [contentComment, setContentComment] = useState('')
   const [contentReplyComment, setContentReplyComment] = useState('')
   const appContext = useContext(AppContext)
-  const { user } = appContext
-  const [socket, setSocket] = useState(null)
+  const { user, socket } = appContext
 
   const fetchAllDataComments = useCallback(async () => {
     try {
@@ -25,19 +23,6 @@ const ModalComments = ({ infoNote, setIsShowModalComments, setReload }) => {
   useEffect(() => {
     fetchAllDataComments()
   }, [fetchAllDataComments])
-
-  useEffect(() => {
-    const ws = io('https://samnote.mangasocial.online')
-    setSocket(ws)
-
-    ws.on('connect', () => {
-      console.log('Connected to WebSocket server')
-    })
-
-    return () => {
-      ws.disconnect()
-    }
-  }, [])
 
   useEffect(() => {
     if (!socket) return

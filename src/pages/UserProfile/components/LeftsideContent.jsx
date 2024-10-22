@@ -15,14 +15,13 @@ import ListNotes from './ListNotes'
 import Markdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import { useNavigate } from 'react-router-dom'
-import io from 'socket.io-client'
 
 const LeftsideContent = ({
   userInfomations,
   setReload,
 }) => {
   const appContext = useContext(AppContext)
-  const { setSnackbar, user } = appContext
+  const { setSnackbar, user, socket } = appContext
   //notes
   const [archivedNotes, setArchivedNotes] = useState([])
   const [publicNotes, setPublicNotes] = useState([])
@@ -34,7 +33,6 @@ const LeftsideContent = ({
   const [isShowModalComments, setIsShowModalComments] = useState(false)
   const [noteShowComments, setNoteShowComments] = useState(null)
   const navigate = useNavigate()
-  const [socket, setSocket] = useState(null)
 
   const handlePublicNotesTabChange = (event, newValue) => {
     setPublicNotesTabValue(newValue)
@@ -113,19 +111,6 @@ const LeftsideContent = ({
       }
     })
   }
-
-  useEffect(() => {
-    const ws = io('https://samnote.mangasocial.online')
-    setSocket(ws)
-
-    ws.on('connect', () => {
-      console.log('Connected to WebSocket server')
-    })
-
-    return () => {
-      ws.disconnect()
-    }
-  }, [])
 
   useEffect(() => {
     if (!socket) return

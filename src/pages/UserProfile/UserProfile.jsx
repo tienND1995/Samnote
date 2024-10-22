@@ -10,59 +10,59 @@ import Loading from '../../share/Loading'
 import './UserProfile.css'
 
 import {
- Footer,
- LeftsideContent,
- RightsideContent,
- UserIntro,
+    Footer,
+    LeftsideContent,
+    RightsideContent,
+    UserIntro,
 } from './components'
 
 const UserProfile = () => {
- const appContext = useContext(AppContext)
- const { user } = appContext
- const [userInfomations, setUserInformations] = useState(null)
+    const appContext = useContext(AppContext)
+    const { user } = appContext
+    const [userInfomations, setUserInformations] = useState(null)
 
- const [reload, setReload] = useState(0)
+    const [reload, setReload] = useState(0)
 
- const params = useParams()
- const userID = params.id
+    const params = useParams()
+    const userID = params.id
 
- const getUserInformation = async (userID) => {
-  try {
-   const res = await api.get(
-    `https://samnote.mangasocial.online/profile/${userID}`
-   )
-   setUserInformations(res.data.user)
-  } catch (err) {
-   console.log(err)
-  }
- }
+    const getUserInformation = async (userID) => {
+        try {
+            const res = await api.get(
+                `https://samnote.mangasocial.online/profile/${userID}`
+            )
+            setUserInformations(res.data.user)
+        } catch (err) {
+            console.log(err)
+        }
+    }
 
- useEffect(() => {
-  getUserInformation(userID)
- }, [userID, reload])
+    useEffect(() => {
+        getUserInformation(userID)
+    }, [userID, reload])
 
- return userInfomations ? (
-  <Box className='w-full bg-[#4A4B51] h-auto overflow-y-auto'>
-   <Box className='w-full bg-[#4A4B51] h-auto'>
-    <>
-     <UserIntro userInfomations={userInfomations} user={user} />
-     <div className='container-content w-[98%] flex flex-col lg:flex-row justify-between m-auto'>
-      <LeftsideContent
-       userInfomations={userInfomations}
-       setReload={setReload}
-      />
-      <RightsideContent
-       userInfomations={userInfomations}
-       setReload={setReload}
-      />
-     </div>
-     <Footer />
-    </>
-   </Box>
-  </Box>
- ) : (
-  <Loading />
- )
+    return userInfomations ? (
+        <Box className='w-full bg-[#4A4B51] h-auto overflow-y-auto'>
+            <Box className='w-full bg-[#4A4B51] h-auto'>
+                <>
+                    <UserIntro userInfomations={userInfomations} />
+                    <div className='container-content w-[98%] flex flex-col lg:flex-row justify-between m-auto'>
+                        <LeftsideContent
+                            userInfomations={userInfomations}
+                            setReload={setReload}
+                        />
+                        <RightsideContent
+                            userInfomations={userInfomations}
+                            setReload={setReload}
+                        />
+                    </div>
+                    <Footer />
+                </>
+            </Box>
+        </Box>
+    ) : (
+        <Loading />
+    )
 }
 
 export default UserProfile
