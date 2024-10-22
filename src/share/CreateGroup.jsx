@@ -18,6 +18,7 @@ import { schemaGroup } from '../utils/schema'
 import configs from '../configs/configs.json'
 
 import avatarDefault from '../assets/avatar-default.png'
+import { debounce } from '../utils/utils'
 
 const { API_SERVER_URL, BASE64_URL } = configs
 
@@ -362,7 +363,7 @@ const CreateGroup = ({ onGetAllMessageList, showModal, setShowModal }) => {
         className='w-100 lg:placeholder:text-[20px] placeholder:text-[14px]'
         type='text'
         placeholder='Enter username/email...'
-        onChange={handleChangeSearchValue}
+        onChange={debounce(handleChangeSearchValue, 1000)}
        />
       </div>
 
