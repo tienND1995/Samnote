@@ -279,7 +279,7 @@ const Home = () => {
                               fontWeight: '500',
                            }
                      }
-                     onClick={() => navigate(`/dustbin`)}
+                     onClick={() => navigate(`/dustbin?page=1`)}
                   >
                      Dustbin
                   </li>

@@ -3,13 +3,18 @@ import { useEffect, useState } from 'react'
 import { fetchNoteList } from '../fetchApiEditNote'
 
 import SearchIcon from '@mui/icons-material/Search'
-import SkipNextIcon from '@mui/icons-material/SkipNext'
-import SkipPreviousIcon from '@mui/icons-material/SkipPrevious'
 import axios from 'axios'
 import NoteCard from '../../../share/NoteCard'
 import { debounce } from '../../../utils/utils'
+import PaginationNote from '../../../share/PaginationNote'
 
-const NoteList = ({ noteList, userID, onChangeNoteList, updateNotes }) => {
+const NoteList = ({
+ noteList,
+ userID,
+ onChangeNoteList,
+ updateNotes,
+ paginate,
+}) => {
  const [noteListInitial, setNoteListInitial] = useState([])
 
  useEffect(() => {
@@ -59,55 +64,7 @@ const NoteList = ({ noteList, userID, onChangeNoteList, updateNotes }) => {
      />
     </div>
 
-    <nav aria-label='Page navigation'>
-     <ul className='pagination items-center gap-1 gap-md-2'>
-      <li className='page-item'>
-       <a className='text-white text-decoration-none ' href='#'>
-        <SkipPreviousIcon className='md:text-2xl text-xl' />
-       </a>
-      </li>
-      <li className='page-item'>
-       <a
-        className='text-black text-center md:w-[25px] w-[20px] rounded-sm block bg-white text-decoration-none md:text-xl text-sm'
-        text-sm
-        href='#'
-       >
-        1
-       </a>
-      </li>
-      <li className='page-item'>
-       <a
-        className='text-black text-center md:w-[25px] w-[20px] rounded-sm  block bg-white text-decoration-none md:text-xl text-sm'
-        href='#'
-       >
-        2
-       </a>
-      </li>
-      <li className='page-item'>
-       <a
-        className='text-black text-center md:w-[25px] w-[20px] rounded-sm  block bg-white text-decoration-none md:text-xl text-sm'
-        href='#'
-       >
-        3
-       </a>
-      </li>
-
-      <li className='page-item'>
-       <a
-        className='text-black text-center md:w-[25px] w-[20px] rounded-sm  block bg-white text-decoration-none md:text-xl text-sm'
-        href='#'
-       >
-        ...
-       </a>
-      </li>
-
-      <li className='page-item'>
-       <a className='text-white text-decoration-none ' href='#'>
-        <SkipNextIcon className='md:text-2xl text-xl' />
-       </a>
-      </li>
-     </ul>
-    </nav>
+    <PaginationNote {...paginate} />
    </div>
 
    <div className='mt-3 flex flex-col flex-grow-1'>
