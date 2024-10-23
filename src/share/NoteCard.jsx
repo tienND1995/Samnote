@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate, useSearchParams } from 'react-router-dom'
 import Swal from 'sweetalert2'
 
 import Markdown from 'react-markdown'
@@ -16,6 +16,9 @@ import axios from 'axios'
 import { fetchApiSamenote } from '../utils/fetchApiSamnote'
 
 const NoteCard = ({ note, noteList, type, updateNotes }) => {
+ const [searchParams, setSearchParam] = useSearchParams()
+ const currentPage = searchParams.get('page')
+
  const settings = {
   dots: false,
   infinite: false,
@@ -129,13 +132,15 @@ const NoteCard = ({ note, noteList, type, updateNotes }) => {
  }
 
  const optionLink = () =>
-  `/${type === 'edit' ? 'editnote' : 'dustbin'}/${note.idNote}`
+  `/${type === 'edit' ? 'editnote' : 'dustbin'}/${
+   note.idNote
+  }?page=${currentPage || 1}`
 
  //  *__________________________
  if (Object.keys(note).length === 0) return
 
  return (
-  <li className='flex flex-col' key={note.idNote}>
+  <li className='flex flex-col h-max' key={note.idNote}>
    <div className='flex flex-col relative'>
     <NavLink
      to={optionLink()}

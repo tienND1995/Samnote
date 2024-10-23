@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useContext, useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
 
 import { AppContext } from '../../../context'
 import { joiResolver } from '@hookform/resolvers/joi'
@@ -42,8 +42,10 @@ const FormEdit = (props) => {
  const appContext = useContext(AppContext)
  const { user, setSnackbar } = appContext
  const { id } = useParams()
+ const [searchParams, setSearchParam] = useSearchParams()
+ const currentPage = searchParams.get('page')
 
- const [noteItem, setNoteItem] = useState({ type: 'text' })
+ const [noteItem, setNoteItem] = useState({})
 
  const [checklist, setChecklist] = useState([])
  const [dataContent, setDataContent] = useState({
@@ -98,8 +100,6 @@ const FormEdit = (props) => {
  const getDataNoteId = async () => {
   const noteList = await fetchNoteList(user?.id)
   const noteId = noteList.filter((note) => note.idNote === Number.parseInt(id))
-
-  if (!noteId || noteId.length === 0 || !id) return reset()
 
   setNoteItem(noteId[0])
 
@@ -166,10 +166,20 @@ const FormEdit = (props) => {
   }
 
   if (!user?.id) return
-
-  getDataNoteId()
   getFolders()
   fetchAllColor()
+
+  if (!id) {
+   setDataContent({
+    isError: false,
+    message: '',
+    content: '',
+   })
+
+   return reset()
+  }
+
+  getDataNoteId()
  }, [user?.id, id])
 
  useEffect(() => {
@@ -276,7 +286,7 @@ const FormEdit = (props) => {
  return (
   <div className='p-2 bg-[#3A3F42] rounded-lg flex flex-col flex-grow-1'>
    <Link
-    to='/editnote'
+    to={`/editnote?page=${currentPage}`}
     className='absolute top-2 left-2 lg:top-6 lg:left-6 flex bg-white rounded-sm'
    >
     <KeyboardBackspaceIcon className='xl:hidden lg:text-3xl text-2xl text-dark' />
@@ -483,7 +493,7 @@ const FormEdit = (props) => {
       </button>
      </div>
 
-     {noteItem.type === 'text' && (
+     {typeForm === 'text' && (
       <AddImages
        userId={user?.id}
        noteId={id}
@@ -503,7 +513,7 @@ const FormEdit = (props) => {
       </p>
      )}
 
-     {noteItem.type === 'text' ? (
+     {typeForm === 'text' ? (
       <TextEditor
        value={dataContent.content}
        setDataContent={setDataContent}

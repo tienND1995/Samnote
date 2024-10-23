@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import { AppContext } from '../../context'
 
@@ -7,6 +8,7 @@ import SearchIcon from '@mui/icons-material/Search'
 import NoteCard from '../../share/NoteCard'
 import { fetchApiSamenote } from '../../utils/fetchApiSamnote'
 import { debounce } from '../../utils/utils'
+import PaginationNote from '../../share/PaginationNote'
 
 const Dustbin = () => {
  const appContext = useContext(AppContext)
@@ -16,18 +18,30 @@ const Dustbin = () => {
 
  const [messageNotifi, setMessageNottifi] = useState('')
 
+ // params pagination
+ const [searchParams, setSearchParams] = useSearchParams()
+ const pageParam = searchParams.get('page')
+ const [pageSize, setPageSize] = useState(5)
+ const [totalNote, setTotalNote] = useState(10)
+
  const getDustbinNotes = () => {
-  return fetchApiSamenote('get', `/trash/${user?.id}`).then((data) => {
-   setDustbinNotes(data.notes)
-   setDustbinNotesInit(data.notes)
-  })
+  return fetchApiSamenote('get', `/trash/${user?.id}?page=${pageParam || 1}`).then(
+   (data) => {
+    setDustbinNotes(data.notes)
+    setDustbinNotesInit(data.notes)
+
+    setPageSize(data.total_item)
+    setTotalNote(data.total_item * data.total_page)
+    console.log('data', data)
+   }
+  )
  }
 
  useEffect(() => {
   if (!user) return
 
   getDustbinNotes()
- }, [user])
+ }, [user, pageParam])
 
  const handleChangeSearchNote = async (e) => {
   const textSearch = e.target.value
@@ -93,7 +107,7 @@ const Dustbin = () => {
     </span>
    )}
 
-   <ul className='grid grid-cols-1 md:grid-cols-2 my-lg-4 my-2 my-md-3 gap-lg-3 gap-2 flex-grow-1 pr-1 overflow-y-auto style-scrollbar-y style-scrollbar-y-sm'>
+   <ul className='grid grid-cols-1 md:grid-cols-2 my-lg-4 my-2 my-md-3 gap-lg-3 gap-2 pr-1 overflow-y-auto style-scrollbar-y style-scrollbar-y-sm'>
     {dustbinNotes?.map((note) => (
      <NoteCard
       type='delete'
@@ -104,6 +118,8 @@ const Dustbin = () => {
      />
     ))}
    </ul>
+
+   <PaginationNote pageSize={pageSize} totalItem={totalNote} pathName={'/dustbin'} />
   </div>
  )
 }

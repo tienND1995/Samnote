@@ -85,7 +85,7 @@ const UserPanel = () => {
     {
       name: "Note",
       icon: <EventNoteIcon className="size-[25px] lg:size-[30px]" />,
-      url: `/editnote`,
+      url: `/editnote?page=1`,
     },
     {
       name: "Message",
@@ -109,7 +109,7 @@ const UserPanel = () => {
     {
       name: 'Dustbin',
       icon: <DeleteIcon className='size-[25px] lg:size-[30px]' />,
-      url: '/Dustbin',
+      url: '/dustbin?page=1',
     },
 
     {
