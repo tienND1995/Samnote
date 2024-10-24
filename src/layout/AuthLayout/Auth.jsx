@@ -1,12 +1,14 @@
 import { Box, Button, Typography } from '@mui/material'
 import { NavLink } from 'react-router-dom'
 
+import logoSamnote from '../../assets/logo.png'
+
 const Auth = ({ onShowModal }) => {
  return (
   <Box className='flex flex-col gap-12 top-0 left-0 w-full h-full  justify-center items-center text-center'>
    <Box className='flex items-center gap-4'>
     <img
-     src='/public/logo.png'
+     src={logoSamnote}
      alt=''
      className='lg:w-[100px] lg:h-[92px] md:w-[80px] md:h-[70px] w-[60px] h-[50px]'
     />
